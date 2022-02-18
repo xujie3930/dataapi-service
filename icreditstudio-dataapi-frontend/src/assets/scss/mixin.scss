@@ -1,0 +1,101 @@
+// .cell {
+//   padding-left: 25px;
+//   padding-right: 25px;
+// }
+
+.el-form-item__label {
+  font-size: 14px;
+  font-family: PingFangSC, PingFangSC-Regular;
+  font-weight: 500;
+  color: #333;
+}
+
+@mixin input-small-height {
+  font-family: 'PingFangSC-Regular';
+  height: 32px;
+  line-height: 32px;
+}
+
+@mixin flex($justify: center, $align: center, $row: row, $inline: flex) {
+  display: $inline;
+  flex-direction: $row;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+@mixin table-header-cell {
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: PingFangSC, PingFangSC-Medium;
+  background-color: #fafafa;
+  // @extend .cell;
+}
+
+@mixin table-column-cell {
+  font-size: 14px;
+  font-family: PingFangSC, PingFangSC-Regular;
+  font-weight: 500;
+  color: #333;
+  // @extend .cell;
+}
+
+@mixin text-ellipse {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// iCredit系统样式调整
+@mixin icredit-form {
+  ::v-deep {
+    .el-form-item--samll {
+      margin-bottom: 18px;
+
+      .el-form-item__label {
+        font-size: 14px;
+        font-family: PingFangSC, PingFangSC-Regular;
+        font-weight: 400;
+        text-align: right;
+        color: #262626;
+      }
+
+      .el-input__inner {
+        height: 32px;
+        line-height: 32px;
+      }
+
+      .el-input-number {
+        line-height: 29px;
+      }
+
+      .el-form-item__content {
+        text-align: left;
+      }
+
+      .el-input-number.is-controls-right .el-input-number__decrease,
+      .el-input-number.is-controls-right .el-input-number__increase {
+        height: auto;
+        line-height: 15px;
+      }
+    }
+  }
+}
+
+@mixin icredit-table {
+  color: #262626;
+  ::v-deep {
+    th.is-center {
+      padding: 5px 0;
+      color: #262626;
+    }
+
+    tr td {
+      padding: 10px 0 !important;
+    }
+  }
+}
+
+.flex-row-sp-center {
+  @include flex(space-between);
+}

@@ -1,0 +1,44 @@
+{
+  "name": "icreditstudio-dataapi-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "dev": "npm run serve",
+    "build": "vue-cli-service build --mode production",
+    "build:dev": "vue-cli-service build --mode dev",
+    "build:develop": "vue-cli-service build --mode develop",
+    "build:test": "vue-cli-service build --mode test",
+    "build:alpha": "vue-cli-service build --mode alpha",
+    "build:release": "vue-cli-service build --mode release",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "axios": "^0.25.0",
+    "core-js": "^3.6.5",
+    "element-ui": "^2.15.7",
+    "gm-crypt": "^0.0.2",
+    "js-cookie": "^3.0.1",
+    "js-file-download": "^0.4.12",
+    "lodash": "^4.17.21",
+    "node-sass": "4.14.1",
+    "sass-loader": "8.0.2",
+    "svg-sprite-loader": "^6.0.11",
+    "vue": "^2.6.11",
+    "vue-ls": "^4.0.0",
+    "vue-router": "^3.5.3",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-vue": "^6.2.2",
+    "prettier": "^2.2.1",
+    "vue-template-compiler": "^2.6.11"
+  }
+}

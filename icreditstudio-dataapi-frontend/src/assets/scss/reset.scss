@@ -1,0 +1,149 @@
+@charset "utf-8";
+/* CSS Document */
+
+@font-face {
+  font-family: 'PingFangSC-Regular';
+  src: url('../font/苹方字体.ttf');
+  font-weight: normal;
+  font-size: initial;
+}
+
+html,
+body,
+ul,
+li,
+ol,
+dl,
+dd,
+dt,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+form,
+img {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-size: 12px;
+  font-family: PingFangSC-Regular, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: normal;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+input {
+  border: none;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+select,
+input {
+  vertical-align: middle;
+}
+
+select,
+input,
+textarea {
+  margin: 0;
+}
+
+input[type='text'],
+input[type='password'],
+textarea {
+  outline-style: none;
+  -webkit-appearance: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+textarea {
+  resize: none;
+  font-family: PingFangSC-Regular, sans-serif;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+em,
+i {
+  font-style: normal;
+}
+
+a,
+button,
+input {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  outline: none;
+}
+
+a,
+input[type='button'],
+input[type='submit'] {
+  cursor: pointer;
+}
+
+::-webkit-scrollbar-track-piece {
+  background: transparent;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 50px;
+  background: #ccc;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ababab;
+}
+
+select {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+textarea {
+  overflow: hidden;
+}

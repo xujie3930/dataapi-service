@@ -1,0 +1,159 @@
+@import './mixin.scss';
+
+.detail-info-table {
+  border: 1px solid #e8e8e8;
+  border-bottom: none;
+
+  &-item {
+    @include flex(flex-start);
+    height: 48px;
+    line-height: 48px;
+    border-bottom: 1px solid #e8e8e8;
+    overflow: hidden;
+
+    &:nth-child(2n + 1) {
+      background-color: #fafafa;
+    }
+
+    .left {
+      width: 200px;
+      text-align: center;
+      font-size: 14px;
+      font-family: PingFangSC, PingFangSC-Medium;
+      font-weight: 600;
+      text-align: center;
+      color: #333;
+      border-right: 1px solid #e8e8e8;
+    }
+
+    .right {
+      flex: 1;
+      font-size: 14px;
+      font-family: PingFangSC, PingFangSC-Regular;
+      font-weight: 400;
+      text-align: left;
+      padding-left: 24px;
+      color: #333;
+      overflow: hidden;
+
+      .content {
+        @include text-ellipse;
+        display: block;
+        max-width: 560px;
+      }
+    }
+  }
+}
+
+/* 弹窗样式 */
+.ds-dialog {
+  &-footer {
+    @include flex(flex-end);
+
+    &-btn {
+      @include flex;
+      width: 96px;
+      height: 34px;
+      line-height: 34px;
+      font-size: 14px;
+      font-weight: 400;
+      border-radius: 4px;
+      border: 1px solid #1890ff;
+      font-family: PingFangSC, PingFangSC-Regular;
+    }
+
+    .btn-plain {
+      color: #1890ff;
+      background-color: transparent;
+      &:hover {
+        background-color: #ecf5ff;
+      }
+    }
+
+    .el-button--primary {
+      background-color: #1890ff;
+    }
+  }
+
+  ::v-deep {
+    .el-dialog__title {
+      font-size: 18px;
+      font-family: PingFangSC, PingFangSC-Medium;
+      font-weight: 500;
+      color: #202224;
+    }
+
+    .el-dialog__headerbtn .el-dialog__close {
+      color: #444;
+      font-weight: 700;
+    }
+  }
+}
+
+/* 表格样式 */
+.ds-table {
+  .table-header-cell {
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: PingFangSC, PingFangSC-Medium;
+    background-color: #fafafa;
+  }
+
+  .table-column-cell {
+    font-size: 14px;
+    font-family: PingFangSC, PingFangSC-Regular;
+    font-weight: 500;
+    color: #333;
+
+    .el-button {
+      padding: 9px;
+    }
+
+    .el-button--text {
+      color: #1890ff;
+    }
+  }
+}
+
+.sub-app {
+  font-family: 'PingFangSC-Regular';
+
+  .el-form-item--samll {
+    .el-input {
+      font-size: 13px;
+    }
+
+    .el-input__inner {
+      @include input-small-height;
+    }
+
+    .el-range-editor--samll {
+      @include input-small-height;
+    }
+
+    .el-input__icon {
+      @include input-small-height;
+    }
+
+    .el-range-separator {
+      @include input-small-height;
+    }
+
+    .el-date-editor .el-range-input,
+    .el-date-editor .el-range-separator {
+      font-size: 13px;
+    }
+  }
+
+  .el-button {
+    // font-family: 'PingFangSC-Regular';
+    padding: 9px 15px;
+  }
+
+  .el-button--primary {
+    color: #fff;
+    background-color: #1890ff;
+    border-color: #1890ff;
+  }
+}
