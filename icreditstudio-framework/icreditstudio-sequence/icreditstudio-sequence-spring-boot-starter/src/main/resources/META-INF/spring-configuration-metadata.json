@@ -1,0 +1,26 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.jinninghui.datasphere.icreditstudio.framework.sequence.configuration.SequenceProperties",
+      "name": "sequence",
+      "type": "com.jinninghui.datasphere.icreditstudio.framework.sequence.configuration.SequenceProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.jinninghui.datasphere.icreditstudio.framework.sequence.configuration.SequenceProperties",
+      "name": "sequence.type",
+      "type": "java.lang.String",
+      "defaultValue": "snowflake",
+      "description": "sequence type property, have two value with snowflake and default. default is snowflake"
+    },
+    {
+      "sourceType": "com.jinninghui.datasphere.icreditstudio.framework.sequence.configuration.SequenceProperties",
+      "name": "sequence.generate",
+      "type": "java.lang.String",
+      "defaultValue": "random",
+      "description": "this property worked with sequence.type=snowflake. mac = mac address, random = redis random value , simple = local value"
+    }
+  ]
+}
