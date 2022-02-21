@@ -67,8 +67,8 @@ function render(props = {}) {
     render: h => h(App)
   }).$mount(
     container
-      ? container.querySelector('#icreditstudio-datasource-app')
-      : '#icreditstudio-datasource-app'
+      ? container.querySelector('#icreditstudio-dataapi-app')
+      : '#icreditstudio-dataapi-app'
   )
 }
 

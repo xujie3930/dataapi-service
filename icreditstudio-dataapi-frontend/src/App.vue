@@ -6,7 +6,7 @@
 <template>
   <div
     :class="[
-      'icreditstudio-data-sync-app',
+      'icreditstudio-dataapi-app',
       'sub-app',
       $store.getters.appEnv === 'openDataPlatForm' ? 'open-data-platform' : ''
     ]"
@@ -35,12 +35,12 @@ export default {
 </script>
 
 <style>
-.icreditstudio-data-sync-app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+.icreditstudio-dataapi-app {
+  font-family: PingFangSC, PingFangSC-Medium;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #262626;
 }
 
 .open-data-platform {

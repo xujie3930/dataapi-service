@@ -2,7 +2,7 @@ import axios from 'axios'
 import Notification from './notify'
 import store from '@/store'
 import { MessageBox } from 'element-ui'
-import { CODE_Message } from '@/configs'
+import { CODE_Message } from '@/config'
 
 const getCodeMessage = code => CODE_Message[code]
 const token = () => store.getters.token

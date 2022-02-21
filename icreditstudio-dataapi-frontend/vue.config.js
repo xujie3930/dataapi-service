@@ -11,6 +11,8 @@ const resolve = dir => path.join(__dirname, dir)
 
 const publicPath = process.env.VUE_APP_DOMAIN
 
+const APP_NAME = '数据服务'
+
 module.exports = {
   publicPath,
   outputDir: 'dist',
@@ -50,6 +52,7 @@ module.exports = {
   },
 
   configureWebpack: {
+    name: APP_NAME,
     resolve: { alias: { '@': resolve('src') } },
 
     output: {
@@ -60,6 +63,12 @@ module.exports = {
   },
 
   chainWebpack: config => {
+    // 修改界面头部标题
+    config.plugin('html').tap(args => {
+      args[0].title = APP_NAME
+      return args
+    })
+
     // 第一步：让其他svg loader不要对src/assets/icons/svg进行操作
     // config.module.rule('svg').exclude.add(resolve('src/assets/icons/svg')).end()
     config.module.rule('svg').uses.clear().end()

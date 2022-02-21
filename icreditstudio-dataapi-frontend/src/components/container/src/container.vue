@@ -130,14 +130,14 @@ export default {
 </script>
 <style scoped lang="scss">
 .iframe-layout-basic-container {
+  width: 100%;
   min-height: calc(100vh - 126px);
   padding: 0 16px 16px;
   background-color: #fff;
 }
 
 .iframe-layout-basic-header {
-  padding: 24px 0 0;
-  // border-bottom: 1px dashed $--border-color-base;
+  // padding: 24px 0 0;
   border-bottom: 1px dashed #d9d9d9;
 }
 
@@ -145,7 +145,6 @@ export default {
   padding: 19px 0 16px;
 
   span {
-    // color: $--color-text-primary;
     color: #333;
     font-size: 16px;
     font-weight: bolder;

@@ -73,10 +73,12 @@ export default {
   created() {
     // 存储当前路由权限
     this.permissions = Object.freeze(this.$route.meta.permissionList || [])
+
     // 如果表格配置 则通过权限过滤表格操作按钮
-    if (this.tableConfiguration && this.isFilterTableOperationByPermission) {
-      this.mixinFilterTableOperationByPermission(this.tableConfiguration.group)
-    }
+    // if (this.tableConfiguration && this.isFilterTableOperationByPermission) {
+    //  this.mixinFilterTableOperationByPermission(this.tableConfiguration.group)
+    // }
+
     if (Array.isArray(this.formOption)) {
       this.mixinSearchFormItems = cloneDeep(this.formOption).filter(
         e => e.isSearch

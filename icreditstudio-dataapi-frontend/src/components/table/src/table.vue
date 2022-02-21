@@ -128,11 +128,9 @@
           :sortable="item.sortable || false"
         >
           <template #default="scope">
-            <el-tag
-              v-if="scope.row[item.prop]"
-              :type="scope.row[`${item.prop}Type`]"
-              >{{ scope.row[item.prop] }}</el-tag
-            >
+            <span :style="{ color: renderStatusTextColor(scope, item.color) }">
+              {{ renderStatusText(scope, item) }}
+            </span>
           </template>
         </el-table-column>
         <!-- color -->
@@ -683,6 +681,8 @@
         </el-table-column>
       </template>
     </el-table>
+
+    <!-- 表格底部分页器 -->
     <div
       :class="[
         tablePagination.isLeftShowCount ? 'pagination-warp' : 'pagination'
@@ -788,17 +788,33 @@ export default {
   },
 
   methods: {
-    renderBtnShow(scoped, visible) {
+    // 操作列按钮是否显示
+    renderBtnShow(scope, visible) {
       // 默认显示按钮
       if (!visible) return true
-      return typeof visible === 'function' ? visible(scoped) : Boolean(visible)
+      return typeof visible === 'function' ? visible(scope) : Boolean(visible)
     },
 
-    renderBtnDisabled(scoped, disabled) {
+    // 操作列按钮是否禁用
+    renderBtnDisabled(scope, disabled) {
       if (!disabled) return false
       return typeof disabled === 'function'
-        ? disabled(scoped)
+        ? disabled(scope)
         : Boolean(disabled)
+    },
+
+    // statusText类型的column值渲染
+    renderStatusText(scope, item) {
+      const { row } = scope
+      const { formatter, prop } = item
+      if (typeof formatter === 'function') return item.formatter(row)
+      return row[prop]
+    },
+
+    // statusText文案颜色值渲染
+    renderStatusTextColor(scope, color) {
+      if (typeof color === 'function') return color(scope)
+      return color || 'unset'
     },
 
     /**
