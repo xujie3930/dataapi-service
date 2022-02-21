@@ -22,7 +22,7 @@ module.exports = {
   productionSourceMap: false,
 
   devServer: {
-    port: 8099,
+    port: 8077,
     disableHostCheck: false,
     historyApiFallback: true,
     headers: {
