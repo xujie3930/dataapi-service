@@ -38,7 +38,7 @@
 
       <footer v-if="!hideFooter" slot="footer" class="dialog-footer">
         <slot v-if="footer" name="customFooter" />
-        <div v-else>
+        <div :style="{ textAlign: footerPlacement }" v-else>
           <el-button size="mini" @click="close">取 消</el-button>
           <el-button
             size="mini"
@@ -120,6 +120,12 @@ export default {
     closeOnClickModal: {
       type: Boolean,
       default: true
+    },
+
+    // 页脚按钮位置
+    footerPlacement: {
+      type: String,
+      default: 'right'
     }
   },
 
@@ -131,11 +137,10 @@ export default {
     close() {
       this.dialogVisible = false
       this.btnLoading = false
-      this.$emit('on-close')
     },
 
-    btnLoadingClose() {
-      this.btnLoading = false
+    setButtonLoading(btnLoading = false) {
+      this.btnLoading = btnLoading
     },
 
     confirm() {

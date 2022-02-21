@@ -9,56 +9,73 @@
       <header class="data-service-aside__header">
         <h3 class="title">API开发</h3>
         <div>
-          <i class="header-icon el-icon-circle-plus-outline"></i>
-          <i class="header-icon el-icon-refresh"></i>
+          <el-dropdown
+            trigger="click"
+            placement="bottom-start"
+            @command="handleCommandClick"
+          >
+            <i class="header-icon el-icon-circle-plus-outline"></i>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="process">
+                新建业务流程
+              </el-dropdown-item>
+              <el-dropdown-item command="group">新建API分组</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+
+          <i
+            :class="[
+              'header-icon',
+              'el-icon-refresh',
+              isRefreshTreeData ? 'is-refresh' : ''
+            ]"
+            @click="handleRefreshClick"
+          ></i>
         </div>
       </header>
 
       <div class="search-select">
-        <el-select
+        <el-input
           class="text-select"
           filterable
           clearable
           remote
-          placeholder="请输入关键字"
+          placeholder="请输入关键词搜索"
           size="mini"
           :loading="searchLoading"
           @change="handleSelectChange"
           v-model="selectValue"
         >
-          <el-option
-            v-for="item in selectOptions"
-            :key="item.tableName"
-            :label="item.tableName"
-            :value="item.id"
-          >
-          </el-option>
-        </el-select>
-        <i class="search el-icon-search"></i>
+          <i
+            slot="suffix"
+            class="search el-icon-search"
+            @click="handleSelectChange"
+          ></i>
+        </el-input>
       </div>
 
       <el-tree
         class="tree"
         ref="tree"
         node-key="id"
+        lazy
+        v-loading="isTreeLoading"
+        :prop="{ isLeaf: 'leaf' }"
         :data="treeData"
-        :expand-on-click-node="false"
+        :load="fetchTreeData"
+        :expand-on-click-node="true"
         :default-expanded-keys="defalutExpandKey"
         @node-click="handleNodeClick"
       >
         <div
           slot-scope="{ node, data }"
           :id="node.id"
-          :draggable="node.level > 1"
-          :class="[
-            'custom-tree-node',
-            node.parent.disabled || data.disabled ? 'is-disabled' : ''
-          ]"
+          :draggable="node.level === 2"
+          :class="['custom-tree-node']"
         >
           <div class="left">
-            <span v-if="data.type === '3'" class="circle"></span>
-            <JSvg class="jsvg-icon" :name="data.icon"></JSvg>
-            <span>{{ data.label }}</span>
+            <JSvg class="jsvg-icon" :svg-name="data.icon"></JSvg>
+            <span>{{ data.name }} </span>
           </div>
         </div>
       </el-tree>
@@ -113,25 +130,36 @@
 
       <DatasourceGenerate v-else @on-jump="jumpCallback" />
     </transition>
+
+    <AddBusinessPorcess
+      ref="addProcessDialog"
+      @on-close="closeProcessCallBack"
+    />
   </div>
 </template>
 
 <script>
+import API from '@/api/api'
 import DatasourceGenerate from './source'
+import AddBusinessPorcess from './add-business-porcess.vue'
 import tableConfiguration from '@/configuration/table/data-service-api'
 import formOption from '@/configuration/form/data-service-api'
 import crud from '@/mixins/crud'
+import { cloneDeep } from 'lodash'
 
 export default {
   mixins: [crud],
 
-  components: { DatasourceGenerate },
+  components: { DatasourceGenerate, AddBusinessPorcess },
 
   data() {
     return {
       opType: '',
       selectValue: '',
       searchLoading: false,
+      addPopovervisible: false,
+      isRefreshTreeData: false,
+      isTreeLoading: false,
       defalutExpandKey: [],
       selectOptions: [],
       formOption,
@@ -144,54 +172,27 @@ export default {
       mixinSearchFormConfig: {
         models: { name: '', type: '', path: '', status: '', time: [] }
       },
+      oldTreeData: [],
       treeData: [
         {
-          label: 'datax_web',
-          icon: 'database',
+          name: 'datax_web',
+          icon: 'process',
           type: 0,
           id: 1,
+          leaf: false,
           disabled: false,
           category: 'database',
+          visible: false,
           children: [
             {
-              label: 'h_app_sysytem',
-              icon: 'table',
+              name: 'h_app_sysytem',
+              icon: 'group',
               type: 1,
               id: 2,
+              leaf: true,
               disabled: false,
-              category: 'table'
-            },
-            {
-              label: 'h_data_metadata_code',
-              icon: 'table',
-              type: 2,
-              id: 3,
-              disabled: true,
-              category: 'table'
-            }
-          ]
-        },
-        {
-          label: 'datax_web2',
-          icon: 'database',
-          type: 0,
-          id: 6,
-          disabled: true,
-          category: 'database',
-          children: [
-            {
-              label: 'h_app_sysytem',
-              icon: 'table',
-              type: 1,
-              id: 7,
-              category: 'table'
-            },
-            {
-              label: 'h_data_metadata_code',
-              icon: 'table',
-              type: 2,
-              id: 8,
-              category: 'table'
+              category: 'table',
+              visible: true
             }
           ]
         }
@@ -199,20 +200,43 @@ export default {
     }
   },
 
+  created() {
+    // this.fetchBusinessProcessList()
+  },
+
   methods: {
     // 点击选中当前节点
     handleNodeClick(curData, curNode) {
       console.log('curData, curNode=', curData, curNode)
-      const { label, id, ...rest } = curData
-      const idx = this.tabsConfig.findIndex(item => item.id === id)
-      this.curTabName = id
-      this.currentTab = curData
-      // tab选项已经存在当前节点
-      if (idx > -1) {
-        console.log(id)
-      } else {
-        this.tabsConfig.push({ name: label, id, ...rest })
+    },
+
+    handleCommandClick(clickType) {
+      console.log(clickType, 'type')
+      this.$refs.addProcessDialog.open()
+    },
+
+    // 点击-筛选分组
+    handleSelectChange() {
+      const name = this.selectValue
+      const filterTreeData = []
+      console.log(name, 'lllll')
+
+      // API节点筛选符合用户输入值的节点
+      const filterChildrenData = child => {
+        console.log(child, 'redred')
+        return child?.filter(item => item.name?.includes(name))
       }
+
+      cloneDeep(this.oldTreeData).forEach(node => {
+        console.log(node.name?.includes(name), 'lllpp')
+        node.name?.includes(name)
+          ? filterTreeData.push(node)
+          : filterChildrenData(node.children)
+      })
+
+      console.log(filterTreeData, 'sss')
+
+      this.treeData = filterTreeData
     },
 
     // 新增API
@@ -220,10 +244,75 @@ export default {
       this.opType = 'add'
     },
 
-    handleSelectChange() {},
+    // 刷新
+    handleRefreshClick() {
+      this.isRefreshTreeData = !this.isRefreshTreeData
+    },
 
     jumpCallback() {
       this.opType = ''
+    },
+
+    closeProcessCallBack(opType) {
+      opType === 'save' && this.fetchBusinessProcessList()
+    },
+
+    // 获取-左侧树懒加载
+    fetchTreeData(node, resolve) {
+      const { level } = node
+      switch (level) {
+        case 0:
+          this.fetchBusinessProcessList(resolve)
+          break
+
+        case 1:
+          this.fetchBusinessProcessChildList(resolve)
+          break
+
+        default:
+          return resolve([])
+      }
+    },
+
+    // 获取-左侧树节点数据
+    fetchBusinessProcessList(resolve) {
+      this.isTreeLoading = true
+      API.getBusinessProcess()
+        .then(({ success, data }) => {
+          if (success) {
+            const treeData = data.map(item => {
+              return {
+                ...item,
+                leaf: false,
+                icon: 'process'
+              }
+            })
+            this.oldTreeData = treeData
+            resolve ? resolve(treeData) : (this.treeData = treeData)
+          }
+        })
+        .finally(() => {
+          this.isTreeLoading = false
+        })
+    },
+
+    // 获取-左侧树二级节点数据
+    fetchBusinessProcessChildList(resolve) {
+      const workId = this.$refs?.tree.getCurrentKey()
+      API.getBusinessProcessChild({ workId })
+        .then(({ success, data: children }) => {
+          if (success && children) {
+            const data = children.map(item => {
+              return {
+                ...item,
+                leaf: true,
+                icon: 'group'
+              }
+            })
+            resolve(data)
+          }
+        })
+        .finally(() => {})
     }
   }
 }
@@ -239,7 +328,7 @@ export default {
     @include flex(flex-start, flex-start, column);
     width: 240px;
     height: 100%;
-    overflow: hidden;
+    // overflow: hidden;
 
     &:hover {
       overflow-y: auto;
@@ -262,9 +351,25 @@ export default {
 
       .header-icon {
         font-size: 16px;
-        color: #999;
+        color: #1890ff;
         margin-left: 12px;
         cursor: pointer;
+      }
+
+      .is-refresh {
+        animation: refreshIcon 1.5s linear infinite;
+
+        @keyframes refreshIcon {
+          0% {
+            transform: rotate(0);
+          }
+          50% {
+            transform: rotate(180deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
       }
     }
 
@@ -287,7 +392,7 @@ export default {
       }
 
       .text-select {
-        width: 180px;
+        width: 210px;
       }
 
       ::v-deep {
@@ -295,24 +400,34 @@ export default {
           border: none;
           padding: 0 5px;
         }
+
+        .el-input__suffix {
+          line-height: 28px;
+        }
       }
     }
 
     .tree {
       width: 100%;
 
+      .el-tree-node {
+        margin-bottom: 10px;
+      }
+
       .custom-tree-node {
         @include flex(row, space-between);
         flex: 1;
         cursor: pointer;
         padding-right: 8px;
+        font-size: 14px;
+        color: #262626;
 
         .left {
           @include flex;
 
           .jsvg-icon {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             margin: 0 5px;
           }
 
@@ -351,7 +466,13 @@ export default {
 
       ::v-deep {
         .el-tree-node.is-current > .el-tree-node__content {
-          color: #1890ff;
+          font-size: 14px;
+          background-color: #f0f5ff;
+
+          .custom-tree-node {
+            color: #1890ff;
+          }
+
           .right {
             display: block;
           }
@@ -368,7 +489,7 @@ export default {
     height: 100%;
     border-left: 1px solid #d9d9d9;
     overflow: hidden;
-    padding-top: 20px;
+    padding-top: 36px;
   }
 }
 
