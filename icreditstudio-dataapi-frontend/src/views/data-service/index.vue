@@ -231,11 +231,12 @@ export default {
 
 <style lang="scss" scoped>
 .data-service {
-  @include flex;
-  width: 100vw;
-  height: 100vh;
+  @include flex(center, flex-start);
+  background: #fff;
+  height: calc(100vh - 124px);
 
   &-aside {
+    @include flex(flex-start, flex-start, column);
     width: 240px;
     height: 100%;
     overflow: hidden;
@@ -243,111 +244,117 @@ export default {
     &:hover {
       overflow-y: auto;
     }
-  }
 
-  &-aside__header {
-    @include flex(space-between);
-    padding: 10px;
+    &__header {
+      @include flex(space-between);
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
 
-    .title {
-      height: 25px;
-      font-size: 18px;
-      font-family: PingFangSC, PingFangSC-Medium;
-      font-weight: 500;
-      color: #262626;
-      line-height: 25px;
-    }
-
-    .header-icon {
-      color: #1890ff;
-    }
-  }
-
-  .search-select {
-    @include flex;
-    position: relative;
-    width: 210px;
-    height: 32px;
-    padding: 0 5px;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 4px;
-    margin-left: 10px;
-
-    .search {
-      color: #1890ff;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .text-select {
-      width: 180px;
-    }
-
-    ::v-deep {
-      .el-input--mini .el-input__inner {
-        border: none;
-        padding: 0 5px;
-      }
-    }
-  }
-
-  .tree {
-    width: 100%;
-
-    .custom-tree-node {
-      @include flex(row, space-between);
-      flex: 1;
-      cursor: pointer;
-      padding-right: 8px;
-
-      .left {
-        @include flex;
-
-        .jsvg-icon {
-          width: 14px;
-          height: 14px;
-          margin: 0 5px;
-        }
-
-        .circle {
-          width: 6px;
-          height: 6px;
-          background: #52c41a;
-          border-radius: 50%;
-          margin-right: 5px;
-        }
+      .title {
+        height: 25px;
+        font-size: 18px;
+        font-family: PingFangSC, PingFangSC-Medium;
+        font-weight: 500;
+        color: #262626;
+        line-height: 25px;
       }
 
-      .right {
-        display: none;
-
-        .icon {
-          transform: rotate(90deg);
-        }
-      }
-
-      &:hover > .right {
-        display: block;
-        &:hover {
-          cursor: pointer;
-        }
+      .header-icon {
+        font-size: 16px;
+        color: #999;
+        margin-left: 12px;
+        cursor: pointer;
       }
     }
 
-    .is-disabled {
-      color: #c0c4cc;
-      cursor: not-allowed;
-      background-image: none;
-      background-color: #fff;
-      border-color: #ebeef5;
-    }
+    .search-select {
+      @include flex;
+      position: relative;
+      width: 210px;
+      height: 32px;
+      padding: 0 5px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 4px;
+      margin-left: 10px;
+      margin-bottom: 10px;
 
-    ::v-deep {
-      .el-tree-node.is-current > .el-tree-node__content {
+      .search {
         color: #1890ff;
+        font-size: 15px;
+        cursor: pointer;
+      }
+
+      .text-select {
+        width: 180px;
+      }
+
+      ::v-deep {
+        .el-input--mini .el-input__inner {
+          border: none;
+          padding: 0 5px;
+        }
+      }
+    }
+
+    .tree {
+      width: 100%;
+
+      .custom-tree-node {
+        @include flex(row, space-between);
+        flex: 1;
+        cursor: pointer;
+        padding-right: 8px;
+
+        .left {
+          @include flex;
+
+          .jsvg-icon {
+            width: 14px;
+            height: 14px;
+            margin: 0 5px;
+          }
+
+          .circle {
+            width: 6px;
+            height: 6px;
+            background: #52c41a;
+            border-radius: 50%;
+            margin-right: 5px;
+          }
+        }
+
         .right {
+          display: none;
+
+          .icon {
+            transform: rotate(90deg);
+          }
+        }
+
+        &:hover > .right {
           display: block;
+          &:hover {
+            cursor: pointer;
+          }
+        }
+      }
+
+      .is-disabled {
+        color: #c0c4cc;
+        cursor: not-allowed;
+        background-image: none;
+        background-color: #fff;
+        border-color: #ebeef5;
+      }
+
+      ::v-deep {
+        .el-tree-node.is-current > .el-tree-node__content {
+          color: #1890ff;
+          .right {
+            display: block;
+          }
         }
       }
     }
@@ -360,6 +367,8 @@ export default {
     width: 100%;
     height: 100%;
     border-left: 1px solid #d9d9d9;
+    overflow: hidden;
+    padding-top: 20px;
   }
 }
 
