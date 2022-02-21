@@ -8,7 +8,7 @@
     <artifactId>icreditstudio-dataapi-service</artifactId>
     <packaging>pom</packaging>
 
-    <name>iCreditStudio-DataSource-Service</name>
+    <name>iCreditStudio-DataApi-Service</name>
 
     <properties>
         <spring.boot.version>2.3.2.RELEASE</spring.boot.version>
