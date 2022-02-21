@@ -9,6 +9,6 @@ import JSvg from './src/svg'
 
 Vue.component(JSvg.name, JSvg)
 
-const svg = require.context('@/assets/icons/svg', false, /\.svg$/)
-const requireSvgFile = module => module.keys().map(module)
-requireSvgFile(svg)
+// const svg = require.context('@/assets/icons/svg', false, /\.svg$/)
+// const requireSvgFile = module => module.keys().map(module)
+// requireSvgFile(svg)
