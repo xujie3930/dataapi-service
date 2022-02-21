@@ -49,7 +49,7 @@ server:
 
 #mybatis-plus
 mybatis-plus:
-  mapper-locations: classpath*:com/jinninghui/**/mapper/mysql/*.xml
+  mapper-locations: classpath*:com/jinninghui/**/mapper/*.xml
   #实体扫描，多个package用逗号或者分号分隔
   #  typeAliasesPackage: com.hashtech.modules.*.entity
   global-config:
