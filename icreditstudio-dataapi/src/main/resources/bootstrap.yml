@@ -37,8 +37,8 @@ server:
       enabled: false
       pattern: '%t %a "%r" %s (%D ms)'
 
-#system:
-#  errorCode: 500
+system:
+  errorCode: 500
 #mybatis:
 #  mapper-locations: classpath*:com/hashtech/**/mapper/mysql/*.xml
 #  type-handlers-package: com.hashtech
@@ -74,7 +74,8 @@ sequence:
   type: snowflake
   generate: random
 ###sequence 服务 ###
-
+system:
+  errorCode: 500
 #国密加密ECB 模式
 sm4:
   secretKey: JeF8U9wHFOMfs2Y8

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
+import org.apache.htrace.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
@@ -22,11 +23,11 @@ public class BaseEntity extends BaseObject {
     //********************常量字段 start************************//
 
     public static final String ID = "ID";
-    public static final String DEL_FLAG = "DEL_FLAG";
-    public static final String CREATE_TIME = "CREATE_TIME";
-    public static final String CREATE_BY = "CREATE_BY";
-    public static final String UPDATE_TIME = "UPDATE_TIME";
-    public static final String UPDATE_BY = "UPDATE_BY";
+    public static final String DEL_FLAG = "del_flag";
+    public static final String CREATE_TIME = "create_time";
+    public static final String CREATE_BY = "create_by";
+    public static final String UPDATE_TIME = "update_time";
+    public static final String UPDATE_BY = "update_by";
 
     //********************常量字段 endt************************//
 
@@ -47,6 +48,7 @@ public class BaseEntity extends BaseObject {
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
     /**
@@ -59,7 +61,8 @@ public class BaseEntity extends BaseObject {
      * 更新时间
      */
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
-    private Date update_time;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date updateTime;
 
     /**
      * 更新人
@@ -72,5 +75,5 @@ public class BaseEntity extends BaseObject {
      */
     @TableField(value = "del_flag", fill = FieldFill.INSERT)
     @TableLogic
-    private Boolean delFlag;
+    private Integer delFlag = 0;
 }
