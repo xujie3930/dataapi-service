@@ -37,8 +37,8 @@ server:
       enabled: false
       pattern: '%t %a "%r" %s (%D ms)'
 
-#system:
-#  errorCode: 500
+system:
+  errorCode: 500
 #mybatis:
 #  mapper-locations: classpath*:com/hashtech/**/mapper/mysql/*.xml
 #  type-handlers-package: com.hashtech
@@ -49,7 +49,7 @@ server:
 
 #mybatis-plus
 mybatis-plus:
-  mapper-locations: classpath*:com/jinninghui/**/mapper/*.xml
+  mapper-locations: classpath*:com/jinninghui/**/mapper/mysql/*.xml
   #实体扫描，多个package用逗号或者分号分隔
   #  typeAliasesPackage: com.hashtech.modules.*.entity
   global-config:
