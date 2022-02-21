@@ -13,7 +13,7 @@ export const sm4Config = {
 
 const VUE_DATA_SOURCE_CONFIG = {
   // app应用样式前缀
-  appPrefix: 'icredit-data-source-',
+  appPrefix: 'icredit-dataapi-',
   sm4Config
 }
 
