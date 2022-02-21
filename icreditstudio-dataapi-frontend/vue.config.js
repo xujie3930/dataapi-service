@@ -14,7 +14,7 @@ const publicPath = process.env.VUE_APP_DOMAIN
 const APP_NAME = '数据服务'
 
 module.exports = {
-  publicPath: '/subapp/dataservice/',
+  publicPath,
   outputDir: 'jnh-datasphere-icreditatudio-dataapi-frontend-' + version + '-dist',
   assetsDir: 'static',
   indexPath: 'index.html',
