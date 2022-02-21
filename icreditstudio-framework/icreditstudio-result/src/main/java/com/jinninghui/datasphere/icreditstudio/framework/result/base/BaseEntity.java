@@ -23,10 +23,10 @@ public class BaseEntity extends BaseObject {
 
     public static final String ID = "ID";
     public static final String DEL_FLAG = "DEL_FLAG";
-    public static final String CREATE_TIME = "CREATE_TIME";
-    public static final String CREATE_BY = "CREATE_BY";
-    public static final String UPDATE_TIME = "UPDATE_TIME";
-    public static final String UPDATE_BY = "UPDATE_BY";
+    public static final String CREATE_TIME = "create_time";
+    public static final String CREATE_BY = "create_by";
+    public static final String UPDATE_TIME = "update_time";
+    public static final String UPDATE_BY = "update_by";
 
     //********************常量字段 endt************************//
 
@@ -59,7 +59,7 @@ public class BaseEntity extends BaseObject {
      * 更新时间
      */
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
-    private Date update_time;
+    private Date updateTime;
 
     /**
      * 更新人

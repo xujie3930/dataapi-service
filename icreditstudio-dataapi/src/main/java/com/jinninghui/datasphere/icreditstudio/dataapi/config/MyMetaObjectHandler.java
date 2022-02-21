@@ -1,8 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.SysUser;
-import com.jinninghui.datasphere.icreditstudio.framework.result.base.BaseEntity;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
@@ -14,18 +12,24 @@ import java.time.LocalDateTime;
 @Component
 public class MyMetaObjectHandler implements MetaObjectHandler {
 
-    ThreadLocal<SysUser> local = new ThreadLocal<>();
+    private static final String FIELD_CREATE_TIME = "createTime";
+    public static final String FIELD_CREATE_BY = "createBy";
+    public static final String FIELD_DEL_FLAG = "delFlag";
+    public static final String FIELD_UPDATE_TIME = "updateTime";
+    public static final String FIELD_UPDATE_BY = "updateBy";
+
+//    ThreadLocal<SysUser> local = new ThreadLocal<>();
 
     @Override
     public void insertFill(MetaObject metaObject) {
-        this.setFieldValByName(BaseEntity.CREATE_TIME, LocalDateTime.now(), metaObject);
-        this.setFieldValByName(BaseEntity.CREATE_BY, local.get().getUserId(), metaObject);
-        this.setFieldValByName(BaseEntity.DEL_FLAG, false, metaObject);
+        this.setFieldValByName(FIELD_CREATE_TIME, LocalDateTime.now(), metaObject);
+        this.setFieldValByName(FIELD_CREATE_BY, null/*local.get().getUserId()*/, metaObject);
+        this.setFieldValByName(FIELD_DEL_FLAG, false, metaObject);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        this.setFieldValByName(BaseEntity.UPDATE_TIME, LocalDateTime.now(), metaObject);
-        this.setFieldValByName(BaseEntity.UPDATE_BY, local.get().getUserId(), metaObject);
+        this.setFieldValByName(FIELD_UPDATE_TIME, LocalDateTime.now(), metaObject);
+        this.setFieldValByName(FIELD_UPDATE_BY, null/*local.get().getUserId()*/, metaObject);
     }
 }
