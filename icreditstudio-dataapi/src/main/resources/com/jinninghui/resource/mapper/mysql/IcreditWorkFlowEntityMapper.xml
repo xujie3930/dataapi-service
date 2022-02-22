@@ -33,4 +33,17 @@
             id=#{id}
         </where>
     </update>
+
+    <select id="searchFromName"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult">
+        select name as workFlowName,
+        id as workFlowId
+        from icredit_work_flow
+        <where>
+            <if test="name !=null and name != '' ">
+                and name like concat ('%', #{name}, '%')
+            </if>
+            AND del_flag = 0
+        </where>
+    </select>
 </mapper>

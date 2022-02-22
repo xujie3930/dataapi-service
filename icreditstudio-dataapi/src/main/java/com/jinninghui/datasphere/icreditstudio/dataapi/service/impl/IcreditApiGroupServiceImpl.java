@@ -11,6 +11,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupSe
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
@@ -53,6 +54,16 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     public BusinessResult<List<IcreditApiGroupEntity>> getList(ApiGroupListRequest request) {
         List<IcreditApiGroupEntity> list = list(queryWrapper(request));
         return BusinessResult.success(list);
+    }
+
+    @Override
+    public List<ApiGroupResult> getByWorkId(String workFlowId) {
+        return apiGroupMapper.getByWorkId(workFlowId);
+    }
+
+    @Override
+    public List<IcreditApiGroupEntity> searchFromName(String name) {
+        return apiGroupMapper.searchFromName(name);
     }
 
     private Wrapper<IcreditApiGroupEntity> queryWrapper(ApiGroupListRequest request) {
