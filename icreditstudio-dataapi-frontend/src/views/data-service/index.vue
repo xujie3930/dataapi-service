@@ -219,16 +219,13 @@ export default {
     handleSelectChange() {
       const name = this.selectValue
       const filterTreeData = []
-      console.log(name, 'lllll')
 
       // API节点筛选符合用户输入值的节点
       const filterChildrenData = child => {
-        console.log(child, 'redred')
         return child?.filter(item => item.name?.includes(name))
       }
 
       cloneDeep(this.oldTreeData).forEach(node => {
-        console.log(node.name?.includes(name), 'lllpp')
         node.name?.includes(name)
           ? filterTreeData.push(node)
           : filterChildrenData(node.children)
@@ -298,7 +295,7 @@ export default {
 
     // 获取-左侧树二级节点数据
     fetchBusinessProcessChildList(resolve) {
-      const workId = this.$refs?.tree.getCurrentKey()
+      const workId = this.$refs.tree.getCurrentKey()
       API.getBusinessProcessChild({ workId })
         .then(({ success, data: children }) => {
           if (success && children) {
