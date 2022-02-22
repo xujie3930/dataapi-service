@@ -11,8 +11,8 @@ public class ResourceCodeBean {
 
     public enum ResourceCode {
         RESOURCE_CODE_10000000("10000000", "用户异常！"),
-        RESOURCE_CODE_10000002("10000002", "业务流程名称重复！"),
-        RESOURCE_CODE_10000003("10000003", "API分组名称重复！"),
+        RESOURCE_CODE_10000002("10000002", "名称已存在，请重新输入！"),
+        RESOURCE_CODE_10000003("10000003", "分组名称已存在，请重新输入！"),
         RESOURCE_CODE_10000004("10000004", "API分组目录不能拖动到业务流程目录！"),
         RESOURCE_CODE_10000005("10000005", "业务流程目录不能拖动到API分组目录！"),
         ;

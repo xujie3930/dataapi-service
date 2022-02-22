@@ -10,21 +10,23 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEnt
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditWorkFlowMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.OauthApiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -39,8 +41,6 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
 
     @Autowired
     private IcreditWorkFlowMapper workFlowMapper;
-    @Autowired
-    private OauthApiService oauthApiService;
     @Autowired
     private IcreditApiGroupService apiGroupService;
 
@@ -101,6 +101,51 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
             }
         }
         return BusinessResult.success(true);
+    }
+
+    @Override
+    public List<WorkFlowResult> searchFromName(WorkFlowSaveRequest request) {
+        if (StringUtils.isBlank(request.getName())) {
+            return new LinkedList<>();
+        }
+        //根据业务流程名称搜索
+        List<WorkFlowResult> workFlowResults = workFlowMapper.searchFromName(request.getName());
+        Set<String> workFlowIds = new HashSet<>();
+        for (WorkFlowResult workFlowResult : workFlowResults) {
+            String workFlowId = workFlowResult.getWorkFlowId();
+            List<ApiGroupResult> apiGroupResults = apiGroupService.getByWorkId(workFlowId);
+            workFlowResult.setApiGroup(apiGroupResults);
+            workFlowIds.add(workFlowId);
+        }
+
+        //根据API分组名称搜索
+        List<IcreditApiGroupEntity> apiGroupEntityList = apiGroupService.searchFromName(request.getName());
+        for (IcreditApiGroupEntity apiGroupEntity : apiGroupEntityList) {
+            if (workFlowIds.contains(apiGroupEntity.getWorkId())) {
+                continue;
+            }
+            IcreditWorkFlowEntity workFlowEntity = getById(apiGroupEntity.getWorkId());
+            WorkFlowResult workFlowResult;
+            Boolean toAdd = false;
+            Optional<WorkFlowResult> first = workFlowResults.stream()
+                    .filter(p -> {
+                        return apiGroupEntity.getWorkId().equals(p.getWorkFlowId());
+                    }).findFirst();
+            if (first.isPresent()){
+                workFlowResult = first.get();
+            }else {
+                workFlowResult = new WorkFlowResult(workFlowEntity.getName(), workFlowEntity.getId(), new LinkedList<>());
+                toAdd = true;
+            }
+            IcreditApiGroupEntity tempApiGroupEntity = apiGroupService.getById(apiGroupEntity.getId());
+            ApiGroupResult apiGroupResult = new ApiGroupResult(tempApiGroupEntity.getName(), tempApiGroupEntity.getId());
+            workFlowResult.getApiGroup().add(apiGroupResult);
+            //避免重复添加
+            if (toAdd){
+                workFlowResults.add(workFlowResult);
+            }
+        }
+        return workFlowResults;
     }
 
     private Wrapper<IcreditWorkFlowEntity> queryWrapper() {

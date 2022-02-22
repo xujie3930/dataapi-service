@@ -3,6 +3,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web.request;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * @author xujie
  * @description API分组保存参数
@@ -13,8 +15,10 @@ public class ApiGroupSaveRequest {
     //业务流程id
     private String workId;
     //api分组名称
-    @Length(min = 2, max = 50, message = "API分组名称为2~50个字")
+    @NotBlank(message = "分组名称不能为空")
+    @Length(min = 2, max = 50, message = "请输入以英文字母或者汉字开头的2~50字的分组名称")
     private String name;
     //api分组描述
+    @Length(max = 200, message = "分组描述200字以内")
     private String desc;
 }

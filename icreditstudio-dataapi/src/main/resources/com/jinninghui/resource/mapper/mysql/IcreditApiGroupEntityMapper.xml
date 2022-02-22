@@ -22,6 +22,29 @@
             resultType="java.lang.Integer">
         select ifnull(Max(sort), 0)
         from icredit_api_group
-        
+    </select>
+
+    <select id="getByWorkId"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult">
+        select name as apiGroupName,
+        id as apiGroupId
+        from icredit_api_group
+        <where>
+            <if test="workFlowId !=null">
+                and work_id = #{workFlowId}
+            </if>
+        </where>
+    </select>
+
+    <select id="searchFromName"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity">
+        select *
+        from icredit_api_group
+        <where>
+            <if test="name !=null and name != '' ">
+                and name like concat ('%', #{name}, '%')
+            </if>
+            AND del_flag = 0
+        </where>
     </select>
 </mapper>
