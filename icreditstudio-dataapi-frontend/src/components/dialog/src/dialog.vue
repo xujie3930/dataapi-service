@@ -129,6 +129,12 @@ export default {
     }
   },
 
+  watch: {
+    dialogVisible(visible) {
+      this.$emit('on-change', visible)
+    }
+  },
+
   methods: {
     open() {
       this.dialogVisible = true

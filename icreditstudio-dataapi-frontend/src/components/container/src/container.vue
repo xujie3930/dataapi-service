@@ -130,9 +130,14 @@ export default {
 </script>
 <style scoped lang="scss">
 .iframe-layout-basic-container {
+  // @include flex(flex-start, flex-start, column);
+  // min-height: calc(100vh - 126px);
+  // padding: 0 16px 16px;
   width: 100%;
-  min-height: calc(100vh - 126px);
-  padding: 0 16px 16px;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 30px 16px;
   background-color: #fff;
 }
 
