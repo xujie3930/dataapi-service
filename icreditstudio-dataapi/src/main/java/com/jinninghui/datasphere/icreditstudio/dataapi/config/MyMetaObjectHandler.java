@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.UserUtil;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         this.setFieldValByName(FIELD_CREATE_TIME, new Date(), metaObject);
         this.setFieldValByName(FIELD_CREATE_BY, UserUtil.getUser().getUserId(), metaObject);
-        this.setFieldValByName(FIELD_DEL_FLAG, false, metaObject);
+        this.setFieldValByName(FIELD_DEL_FLAG, DelFlagEnum.ENA_BLED.getCode(), metaObject);
         this.setFieldValByName(FIELD_UPDATE_TIME, new Date(), metaObject);
         this.setFieldValByName(FIELD_UPDATE_BY, UserUtil.getUser().getUserId(), metaObject);
     }

@@ -2,28 +2,26 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.InternalUserInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditWorkFlowMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.OauthApiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,10 +50,10 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     }
 
     @Override
+    @BusinessParamsValidate(argsIndexs = {1})
     public BusinessResult<String> saveDef(String userId, WorkFlowSaveRequest request) {
-        InternalUserInfoVO user = oauthApiService.getUserById(userId);
         checkRepetitionName(request.getName(), null);
-        IcreditWorkFlowEntity entity = getWorkFlowEntitySaveEntity(user, request);
+        IcreditWorkFlowEntity entity = getWorkFlowEntitySaveEntity(request);
         save(entity);
         return BusinessResult.success(entity.getId());
     }
@@ -112,13 +110,8 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
         return wrapper;
     }
 
-    private IcreditWorkFlowEntity getWorkFlowEntitySaveEntity(InternalUserInfoVO user, WorkFlowSaveRequest request) {
+    private IcreditWorkFlowEntity getWorkFlowEntitySaveEntity(WorkFlowSaveRequest request) {
         IcreditWorkFlowEntity entity = BeanCopyUtils.copyProperties(request, new IcreditWorkFlowEntity());
-        Date date = new Date();
-        entity.setCreateBy(user.getUsername());
-        entity.setCreateTime(date);
-        entity.setUpdateTime(date);
-        entity.setUpdateBy(user.getUsername());
         Integer maxSort = workFlowMapper.getMaxSort();
         entity.setSort(maxSort + 1);
         return entity;

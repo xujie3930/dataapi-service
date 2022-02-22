@@ -2,26 +2,23 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.InternalUserInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiGroupMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.OauthApiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,14 +33,13 @@ import java.util.List;
 public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMapper, IcreditApiGroupEntity> implements IcreditApiGroupService {
 
     @Autowired
-    private OauthApiService oauthApiService;
-    @Autowired
     private IcreditApiGroupMapper apiGroupMapper;
+
     @Override
+    @BusinessParamsValidate(argsIndexs = {1})
     public BusinessResult<String> saveDef(String userId, ApiGroupSaveRequest request) {
-        InternalUserInfoVO user = oauthApiService.getUserById(userId);
         checkRepetitionName(request.getName(), null);
-        IcreditApiGroupEntity entity = getApiGroupEntitySaveEntity(user, request);
+        IcreditApiGroupEntity entity = getApiGroupEntitySaveEntity(request);
         save(entity);
         return BusinessResult.success(entity.getId());
     }
@@ -67,13 +63,8 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
         return wrapper;
     }
 
-    private IcreditApiGroupEntity getApiGroupEntitySaveEntity(InternalUserInfoVO user, ApiGroupSaveRequest request) {
+    private IcreditApiGroupEntity getApiGroupEntitySaveEntity(ApiGroupSaveRequest request) {
         IcreditApiGroupEntity entity = BeanCopyUtils.copyProperties(request, new IcreditApiGroupEntity());
-        Date date = new Date();
-        entity.setCreateBy(user.getUsername());
-        entity.setUpdateBy(user.getUsername());
-        entity.setCreateTime(date);
-        entity.setUpdateTime(date);
         Integer maxSort = apiGroupMapper.getMaxSort(request.getWorkId());
         entity.setSort(maxSort + 1);
         return entity;
