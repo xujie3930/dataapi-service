@@ -1,6 +1,5 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web.result;
 
-import jdk.nashorn.internal.objects.annotations.Constructor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -18,4 +17,9 @@ public class WorkFlowResult {
     private String workFlowName;
     private String workFlowId;
     private List<ApiGroupResult> apiGroup = new LinkedList<>();
+
+    public WorkFlowResult(String workFlowName, String workFlowId) {
+        this.workFlowName = workFlowName;
+        this.workFlowId = workFlowId;
+    }
 }
