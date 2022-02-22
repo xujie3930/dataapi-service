@@ -74,8 +74,8 @@ sequence:
   type: snowflake
   generate: random
 ###sequence 服务 ###
-system:
-  errorCode: 500
+#system:
+#  errorCode: 500
 #国密加密ECB 模式
 sm4:
   secretKey: JeF8U9wHFOMfs2Y8
