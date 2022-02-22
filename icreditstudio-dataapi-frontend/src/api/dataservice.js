@@ -16,6 +16,9 @@ const getBusinessProcess = params => postAction('/workFlow/list', params)
 // 获取API分组列表
 const getBusinessProcessChild = params => postAction('/apiGroup/list', params)
 
+// 获取某个分组下的API下的列表
+const getApiGroupList = params => postAction('/apiBase/list', params)
+
 // 搜索业务流程以及API分组
 const searchProcessOrGroup = params => postAction('/search', params)
 
@@ -24,5 +27,6 @@ export default {
   addApiGroup,
   getBusinessProcess,
   getBusinessProcessChild,
+  getApiGroupList,
   searchProcessOrGroup
 }

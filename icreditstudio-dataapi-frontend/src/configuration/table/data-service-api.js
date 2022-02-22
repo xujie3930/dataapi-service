@@ -3,6 +3,19 @@
  * @Date: 2022-02-18
  */
 
+// 发布状态
+const statusMapping = {
+  0: { name: '待发布', color: '#999' },
+  1: { name: '未发布', color: '#ff4d4f' },
+  2: { name: '已发布', color: '#52c41a' }
+}
+
+// API类型
+const apiType = {
+  0: '注册API',
+  1: '数据源生成'
+}
+
 export default that => ({
   refName: 'dataServiceApi',
   isBorder: true,
@@ -29,84 +42,80 @@ export default that => ({
     {
       type: 'text',
       label: 'API名称',
-      prop: 'type'
+      prop: 'name'
     },
     {
       type: 'text',
       label: 'API Path',
-      prop: 'name',
+      prop: 'path',
       width: 200
     },
     {
       type: 'text',
       label: 'API类型',
-      prop: 'uri',
-      width: 350
+      prop: 'type',
+      width: 350,
+      formatter: ({ type }) => apiType[type]
     },
     {
       type: 'text',
       label: '最新版本号',
-      prop: 'status',
+      prop: 'apiVersion',
       width: 100
     },
     {
       type: 'statusText',
       label: '发布状态',
-      prop: 'status',
+      prop: 'publishStatus',
       width: 100,
-      color: ({ row: { status } }) => {
-        return status === 1 ? '#52c41a' : status === 2 ? '#ff4d4f' : '#999'
-      },
-      formatter: ({ status }) => {
-        return status === 1 ? '已授权' : status === 2 ? '未发布' : '草稿'
-      }
+      color: ({ row: { publishStatus: s } }) => statusMapping[s].color,
+      formatter: ({ publishStatus: s }) => statusMapping[s].name
     },
     {
       type: 'text',
       label: '发布人',
-      prop: 'admin',
+      prop: 'publishUser',
       width: 80
     },
     {
-      type: 'text',
+      type: 'date',
       label: '发布时间',
-      prop: 'lastSyncTime',
+      prop: 'publishTime',
       width: 180
     },
     {
       type: 'operation',
       label: '操作',
       fixed: 'right',
-      width: 220,
+      width: 150,
       operationList: [
-        {
-          func: that.mixinHandleDelete,
-          label: '停止发布',
-          visible: ({ row }) => row.status === 1
-        },
+        // {
+        //   func: that.mixinHandleDelete,
+        //   label: '停止发布',
+        //   visible: ({ row }) => row.status === 1
+        // },
 
         {
           func: that.mixinHandleDelete,
           label: '授权'
         },
+        // {
+        //   func: that.mixinHandleDelete,
+        //   label: '发布',
+        //   visible: ({ row }) => row.status === 2
+        // },
+        // {
+        //   func: that.mixinHandleDelete,
+        //   label: '编辑'
+        // },
         {
           func: that.mixinHandleDelete,
-          label: '发布',
-          visible: ({ row }) => row.status === 2
-        },
-        {
-          func: that.mixinHandleDelete,
-          label: '编辑'
-        },
-        {
-          func: that.mixinHandleDelete,
-          label: '历史版本',
-          visible: ({ row }) => row.status === 2
-        },
-        {
-          func: that.mixinHandleDelete,
-          label: '详情'
+          label: '历史版本'
         }
+        // {
+        //   func: that.mixinHandleDelete,
+        //   label: '详情'
+        // }
       ]
     }
   ]
