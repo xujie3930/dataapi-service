@@ -21,7 +21,7 @@ public class IcreditGenerateApiEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Boolean model;
+    private Integer model;
 
     private String datasourceId;
 
@@ -31,19 +31,6 @@ public class IcreditGenerateApiEntity implements Serializable {
 
     private String apiBaseId;
 
-    private Boolean apiVersion;
-
-    private String remark;
-
-    private LocalDateTime createTime;
-
-    private String createBy;
-
-    private LocalDateTime updateTime;
-
-    private String updateBy;
-
-    private Boolean delFlag;
-
+    private Integer apiVersion;
 
 }

@@ -1,22 +1,15 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
-
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DatasourceApiSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -37,5 +30,18 @@ public class IcreditApiBaseController {
     public BusinessResult<BusinessPageResult> list(@RequestBody ApiBaseListRequest request) {
         return apiBaseService.getList(request);
     }
+
+    @PostMapping("/datasourceApi/create")
+    public BusinessResult<Boolean> createDataSourceApi(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
+        DatasourceApiSaveParam param = new DatasourceApiSaveParam();
+        BeanUtils.copyProperties(apiSaveRequest, param);
+        return apiBaseService.createDataSourceApi(param);
+    }
+
+    @PostMapping("/generate/apiPath")
+    public String generateApiPath(){
+        return RandomStringUtils.randomAlphabetic(16);
+    }
+
 }
 

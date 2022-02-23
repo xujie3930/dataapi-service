@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -12,5 +13,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2022-02-21
  */
 public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
+
+    Boolean isExistByName(@Param("name") String name);
+
+    Boolean isExistByPath(@Param("path") String path);
 
 }
