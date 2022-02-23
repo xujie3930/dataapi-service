@@ -59,6 +59,12 @@ public abstract class StringUtils {
 
 	private static Pattern NUMBER_PATTERN = Pattern.compile("^[-\\+]?[\\d]*$");
 
+	//支持汉字、英文字母、数字、英文格式的下划线
+	private static Pattern ALL_PATTERN = Pattern.compile("^[\\u4E00-\\u9FA5A-Za-z0-9_]+$");
+
+	//判断以字母或者数字开头
+	private static Pattern FRONT_PATTERN = Pattern.compile("^([a-z]+|[A-Z]+|[\\u4e00-\\u9fa5]+)$");
+
 
 	//---------------------------------------------------------------------
 	// General convenience methods for working with Strings
@@ -1335,4 +1341,21 @@ public abstract class StringUtils {
 		}
 	}
 
+	/**
+	 * 只支持汉字、英文字母、数字、英文格式的下划线
+	 * @param str
+	 * @return
+	 */
+	public static boolean isLegal(String str) {
+		return ALL_PATTERN.matcher(str).matches();
+	}
+
+	/**
+	 * 是否以字母或数字开头
+	 * @param str
+	 * @return
+	 */
+	public static boolean isFrontWithNumOrLetters(String str) {
+		return FRONT_PATTERN.matcher(str).matches();
+	}
 }

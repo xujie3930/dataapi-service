@@ -8,6 +8,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiGroupMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
@@ -39,6 +40,7 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     @Override
     @BusinessParamsValidate(argsIndexs = {1})
     public BusinessResult<String> saveDef(String userId, ApiGroupSaveRequest request) {
+        StringLegalUtils.checkLegalName(request.getName());
         checkRepetitionName(request.getName(), null);
         IcreditApiGroupEntity entity = getApiGroupEntitySaveEntity(request);
         save(entity);

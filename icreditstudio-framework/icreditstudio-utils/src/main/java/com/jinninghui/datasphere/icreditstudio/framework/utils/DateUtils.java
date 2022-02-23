@@ -749,4 +749,9 @@ public final class DateUtils {
 		format.setCalendar(cal);
 		return format.format(date);
 	}
+
+	public static String longToString(Long lt) {
+		Date date = new Date(lt);
+		return dateFormat.format(date);
+	}
 }
