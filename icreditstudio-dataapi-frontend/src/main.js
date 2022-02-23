@@ -56,7 +56,8 @@ function render(props = {}) {
   const { container } = props
   watcher(props)
   router = new VueRouter({
-    base: window.__POWERED_BY_QIANKUN__ ? '/subapp/dataapi/' : '/',
+    // base: window.__POWERED_BY_QIANKUN__ ? '/subapp/dataapi/' : '/',
+    base: '/',
     mode: 'history',
     routes
   })
