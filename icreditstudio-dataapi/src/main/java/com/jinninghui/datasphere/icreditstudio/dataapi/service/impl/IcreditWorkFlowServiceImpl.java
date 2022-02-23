@@ -10,6 +10,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEnt
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditWorkFlowMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
@@ -17,7 +18,6 @@ import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppE
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -52,6 +51,7 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     @Override
     @BusinessParamsValidate(argsIndexs = {1})
     public BusinessResult<String> saveDef(String userId, WorkFlowSaveRequest request) {
+        StringLegalUtils.checkLegalName(request.getName());
         checkRepetitionName(request.getName(), null);
         IcreditWorkFlowEntity entity = getWorkFlowEntitySaveEntity(request);
         save(entity);
@@ -124,16 +124,15 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
             if (workFlowIds.contains(apiGroupEntity.getWorkId())) {
                 continue;
             }
-            IcreditWorkFlowEntity workFlowEntity = getById(apiGroupEntity.getWorkId());
+            //从原有的业务流程中取，取不到则为新的业务流程
             WorkFlowResult workFlowResult;
             Boolean toAdd = false;
             Optional<WorkFlowResult> first = workFlowResults.stream()
-                    .filter(p -> {
-                        return apiGroupEntity.getWorkId().equals(p.getWorkFlowId());
-                    }).findFirst();
+                    .filter(p -> apiGroupEntity.getWorkId().equals(p.getWorkFlowId())).findFirst();
             if (first.isPresent()){
                 workFlowResult = first.get();
             }else {
+                IcreditWorkFlowEntity workFlowEntity = getById(apiGroupEntity.getWorkId());
                 workFlowResult = new WorkFlowResult(workFlowEntity.getName(), workFlowEntity.getId(), new LinkedList<>());
                 toAdd = true;
             }

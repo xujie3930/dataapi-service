@@ -24,7 +24,7 @@ public class ApiBaseListRequest  extends BusinessBasePageForm {
     //API类型：0-注册API，1-数据源生成API
     private Integer type;
     //发布开始时间
-    private String publishTimeStart;
+    private Long publishTimeStart;
     //发布结束时间
-    private String publishTimeEnd;
+    private Long publishTimeEnd;
 }
