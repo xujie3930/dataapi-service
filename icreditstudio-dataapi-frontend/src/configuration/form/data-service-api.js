@@ -29,7 +29,7 @@ export default [
       { value: '', label: '全部' },
       { value: 1, label: '已发布' },
       { value: 2, label: '未发布' },
-      { value: 3, label: '草稿' }
+      { value: 3, label: '待发布' }
     ]
   },
   {

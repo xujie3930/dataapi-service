@@ -57,10 +57,11 @@
         :prop="{ isLeaf: 'leaf' }"
         :data="treeData"
         :load="fetchTreeData"
-        :expand-on-click-node="false"
+        :expand-on-click-node="true"
         :default-expanded-keys="defalutExpandKey"
-        @node-click="handleNodeExpandClick"
+        @current-change="handleNodeChangeClick"
       >
+        <!-- @node-click="handleNodeExpandClick" -->
         <div slot-scope="{ node, data }" :id="node.id" class="custom-tree-node">
           <JSvg class="jsvg-icon" :svg-name="data.icon"></JSvg>
           <el-tooltip
@@ -232,12 +233,18 @@ export default {
     handleNodeExpandClick(data) {
       const { id } = data
       console.log(data, id, 'data')
-      this.mixinRetrieveTableData()
+      // this.mixinRetrieveTableData()
     },
 
     // 点击-双击左侧树的label进行编辑
     handleTreeDoubleClick(data) {
       console.log(data, 'data')
+    },
+
+    // 点击
+    handleNodeChangeClick(data, node) {
+      console.log('handleNodeExpandClick %c green', data, node, 'lplp')
+      this.mixinRetrieveTableData()
     },
 
     // 鼠标-移入判断是否需要显示tootltip
@@ -262,7 +269,7 @@ export default {
 
     // 设置-进入界面高亮左侧树第一个节点或第一个子节点
     setHighlightNode(treeData, nodeType) {
-      console.log(treeData, nodeType)
+      console.log(nodeType)
       const [{ id }] = treeData
       if (id) {
         this.defalutExpandKey = [id]
