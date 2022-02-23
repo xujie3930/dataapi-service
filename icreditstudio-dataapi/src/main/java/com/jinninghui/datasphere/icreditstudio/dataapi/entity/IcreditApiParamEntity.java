@@ -25,31 +25,18 @@ public class IcreditApiParamEntity implements Serializable {
 
     private String fieldType;
 
-    private Boolean required;
+    private Integer required;
 
     private String desc;
 
-    private Boolean isRequest;
+    private Integer isRequest;
 
-    private Boolean isResponse;
+    private Integer isResponse;
 
     private String apiBaseId;
 
     private String defaultValue;
 
-    private Boolean apiVersion;
-
-    private String remark;
-
-    private LocalDateTime createTime;
-
-    private String createBy;
-
-    private LocalDateTime updateTime;
-
-    private String updateBy;
-
-    private Boolean delFlag;
-
+    private Integer apiVersion;
 
 }

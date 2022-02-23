@@ -6,7 +6,7 @@ spring:
       max-file-size: 30MB
       max-request-size: 50MB
   application:
-    name: dataapi
+    name: dataserve
   jackson:
     #date-format: yyyy-MM-dd HH:mm:ss
     #time-zone: GMT+8
@@ -27,12 +27,12 @@ spring:
     refresh:
       refreshable: none
 server:
-  port: 8101
+  port: 8109
   servlet:
     encoding:
       charset: UTF-8
       force: true
-    context-path: dataserve
+    context-path: /dataserve
   tomcat:
     accesslog:
       enabled: false

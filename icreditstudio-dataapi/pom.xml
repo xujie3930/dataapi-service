@@ -32,6 +32,15 @@
             <groupId>com.jinninghui.datasphere</groupId>
             <artifactId>icreditstudio-servicecenter</artifactId>
         </dependency>
+        <!--服务间调用 openFeign-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-httpclient</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
