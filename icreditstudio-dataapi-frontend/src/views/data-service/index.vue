@@ -121,11 +121,11 @@
     <!-- 新增业务流程 -->
     <AddBusinessPorcess
       ref="addProcessDialog"
-      @on-close="closeProcessCallBack"
+      @on-close="closeDialogCallback"
     />
 
     <!-- 新增API分组 -->
-    <AddApiGroup ref="addGroupDialog" @on-close="closeApiGroupCallBack" />
+    <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
   </div>
 </template>
 
@@ -149,6 +149,7 @@ export default {
     this.fetchTreeDataByName = debounce(this.fetchTreeDataByName, 500)
     return {
       noGroupImg,
+      timeId: null,
       opType: '',
       selectValue: '',
       searchLoading: false,
@@ -219,21 +220,18 @@ export default {
 
     // 点击-左侧树顶部按钮
     handleCommandClick(command) {
+      this.currentTreeNodeId = this.$refs?.tree.getCurrentKey()
+      const { workId } = this.$refs?.tree.getCurrentNode()
+      const options = { currentTreeNodeId: this.currentTreeNodeId, workId }
       switch (command) {
         case 'process':
-          this.$refs.addProcessDialog.open()
+          this.$refs.addProcessDialog.open(options)
           break
 
         case 'group':
-          this.$refs.addGroupDialog.open()
+          this.$refs.addGroupDialog.open(options)
+          break
       }
-    },
-
-    //点击-展开
-    handleNodeExpandClick(data) {
-      const { id } = data
-      console.log(data, id, 'data')
-      // this.mixinRetrieveTableData()
     },
 
     // 点击-双击左侧树的label进行编辑
@@ -241,9 +239,9 @@ export default {
       console.log(data, 'data')
     },
 
-    // 点击
-    handleNodeChangeClick(data, node) {
-      console.log('handleNodeExpandClick %c green', data, node, 'lplp')
+    // 点击-当前高亮树节点发生更改
+    handleNodeChangeClick({ id }) {
+      this.setHighlightCurrentNode(id)
       this.mixinRetrieveTableData()
     },
 
@@ -258,9 +256,11 @@ export default {
       this.opType = 'add'
     },
 
-    // 刷新
+    // 点击-刷新左侧树数据
     handleRefreshClick() {
-      this.isRefreshTreeData = !this.isRefreshTreeData
+      this.isRefreshTreeData = true
+      clearTimeout(this.timeId)
+      this.fetchBusinessProcessList()
     },
 
     jumpCallback() {
@@ -269,23 +269,38 @@ export default {
 
     // 设置-进入界面高亮左侧树第一个节点或第一个子节点
     setHighlightNode(treeData, nodeType) {
-      console.log(nodeType)
       const [{ id }] = treeData
       if (id) {
+        this.currentTreeNodeId = id
         this.defalutExpandKey = [id]
         this.$refs?.tree?.setCurrentKey(id)
       }
-      // nodeType === 'child' && this.mixinRetrieveTableData()
+      nodeType === 'child' && this.mixinRetrieveTableData()
     },
 
-    // 回调-新增业务流程弹
-    closeProcessCallBack(opType) {
-      opType === 'save' && this.fetchBusinessProcessList()
+    // 设置-左侧树需要被高亮的节点
+    setHighlightCurrentNode(id) {
+      this.defalutExpandKey = [id]
+      this.currentTreeNodeId = id
+      console.log(id, 'ididid')
+      this.$nextTick(() => {
+        const { tree } = this.$refs
+        tree && tree.setCurrentKey(id)
+      })
     },
 
-    // 回调-新转增API分组
-    closeApiGroupCallBack() {
-      this.fetchBusinessProcessList()
+    // 回调-新增业务流程或API分组
+    async closeDialogCallback(options) {
+      const { currentTreeNodeId, command, workId } = options
+      this.currentTreeNodeId = currentTreeNodeId
+      this.defalutExpandKey = workId
+        ? [workId, currentTreeNodeId]
+        : [currentTreeNodeId]
+      const isFinish = await this.fetchBusinessProcessList()
+      if (isFinish) {
+        command === 'process' && this.setHighlightCurrentNode(workId)
+        command === 'group' && this.mixinRetrieveTableData()
+      }
     },
 
     // 获取某个分组下的api列表
@@ -333,15 +348,18 @@ export default {
 
     // 获取-左侧树懒加载
     fetchTreeData(node, resolve) {
-      console.log(node, 'nodenode')
-      const { level, data } = node
+      const {
+        level,
+        data: { id }
+      } = node
       switch (level) {
         case 0:
           this.fetchBusinessProcessList(resolve)
           break
 
         case 1:
-          this.fetchBusinessProcessChildList(data.id, resolve)
+          this.setHighlightCurrentNode(id)
+          this.fetchBusinessProcessChildList(id, resolve)
           break
 
         default:
@@ -352,7 +370,7 @@ export default {
     // 获取-左侧树节点数据
     fetchBusinessProcessList(resolve) {
       this.isTreeLoading = true
-      API.getBusinessProcess()
+      return API.getBusinessProcess()
         .then(({ success, data }) => {
           if (success) {
             const treeData = data.map(item => {
@@ -370,13 +388,20 @@ export default {
               this.isInterfaceFirstCalling = false
               this.setHighlightNode(treeData, 'parent')
             }
+
+            return true
           }
         })
         .catch(() => {
-          return resolve([])
+          this.isRefreshTreeData = false
+          resolve([])
+          return false
         })
         .finally(() => {
           this.isTreeLoading = false
+          this.timeId = setTimeout(() => {
+            this.isRefreshTreeData = false
+          }, 1600)
         })
     },
 
@@ -385,7 +410,7 @@ export default {
       API.getBusinessProcessChild({ workId: id })
         .then(({ success, data: children }) => {
           if (success && children) {
-            const data = children.map(item => {
+            const data = children?.map(item => {
               return {
                 ...item,
                 leaf: true,
@@ -393,14 +418,16 @@ export default {
               }
             })
 
+            resolve(data)
+
+            this.isFirstNodeHasChild = !!data.length
+            children?.length && this.setHighlightCurrentNode(children[0].id)
+
             // 首次加载
             if (this.isChilInterfaceFirstCalling) {
               this.isChilInterfaceFirstCalling = false
-              this.isFirstNodeHasChild = !!data.length
               this.setHighlightNode(data, 'child')
             }
-
-            resolve(data)
           }
         })
         .catch(() => {
@@ -410,8 +437,7 @@ export default {
 
     // 拦截-表格请求接口参数拦截
     interceptorsRequestRetrieve(params) {
-      console.log(params, 'parasm')
-      const apiGroupId = this.$refs?.tree?.getCurrentKey() ?? ''
+      const apiGroupId = this.currentTreeNodeId
       const { time, ...restParams } = params
       const publishTimeStart = time?.length ? time[0] : ''
       const publishTimeEnd = time?.length
@@ -462,7 +488,7 @@ export default {
       }
 
       .is-refresh {
-        animation: refreshIcon 1.5s linear infinite;
+        animation: refreshIcon 1s linear infinite;
 
         @keyframes refreshIcon {
           0% {

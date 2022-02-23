@@ -54,6 +54,7 @@ export default {
   data() {
     return {
       opType: '',
+      options: {},
       processForm: { name: '', desc: '' },
       rules: {
         name: [
@@ -66,14 +67,16 @@ export default {
   },
 
   methods: {
-    open() {
+    open(options) {
+      this.options = options
       this.$refs.baseDialog.open()
     },
 
     close(opType) {
+      const options = { opType, command: 'process', ...this.options }
       this.$refs.processForm.resetFields()
       this.$refs.baseDialog.close()
-      this.$emit('on-close', opType)
+      this.$emit('on-close', options)
     },
 
     reset() {
@@ -92,7 +95,6 @@ export default {
           : API.addBusinessProcess(this.processForm)
               .then(({ success, data }) => {
                 if ((success, data)) {
-                  console.log(success, data)
                   this.$notify.success({
                     title: '操作结果',
                     message: '新增业务流程成功！',
