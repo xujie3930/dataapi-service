@@ -136,7 +136,7 @@ export default {
             )
             this.mixinTablePagination.total = total || 0
             this.mixinTablePagination.currentPage =
-              pageNum > pageCount ? pageCount : pageNum
+              pageNum > pageCount ? (pageCount === 0 ? 1 : pageCount) : pageNum
           }
         })
         .catch(err => {

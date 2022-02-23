@@ -3,7 +3,7 @@
  * @Date: 2022-02-18
 -->
 <template>
-  <div class="data-service">
+  <div class="data-service" :style="style">
     <aside class="data-service-aside">
       <header class="data-service-aside__header">
         <h3 class="title">API开发</h3>
@@ -52,13 +52,16 @@
         node-key="id"
         lazy
         draggable
+        highlight-current
         v-loading="isTreeLoading"
         :prop="{ isLeaf: 'leaf' }"
         :data="treeData"
         :load="fetchTreeData"
-        :expand-on-click-node="false"
+        :expand-on-click-node="true"
         :default-expanded-keys="defalutExpandKey"
+        @current-change="handleNodeChangeClick"
       >
+        <!-- @node-click="handleNodeExpandClick" -->
         <div slot-scope="{ node, data }" :id="node.id" class="custom-tree-node">
           <JSvg class="jsvg-icon" :svg-name="data.icon"></JSvg>
           <el-tooltip
@@ -78,7 +81,7 @@
       </el-tree>
     </aside>
 
-    <transition name="data-service">
+    <transition v-if="isFirstNodeHasChild" name="data-service">
       <Crud
         class="data-service-main"
         v-if="!opType"
@@ -110,6 +113,11 @@
       <DatasourceGenerate v-else @on-jump="jumpCallback" />
     </transition>
 
+    <div v-else class="data-service-empty">
+      <img class="img" :src="noGroupImg" />
+      <span class="text">该业务流程下暂无分组</span>
+    </div>
+
     <!-- 新增业务流程 -->
     <AddBusinessPorcess
       ref="addProcessDialog"
@@ -130,6 +138,7 @@ import tableConfiguration from '@/configuration/table/data-service-api'
 import formOption from '@/configuration/form/data-service-api'
 import crud from '@/mixins/crud'
 import { debounce } from 'lodash'
+import noGroupImg from '@/assets/images/bg-no-group.png'
 
 export default {
   mixins: [crud],
@@ -139,25 +148,33 @@ export default {
   data() {
     this.fetchTreeDataByName = debounce(this.fetchTreeDataByName, 500)
     return {
+      noGroupImg,
       opType: '',
       selectValue: '',
       searchLoading: false,
       addPopovervisible: false,
       isRefreshTreeData: false,
       isTreeLoading: false,
-      defalutExpandKey: [],
       isTooltipDisabled: false,
+      isInterfaceFirstCalling: true,
+      isChilInterfaceFirstCalling: true,
+      isFirstNodeHasChild: false,
+      defalutExpandKey: [],
       selectOptions: [],
+      currentTreeNodeId: null,
       formOption,
       tableConfiguration: tableConfiguration(this),
-      mixinTableData: [
-        { status: 0 },
-        { name: '123434', status: 1 },
-        { status: 2 }
-      ],
+      // mixinTableData: [
+      //   { status: 0 },
+      //   { name: '123434', status: 1 },
+      //   { status: 2 }
+      // ],
       mixinSearchFormConfig: {
-        models: { name: '', type: '', path: '', status: '', time: [] }
+        models: { name: '', type: '', path: '', publishStatus: '', time: [] }
       },
+
+      fetchConfig: { retrieve: { url: '/apiBase/list', method: 'post' } },
+
       oldTreeData: [],
       treeData: [
         {
@@ -186,8 +203,12 @@ export default {
     }
   },
 
-  created() {
-    // this.fetchBusinessProcessList()
+  computed: {
+    style() {
+      return {
+        height: window.__POWERED_BY_QIANKUN__ ? 'calc(100vh - 126px)' : '100vh'
+      }
+    }
   },
 
   methods: {
@@ -208,9 +229,22 @@ export default {
       }
     },
 
+    //点击-展开
+    handleNodeExpandClick(data) {
+      const { id } = data
+      console.log(data, id, 'data')
+      // this.mixinRetrieveTableData()
+    },
+
     // 点击-双击左侧树的label进行编辑
     handleTreeDoubleClick(data) {
       console.log(data, 'data')
+    },
+
+    // 点击
+    handleNodeChangeClick(data, node) {
+      console.log('handleNodeExpandClick %c green', data, node, 'lplp')
+      this.mixinRetrieveTableData()
     },
 
     // 鼠标-移入判断是否需要显示tootltip
@@ -233,6 +267,17 @@ export default {
       this.opType = ''
     },
 
+    // 设置-进入界面高亮左侧树第一个节点或第一个子节点
+    setHighlightNode(treeData, nodeType) {
+      console.log(nodeType)
+      const [{ id }] = treeData
+      if (id) {
+        this.defalutExpandKey = [id]
+        this.$refs?.tree?.setCurrentKey(id)
+      }
+      // nodeType === 'child' && this.mixinRetrieveTableData()
+    },
+
     // 回调-新增业务流程弹
     closeProcessCallBack(opType) {
       opType === 'save' && this.fetchBusinessProcessList()
@@ -241,6 +286,21 @@ export default {
     // 回调-新转增API分组
     closeApiGroupCallBack() {
       this.fetchBusinessProcessList()
+    },
+
+    // 获取某个分组下的api列表
+    fetchApiGroupList() {
+      const params = {}
+      this.isTreeLoading = true
+      API.getApiGroupList(params)
+        .then(({ success, data }) => {
+          if ((success, data)) {
+            this.mixinTableData = data
+          }
+        })
+        .finally(() => {
+          this.isTreeLoading = false
+        })
     },
 
     // 获取-符合输入的分组以及流程数据
@@ -304,6 +364,12 @@ export default {
             })
             this.oldTreeData = treeData
             resolve ? resolve(treeData) : (this.treeData = treeData)
+
+            // 接口首次调用则默认高亮第一个节点
+            if (this.isInterfaceFirstCalling) {
+              this.isInterfaceFirstCalling = false
+              this.setHighlightNode(treeData, 'parent')
+            }
           }
         })
         .catch(() => {
@@ -326,12 +392,38 @@ export default {
                 icon: 'group'
               }
             })
+
+            // 首次加载
+            if (this.isChilInterfaceFirstCalling) {
+              this.isChilInterfaceFirstCalling = false
+              this.isFirstNodeHasChild = !!data.length
+              this.setHighlightNode(data, 'child')
+            }
+
             resolve(data)
           }
         })
         .catch(() => {
           return resolve([])
         })
+    },
+
+    // 拦截-表格请求接口参数拦截
+    interceptorsRequestRetrieve(params) {
+      console.log(params, 'parasm')
+      const apiGroupId = this.$refs?.tree?.getCurrentKey() ?? ''
+      const { time, ...restParams } = params
+      const publishTimeStart = time?.length ? time[0] : ''
+      const publishTimeEnd = time?.length
+        ? time[1] + 24 * 60 * 60 * 1000 - 1
+        : ''
+
+      return {
+        apiGroupId,
+        publishTimeStart,
+        publishTimeEnd,
+        ...restParams
+      }
     }
   }
 }
@@ -341,13 +433,11 @@ export default {
 .data-service {
   @include flex(center, flex-start);
   background: #fff;
-  height: calc(100vh - 124px);
 
   &-aside {
     @include flex(flex-start, flex-start, column);
     width: 240px;
     height: 100%;
-    // overflow: hidden;
 
     &__header {
       @include flex(space-between);
@@ -515,6 +605,28 @@ export default {
     height: 100%;
     border-left: 1px solid #d9d9d9;
     overflow: hidden;
+  }
+
+  &-empty {
+    @include flex(center, center, column);
+    flex: 1;
+    height: 100%;
+    border-left: 1px solid #d9d9d9;
+    box-sizing: border-box;
+
+    .img {
+      width: 300px;
+      height: 300px;
+      margin-top: -50px;
+    }
+
+    .text {
+      margin-top: 45px;
+      font-size: 20px;
+      font-family: PingFangSC, PingFangSC-Medium;
+      font-weight: 500;
+      color: #333;
+    }
   }
 }
 

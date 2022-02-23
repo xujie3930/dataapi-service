@@ -21,7 +21,7 @@ export default [
   {
     type: 'select',
     label: '发布状态',
-    ruleProp: 'status',
+    ruleProp: 'publishStatus',
     model: '',
     inline: true,
     isSearch: true,
@@ -29,7 +29,7 @@ export default [
       { value: '', label: '全部' },
       { value: 1, label: '已发布' },
       { value: 2, label: '未发布' },
-      { value: 3, label: '草稿' }
+      { value: 3, label: '待发布' }
     ]
   },
   {
@@ -41,8 +41,8 @@ export default [
     isSearch: true,
     options: [
       { value: '', label: '全部' },
-      { value: 1, label: '注册API' },
-      { value: 2, label: '数据源生成API' }
+      { value: 0, label: '注册API' },
+      { value: 1, label: '数据源生成API' }
     ]
   },
 
