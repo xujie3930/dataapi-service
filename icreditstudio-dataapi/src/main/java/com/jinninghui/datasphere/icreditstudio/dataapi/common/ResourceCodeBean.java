@@ -21,6 +21,10 @@ public class ResourceCodeBean {
         RESOURCE_CODE_20000003("20000003", "API 名称已存在！"),
         RESOURCE_CODE_20000004("20000004", "请先勾选返回参数！"),
         RESOURCE_CODE_20000005("20000005", "API Path已存在！"),
+
+
+        RESOURCE_CODE_60000001("60000001", "获取资源库连接失败！"),
+        RESOURCE_CODE_60000002("60000002", "数据源不明确，id为空！"),
         ;
 
         public final String code;

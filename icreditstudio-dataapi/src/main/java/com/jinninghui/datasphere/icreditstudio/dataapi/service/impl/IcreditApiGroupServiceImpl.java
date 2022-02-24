@@ -13,6 +13,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListR
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.GroupIdAndNameVO;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
@@ -94,5 +95,10 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
         if (hasExit) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000003.getCode());
         }
+    }
+
+    @Override
+    public BusinessResult<List<GroupIdAndNameVO>> getGroupListByWorkFlowId(ApiGroupListRequest request) {
+        return BusinessResult.success(apiGroupMapper.getGroupListByWorkFlowId(request.getWorkId()));
     }
 }

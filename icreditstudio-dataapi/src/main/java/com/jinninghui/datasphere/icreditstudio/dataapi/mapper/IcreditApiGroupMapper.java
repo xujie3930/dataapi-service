@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.GroupIdAndNameVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -24,4 +25,6 @@ public interface IcreditApiGroupMapper extends BaseMapper<IcreditApiGroupEntity>
     List<ApiGroupResult> getByWorkId(@Param("workFlowId") String workFlowId);
 
     List<IcreditApiGroupEntity> searchFromName(@Param("name") String name);
+
+    List<GroupIdAndNameVO> getGroupListByWorkFlowId(@Param("workFlowId") String workFlowId);
 }

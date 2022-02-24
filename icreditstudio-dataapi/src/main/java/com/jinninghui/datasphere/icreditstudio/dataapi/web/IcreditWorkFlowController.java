@@ -4,6 +4,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.WorkFlowIdAndNameVO;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,11 @@ public class IcreditWorkFlowController {
     @PostMapping("/rearrangement")
     BusinessResult<Boolean> rearrangement(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody Map<String, String[]> request) {
         return workFlowService.rearrangement(userId, request);
+    }
+
+    @PostMapping("/getBusinessProcessList")
+    BusinessResult<List<WorkFlowIdAndNameVO>> getWorkFlowList() {
+        return workFlowService.getWorkFlowList();
     }
 
 }
