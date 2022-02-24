@@ -12,8 +12,10 @@ import java.util.List;
  **/
 @Data
 public class ApiDetailResult {
+    //API主键id
+    private String id;
     //API类型：0-注册API，1-数据源生成API
-    private String type;
+    private Integer type;
     //API名称
     private String name;
     //API PATH
@@ -25,7 +27,7 @@ public class ApiDetailResult {
     //目标文件夹（业务流程名称/API分组名称）
     private String destination;
     //发布状态：0-待发布，1-未发布，2-已发布
-    private String publishStatus;
+    private Integer publishStatus;
     //API版本号
     private Integer apiVersion;
     //创建人
@@ -42,6 +44,6 @@ public class ApiDetailResult {
     private List<APIParamResult> paramList = new LinkedList<>();
     //注册API参数
     private RegisterApiResult registerApi;
-    //数据源生成API
+    //数据源生成API,sql生成模式
     private GenerateApiResult generateApi;
 }
