@@ -28,11 +28,13 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         this.setFieldValByName(FIELD_DEL_FLAG, DelFlagEnum.ENA_BLED.getCode(), metaObject);
         this.setFieldValByName(FIELD_UPDATE_TIME, new Date(), metaObject);
         this.setFieldValByName(FIELD_UPDATE_BY, UserUtil.getUser().getUserId(), metaObject);
+        UserUtil.local.remove();
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
         this.setFieldValByName(FIELD_UPDATE_TIME, new Date(), metaObject);
         this.setFieldValByName(FIELD_UPDATE_BY, UserUtil.getUser().getUserId(), metaObject);
+        UserUtil.local.remove();
     }
 }
