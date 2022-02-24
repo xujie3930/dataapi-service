@@ -6,6 +6,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListR
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.GroupIdAndNameVO;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.apache.ibatis.annotations.Param;
 
@@ -30,4 +31,6 @@ public interface IcreditApiGroupService extends IService<IcreditApiGroupEntity> 
     List<ApiGroupResult> getByWorkId(@Param("workFlowId") String workFlowId);
 
     List<IcreditApiGroupEntity> searchFromName(String name);
+
+    BusinessResult<List<GroupIdAndNameVO>> getGroupListByWorkFlowId(ApiGroupListRequest request);
 }

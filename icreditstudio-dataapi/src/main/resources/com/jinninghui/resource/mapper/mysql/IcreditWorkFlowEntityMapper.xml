@@ -46,4 +46,8 @@
             AND del_flag = 0
         </where>
     </select>
+
+    <select id="getWorkFlowList" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.WorkFlowIdAndNameVO">
+        select id,name from icredit_work_flow where del_flag = 0
+    </select>
 </mapper>

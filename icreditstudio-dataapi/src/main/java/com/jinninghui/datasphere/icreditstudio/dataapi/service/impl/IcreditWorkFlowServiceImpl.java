@@ -14,6 +14,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.WorkFlowIdAndNameVO;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
@@ -172,5 +173,10 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
         if (hasExit) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000003.getCode());
         }
+    }
+
+    @Override
+    public BusinessResult<List<WorkFlowIdAndNameVO>> getWorkFlowList() {
+        return BusinessResult.success(workFlowMapper.getWorkFlowList());
     }
 }

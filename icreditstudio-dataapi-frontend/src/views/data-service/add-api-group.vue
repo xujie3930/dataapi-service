@@ -71,6 +71,7 @@ export default {
   data() {
     return {
       opType: '',
+      options: {},
       processOptions: [],
       apiGroupForm: { workId: '', name: '', desc: '' },
       rules: {
@@ -91,15 +92,17 @@ export default {
   },
 
   methods: {
-    open() {
+    open(options) {
+      this.options = options
       this.$refs.baseDialog.open()
       this.fetchBusinessProcessList()
     },
 
     close(opType) {
+      const options = { opType, command: 'group', ...this.options }
       this.$refs.apiGroupForm.resetFields()
       this.$refs.baseDialog.close()
-      this.$emit('on-close', opType)
+      this.$emit('on-close', options)
     },
 
     change(visible) {
@@ -132,11 +135,14 @@ export default {
           : API.addApiGroup(this.apiGroupForm)
               .then(({ success, data }) => {
                 if ((success, data)) {
+                  const { apiGroupId, workId } = data
                   this.$notify.success({
                     title: '操作结果',
                     message: '新增API分组成功！',
                     duration: 1500
                   })
+                  this.options.currentTreeNodeId = apiGroupId
+                  this.options.workId = workId
                   this.close('save')
                 }
               })

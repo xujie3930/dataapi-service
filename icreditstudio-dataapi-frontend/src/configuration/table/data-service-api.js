@@ -47,8 +47,7 @@ export default that => ({
     {
       type: 'text',
       label: 'API Path',
-      prop: 'path',
-      width: 200
+      prop: 'path'
     },
     {
       type: 'text',
@@ -57,12 +56,12 @@ export default that => ({
       width: 350,
       formatter: ({ type }) => apiType[type]
     },
-    {
-      type: 'text',
-      label: '最新版本号',
-      prop: 'apiVersion',
-      width: 100
-    },
+    // {
+    //   type: 'text',
+    //   label: '最新版本号',
+    //   prop: 'apiVersion',
+    //   width: 100
+    // },
     {
       type: 'statusText',
       label: '发布状态',
@@ -95,10 +94,10 @@ export default that => ({
         //   visible: ({ row }) => row.status === 1
         // },
 
-        {
-          func: that.mixinHandleDelete,
-          label: '授权'
-        },
+        // {
+        //   func: that.mixinHandleDelete,
+        //   label: '授权'
+        // },
         // {
         //   func: that.mixinHandleDelete,
         //   label: '发布',
@@ -108,14 +107,14 @@ export default that => ({
         //   func: that.mixinHandleDelete,
         //   label: '编辑'
         // },
-        {
-          func: that.mixinHandleDelete,
-          label: '历史版本'
-        }
         // {
         //   func: that.mixinHandleDelete,
-        //   label: '详情'
+        //   label: '历史版本'
         // }
+        {
+          func: that.mixinHandleDelete,
+          label: '详情'
+        }
       ]
     }
   ]

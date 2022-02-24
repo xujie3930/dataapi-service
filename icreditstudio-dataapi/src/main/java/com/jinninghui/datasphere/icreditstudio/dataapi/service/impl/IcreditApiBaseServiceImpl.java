@@ -5,18 +5,17 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisInterfaceInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiModelTypeEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiPublishStatusEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequestFiledEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ResponseFiledEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
+import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
@@ -25,15 +24,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiParamService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditGenerateApiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DatasourceApiParamSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiBaseResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.Query;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
-import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -42,10 +38,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * <p>
@@ -69,6 +65,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Resource
     private IcreditApiBaseMapper apiBaseMapper;
 
+    private static final String SQL_AND = " AND ";
+    private static final String SQL_FIELD_SPLIT_CHAR = ",";
+    private static final String SQL_WHERE = " WHERE ";
     private static final String SEPARATOR = "|";
     private static final String SPLIT_URL_FLAG = "?";
     private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
@@ -118,22 +117,19 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     @Override
     @Transactional
-    public BusinessResult<Boolean> createDataSourceApi(DatasourceApiSaveParam param) {
+    public BusinessResult<Boolean> createDataSourceApi(String userId, DatasourceApiSaveParam param) {
         //校验api path和api name
         checkPathAndName(param.getPath(), param.getName());
-        if((ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel()) && CollectionUtils.isEmpty(param.getApiParamSaveRequestList())) ||
-                null == param.getApiGenerateSaveRequest()){
-            //入参错误
-        }
-
         //保存api基础信息
         IcreditApiBaseEntity apiBaseEntity = new IcreditApiBaseEntity();
         BeanUtils.copyProperties(param, apiBaseEntity);
         apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.PUBLISHED.getCode());
+        apiBaseEntity.setPublishUser(userId);
+        apiBaseEntity.setPublishTime(new Date());
         save(apiBaseEntity);
 
         StringBuffer querySqlPrefix = new StringBuffer("SELECT ");
-        StringBuffer querySqlSuffix = new StringBuffer(" WHERE ");
+        StringBuffer querySqlSuffix = new StringBuffer(SQL_WHERE);
         StringBuffer requiredFields = new StringBuffer();
         boolean isHaveRespField = false;
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
@@ -151,15 +147,15 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 apiParamEntity.setIsResponse(datasourceApiParamSaveRequest.getIsResponse());
                 apiParamEntityList.add(apiParamEntity);
                 if(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsResponse())){
-                    querySqlPrefix.append(datasourceApiParamSaveRequest.getFieldName()).append(",");
+                    querySqlPrefix.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                     isHaveRespField = true;
                 }
                 if(RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsRequest())){
                     querySqlSuffix.append(datasourceApiParamSaveRequest.getFieldName())
-                            .append(" = ${").append(datasourceApiParamSaveRequest.getFieldName()).append("}").append(" AND ");
+                            .append(" = ${").append(datasourceApiParamSaveRequest.getFieldName()).append("}").append(SQL_AND);
                 }
                 if(RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getRequired())){
-                    requiredFields.append(datasourceApiParamSaveRequest.getFieldName()).append(",");
+                    requiredFields.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                 }
             }
             if(!isHaveRespField){//没有勾选返回参数
@@ -167,13 +163,13 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
             apiParamService.saveBatch(apiParamEntityList);
         }
-        String querySql = String.valueOf(new StringBuffer(querySqlPrefix.substring(0, querySqlPrefix.lastIndexOf(",")))
+        String querySql = String.valueOf(new StringBuffer(querySqlPrefix.substring(0, querySqlPrefix.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))
                 .append(" FROM ").append(param.getApiGenerateSaveRequest().getTableName()).append(querySqlSuffix));
-        if(querySql.endsWith(" WHERE ")){
-            querySql = querySql.substring(0, querySql.lastIndexOf(" WHERE "));
+        if(querySql.endsWith(SQL_WHERE)){
+            querySql = querySql.substring(0, querySql.lastIndexOf(SQL_WHERE));
         }
-        if(querySql.endsWith(" AND ")){
-            querySql = querySql.substring(0, querySql.lastIndexOf(" AND "));
+        if(querySql.endsWith(SQL_AND)){
+            querySql = querySql.substring(0, querySql.lastIndexOf(SQL_AND));
         }
 
         //保存 generate api
@@ -225,5 +221,50 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         }else{//url不包含？和| -- jdbc:mysql://192.168.0.193:3306/daas
             return String.valueOf(new StringBuffer(url).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
         }
+    }
+
+    @Override
+    public BusinessResult<List<Map<String, Object>>> getDataSourcesList(DataSourcesListRequest request) {
+        return dataSourceFeignClient.getDataSourcesList(request);
+    }
+
+    @Override
+    public BusinessResult<List<Map<String, String>>> getTableNameList(TableNameListRequest request) {
+        return dataSourceFeignClient.getTableNameList(request);
+    }
+
+    @Override
+    public BusinessResult<List<FieldInfo>> getTableFieldList(TableFieldListRequest request) {
+        DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
+        String uri = datasource.getUri();
+        Connection conn = DBConnectionManager.getInstance().getConnection(uri, datasource.getType());
+        List<FieldInfo> fieldList = new ArrayList<>();
+        try {
+            ResultSet rs = conn.getMetaData().getColumns(null, null, request.getTableName(), "%");
+            while(rs.next()) {
+                FieldInfo fieldInfo = new FieldInfo();
+                fieldInfo.setDesc(rs.getString("REMARKS"));
+                fieldInfo.setFieldType(rs.getString("TYPE_NAME"));
+                fieldInfo.setFieldName(rs.getString("COLUMN_NAME"));
+                fieldInfo.setIsResponseField(SelectFiledEnum.FIELD_SELECTED.getCode());
+                fieldInfo.setIsRequestField(SelectFiledEnum.FIELD_NOT_SELECTED.getCode());
+                fieldInfo.setIsRequiredField(SelectFiledEnum.FIELD_NOT_SELECTED.getCode());
+                fieldList.add(fieldInfo);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return BusinessResult.success(fieldList);
+    }
+
+    private DatasourceDetailResult getDatasourceDetail(String datasourceId) {
+        if (StringUtils.isBlank(datasourceId)){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_60000002.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_60000002.getMessage());
+        }
+        BusinessResult<DatasourceDetailResult> datasourceResult = dataSourceFeignClient.info(datasourceId);
+        if (!datasourceResult.isSuccess() || Objects.isNull(datasourceResult.getData())){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_60000001.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_60000001.getMessage());
+        }
+        return datasourceResult.getData();
     }
 }
