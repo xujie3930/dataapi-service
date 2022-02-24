@@ -9,26 +9,21 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisInterfaceInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiParamService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditGenerateApiService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.factory.ApiBaseFactory;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
-import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DatasourceUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.APIParamResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiBaseResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GenerateApiResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -37,6 +32,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUti
 import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,12 +58,18 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private IcreditGenerateApiService generateApiService;
     @Resource
     private IcreditApiParamService apiParamService;
+    @Autowired
+    private IcreditApiGroupService apiGroupService;
+    @Autowired
+    private IcreditWorkFlowService workFlowService;
     @Resource
     private DatasourceFeignClient dataSourceFeignClient;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
     @Resource
     private IcreditApiBaseMapper apiBaseMapper;
+    @Autowired
+    private ApiBaseFactory apiBaseFactory;
 
     private static final String SQL_AND = " AND ";
     private static final String SQL_FIELD_SPLIT_CHAR = ",";
@@ -207,20 +209,19 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             return BusinessResult.success(result);
         }
         BeanCopyUtils.copyProperties(apiBaseEntity, result);
-        if (ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(apiBaseEntity.getType())) {
-            GenerateApiResult generateApiResult = new GenerateApiResult();
-            IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiBaseId(id);
-            if (!Objects.isNull(generateApiEntity)) {
-                BeanCopyUtils.copyProperties(generateApiEntity, generateApiResult);
+        //TODO：sql生成模式,改成工厂模式
+        ApiBaseService apiService = apiBaseFactory.getApiService(apiBaseEntity.getType());
+        apiService.setApiBaseResult(result);
+        //获取其业务流程和分组名称
+        IcreditApiGroupEntity apiGroupEntity = apiGroupService.getById(apiBaseEntity.getApiGroupId());
+        if (!Objects.isNull(apiGroupEntity)) {
+            IcreditWorkFlowEntity workFlowEntity = workFlowService.getById(apiGroupEntity.getWorkId());
+            if (!Objects.isNull(workFlowEntity)) {
+                //目标文件夹=业务流程/分组
+                result.setDestination(workFlowEntity.getName() + "/" + apiGroupEntity.getName());
             }
-            BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(generateApiEntity.getDatasourceId()));
-            if (connResult.isSuccess() && !Objects.isNull(connResult.getData())) {
-                String url = connResult.getData().getUrl();
-                generateApiResult.setDatabaseName(DatasourceUtils.getDatabaseName(url));
-            }
-            result.setGenerateApi(generateApiResult);
         }
-
+        //获取其param参数
         List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiBaseId(id);
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         result.setParamList(apiParamList);
