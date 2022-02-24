@@ -2,4 +2,37 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppMapper">
 
+    <select id="hasExistappFlag"
+            resultType="java.lang.Boolean">
+        select 1
+        from icredit_app
+        <where>
+            <if test="appFlag != null and appFlag != '' ">
+                AND app_flag = #{appFlag}
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <select id="getList"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity">
+        select *
+        from icredit_app
+        <where>
+            <if test="appGroupId != null and appGroupId != '' ">
+                AND app_group_id = #{appGroupId}
+            </if>
+        </where>
+        order by is_enable desc, create_time desc
+    </select>
+
+    <update id="enableById">
+        update icredit_app
+        <set>
+            is_enable=#{request.isEnable}
+        </set>
+        <where>
+            id=#{request.id}
+        </where>
+    </update>
 </mapper>

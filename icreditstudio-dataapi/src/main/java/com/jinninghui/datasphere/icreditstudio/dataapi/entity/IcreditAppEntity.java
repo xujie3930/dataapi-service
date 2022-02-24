@@ -1,10 +1,14 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.time.LocalDateTime;
-import java.io.Serializable;
+import com.jinninghui.datasphere.icreditstudio.framework.result.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -17,15 +21,21 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("icredit_app")
-public class IcreditAppEntity implements Serializable {
+public class IcreditAppEntity extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 主键id
+     */
+    @TableId(type = IdType.ID_WORKER_STR)
+    private String id;
+
     private String appFlag;
 
-    private Boolean certificationType;
+    private Integer certificationType;
 
-    private Boolean isEnable;
+    private Integer isEnable;
 
     private String name;
 
@@ -33,6 +43,7 @@ public class IcreditAppEntity implements Serializable {
 
     private String appGroupId;
 
+    @TableField("`desc`")
     private String desc;
 
     private String token;
@@ -40,18 +51,4 @@ public class IcreditAppEntity implements Serializable {
     private Integer period;
 
     private String allowIp;
-
-    private String remark;
-
-    private LocalDateTime createTime;
-
-    private String createBy;
-
-    private LocalDateTime updateTime;
-
-    private String updateBy;
-
-    private Boolean delFlag;
-
-
 }

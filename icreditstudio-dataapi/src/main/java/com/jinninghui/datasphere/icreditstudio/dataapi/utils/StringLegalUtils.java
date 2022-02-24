@@ -21,6 +21,13 @@ public class StringLegalUtils {
         }
     }
 
+    public static void checkLegalNameForApp(String name) {
+        boolean legal = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isLegal(name);
+        if (!legal) {
+            throw new AppException("包含不规范字符，请重新输入");
+        }
+    }
+
     public static void main(String[] args) {
         String str = "分组8";
         checkLegalName(str);
