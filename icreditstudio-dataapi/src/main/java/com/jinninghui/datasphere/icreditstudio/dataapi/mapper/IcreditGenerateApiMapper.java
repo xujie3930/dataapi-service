@@ -1,7 +1,8 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface IcreditGenerateApiMapper extends BaseMapper<IcreditGenerateApiEntity> {
 
+    IcreditGenerateApiEntity getByApiBaseId(@Param("id") String id);
 }

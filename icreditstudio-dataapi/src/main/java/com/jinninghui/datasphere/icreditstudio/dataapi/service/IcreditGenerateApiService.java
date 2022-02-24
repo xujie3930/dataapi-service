@@ -1,7 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
 
 /**
  * <p>
@@ -13,4 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IcreditGenerateApiService extends IService<IcreditGenerateApiEntity> {
 
+    IcreditGenerateApiEntity getByApiBaseId(String id);
 }

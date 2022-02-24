@@ -16,6 +16,8 @@
 
 package com.jinninghui.datasphere.icreditstudio.framework.utils;
 
+import com.alibaba.fastjson.JSON;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -63,7 +65,8 @@ public abstract class StringUtils {
 	private static Pattern ALL_PATTERN = Pattern.compile("^[\\u4E00-\\u9FA5A-Za-z0-9_]+$");
 
 	//判断以字母或者数字开头
-	private static Pattern FRONT_PATTERN = Pattern.compile("^([a-z]+|[A-Z]+|[\\u4e00-\\u9fa5]+)$");
+	private static Pattern FRONT_CHINESE = Pattern.compile("[\\u4e00-\\u9fa5]+.*$");
+	private static Pattern FRONT_ENGLISH = Pattern.compile("^[a-zA-z].*");
 
 
 	//---------------------------------------------------------------------
@@ -1351,11 +1354,30 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * 是否以字母或数字开头
+	 * 是否以中文开头
 	 * @param str
 	 * @return
 	 */
-	public static boolean isFrontWithNumOrLetters(String str) {
-		return FRONT_PATTERN.matcher(str).matches();
+	public static boolean isFrontWithChinese(String str) {
+		boolean matches = FRONT_CHINESE.matcher(str).matches();
+		return matches;
+	}
+
+	/**
+	 * 是否以英文开头
+	 * @param str
+	 * @return
+	 */
+	public static boolean isFrontWithEnglish(String str) {
+		boolean matches = FRONT_ENGLISH.matcher(str).matches();
+		return matches;
+	}
+
+	public static List copy(List<?> list,Class clazz){
+
+		String oldOb = JSON.toJSONString(list);
+
+		return JSON.parseArray(oldOb, clazz);
+
 	}
 }

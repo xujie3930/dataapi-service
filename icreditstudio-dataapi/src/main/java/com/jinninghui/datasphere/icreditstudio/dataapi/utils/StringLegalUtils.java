@@ -10,18 +10,19 @@ import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppE
 public class StringLegalUtils {
 
     public static void checkLegalName(String name) {
-        /*boolean legal = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isLegal(name);
-        if (!legal){
-            throw new AppException("输入包含除中文汉字、英文字母、数字、英文格式的下划线之外的字符");
+        boolean legal = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isLegal(name);
+        if (!legal) {
+            throw new AppException("包含不规范字符，请重新输入");
         }
-        boolean front = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isFrontWithNumOrLetters(name);
-        if (!front){
+        boolean front = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isFrontWithEnglish(name) ||
+                com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isFrontWithChinese(name);
+        if (!front) {
             throw new AppException("请输入以英文字母或者汉字开头的2~50字的名称");
-        }*/
+        }
     }
 
     public static void main(String[] args) {
-        String str = "abcAbc123";
+        String str = "分组8";
         checkLegalName(str);
     }
 }

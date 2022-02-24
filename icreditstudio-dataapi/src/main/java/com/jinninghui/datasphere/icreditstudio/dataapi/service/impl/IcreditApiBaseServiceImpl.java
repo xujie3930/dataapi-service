@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisInterfaceInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
@@ -13,18 +14,21 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEnt
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
-import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiParamService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditGenerateApiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DatasourceUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.APIParamResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiBaseResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GenerateApiResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -100,7 +104,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             wrapper.like(IcreditApiBaseEntity.PATH, request.getPath());
         }
         if (null != request.getPublishStatus()){
-            wrapper.eq(IcreditApiBaseEntity.PUBLISH_STATUS, request.getPublishTimeStart());
+            wrapper.eq(IcreditApiBaseEntity.PUBLISH_STATUS, request.getPublishStatus());
         }
         if (null != request.getType()){
             wrapper.eq(IcreditApiBaseEntity.TYPE, request.getType());
@@ -195,6 +199,34 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(true);
     }
 
+    @Override
+    public BusinessResult<ApiDetailResult> detail(String id) {
+        ApiDetailResult result = new ApiDetailResult();
+        IcreditApiBaseEntity apiBaseEntity = getById(id);
+        if (Objects.isNull(apiBaseEntity)) {
+            return BusinessResult.success(result);
+        }
+        BeanCopyUtils.copyProperties(apiBaseEntity, result);
+        if (ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(apiBaseEntity.getType())) {
+            GenerateApiResult generateApiResult = new GenerateApiResult();
+            IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiBaseId(id);
+            if (!Objects.isNull(generateApiEntity)) {
+                BeanCopyUtils.copyProperties(generateApiEntity, generateApiResult);
+            }
+            BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(generateApiEntity.getDatasourceId()));
+            if (connResult.isSuccess() && !Objects.isNull(connResult.getData())) {
+                String url = connResult.getData().getUrl();
+                generateApiResult.setDatabaseName(DatasourceUtils.getDatabaseName(url));
+            }
+            result.setGenerateApi(generateApiResult);
+        }
+
+        List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiBaseId(id);
+        List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
+        result.setParamList(apiParamList);
+        return BusinessResult.success(result);
+    }
+
     private void checkPathAndName(String path, String name) {
         if (!path.matches("[a-zA-Z]{16}")) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000001.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000001.getMessage());
@@ -203,7 +235,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000002.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000002.getMessage());
         }
         Boolean isExist = apiBaseMapper.isExistByName(name);
-        if(null != isExist && isExist){
+        if (null != isExist && isExist) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000003.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000003.getMessage());
         }
         isExist = apiBaseMapper.isExistByPath(path);
