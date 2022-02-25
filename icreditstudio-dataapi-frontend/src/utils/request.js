@@ -19,6 +19,7 @@ service.interceptors.request.use(
   config => {
     const configObj = config
     configObj.headers.Authorization = appEnv ? token() : `Bearer ${token()}`
+    configObj.headers.userId = '849758069676310528'
     return configObj
   },
   error => {

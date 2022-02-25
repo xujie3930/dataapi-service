@@ -4,7 +4,7 @@
  * @Date: 2022-01-16
  */
 
-const { name,version } = require('./package')
+const { name, version } = require('./package')
 const path = require('path')
 
 const resolve = dir => path.join(__dirname, dir)
@@ -15,7 +15,8 @@ const APP_NAME = '数据服务'
 
 module.exports = {
   publicPath,
-  outputDir: 'jnh-datasphere-icreditatudio-dataapi-frontend-' + version + '-dist',
+  outputDir:
+    'jnh-datasphere-icreditatudio-dataapi-frontend-' + version + '-dist',
   assetsDir: 'static',
   indexPath: 'index.html',
   filenameHashing: true,

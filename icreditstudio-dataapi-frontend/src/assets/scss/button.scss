@@ -1,0 +1,27 @@
+.jui-button {
+  min-width: 90px;
+  height: 32px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: PingFangSC, PingFangSC-Regular;
+  font-weight: 400;
+  text-align: center;
+}
+
+.el-button + .el-button {
+  margin-left: 15px;
+}
+
+.jui-button--default {
+  @extend .jui-button;
+  background-color: #fff;
+  color: #1890ff;
+  border: 1px solid #1890ff;
+}
+
+.jui-button--priamry {
+  @extend .jui-button;
+  color: #fff;
+  background-color: #1890ff;
+  border: 1px solid #1890ff;
+}

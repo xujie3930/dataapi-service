@@ -1,7 +1,9 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IcreditApiParamService extends IService<IcreditApiParamEntity> {
 
+    List<IcreditApiParamEntity> getByApiBaseId(String id);
 }

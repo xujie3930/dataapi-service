@@ -1,9 +1,14 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DataSourcesListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableFieldListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableNameListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
@@ -31,6 +36,8 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
     BusinessResult<List<Map<String, String>>> getTableNameList(TableNameListRequest request);
 
     BusinessResult<List<FieldInfo>> getTableFieldList(TableFieldListRequest request);
+
+    BusinessResult<ApiDetailResult> detail(String id);
 
     BusinessResult<Boolean> checkApiPath(CheckApiPathRequest request);
 

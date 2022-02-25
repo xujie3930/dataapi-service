@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class ApiGroupSaveRequest {
     //业务流程id
+    @NotBlank(message = "业务流程id不能为空!")
     private String workId;
     //api分组名称
     @NotBlank(message = "分组名称不能为空")

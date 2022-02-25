@@ -1,10 +1,13 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiParamMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiParamService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +20,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class IcreditApiParamServiceImpl extends ServiceImpl<IcreditApiParamMapper, IcreditApiParamEntity> implements IcreditApiParamService {
 
+    @Autowired
+    private IcreditApiParamMapper apiParamMapper;
+
+    @Override
+    public List<IcreditApiParamEntity> getByApiBaseId(String id) {
+        return apiParamMapper.getByApiBaseId(id);
+    }
 }

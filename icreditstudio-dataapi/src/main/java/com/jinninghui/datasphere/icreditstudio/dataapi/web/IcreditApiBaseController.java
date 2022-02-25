@@ -1,10 +1,11 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -45,6 +46,11 @@ public class IcreditApiBaseController {
     @PostMapping("/generate/apiPath")
     public BusinessResult<String> generateApiPath(){
         return BusinessResult.success(RandomStringUtils.randomAlphabetic(16));
+    }
+
+    @PostMapping("/detail")
+    public BusinessResult<ApiDetailResult> detail(@RequestBody ApiBaseDetailRequest request) {
+        return apiBaseService.detail(request.getId());
     }
 
     @PostMapping("/getDatasourceListByType")

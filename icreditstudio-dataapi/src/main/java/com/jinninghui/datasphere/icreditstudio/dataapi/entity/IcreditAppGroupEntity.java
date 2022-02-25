@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -24,8 +25,14 @@ public class IcreditAppGroupEntity extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId
+    /**
+     * 主键id
+     */
+    @TableId(type = IdType.ID_WORKER_STR)
     private String id;
+
+    //页面id
+    private String appGroupId;
     private String name;
 
     @TableField("`desc`")
