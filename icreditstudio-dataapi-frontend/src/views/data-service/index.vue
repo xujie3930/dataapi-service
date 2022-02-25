@@ -110,7 +110,12 @@
         @handleAddDataServiceApi="handleAddDataServiceApi"
       />
 
-      <DatasourceGenerate v-else @on-jump="jumpCallback" />
+      <DatasourceGenerate
+        v-else
+        ref="datasourceGenerate"
+        @on-jump="jumpCallback"
+        @on-save="saveCallback"
+      />
     </transition>
 
     <div v-else class="data-service-empty">
@@ -131,7 +136,7 @@
 
 <script>
 import API from '@/api/api'
-import DatasourceGenerate from './source'
+import DatasourceGenerate from './generate-datasource.vue'
 import AddBusinessPorcess from './add-business-porcess.vue'
 import AddApiGroup from './add-api-group.vue'
 import tableConfiguration from '@/configuration/table/data-service-api'
@@ -165,42 +170,12 @@ export default {
       currentTreeNodeId: null,
       formOption,
       tableConfiguration: tableConfiguration(this),
-      // mixinTableData: [
-      //   { status: 0 },
-      //   { name: '123434', status: 1 },
-      //   { status: 2 }
-      // ],
       mixinSearchFormConfig: {
         models: { name: '', type: '', path: '', publishStatus: '', time: [] }
       },
-
       fetchConfig: { retrieve: { url: '/apiBase/list', method: 'post' } },
-
       oldTreeData: [],
-      treeData: [
-        {
-          name: 'datax_web',
-          icon: 'process',
-          type: 0,
-          id: 1,
-          leaf: false,
-          disabled: false,
-          category: 'database',
-          visible: false,
-          children: [
-            {
-              name: 'h_app_sysytem',
-              icon: 'group',
-              type: 1,
-              id: 2,
-              leaf: true,
-              disabled: false,
-              category: 'table',
-              visible: true
-            }
-          ]
-        }
-      ]
+      treeData: []
     }
   },
 
@@ -221,7 +196,7 @@ export default {
     // 点击-左侧树顶部按钮
     handleCommandClick(command) {
       this.currentTreeNodeId = this.$refs?.tree.getCurrentKey()
-      const { workId } = this.$refs?.tree.getCurrentNode()
+      const { workId } = this.$refs?.tree.getCurrentNode() || {}
       const options = { currentTreeNodeId: this.currentTreeNodeId, workId }
       switch (command) {
         case 'process':
@@ -251,9 +226,24 @@ export default {
       this.isTooltipDisabled = clientWidth >= scrollWidth
     },
 
-    // 新增API
+    // 点击-打开数据源生成界面
     handleAddDataServiceApi() {
       this.opType = 'add'
+      const { opType, currentTreeNodeId } = this
+      const { data, parent } = this.$refs?.tree.getNode(currentTreeNodeId) ?? {}
+      const { id: pid, name } = parent?.data ?? {}
+      const cascaderOptions = [
+        {
+          value: pid,
+          label: name,
+          children: [{ label: data.name, value: data.id }]
+        }
+      ]
+      const options = { opType, currentTreeNodeId, cascaderOptions }
+
+      this.$nextTick(() => {
+        this.$refs.datasourceGenerate.open(options)
+      })
     },
 
     // 点击-刷新左侧树数据
@@ -261,10 +251,6 @@ export default {
       this.isRefreshTreeData = true
       clearTimeout(this.timeId)
       this.fetchBusinessProcessList()
-    },
-
-    jumpCallback() {
-      this.opType = ''
     },
 
     // 设置-进入界面高亮左侧树第一个节点或第一个子节点
@@ -287,6 +273,20 @@ export default {
         const { tree } = this.$refs
         tree && tree.setCurrentKey(id)
       })
+    },
+
+    // 回调-新增数据源生成页面切换
+    jumpCallback() {
+      this.opType = ''
+      this.mixinRetrieveTableData()
+    },
+
+    // 回调-新增API
+    saveCallback(saveType) {
+      if (saveType === 1) {
+        this.opType = ''
+        saveType === 1 && this.mixinRetrieveTableData()
+      }
     },
 
     // 回调-新增业务流程或API分组
@@ -481,10 +481,16 @@ export default {
       }
 
       .header-icon {
-        font-size: 16px;
+        font-size: 18px;
         color: #1890ff;
         margin-left: 12px;
         cursor: pointer;
+        transform: scale(1);
+        transition: transform 0.3s ease-in-out;
+
+        &:hover {
+          transform: scale(1.2);
+        }
       }
 
       .is-refresh {
@@ -542,10 +548,6 @@ export default {
       width: 100%;
       box-sizing: border-box;
       overflow-y: auto;
-
-      // &:hover {
-      //   overflow-y: auto;
-      // }
 
       .custom-tree-node {
         @include flex(flex-start, center);
@@ -626,7 +628,7 @@ export default {
   &-main {
     @include flex(flex-start);
     position: relative;
-    flex: 1;
+    // flex: 1;
     width: 100%;
     height: 100%;
     border-left: 1px solid #d9d9d9;
@@ -656,14 +658,14 @@ export default {
   }
 }
 
-// .data-service-entry-active,
-// .data-service-leave-active {
-//   transition: all 0.35s ease-in-out;
-// }
+.data-service-entry-active,
+.data-service-leave-active {
+  transition: all 0.35s ease-in-out;
+}
 
-// .data-service-enter,
-// .data-service-leave-to {
-//   transform: translateY(50%);
-//   opacity: 0;
-// }
+.data-service-enter,
+.data-service-leave-to {
+  transform: translateY(30px);
+  opacity: 0;
+}
 </style>
