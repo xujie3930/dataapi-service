@@ -14,8 +14,8 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
 
-    Boolean isExistByName(@Param("name") String name);
+    IcreditApiBaseEntity findByApiName(@Param("name") String name);
 
-    Boolean isExistByPath(@Param("path") String path);
+    IcreditApiBaseEntity findByApiPath(@Param("path") String path);
 
 }

@@ -1,13 +1,13 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class DatasourceApiGenerateSaveRequest {
+@AllArgsConstructor
+public class CheckQuerySqlRequest {
 
-    private String id;
-    private Integer model;
     private String datasourceId;
     private String sql;
-    private String tableName;
+
 }
