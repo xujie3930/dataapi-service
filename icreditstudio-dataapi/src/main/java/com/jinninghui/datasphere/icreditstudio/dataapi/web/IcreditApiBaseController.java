@@ -4,6 +4,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -35,15 +36,15 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/datasourceApi/create")
-    public BusinessResult<Boolean> createDataSourceApi(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
+    public BusinessResult<ApiSaveResult> createDataSourceApi(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
         DatasourceApiSaveParam param = new DatasourceApiSaveParam();
         BeanUtils.copyProperties(apiSaveRequest, param);
         return apiBaseService.createDataSourceApi(userId, param);
     }
 
     @PostMapping("/generate/apiPath")
-    public String generateApiPath(){
-        return RandomStringUtils.randomAlphabetic(16);
+    public BusinessResult<String> generateApiPath(){
+        return BusinessResult.success(RandomStringUtils.randomAlphabetic(16));
     }
 
     @PostMapping("/getDatasourceListByType")
@@ -64,6 +65,21 @@ public class IcreditApiBaseController {
     @PostMapping("/getTableFieldList")
     public BusinessResult<List<FieldInfo>> getTableFieldList(@RequestBody TableFieldListRequest request){
         return apiBaseService.getTableFieldList(request);
+    }
+
+    @PostMapping("/checkApiPath")
+    public BusinessResult<Boolean> checkApiPath(@RequestBody CheckApiPathRequest request){
+        return apiBaseService.checkApiPath(request);
+    }
+
+    @PostMapping("/checkApiName")
+    public BusinessResult<Boolean> checkApiName(@RequestBody CheckApiNameRequest request){
+        return apiBaseService.checkApiName(request);
+    }
+
+    @PostMapping("/checkQuerySql")
+    public BusinessResult<Boolean> checkQuerySql(@RequestBody CheckQuerySqlRequest request){
+        return apiBaseService.checkQuerySql(request);
     }
 
 }

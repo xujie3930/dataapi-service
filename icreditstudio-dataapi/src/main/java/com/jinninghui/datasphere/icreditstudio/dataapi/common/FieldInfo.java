@@ -7,9 +7,9 @@ public class FieldInfo {
 
     private String fieldName;
     private String fieldType;
-    private Integer isRequestField;
-    private Integer isResponseField;
-    private Integer isRequiredField;
+    private Integer isRequest;
+    private Integer isResponse;
+    private Integer required;
     private String desc;
 
 }
