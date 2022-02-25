@@ -25,7 +25,7 @@ public class OauthApiServiceImpl implements OauthApiService {
     public InternalUserInfoVO getUserById(String userId) {
         CommonResult<InternalUserInfoVO> result = microOauth2ApiFeignClient.info(userId);
         if (Objects.isNull(result.getData())) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000000.getCode());
+            return null;
         }
         return result.getData();
     }

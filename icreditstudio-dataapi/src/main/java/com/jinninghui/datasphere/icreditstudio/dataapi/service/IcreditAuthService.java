@@ -2,6 +2,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IcreditAuthService extends IService<IcreditAuthEntity> {
 
+    BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request);
 }

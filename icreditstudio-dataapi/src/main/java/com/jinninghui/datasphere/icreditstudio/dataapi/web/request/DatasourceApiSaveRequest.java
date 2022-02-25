@@ -8,6 +8,7 @@ import java.util.List;
 public class DatasourceApiSaveRequest {
 
     private String id;
+    private Integer saveType;
     private Integer type;
     private String name;
     private String requestType;
@@ -15,8 +16,7 @@ public class DatasourceApiSaveRequest {
     private String path;
     private String apiGroupId;
     private String desc;
-//    private String apiGroupName;
-    private Integer apiVersion = 1;
+    private Integer apiVersion;
 
     private DatasourceApiGenerateSaveRequest apiGenerateSaveRequest;
     private List<DatasourceApiParamSaveRequest> apiParamSaveRequestList;
