@@ -24,6 +24,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_20000006("20000006", "sql语句不能使用【select *】的形式！"),
         RESOURCE_CODE_20000007("20000007", "请检查sql语句语法是否正确，或选择的数据源与sql语句中的表是否对应！"),
         RESOURCE_CODE_20000008("20000008", "sql语句不能为空！"),
+        RESOURCE_CODE_20000009("20000009", "请选择API！"),
 
 
         RESOURCE_CODE_60000001("60000001", "获取资源库连接失败！"),

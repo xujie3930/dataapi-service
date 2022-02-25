@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisInterfaceInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
@@ -21,12 +22,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.factory.ApiBaseFa
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.APIParamResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiBaseResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiParamSaveResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGenerateSaveResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -229,6 +225,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     @Override
+    @ResultReturning
     public BusinessResult<ApiDetailResult> detail(String id) {
         ApiDetailResult result = new ApiDetailResult();
         IcreditApiBaseEntity apiBaseEntity = getById(id);
@@ -236,7 +233,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             return BusinessResult.success(result);
         }
         BeanCopyUtils.copyProperties(apiBaseEntity, result);
-        //TODO：sql生成模式,改成工厂模式
+        //根据不同API类型返回不同对象
         ApiBaseService apiService = apiBaseFactory.getApiService(apiBaseEntity.getType());
         apiService.setApiBaseResult(result);
         //获取其业务流程和分组名称
