@@ -255,23 +255,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(result);
     }
 
-    private void checkPathAndName(String path, String name) {
-        if (!path.matches("[a-zA-Z]{16}")) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000001.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000001.getMessage());
-        }
-        if (!name.matches("[a-zA-Z0-9\u4e00-\u9fa5_]{1,50}")) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000002.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000002.getMessage());
-        }
-        Boolean isExist = apiBaseMapper.isExistByName(name);
-        if (null != isExist && isExist) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000003.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000003.getMessage());
-        }
-        isExist = apiBaseMapper.isExistByPath(path);
-        if(null != isExist && isExist){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000005.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000005.getMessage());
-        }
-    }
-
     private String handleUrl(String url) {
         //根据uri获取jdbc连接
         if(url.contains(SPLIT_URL_FLAG)){//url包含？ -- jdbc:mysql://192.168.0.193:3306/data_source?username=root
