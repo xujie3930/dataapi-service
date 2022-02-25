@@ -5,7 +5,13 @@
  */
 
 import dataServiceApiTableConfig from './data-service-api'
-
 import dataServiceParamTableConfig from './data-service-api-param'
+import tableRequestConfiguration from './data-service-api-request'
+import tableResponseConfiguration from './data-service-api-response'
 
-export { dataServiceApiTableConfig, dataServiceParamTableConfig }
+export {
+  dataServiceApiTableConfig,
+  dataServiceParamTableConfig,
+  tableRequestConfiguration,
+  tableResponseConfiguration
+}

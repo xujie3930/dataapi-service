@@ -164,145 +164,312 @@
           </el-col>
         </el-row>
 
-        <el-form-item>
-          <div slot="label" class="source-main-form--title">选择表</div>
-        </el-form-item>
+        <!-- API类型为注册API-->
+        <template v-if="form.type === API_TYPE_MAPPING.REGISTER">
+          <el-form-item>
+            <div slot="label" class="source-main-form--title">后端服务定义</div>
+          </el-form-item>
 
-        <el-row type="flex" class="form-row-item" justify="space-between">
-          <el-col :span="11">
-            <el-form-item label="数据库类型" prop="databaseTye">
-              <el-select
-                readonly
-                disabled
-                style="width: 100%"
-                v-model="form.databaseTye"
-                placeholder="请选择数据库类型"
+          <el-row type="flex" class="form-row-item" justify="space-between">
+            <el-col :span="11">
+              <el-form-item label="后端服务Host" prop="databaseTye">
+                <el-input
+                  readonly
+                  style="width: 100%"
+                  v-model="form.databaseTye"
+                  placeholder="请选择数据库类型"
+                >
+                </el-input>
+                <p class="form-row-item--tip">
+                  以http://开头，后台服务的IP地址
+                </p>
+              </el-form-item>
+            </el-col>
+
+            <el-col :span="11">
+              <el-form-item
+                label="后端Path"
+                prop="apiGenerateSaveRequest.datasourceId"
               >
-                <el-option label="MySQL" :value="1"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
+                <el-input
+                  filterable
+                  style="width: 100%"
+                  v-model="form.apiGenerateSaveRequest.datasourceId"
+                  placeholder="请选择数据源名称"
+                  @change="handleDatasourceNameChange"
+                >
+                </el-input>
+                <p class="form-row-item--tip">
+                  支持英文、数字、下划线、连字符（-），请手动输入
+                </p>
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row type="flex" class="form-row-item" justify="space-between">
-          <el-col :span="11">
-            <el-form-item
-              label="数据源名称"
-              prop="apiGenerateSaveRequest.datasourceId"
+          <el-form-item>
+            <div slot="label" class="source-main-form--title">请求参数定义</div>
+          </el-form-item>
+
+          <el-row class="form-row-item form-row-table">
+            <JTable
+              ref="selectParamTable"
+              :table-loading="tableLoading"
+              :table-data="form.apiParamSaveRequestList"
+              :table-configuration="tableRequestConfiguration"
             >
-              <el-select
-                filterable
-                style="width: 100%"
-                v-model="form.apiGenerateSaveRequest.datasourceId"
-                placeholder="请选择数据源名称"
-                @change="handleDatasourceNameChange"
-              >
-                <el-option
-                  :label="item.databaseName"
-                  :value="item.id"
-                  :key="item.id"
-                  v-for="item in datasourceOptions"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
+              <div class="custom-table-empty" slot="empty">
+                <span class="add-icon">+</span>
+                <span class="add-label">新增参数</span>
+              </div>
+            </JTable>
+          </el-row>
 
-          <el-col :span="11">
-            <el-form-item
-              label="数据表名称"
-              prop="apiGenerateSaveRequest.tableName"
+          <el-form-item>
+            <div slot="label" class="source-main-form--title">返回参数定义</div>
+          </el-form-item>
+
+          <el-row class="form-row-item form-row-table">
+            <JTable
+              ref="selectParamTable"
+              :table-loading="tableLoading"
+              :table-data="form.apiParamSaveRequestList"
+              :table-configuration="tableResponseConfiguration"
             >
-              <el-select
-                filterable
-                style="width: 100%"
-                :disabled="!form.apiGenerateSaveRequest.datasourceId"
-                v-model="form.apiGenerateSaveRequest.tableName"
-                :placeholder="
-                  form.apiGenerateSaveRequest.datasourceId
-                    ? '请选择数据表名称'
-                    : '请先选择数据源'
-                "
-                @change="fetchTableFields"
-              >
-                <el-option
-                  :label="item | filterTableName"
-                  :value="item.tableName"
-                  :key="item.tableName"
-                  v-for="item in dataNameOptions"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
+            </JTable>
+          </el-row>
+        </template>
 
-        <el-form-item>
-          <div slot="label" class="source-main-form--title">选择参数</div>
-        </el-form-item>
-
-        <el-row type="flex" class="form-row-item" justify="end">
-          <el-col :span="11">
-            <el-form-item>
-              <el-input
-                clearable
-                placeholder="请输入字段名称"
-                v-model.trim="selectTableName"
-                @input="handleTableNameInput"
-                @clear="form.apiParamSaveRequestList = oldTableData"
-              >
-                <i slot="suffix" class="el-input__icon el-icon-search"></i>
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row class="form-row-item form-row-table">
-          <JTable
-            ref="selectParamTable"
-            :table-loading="tableLoading"
-            :table-data="form.apiParamSaveRequestList"
-            :table-configuration="tableConfiguration"
+        <!-- API类型为数据源生成-->
+        <template v-else>
+          <el-form-item>
+            <div slot="label" class="source-main-form--title">选择表</div>
+          </el-form-item>
+          <template
+            v-if="form.apiGenerateSaveRequest.model === API_MODE_MAPPING.TABLE"
           >
-            <!-- 返回参数 -->
-            <template #isResponse="{ row }">
-              <el-checkbox
-                :true-label="0"
-                :false-label="1"
-                v-model="row.isResponse"
-              ></el-checkbox>
-            </template>
+            <el-row type="flex" class="form-row-item" justify="space-between">
+              <el-col :span="11">
+                <el-form-item label="数据库类型" prop="databaseTye">
+                  <el-select
+                    readonly
+                    disabled
+                    style="width: 100%"
+                    v-model="form.databaseTye"
+                    placeholder="请选择数据库类型"
+                  >
+                    <el-option label="MySQL" :value="1"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
-            <!-- 请求参数 -->
-            <template #isRequest="{ row }">
-              <el-checkbox
-                :true-label="0"
-                :false-label="1"
-                v-model="row.isRequest"
-                @change="handleRequestFieldChange($event, row)"
-              ></el-checkbox
-            ></template>
+            <el-row type="flex" class="form-row-item" justify="space-between">
+              <el-col :span="11">
+                <el-form-item
+                  label="数据源名称"
+                  prop="apiGenerateSaveRequest.datasourceId"
+                >
+                  <el-select
+                    filterable
+                    style="width: 100%"
+                    v-model="form.apiGenerateSaveRequest.datasourceId"
+                    placeholder="请选择数据源名称"
+                    @change="handleDatasourceNameChange"
+                  >
+                    <el-option
+                      :label="item.databaseName"
+                      :value="item.id"
+                      :key="item.id"
+                      v-for="item in datasourceOptions"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
 
-            <!-- 是否必填 -->
-            <template #required="{ row }">
-              <el-checkbox
-                :true-label="0"
-                :false-label="1"
-                v-model="row.required"
-              ></el-checkbox
-            ></template>
-          </JTable>
-        </el-row>
+              <el-col :span="11">
+                <el-form-item
+                  label="数据表名称"
+                  prop="apiGenerateSaveRequest.tableName"
+                >
+                  <el-select
+                    filterable
+                    style="width: 100%"
+                    :disabled="!form.apiGenerateSaveRequest.datasourceId"
+                    v-model="form.apiGenerateSaveRequest.tableName"
+                    :placeholder="
+                      form.apiGenerateSaveRequest.datasourceId
+                        ? '请选择数据表名称'
+                        : '请先选择数据源'
+                    "
+                    @change="fetchTableFields"
+                  >
+                    <el-option
+                      :label="item | filterTableName"
+                      :value="item.tableName"
+                      :key="item.tableName"
+                      v-for="item in dataNameOptions"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-form-item>
+              <div slot="label" class="source-main-form--title">选择参数</div>
+            </el-form-item>
+
+            <el-row type="flex" class="form-row-item" justify="end">
+              <el-col :span="11">
+                <el-form-item>
+                  <el-input
+                    clearable
+                    placeholder="请输入字段名称"
+                    v-model.trim="selectTableName"
+                    @input="handleTableNameInput"
+                    @clear="form.apiParamSaveRequestList = oldTableData"
+                  >
+                    <i slot="suffix" class="el-input__icon el-icon-search"></i>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row class="form-row-item form-row-table">
+              <JTable
+                ref="selectParamTable"
+                :table-loading="tableLoading"
+                :table-data="form.apiParamSaveRequestList"
+                :table-configuration="tableConfiguration"
+              >
+                <!-- 返回参数 -->
+                <template #isResponse="{ row }">
+                  <el-checkbox
+                    :true-label="0"
+                    :false-label="1"
+                    v-model="row.isResponse"
+                  ></el-checkbox>
+                </template>
+
+                <!-- 请求参数 -->
+                <template #isRequest="{ row }">
+                  <el-checkbox
+                    :true-label="0"
+                    :false-label="1"
+                    v-model="row.isRequest"
+                    @change="handleRequestFieldChange($event, row)"
+                  ></el-checkbox
+                ></template>
+
+                <!-- 是否必填 -->
+                <template #required="{ row }">
+                  <el-checkbox
+                    :true-label="0"
+                    :false-label="1"
+                    v-model="row.required"
+                  ></el-checkbox
+                ></template>
+              </JTable>
+            </el-row>
+          </template>
+
+          <!-- API模式为SQL模式生成 -->
+          <template
+            v-else-if="
+              form.apiGenerateSaveRequest.model === API_MODE_MAPPING.SQL
+            "
+          >
+            <el-row type="flex" class="form-row-item" justify="space-between">
+              <el-col :span="11">
+                <el-form-item label="数据库类型" prop="databaseTye">
+                  <el-select
+                    readonly
+                    disabled
+                    style="width: 100%"
+                    v-model="form.databaseTye"
+                    placeholder="请选择数据库类型"
+                  >
+                    <el-option label="MySQL" :value="1"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="11">
+                <el-form-item
+                  label="数据源名称"
+                  prop="apiGenerateSaveRequest.datasourceId"
+                >
+                  <el-select
+                    filterable
+                    style="width: 100%"
+                    v-model="form.apiGenerateSaveRequest.datasourceId"
+                    placeholder="请选择数据源名称"
+                    @change="handleDatasourceNameChange"
+                  >
+                    <el-option
+                      :label="item.databaseName"
+                      :value="item.id"
+                      :key="item.id"
+                      v-for="item in datasourceOptions"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-form-item>
+              <div slot="label" class="source-main-form--title">
+                编写SQL语句
+              </div>
+            </el-form-item>
+
+            <el-row type="flex" justify="space-between" class="form-row-item">
+              <el-col class="form-row-item--col" style="padding-left: 30px">
+                <p class="tip" @click="handleSqlTipsClick">SQL编写提示</p>
+                <el-input
+                  type="textarea"
+                  :disabled="!form.apiGenerateSaveRequest.datasourceId"
+                  :autosize="{ minRows: 4 }"
+                  v-model="form.apiGenerateSaveRequest.sql"
+                  :placeholder="
+                    form.apiGenerateSaveRequest.datasourceId
+                      ? '请编写SQL语句'
+                      : '请先选择数据源（SQL模式支持多表关联）'
+                  "
+                ></el-input>
+              </el-col>
+            </el-row>
+          </template>
+        </template>
       </el-form>
     </main>
+    <GenerateApiTips ref="tipsDialog" />
   </div>
 </template>
 
 <script>
+import GenerateApiTips from './generate-api-tips.vue'
+
 import API from '@/api/api'
-import { dataServiceParamTableConfig } from '@/configuration/table'
+import {
+  dataServiceParamTableConfig,
+  tableRequestConfiguration,
+  tableResponseConfiguration
+} from '@/configuration/table'
+
+// API模式
+const API_MODE_MAPPING = { TABLE: 0, SQL: 1, CHAIN: 2 }
+
+// API类型
+const API_TYPE_MAPPING = { REGISTER: 0, SOURCE: 1 }
 
 export default {
+  components: { GenerateApiTips },
+
   data() {
     return {
+      API_MODE_MAPPING,
+      API_TYPE_MAPPING,
+
       timerId: null,
       tableLoading: false,
       pageLoading: false,
@@ -311,6 +478,8 @@ export default {
       isPublishBtnLoading: false,
       oldTableData: [],
       tableConfiguration: dataServiceParamTableConfig,
+      tableRequestConfiguration: tableRequestConfiguration(this),
+      tableResponseConfiguration: tableResponseConfiguration(this),
 
       selectTableName: '',
       dataNameOptions: [],
@@ -329,9 +498,10 @@ export default {
         desc: '',
         apiGenerateSaveRequest: {
           id: '',
-          model: 0,
+          model: 1,
           datasourceId: '',
-          tableName: ''
+          tableName: '',
+          sql: ''
         },
         apiParamSaveRequestList: []
       },
@@ -408,6 +578,11 @@ export default {
       this.$emit('on-jump')
     },
 
+    // 点击-打开SQL编写提示弹窗
+    handleSqlTipsClick() {
+      this.$refs?.tipsDialog.$refs.baseDialog.open()
+    },
+
     // 点击-保存表单
     handleSaveFormClick(saveType) {
       const messageMapping = {
@@ -475,7 +650,6 @@ export default {
 
     // 输入-通过字段名称来获取该张表的数据
     handleTableNameInput() {
-      console.log(11111111111111)
       this.tableLoading = true
       this.timerId && clearTimeout(this.timerId)
 
@@ -617,7 +791,7 @@ export default {
 
     &--title {
       position: relative;
-      width: 78px;
+      min-width: 78px;
       height: 20px;
       font-size: 14px;
       font-weight: 400;
@@ -650,6 +824,28 @@ export default {
         text-align: left;
         color: #999;
       }
+
+      &--col {
+        position: relative;
+
+        .tip {
+          position: absolute;
+          top: -35px;
+          right: 0;
+          height: 20px;
+          font-size: 14px;
+          font-weight: 400;
+          text-align: left;
+          color: #0d95fb;
+          line-height: 20px;
+          cursor: pointer;
+          transition: transform 0.3s ease-in-out;
+
+          &:hover {
+            transform: scale(1.1);
+          }
+        }
+      }
     }
 
     .form-row-table {
@@ -657,6 +853,32 @@ export default {
       width: calc(100% - 20px);
       box-sizing: border-box;
       margin-left: 20px;
+      margin-bottom: 50px;
+
+      .custom-table-empty {
+        @include flex(center, center, row, inline-flex);
+
+        .add-icon {
+          @include flex(center, center, row, inline-flex);
+          @include hover-scale;
+          width: 14px;
+          height: 14px;
+          border-radius: 4px;
+          border: 1px solid #1890ff;
+          cursor: pointer;
+          color: #1890ff;
+        }
+
+        .add-label {
+          font-size: 14px;
+          font-family: PingFangSC, PingFangSC-Medium;
+          font-weight: 500;
+          text-align: center;
+          color: #1890ff;
+          margin-left: 5px;
+          cursor: pointer;
+        }
+      }
     }
   }
 }

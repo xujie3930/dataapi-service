@@ -10,9 +10,6 @@
     title="新建API分组"
     footer-placement="center"
     :hide-footer="false"
-    @on-close="close"
-    @on-change="change"
-    @on-confirm="saveApiGroup"
   >
     <el-form
       ref="apiGroupForm"

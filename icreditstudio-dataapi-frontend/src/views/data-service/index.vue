@@ -110,7 +110,7 @@
         @handleAddDataServiceApi="handleAddDataServiceApi"
       />
 
-      <DatasourceGenerate
+      <GenerateApi
         v-else
         ref="datasourceGenerate"
         @on-jump="jumpCallback"
@@ -136,10 +136,11 @@
 
 <script>
 import API from '@/api/api'
-import DatasourceGenerate from './generate-datasource.vue'
+import GenerateApi from './generate-api'
 import AddBusinessPorcess from './add-business-porcess.vue'
 import AddApiGroup from './add-api-group.vue'
 import tableConfiguration from '@/configuration/table/data-service-api'
+
 import formOption from '@/configuration/form/data-service-api'
 import crud from '@/mixins/crud'
 import { debounce } from 'lodash'
@@ -148,7 +149,7 @@ import noGroupImg from '@/assets/images/bg-no-group.png'
 export default {
   mixins: [crud],
 
-  components: { DatasourceGenerate, AddApiGroup, AddBusinessPorcess },
+  components: { GenerateApi, AddApiGroup, AddBusinessPorcess },
 
   data() {
     this.fetchTreeDataByName = debounce(this.fetchTreeDataByName, 500)
