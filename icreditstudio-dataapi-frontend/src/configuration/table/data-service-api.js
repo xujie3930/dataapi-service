@@ -88,32 +88,13 @@ export default that => ({
       fixed: 'right',
       width: 150,
       operationList: [
-        // {
-        //   func: that.mixinHandleDelete,
-        //   label: '停止发布',
-        //   visible: ({ row }) => row.status === 1
-        // },
-
-        // {
-        //   func: that.mixinHandleDelete,
-        //   label: '授权'
-        // },
-        // {
-        //   func: that.mixinHandleDelete,
-        //   label: '发布',
-        //   visible: ({ row }) => row.status === 2
-        // },
-        // {
-        //   func: that.mixinHandleDelete,
-        //   label: '编辑'
-        // },
-        // {
-        //   func: that.mixinHandleDelete,
-        //   label: '历史版本'
-        // }
         {
-          func: that.mixinHandleDelete,
-          label: '详情'
+          func: that.handleAuthorizeClick,
+          label: '授权'
+        },
+        {
+          func: that.handleVersionClick,
+          label: '版本列表'
         }
       ]
     }

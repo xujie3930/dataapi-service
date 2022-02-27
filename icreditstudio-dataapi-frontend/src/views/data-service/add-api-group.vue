@@ -9,7 +9,6 @@
     width="600px"
     title="新建API分组"
     footer-placement="center"
-    :hide-footer="false"
   >
     <el-form
       ref="apiGroupForm"

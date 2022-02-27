@@ -131,6 +131,8 @@
 
     <!-- 新增API分组 -->
     <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
+
+    <VersionLists ref="versionLists" />
   </div>
 </template>
 
@@ -139,6 +141,7 @@ import API from '@/api/api'
 import GenerateApi from './generate-api'
 import AddBusinessPorcess from './add-business-porcess.vue'
 import AddApiGroup from './add-api-group.vue'
+import VersionLists from './version-lists'
 import tableConfiguration from '@/configuration/table/data-service-api'
 
 import formOption from '@/configuration/form/data-service-api'
@@ -149,7 +152,7 @@ import noGroupImg from '@/assets/images/bg-no-group.png'
 export default {
   mixins: [crud],
 
-  components: { GenerateApi, AddApiGroup, AddBusinessPorcess },
+  components: { GenerateApi, AddApiGroup, AddBusinessPorcess, VersionLists },
 
   data() {
     this.fetchTreeDataByName = debounce(this.fetchTreeDataByName, 500)
@@ -189,6 +192,13 @@ export default {
   },
 
   methods: {
+    handleAuthorizeClick() {},
+
+    handleVersionClick({ row }) {
+      console.log(row, 'rowrow')
+      this.$refs.versionLists.open()
+    },
+
     // 点击-选中当前节点
     handleNodeClick(curData, curNode) {
       console.log('curData, curNode=', curData, curNode)

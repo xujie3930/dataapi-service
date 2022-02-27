@@ -9,7 +9,6 @@
     width="600px"
     title="新建业务流程"
     footer-placement="center"
-    :hide-footer="false"
     @on-close="close"
     @on-change="change"
     @on-confirm="saveBusinessProcess"
