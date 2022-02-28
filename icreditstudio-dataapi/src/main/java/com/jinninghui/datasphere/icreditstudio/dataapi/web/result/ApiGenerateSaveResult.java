@@ -9,6 +9,8 @@ public class ApiGenerateSaveResult {
 
     private Integer model;
 
+    private String sql;
+
     private String datasourceId;
 
     private String tableName;
