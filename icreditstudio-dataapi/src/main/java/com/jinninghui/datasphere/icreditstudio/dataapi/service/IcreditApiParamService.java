@@ -16,4 +16,6 @@ import java.util.List;
 public interface IcreditApiParamService extends IService<IcreditApiParamEntity> {
 
     List<IcreditApiParamEntity> getByApiBaseId(String id);
+
+    List<IcreditApiParamEntity> getByApiIdAndVersion(String id, Integer apiVersion);
 }

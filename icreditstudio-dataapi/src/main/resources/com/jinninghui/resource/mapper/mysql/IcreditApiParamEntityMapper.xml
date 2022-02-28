@@ -13,4 +13,17 @@
             AND del_flag = 0
         </where>
     </select>
+
+    <select id="getByApiIdAndVersion"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity">
+        select *
+        from icredit_api_param
+        where del_flag = 0
+        <if test="id != null and id != '' ">
+            AND api_base_id = #{id}
+        </if>
+        <if test="apiVersion != null and apiVersion != '' ">
+            AND api_version = #{apiVersion}
+        </if>
+    </select>
 </mapper>

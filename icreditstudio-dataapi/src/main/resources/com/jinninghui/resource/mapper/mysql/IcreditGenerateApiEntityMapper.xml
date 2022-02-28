@@ -14,4 +14,18 @@
         </where>
         limit 1
     </select>
+
+    <select id="getByApiIdAndVersion"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity">
+        select *
+        from icredit_generate_api
+        where del_flag = 0
+        <if test="id != null and id != '' ">
+            AND api_base_id = #{id}
+        </if>
+        <if test="apiVersion != null and apiVersion != '' ">
+            AND api_version = #{apiVersion}
+        </if>
+        limit 1
+    </select>
 </mapper>

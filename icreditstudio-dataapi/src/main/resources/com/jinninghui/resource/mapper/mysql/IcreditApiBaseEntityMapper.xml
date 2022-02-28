@@ -20,4 +20,8 @@
         </if>
         limit 1
     </select>
+
+    <update id="updatePublishStatusById">
+        UPDATE icredit_api_base SET publish_status = #{publishStatus} WHERE id = #{id}
+    </update>
 </mapper>

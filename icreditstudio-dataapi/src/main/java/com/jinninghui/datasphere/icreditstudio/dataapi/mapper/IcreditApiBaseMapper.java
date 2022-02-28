@@ -18,4 +18,5 @@ public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
 
     IcreditApiBaseEntity findByApiPath(@Param("path") String path);
 
+    void updatePublishStatusById(@Param("id") String id, @Param("publishStatus") Integer publishStatus);
 }

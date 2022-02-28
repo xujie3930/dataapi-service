@@ -88,5 +88,10 @@ public class IcreditApiBaseController {
         return apiBaseService.checkQuerySql(request);
     }
 
+    @PostMapping("/publishOrStop")
+    public BusinessResult<Boolean> publishOrStop(@RequestBody ApiPublishRequest request){
+        return apiBaseService.publishOrStop(request);
+    }
+
 }
 

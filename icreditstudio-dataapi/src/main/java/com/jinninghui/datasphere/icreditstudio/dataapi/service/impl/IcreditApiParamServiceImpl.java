@@ -27,4 +27,9 @@ public class IcreditApiParamServiceImpl extends ServiceImpl<IcreditApiParamMappe
     public List<IcreditApiParamEntity> getByApiBaseId(String id) {
         return apiParamMapper.getByApiBaseId(id);
     }
+
+    @Override
+    public List<IcreditApiParamEntity> getByApiIdAndVersion(String id, Integer apiVersion) {
+        return apiParamMapper.getByApiIdAndVersion(id, apiVersion);
+    }
 }

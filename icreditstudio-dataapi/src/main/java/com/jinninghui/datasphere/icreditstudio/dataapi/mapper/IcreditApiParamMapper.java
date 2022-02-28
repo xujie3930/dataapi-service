@@ -17,4 +17,6 @@ import java.util.List;
 public interface IcreditApiParamMapper extends BaseMapper<IcreditApiParamEntity> {
 
     List<IcreditApiParamEntity> getByApiBaseId(@Param("id") String id);
+
+    List<IcreditApiParamEntity> getByApiIdAndVersion(@Param("id") String id, @Param("apiVersion") Integer apiVersion);
 }
