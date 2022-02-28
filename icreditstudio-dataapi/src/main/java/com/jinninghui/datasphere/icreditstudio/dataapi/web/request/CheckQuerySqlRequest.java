@@ -10,4 +10,6 @@ public class CheckQuerySqlRequest {
     private String datasourceId;
     private String sql;
 
+    public CheckQuerySqlRequest() {
+    }
 }
