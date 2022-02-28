@@ -3,18 +3,7 @@
  * @Date: 2022-02-18
  */
 
-// 发布状态
-const statusMapping = {
-  0: { name: '待发布', color: '#999' },
-  1: { name: '未发布', color: '#ff4d4f' },
-  2: { name: '已发布', color: '#52c41a' }
-}
-
-// API类型
-const apiType = {
-  0: '注册API',
-  1: '数据源生成'
-}
+import { API_TYPE, STATUS_MAPPING } from '@/config/constant'
 
 export default that => ({
   refName: 'dataServiceApi',
@@ -54,7 +43,7 @@ export default that => ({
       label: 'API类型',
       prop: 'type',
       width: 350,
-      formatter: ({ type }) => apiType[type]
+      formatter: ({ type }) => API_TYPE[type]
     },
     // {
     //   type: 'text',
@@ -67,8 +56,8 @@ export default that => ({
       label: '发布状态',
       prop: 'publishStatus',
       width: 100,
-      color: ({ row: { publishStatus: s } }) => statusMapping[s].color,
-      formatter: ({ publishStatus: s }) => statusMapping[s].name
+      color: ({ row: { publishStatus: s } }) => STATUS_MAPPING[s].color,
+      formatter: ({ publishStatus: s }) => STATUS_MAPPING[s].name
     },
     {
       type: 'text',
@@ -86,15 +75,30 @@ export default that => ({
       type: 'operation',
       label: '操作',
       fixed: 'right',
-      width: 150,
+      width: 180,
       operationList: [
+        // {
+        //   func: that.handleAuthorizeClick,
+        //   label: '授权'
+        // },
+        // {
+        //   func: that.handleVersionClick,
+        //   label: '版本列表'
+        // }
+
         {
-          func: that.handleAuthorizeClick,
-          label: '授权'
+          func: that.handleUpdateStatusClick,
+          label: '发布',
+          visible: ({ row: { publishStatus } }) => publishStatus !== 2
         },
         {
-          func: that.handleVersionClick,
-          label: '版本列表'
+          func: that.handleUpdateStatusClick,
+          label: '停止发布',
+          visible: ({ row: { publishStatus } }) => publishStatus === 2
+        },
+        {
+          func: that.handleDetailClick,
+          label: '详情'
         }
       ]
     }

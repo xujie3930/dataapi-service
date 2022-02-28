@@ -9,6 +9,7 @@
     width="600px"
     title="新建API分组"
     footer-placement="center"
+    @on-confirm="saveApiGroup"
   >
     <el-form
       ref="apiGroupForm"

@@ -133,15 +133,19 @@
     <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
 
     <VersionLists ref="versionLists" />
+
+    <Detail ref="apiDetail" />
   </div>
 </template>
 
 <script>
 import API from '@/api/api'
 import GenerateApi from './generate-api'
-import AddBusinessPorcess from './add-business-porcess.vue'
-import AddApiGroup from './add-api-group.vue'
+import AddBusinessPorcess from './add-business-porcess'
+import AddApiGroup from './add-api-group'
 import VersionLists from './version-lists'
+import Detail from './version-lists/detail'
+
 import tableConfiguration from '@/configuration/table/data-service-api'
 
 import formOption from '@/configuration/form/data-service-api'
@@ -152,7 +156,13 @@ import noGroupImg from '@/assets/images/bg-no-group.png'
 export default {
   mixins: [crud],
 
-  components: { GenerateApi, AddApiGroup, AddBusinessPorcess, VersionLists },
+  components: {
+    GenerateApi,
+    AddApiGroup,
+    AddBusinessPorcess,
+    VersionLists,
+    Detail
+  },
 
   data() {
     this.fetchTreeDataByName = debounce(this.fetchTreeDataByName, 500)
@@ -197,6 +207,30 @@ export default {
     handleVersionClick({ row }) {
       console.log(row, 'rowrow')
       this.$refs.versionLists.open()
+    },
+
+    // 点击-发布或停止发布
+    handleUpdateStatusClick({ row }) {
+      const { id, publishStatus } = row
+      API.updateDataApiStatus({
+        id,
+        publishStatus: publishStatus === 1 ? 2 : 1
+      }).then(({ success, data }) => {
+        if (success && data) {
+          this.$notify.success({
+            title: '操作结果',
+            message: `${publishStatus === 1 ? '发布' : '停止发布'}成功！`,
+            duration: 1500
+          })
+
+          this.mixinRetrieveTableData()
+        }
+      })
+    },
+
+    // 点击-详情
+    handleDetailClick({ row }) {
+      this.$refs.apiDetail.open(row)
     },
 
     // 点击-选中当前节点
