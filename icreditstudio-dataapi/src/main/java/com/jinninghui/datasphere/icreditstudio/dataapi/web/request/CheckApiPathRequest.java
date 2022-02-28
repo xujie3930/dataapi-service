@@ -10,4 +10,6 @@ public class CheckApiPathRequest {
     private String id;
     private String path;
 
+    public CheckApiPathRequest() {
+    }
 }

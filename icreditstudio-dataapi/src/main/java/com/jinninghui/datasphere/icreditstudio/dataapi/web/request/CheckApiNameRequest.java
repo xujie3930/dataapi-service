@@ -10,4 +10,6 @@ public class CheckApiNameRequest {
     private String id;
     private String name;
 
+    public CheckApiNameRequest() {
+    }
 }
