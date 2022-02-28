@@ -10,6 +10,7 @@
             <if test="appFlag != null and appFlag != '' ">
                 AND app_flag = #{appFlag}
             </if>
+            AND del_flag = 0
         </where>
         limit 1
     </select>
@@ -35,4 +36,17 @@
             id=#{request.id}
         </where>
     </update>
+
+    <select id="getByAppFlag"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity">
+        select *
+        from icredit_app
+        <where>
+            <if test="appFlag != null and appFlag != '' ">
+                AND app_flag = #{appFlag}
+            </if>
+            AND del_flag = 0
+        </where>
+        limit 1
+    </select>
 </mapper>

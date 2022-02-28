@@ -80,6 +80,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
 
     @Override
+    @ResultReturning
     public BusinessResult<BusinessPageResult> getList(ApiBaseListRequest request) {
         Wrapper<IcreditApiBaseEntity> wrapper = queryWrapper(request);
         IPage<IcreditApiBaseEntity> page = this.page(
@@ -125,7 +126,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public BusinessResult<ApiSaveResult> createDataSourceApi(String userId, DatasourceApiSaveParam param) {
         checkApiName(new CheckApiNameRequest(param.getId(), param.getName()));
         checkApiPath(new CheckApiPathRequest(param.getId(), param.getPath()));

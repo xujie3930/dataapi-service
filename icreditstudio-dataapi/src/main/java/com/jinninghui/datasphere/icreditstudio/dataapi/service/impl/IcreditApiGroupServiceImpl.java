@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiGroupMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
@@ -54,6 +55,7 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     }
 
     @Override
+    @ResultReturning
     public BusinessResult<List<IcreditApiGroupEntity>> getList(ApiGroupListRequest request) {
         List<IcreditApiGroupEntity> list = list(queryWrapper(request));
         return BusinessResult.success(list);
@@ -65,6 +67,7 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     }
 
     @Override
+    @ResultReturning
     public List<IcreditApiGroupEntity> searchFromName(String name) {
         return apiGroupMapper.searchFromName(name);
     }

@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiParamMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiParamService;
@@ -24,6 +25,7 @@ public class IcreditApiParamServiceImpl extends ServiceImpl<IcreditApiParamMappe
     private IcreditApiParamMapper apiParamMapper;
 
     @Override
+    @ResultReturning
     public List<IcreditApiParamEntity> getByApiBaseId(String id) {
         return apiParamMapper.getByApiBaseId(id);
     }
