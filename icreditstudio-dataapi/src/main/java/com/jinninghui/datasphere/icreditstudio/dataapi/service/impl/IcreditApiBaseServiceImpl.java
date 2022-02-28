@@ -77,6 +77,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String SEPARATOR = "|";
     private static final String SPLIT_URL_FLAG = "?";
     private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
+    private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
 
     @Override
     public BusinessResult<BusinessPageResult> getList(ApiBaseListRequest request) {
@@ -205,15 +206,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         generateApiService.saveOrUpdate(generateApiEntity);
 
         //存放信息到redis
-        BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(param.getApiGenerateSaveRequest().getDatasourceId()));
-        ConnectionInfoVO connInfo = connResult.getData();
-        RedisInterfaceInfo redisInterfaceInfo = new RedisInterfaceInfo();
-        redisInterfaceInfo.setUrl(handleUrl(connInfo.getUrl()));
-        redisInterfaceInfo.setUserName(connInfo.getUsername());
-        redisInterfaceInfo.setPassword(connInfo.getPassword());
-        redisInterfaceInfo.setQuerySql(ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel()) ? querySql : param.getApiGenerateSaveRequest().getSql());
-        redisInterfaceInfo.setRequiredFields(requiredFieldStr);
-        redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(apiBaseEntity.getId()).append(apiBaseEntity.getApiVersion())), JSON.toJSONString(redisInterfaceInfo));
+        String sql = ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel()) ? querySql : param.getApiGenerateSaveRequest().getSql();
+        saveApiInfoToRedis(generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), sql, requiredFieldStr);
+
+        //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
         apiSaveResult.setId(apiBaseEntity.getId());
         ApiGenerateSaveResult generateApiSaveResult = new ApiGenerateSaveResult();
@@ -357,5 +353,43 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             DBConnectionManager.getInstance().freeConnection(uri, conn);
         }
         return BusinessResult.success(true);
+    }
+
+    @Override
+    @Transactional
+    public BusinessResult<Boolean> publishOrStop(ApiPublishRequest request) {
+        apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus());
+        IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getId());
+        if(ApiPublishStatusEnum.NO_PUBLISHED.getCode().equals(request.getPublishStatus())){//停止发布
+            redisTemplate.delete(String.valueOf(new StringBuilder(apiBaseEntity.getPath()).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiBaseEntity.getApiVersion())));
+        }else if(ApiPublishStatusEnum.PUBLISHED.getCode().equals(request.getPublishStatus())){//发布
+            IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+
+            String requiredFieldStr = null;
+            StringBuilder requiredFields = new StringBuilder();
+            List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
+                if(RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(apiParamEntity.getRequired())){
+                    requiredFields.append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+                }
+            }
+            if(requiredFields.length() >= 1) {
+                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
+            }
+            saveApiInfoToRedis(generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr);
+        }
+        return BusinessResult.success(true);
+    }
+
+    private void saveApiInfoToRedis(String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr) {
+        BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(datasourceId));
+        ConnectionInfoVO connInfo = connResult.getData();
+        RedisInterfaceInfo redisInterfaceInfo = new RedisInterfaceInfo();
+        redisInterfaceInfo.setUrl(handleUrl(connInfo.getUrl()));
+        redisInterfaceInfo.setUserName(connInfo.getUsername());
+        redisInterfaceInfo.setPassword(connInfo.getPassword());
+        redisInterfaceInfo.setQuerySql(sql);
+        redisInterfaceInfo.setRequiredFields(requiredFieldStr);
+        redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiVersion)), JSON.toJSONString(redisInterfaceInfo));
     }
 }

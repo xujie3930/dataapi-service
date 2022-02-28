@@ -44,4 +44,6 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
     BusinessResult<Boolean> checkApiName(CheckApiNameRequest request);
 
     BusinessResult<Boolean> checkQuerySql(CheckQuerySqlRequest request);
+
+    BusinessResult<Boolean> publishOrStop(ApiPublishRequest request);
 }
