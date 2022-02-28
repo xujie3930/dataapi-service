@@ -10,6 +10,23 @@
   color: #333;
 }
 
+// 鼠标移入放大
+@mixin hover-scale($scale: 1.2, $time: 0.3s, $fun: ease-in-out) {
+  transition: transform $time $fun;
+  &:hover {
+    transform: scale($scale);
+  }
+}
+
+//文本n行溢出隐藏
+@mixin ellipsis($clamp: 2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $clamp;
+}
+
 @mixin input-small-height {
   font-family: 'PingFangSC-Regular';
   height: 32px;

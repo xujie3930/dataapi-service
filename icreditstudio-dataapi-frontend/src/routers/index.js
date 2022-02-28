@@ -16,6 +16,13 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "home" */ '@/views/data-service')
   },
+  {
+    path: '/application',
+    name: 'applicationManage',
+    component: import(
+      /* webpackChunkName: "application" */ '@/views/application-manage'
+    )
+  },
 
   {
     path: '/404',

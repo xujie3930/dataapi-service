@@ -31,20 +31,29 @@
       @sort-change="handleSortChange"
       @expand-change="handleExpandChange"
     >
+      <!-- 自定义表格无数据 -->
       <template slot="empty">
-        <div class="ds-table-empty">
+        <slot v-if="tableConfiguration.emptySlot" name="empty"></slot>
+
+        <div v-else class="ds-table-empty">
           <img class="img" src="@/assets/images/table-empty.png" />
           <span class="text">暂无数据</span>
         </div>
       </template>
 
-      <template v-if="tableConfiguration.append" slot="append">
-        <div class="icredit-table-append">
+      <!-- 自定义表格底部区域 -->
+      <template
+        v-if="tableConfiguration.append || tableConfiguration.appendSlot"
+        slot="append"
+      >
+        <slot v-if="tableConfiguration.appendSlot"></slot>
+        <div v-else class="icredit-table-append">
           <span class="text" v-if="tableConfiguration.isMore">加载中</span>
           <span class="text" v-else>没有更多了</span>
         </div>
       </template>
 
+      <!-- 根据入参类型渲染TableColumn -->
       <template v-for="(item, index) in tableConfiguration.group">
         <!-- 下标 -->
         <el-table-column
@@ -682,7 +691,7 @@
       </template>
     </el-table>
 
-    <!-- 表格底部分页器 -->
+    <!-- 新增表格底部分页器 -->
     <div
       :class="[
         tablePagination.isLeftShowCount ? 'pagination-warp' : 'pagination'
