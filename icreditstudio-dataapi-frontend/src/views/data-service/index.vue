@@ -215,7 +215,7 @@ export default {
       if (publishStatus === 2) {
         this.$confirm(
           '停止发布后，该版本API将不能授权给其他应用，并且已授权的应用也将全部失效，需重新发布该版本API后才能继续被授权的应用调用，请确认是否停止发布该版本API？',
-          '提示',
+          '停止发布',
           {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
