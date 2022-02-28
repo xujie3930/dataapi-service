@@ -37,8 +37,15 @@ const getDataTableFields = params =>
 // 获取API Path
 const getDataApiPath = params => postAction('/apiBase/generate/apiPath', params)
 
+// 获取某个API详情
+const getDataApiDetail = params => postAction('/apiBase/detail', params)
+
 // 搜索业务流程以及API分组
 const searchProcessOrGroup = params => postAction('/search', params)
+
+// 更新某个API的状态：停止发布 <=> 发布
+const updateDataApiStatus = params =>
+  postAction('/apiBase/publishOrStop', params)
 
 export default {
   addBusinessProcess,
@@ -51,5 +58,7 @@ export default {
   getDataTableOptions,
   getDataTableFields,
   getDataApiPath,
-  searchProcessOrGroup
+  getDataApiDetail,
+  searchProcessOrGroup,
+  updateDataApiStatus
 }

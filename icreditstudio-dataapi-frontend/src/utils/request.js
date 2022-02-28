@@ -1,3 +1,8 @@
+/*
+ * @Author: lizheng
+ * @Description:
+ * @Date: 2022-02-18
+ */
 import axios from 'axios'
 import Notification from './notify'
 import store from '@/store'
@@ -19,7 +24,9 @@ service.interceptors.request.use(
   config => {
     const configObj = config
     configObj.headers.Authorization = appEnv ? token() : `Bearer ${token()}`
-    configObj.headers.userId = '849758069676310528'
+    configObj.headers.userId = window.__POWERED_BY_QIANKUN__
+      ? ''
+      : '910626036754939904'
     return configObj
   },
   error => {

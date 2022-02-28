@@ -15,13 +15,13 @@ export default {
       type: 'text',
       label: '设置为返回参数',
       prop: 'isResponse',
-      width: 150
+      width: 130
     },
     {
       type: 'text',
       label: '设置为请求参数',
       prop: 'isRequest',
-      width: 150
+      width: 130
     },
     {
       type: 'text',
@@ -34,13 +34,13 @@ export default {
       type: 'text',
       label: '字段类型',
       prop: 'fieldType',
-      width: 150
+      width: 100
     },
     {
       type: 'text',
       label: '是否必填',
       prop: 'required',
-      width: 150
+      width: 100
     },
     {
       type: 'text',

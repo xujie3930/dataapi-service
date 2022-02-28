@@ -116,7 +116,7 @@
                 placeholder="请选择请求方式"
               >
                 <el-option label="GET" value="GET"></el-option>
-                <el-option label="POST" value="POST"></el-option>
+                <!-- <el-option label="POST" value="POST"></el-option> -->
               </el-select>
             </el-form-item>
           </el-col>
@@ -488,7 +488,7 @@ export default {
       cascaderOptions: [],
       form: {
         id: '',
-        type: 0,
+        type: 1,
         path: '',
         name: '',
         databaseTye: 1,
@@ -498,7 +498,7 @@ export default {
         desc: '',
         apiGenerateSaveRequest: {
           id: '',
-          model: 1,
+          model: 0,
           datasourceId: '',
           tableName: '',
           sql: ''

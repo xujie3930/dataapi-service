@@ -6,43 +6,27 @@
 
 <template>
   <Dialog
-    ref="baseDialog"
-    class="datasource-dialog"
-    width="850px"
     hide-footer
+    class="datasource-dialog"
+    ref="baseDialog"
+    width="850px"
     title="详情"
   >
-    <div class="detail-row">
-      <div class="banner-title">
-        <div class="text">基础信息</div>
+    <div class="detail-row" v-loading="tableLoading">
+      <div class="banner-title" v-for="(item, key) in renderParams" :key="key">
+        <div class="text">{{ key === 'base' ? '基本信息' : '选择表' }}</div>
 
-        <el-row class="detail-row-item">
-          <el-col :span="12">
-            <span class="label">数据源名称</span>
-            <span class="value">shujuyuan</span>
-          </el-col>
-
-          <el-col :span="12">
-            <span class="label">数据表名称</span>
-            <span class="value label-text label-text-des">table ddd</span>
-          </el-col>
-        </el-row>
-      </div>
-    </div>
-
-    <div class="detail-row">
-      <div class="banner-title">
-        <div class="text">选择表</div>
-
-        <el-row class="detail-row-item">
-          <el-col :span="12">
-            <span class="label">数据源名称</span>
-            <span class="value">shujuyuan</span>
-          </el-col>
-
-          <el-col :span="12">
-            <span class="label">数据表名称</span>
-            <span class="value">table ddd</span>
+        <el-row class="detail-row-wrap">
+          <el-col
+            class="detail-row-wrap--col"
+            :span="12"
+            :key="list.label"
+            v-for="list in item"
+          >
+            <div class="label">{{ list.label }}</div>
+            <div class="value" :style="{ color: list.color }">
+              {{ list.value }}
+            </div>
           </el-col>
         </el-row>
       </div>
@@ -66,108 +50,114 @@
 <script>
 import API from '@/api/api'
 import { tableServiceApiDetailTableConfig } from '@/configuration/table'
+import { cloneDeep } from 'lodash'
+import { API_TYPE, STATUS_MAPPING, API_MODE } from '@/config/constant'
 
 export default {
   data() {
     return {
-      timerId: null,
-      title: '',
-      opType: 'View',
       dialogVisible: false,
-      detailData: { showPassword: 0 },
-      rules: {
-        name: [
-          { required: true, message: '请输入自定义数据源名称', trigger: 'blur' }
+      tableLoading: false,
+      tableData: [],
+      tableOptions: [],
+      tableConfig: tableServiceApiDetailTableConfig,
+
+      renderParams: {
+        base: [
+          {
+            label: 'API类型',
+            value: '',
+            key: 'type',
+            formatter: value => API_TYPE[value]
+          },
+          { label: 'API名称', value: '', key: 'name' },
+          {
+            label: 'API模式',
+            value: '',
+            key: 'model',
+            formatter: value => API_MODE[value]
+          },
+          { label: 'API Path', value: '', key: 'apipath,' },
+          { label: '请求方式', value: '', key: 'requestType' },
+          { label: '返回类型', value: '', key: 'responseType' },
+          { label: '所属分组', value: '', key: 'destination' },
+          {
+            label: '发布状态',
+            value: '',
+            key: 'publishStatus',
+            color: '',
+            formatter: value => STATUS_MAPPING[value].name
+          },
+          {
+            label: '版本号',
+            value: '',
+            key: 'apiVersion',
+            formatter: value => `v${value}`
+          },
+          { label: '创建人', value: '', key: 'createBy' },
+          { label: '创建时间', value: '', key: 'createTime' },
+          { label: '发布人', value: '', key: 'publishUser' },
+          { label: '发布时间', value: '', key: 'publishTime' },
+          { label: '备注', value: '', key: 'desc' }
         ],
-        region: [
-          { required: true, message: '请选择活动区域', trigger: 'change' }
-        ],
-        resource: [
-          { required: true, message: '请选择活动资源', trigger: 'change' }
+
+        table: [
+          { label: '数据源名称', value: '', key: 'databaseName' },
+          { label: '数据表名称', value: '', key: 'tableName' }
         ]
       },
-      tableLoading: false,
-      sourceTableData: [],
-      tableData: [],
-      tableCount: 0,
-      tableIndex: null,
-      tableName: undefined,
-      tableOptions: [],
-      tableConfig: tableServiceApiDetailTableConfig
-    }
-  },
 
-  computed: {
-    hidePassword() {
-      const { showPassword, password: pwd } = this.detailData
-      const getHideIcon = num => Array(num).fill('*').join('')
-
-      return showPassword ? pwd : getHideIcon(pwd ? String(pwd).length : 0)
+      checkMapping: { 0: '否', 1: '是' }
     }
   },
 
   methods: {
-    open() {
-      this.opType = 'view'
+    open(options) {
+      this.options = options
       this.tableOptions = []
-      this.handleReset()
-      // this.getTableDetailData(data.id)
+      this.fetchApiDetailData()
       this.$refs.baseDialog.open()
     },
 
-    // 获取表结构信息详情
-    getTableDetailData(id) {
+    fetchApiDetailData() {
       this.tableLoading = true
-      API.datasourceTableDetail(id)
+      API.getDataApiDetail({ id: this.options.id })
         .then(({ success, data }) => {
           if (success && data) {
-            const { tableCount, tableOptions, columnList } = data
-            this.tableCount = tableCount
-            this.tableOptions = tableOptions
-              ? tableOptions.map(value => ({ value }))
-              : []
-            this.tableData = columnList ?? []
-            this.sourceTableData = columnList ?? []
+            const { paramList, generateApi, ...restData } = data
+
+            cloneDeep(this.renderParams.base).forEach(
+              ({ key, color, formatter }, idx) => {
+                const val = key === 'model' ? generateApi?.model : restData[key]
+                this.renderParams.base[idx].value = formatter
+                  ? formatter(val)
+                  : val
+
+                color &&
+                  (this.renderParams.base[idx].color = formatter(val).color)
+              }
+            )
+
+            cloneDeep(this.renderParams.table).forEach(({ key }, idx) => {
+              this.renderParams.table[idx].value =
+                key in cloneDeep(generateApi) ? generateApi[key] : ''
+            })
+
+            this.tableData = paramList?.map(
+              ({ isRequest, isResponse, required, ...rest }) => {
+                return {
+                  isRequest: this.checkMapping[isRequest],
+                  isResponse: this.checkMapping[isResponse],
+                  required: this.checkMapping[required],
+                  ...rest
+                }
+              }
+            )
           }
         })
         .finally(() => {
           this.tableLoading = false
         })
-    },
-
-    handleTableSelectChange() {
-      this.tableLoading = true
-      clearTimeout(this.timerId)
-      if (this.tableName) {
-        this.tableIndex = this.tableOptions.findIndex(
-          item => item.value === this.tableName
-        )
-        this.tableIndex++
-      } else {
-        this.tableIndex = null
-        this.tableData = this.sourceTableData
-      }
-
-      this.timerId = setTimeout(() => {
-        this.tableLoading = false
-      }, 300)
-    },
-
-    handleReset() {
-      this.tableName = ''
-      this.tableIndex = null
-      this.tableData = []
-      this.sourceTableData = []
-    },
-
-    handleClose() {
-      this.dialogVisible = false
-      this.handleReset()
-    },
-
-    handleConfirm() {
-      this.handleClose()
-      this.$emit('on-confirm')
     }
   }
 }
@@ -188,20 +178,6 @@ export default {
     .el-form-item--small.el-form-item {
       margin-bottom: 0;
     }
-  }
-}
-
-.form-detail {
-  .label-text {
-    font-family: PingFangSC, PingFangSC-Regular;
-    font-weight: 400;
-    text-align: left;
-    // color: #262626;
-  }
-
-  .label-text-des {
-    max-height: 100px;
-    overflow: auto;
   }
 }
 
@@ -238,11 +214,22 @@ export default {
     }
   }
 
-  &-item {
-    margin-top: 20px;
+  &-wrap {
     margin-left: 10px;
 
+    &--col {
+      @include flex(flex-start);
+      margin-top: 17px;
+    }
+    .label {
+      width: 80px;
+    }
+
     .value {
+      width: calc(100% - 80px);
+      max-height: 80px;
+      overflow-x: hidden;
+      overflow-y: auto;
       margin-left: 24px;
     }
   }
