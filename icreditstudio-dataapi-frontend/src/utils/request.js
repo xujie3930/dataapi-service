@@ -24,7 +24,9 @@ service.interceptors.request.use(
   config => {
     const configObj = config
     configObj.headers.Authorization = appEnv ? token() : `Bearer ${token()}`
-    configObj.headers.userId = '910626036754939904'
+    configObj.headers.userId = window.__POWERED_BY_QIANKUN__
+      ? ''
+      : '910626036754939904'
     return configObj
   },
   error => {
