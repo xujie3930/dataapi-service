@@ -18,18 +18,9 @@
 <script>
 export default {
   name: 'App',
-  components: {},
 
   data() {
-    return {
-      activeName: '/index'
-    }
-  },
-
-  methods: {
-    handleClick(path) {
-      this.$router.push(path)
-    }
+    return {}
   }
 }
 </script>

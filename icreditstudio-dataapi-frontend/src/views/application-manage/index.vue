@@ -5,7 +5,7 @@
 -->
 <template>
   <div>
-    <!-- <Crud
+    <Crud
       ref="crud"
       :form-items-search="mixinSearchFormItems"
       :form-func-search="mixinSearchFormFunc"
@@ -29,12 +29,33 @@
       :handleUpdate="mixinHandleCreateOrUpdate"
       :handleCancel="mixinHandleCancel"
       @handleAddDataServiceApi="handleAddDataServiceApi"
-    /> -->
+    />
   </div>
 </template>
 
 <script>
-export default {}
+import { crud } from '@/mixins'
+import { dataServiceAppForm } from '@/configuration/form'
+import { dataServiceAppTableConfig } from '@/configuration/table'
+
+export default {
+  mixins: [crud],
+
+  data() {
+    return {
+      tableConfiguration: dataServiceAppTableConfig(this),
+      formOption: dataServiceAppForm,
+
+      mixinSearchFormConfig: {
+        models: { name: '', type: '', path: '', publishStatus: '', time: [] }
+      }
+    }
+  },
+
+  methods: {
+    handleAddDataServiceApi() {}
+  }
+}
 </script>
 
 <style></style>

@@ -17,11 +17,10 @@ const routes = [
       import(/* webpackChunkName: "home" */ '@/views/data-service')
   },
   {
-    path: '/application',
+    path: '/app',
     name: 'applicationManage',
-    component: import(
-      /* webpackChunkName: "application" */ '@/views/application-manage'
-    )
+    component: () =>
+      import(/* webpackChunkName: "application" */ '@/views/application-manage')
   },
 
   {
