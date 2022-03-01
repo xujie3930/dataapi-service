@@ -348,8 +348,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
-//            e.printStackTrace();
         }finally {
             DBConnectionManager.getInstance().freeConnection(uri, conn);
         }
