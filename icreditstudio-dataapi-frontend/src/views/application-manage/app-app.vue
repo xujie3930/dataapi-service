@@ -1,12 +1,11 @@
 <!--
- * @Description: 新增或编辑应用分组
+ * @Description: 新增或编辑应用
  * @Date: 2022-03-01
 -->
 
 <template>
   <Dialog
     ref="baseDialog"
-    class="datasource-dialog"
     width="735px"
     footer-placement="center"
     :title="options.title"
@@ -16,13 +15,12 @@
   >
     <el-form
       ref="appGroupForm"
-      class="group-form"
       label-width="80px"
       :model="appGroupForm"
       :rules="rules"
       v-loading="loading"
     >
-      <el-form-item label="分组ID" prop="generateId">
+      <el-form-item label="应用ID" prop="generateId">
         <el-input
           disabled
           style="width: 100%"
@@ -31,16 +29,33 @@
         </el-input>
       </el-form-item>
 
-      <el-form-item label="分组名称" prop="name">
-        <el-input
-          maxlength="50"
-          show-word-limit
-          v-model.trim="appGroupForm.name"
-          placeholder="请输入应用分组名称"
-        >
-          <i v-if="veifyNameLoading" slot="suffix" class="el-icon-loading"></i>
-        </el-input>
-      </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="认证方式" prop="name">
+            <el-radio-group v-model="radio">
+              <el-radio :label="3">备选项</el-radio>
+              <el-radio :label="6">备选项</el-radio>
+              <el-radio :label="9">备选项</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="认证方式" prop="name">
+            <el-input
+              maxlength="50"
+              show-word-limit
+              v-model.trim="appGroupForm.name"
+              placeholder="请输入应用分组名称"
+            >
+              <i
+                v-if="veifyNameLoading"
+                slot="suffix"
+                class="el-icon-loading"
+              ></i>
+            </el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
 
       <el-form-item label="备注" prop="desc">
         <el-input
@@ -155,12 +170,15 @@ export default {
           : API.addAppGroup(this.appGroupForm)
               .then(({ success, data }) => {
                 if ((success, data)) {
+                  const { apiGroupId, workId } = data
                   this.$notify.success({
                     title: '操作结果',
                     message: '新增应用分组成功！',
                     duration: 1500
                   })
-                  this.close()
+                  this.options.currentTreeNodeId = apiGroupId
+                  this.options.workId = workId
+                  this.close('save')
                 }
               })
               .finally(() => {
@@ -172,13 +190,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-.group-form-tip {
-  font-size: 12px;
-  font-family: PingFangSC, PingFangSC-Regular;
-  font-weight: 400;
-  text-align: left;
-  color: #999;
-  line-height: 2;
-}
-</style>
+<style lang="scss" scoped></style>

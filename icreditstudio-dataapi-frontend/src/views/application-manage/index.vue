@@ -96,6 +96,7 @@ export default {
 
     closeAddAppGroupCallback(options) {
       console.log(options, 'options')
+      this.mixinRetrieveTableData()
     }
   }
 }

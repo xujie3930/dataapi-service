@@ -3,13 +3,14 @@
  * @Date: 2022-02-18
  */
 
-import { API_TYPE, STATUS_MAPPING } from '@/config/constant'
+import { CERTIFICATION_TYPE, TOEKN_PERIOD } from '@/config/constant'
 
 export default that => ({
   refName: 'dataServiceApi',
+  id: 'dataServiceApi',
   isBorder: true,
   isStripe: true,
-  hasPage: true,
+  hasPage: false,
   customHeaderButton: true,
   group: [
     {
@@ -24,51 +25,47 @@ export default that => ({
     {
       type: 'text',
       label: 'ID',
-      prop: 'path'
+      prop: 'generateId',
+      width: 150
     },
     {
       type: 'text',
       label: '认证方式',
       prop: 'type',
-      width: 350,
-      formatter: ({ type }) => API_TYPE[type]
+      width: 100,
+      formatter: ({ certificationType: t }) => CERTIFICATION_TYPE[t]
     },
-    // {
-    //   type: 'text',
-    //   label: '最新版本号',
-    //   prop: 'apiVersion',
-    //   width: 100
-    // },
     {
       type: 'statusText',
       label: '状态',
       prop: 'publishStatus',
-      width: 100,
-      color: ({ row: { publishStatus: s } }) => STATUS_MAPPING[s].color,
-      formatter: ({ publishStatus: s }) => STATUS_MAPPING[s].name
+      width: 100
+      // color: ({ row: { publishStatus: s } }) => STATUS_MAPPING[s].color,
+      // formatter: ({ publishStatus: s }) => STATUS_MAPPING[s].name
     },
     {
       type: 'text',
       label: 'token有效期',
-      prop: 'publishUser'
+      prop: 'period',
+      width: 120,
+      formatter: ({ period }) => TOEKN_PERIOD[period]
     },
     {
       type: 'text',
       label: '创建人',
-      prop: 'publishUser',
-      width: 80
-    },
-    {
-      type: 'text',
-      label: '创建时间',
-      prop: 'publishUser',
-      width: 80
+      prop: 'createBy',
+      width: 100
     },
     {
       type: 'date',
-      label: '备注',
-      prop: 'publishTime',
+      label: '创建时间',
+      prop: 'createTime',
       width: 180
+    },
+    {
+      type: 'text',
+      label: '备注',
+      prop: 'desc'
     },
     {
       type: 'operation',
