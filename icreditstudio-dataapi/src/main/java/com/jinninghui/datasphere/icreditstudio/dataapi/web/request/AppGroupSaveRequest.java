@@ -12,9 +12,11 @@ import javax.validation.constraints.NotBlank;
  **/
 @Data
 public class AppGroupSaveRequest {
+    private String id;
     @NotBlank(message = "应用分组名称不能为空")
     @Length(max = 50, message = "请输入以英文字母或者汉字开头的50字的名称")
     private String name;
+    private String generateId;
     @Length(max = 250, message = "备注输入250字以内！")
     private String desc;
 }

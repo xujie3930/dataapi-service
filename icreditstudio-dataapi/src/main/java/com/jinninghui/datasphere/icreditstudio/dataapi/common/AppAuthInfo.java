@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.entity;
+package com.jinninghui.datasphere.icreditstudio.dataapi.common;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -20,19 +20,15 @@ import java.io.Serializable;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("icredit_app")
-public class IcreditAppEntity extends BaseEntity implements Serializable {
+public class AppAuthInfo extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * 主键id
      */
-    @TableId(type = IdType.ID_WORKER_STR)
     private String id;
 
-    //页面id
-    private String generateId;
     private String appFlag;
 
     private Integer certificationType;
@@ -45,10 +41,17 @@ public class IcreditAppEntity extends BaseEntity implements Serializable {
 
     private String appGroupId;
 
-    @TableField("`desc`")
     private String desc;
+
+    private String token;
 
     private Integer period;
 
     private String allowIp;
+
+    private Long periodBegin;
+
+    private Long periodEnd;
+
+    private Integer allowCall;
 }

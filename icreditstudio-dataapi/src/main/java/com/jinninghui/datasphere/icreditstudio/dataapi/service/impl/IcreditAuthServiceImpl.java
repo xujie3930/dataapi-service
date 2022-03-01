@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisInterfaceInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.TokenInfo;
@@ -20,12 +21,14 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,8 +59,6 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         IcreditAuthConfigEntity authConfigEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
         authConfigService.save(authConfigEntity);
         //同时保存授权信息到redis：
-        // key:API_PATH + API版本
-        // value:应用token
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
         for (String apiId : request.getApiId()) {
             IcreditAuthEntity authEntity = new IcreditAuthEntity();
@@ -69,16 +70,28 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             Object redisInfo = redisTemplate.opsForValue().get(apiBaseEntity.getPath() + apiBaseEntity.getApiVersion());
             if (Objects.isNull(redisInfo)){
                 RedisInterfaceInfo info = new RedisInterfaceInfo();
-                TokenInfo tokenInfo = new TokenInfo(appEntity.getToken(), request.getPeriodBegin());
-                info.getTokenList().add(tokenInfo);
-                redisTemplate.opsForValue().set(apiBaseEntity.getPath() + apiBaseEntity.getApiVersion(), JSON.toJSONString(info), 5, TimeUnit.MINUTES);
+                saveToRedis(request, appEntity, apiBaseEntity, info, authConfigEntity);
             }else {
-                RedisInterfaceInfo info = (RedisInterfaceInfo) redisInfo;
-                TokenInfo tokenInfo = new TokenInfo(appEntity.getToken(), request.getPeriodBegin());
-                info.getTokenList().add(tokenInfo);
-                redisTemplate.opsForValue().set(apiBaseEntity.getPath() + apiBaseEntity.getApiVersion(), JSON.toJSONString(info), 5, TimeUnit.MINUTES);
+                RedisInterfaceInfo info = JSON.parseObject(redisInfo.toString(), RedisInterfaceInfo.class);
+                saveToRedis(request, appEntity, apiBaseEntity, info, authConfigEntity);
             }
         }
         return BusinessResult.success(true);
+    }
+
+    private void saveToRedis(AuthSaveRequest request, IcreditAppEntity appEntity, IcreditApiBaseEntity apiBaseEntity, RedisInterfaceInfo info, IcreditAuthConfigEntity authConfigEntity) {
+        String token = UUID.randomUUID().toString().replaceAll("-", "");
+        TokenInfo tokenInfo = new TokenInfo(token, request.getPeriodEnd());
+        info.getTokenList().add(tokenInfo);
+        //根据API的PATH和版本，获取已授权的应用token列表，若过期则鉴权失败
+        redisTemplate.opsForValue().set(apiBaseEntity.getPath() + apiBaseEntity.getApiVersion(), JSON.toJSONString(info));
+        //根据appFlag，获取token
+        Object redisObject = redisTemplate.opsForValue().get(appEntity.getAppFlag());
+        if (Objects.isNull(redisObject)){
+            AppAuthInfo appAuthInfo = JSON.parseObject(redisObject.toString(), AppAuthInfo.class);
+            appAuthInfo.setToken(token);
+            BeanCopyUtils.copyProperties(authConfigEntity, appAuthInfo);
+            redisTemplate.opsForValue().set(appEntity.getAppFlag(), JSON.toJSONString(appAuthInfo));
+        }
     }
 }

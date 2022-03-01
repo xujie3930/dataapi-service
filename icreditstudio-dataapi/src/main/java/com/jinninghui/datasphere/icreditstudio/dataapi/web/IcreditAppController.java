@@ -41,10 +41,5 @@ public class IcreditAppController {
     BusinessResult<Boolean> enableById(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AppEnableRequest request) {
         return appService.enableById(userId, request);
     }
-
-    @PostMapping("/access/token")
-    BusinessResult<String> getToken(@RequestBody AccessTokenRequest request) {
-        return appService.getToken(request);
-    }
 }
 

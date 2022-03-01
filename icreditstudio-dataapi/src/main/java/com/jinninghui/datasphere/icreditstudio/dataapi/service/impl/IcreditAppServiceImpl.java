@@ -1,7 +1,9 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.alibaba.cloud.commons.lang.StringUtils;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppMapper;
@@ -17,9 +19,11 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,6 +42,8 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     private static final Integer STR_RAND_LENGTH = 16;
     @Autowired
     private IcreditAppMapper appMapper;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public BusinessResult<String> saveDef(String userId, AppSaveRequest request) {
@@ -49,6 +55,9 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         IcreditAppEntity appEntity = BeanCopyUtils.copyProperties(request, new IcreditAppEntity());
         appEntity.setAppFlag(appFlag);
         save(appEntity);
+        AppAuthInfo appAuthInfo = BeanCopyUtils.copyProperties(appEntity, new AppAuthInfo());
+        //新增应用时候，保存应用信息至redis
+        redisTemplate.opsForValue().set(appFlag, JSON.toJSONString(appAuthInfo));
         return BusinessResult.success(appEntity.getId());
     }
 
@@ -67,19 +76,7 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public BusinessResult<String> getToken(AccessTokenRequest request) {
-        IcreditAppEntity appEntity = appMapper.getByAppFlag(request.getAppFlag());
-        if (Objects.isNull(appEntity)){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000010.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getMessage());
-        }
-        if (StringUtils.isNotBlank(appEntity.getToken())){
-            return BusinessResult.success(appEntity.getToken());
-        }
-        //生成token串，和icredit生成逻辑一致
-        String token = UUID.randomUUID().toString().replaceAll("-", "");
-        appEntity.setToken(token);
-        updateById(appEntity);
-        return BusinessResult.success(appEntity.getToken());
+    public Boolean hasExitByGenerateId(String generateId, String appGroupId) {
+        return appMapper.hasExitByGenerateId(generateId, appGroupId);
     }
 }

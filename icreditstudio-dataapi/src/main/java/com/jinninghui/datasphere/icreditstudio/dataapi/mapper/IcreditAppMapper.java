@@ -24,4 +24,6 @@ public interface IcreditAppMapper extends BaseMapper<IcreditAppEntity> {
     Boolean enableById(@Param("request") AppEnableRequest request);
 
     IcreditAppEntity getByAppFlag(@Param("appFlag") String appFlag);
+
+    Boolean hasExitByGenerateId(@Param("generateId") String generateId, @Param("appGroupId") String appGroupId);
 }

@@ -2,8 +2,10 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.CheckAppGroupNameRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppGroupQueryListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 import java.util.List;
@@ -20,7 +22,9 @@ public interface IcreditAppGroupService extends IService<IcreditAppGroupEntity> 
 
     BusinessResult<String> saveDef(String userId, AppGroupSaveRequest request);
 
-    BusinessResult<List<IcreditAppGroupEntity>> getList(AppGroupListRequest request);
+    BusinessResult<List<AppGroupQueryListResult>> getList(AppQueryListRequest request);
 
-    Boolean hasExit(AppGroupSaveRequest request);
+    BusinessResult<Boolean> checkAppGroupName(CheckAppGroupNameRequest request);
+
+    BusinessResult<String> generateId();
 }
