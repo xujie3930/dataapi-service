@@ -80,6 +80,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
 
     @Override
+    @ResultReturning
     public BusinessResult<BusinessPageResult> getList(ApiBaseListRequest request) {
         Wrapper<IcreditApiBaseEntity> wrapper = queryWrapper(request);
         IPage<IcreditApiBaseEntity> page = this.page(
@@ -125,7 +126,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public BusinessResult<ApiSaveResult> createDataSourceApi(String userId, DatasourceApiSaveParam param) {
         checkApiName(new CheckApiNameRequest(param.getId(), param.getName()));
         checkApiPath(new CheckApiPathRequest(param.getId(), param.getPath()));
@@ -245,6 +246,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiBaseId(id);
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         result.setParamList(apiParamList);
+        result.setCreateTime(Optional.ofNullable(apiBaseEntity.getCreateTime()).orElse(new Date()).getTime());
+        result.setPublishTime(Optional.ofNullable(apiBaseEntity.getPublishTime()).orElse(new Date()).getTime());
         return BusinessResult.success(result);
     }
 
@@ -347,8 +350,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
-//            e.printStackTrace();
         }finally {
             DBConnectionManager.getInstance().freeConnection(uri, conn);
         }

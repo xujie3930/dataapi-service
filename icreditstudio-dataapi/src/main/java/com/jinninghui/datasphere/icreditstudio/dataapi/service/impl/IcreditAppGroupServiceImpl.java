@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppGroupMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
@@ -44,6 +45,7 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     }
 
     @Override
+    @ResultReturning
     //查询所有的应用分组
     public BusinessResult<List<IcreditAppGroupEntity>> getList(AppGroupListRequest request) {
         AppGroupListParam param = BeanCopyUtils.copyProperties(request, new AppGroupListParam());

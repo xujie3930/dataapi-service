@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AccessTokenRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -39,6 +40,11 @@ public class IcreditAppController {
     @PostMapping("/enableById")
     BusinessResult<Boolean> enableById(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AppEnableRequest request) {
         return appService.enableById(userId, request);
+    }
+
+    @PostMapping("/access/token")
+    BusinessResult<String> getToken(@RequestBody AccessTokenRequest request) {
+        return appService.getToken(request);
     }
 }
 

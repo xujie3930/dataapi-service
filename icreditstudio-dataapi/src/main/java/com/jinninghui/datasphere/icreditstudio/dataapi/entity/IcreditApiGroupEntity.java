@@ -48,17 +48,4 @@ public class IcreditApiGroupEntity extends BaseEntity implements Serializable {
      */
     private Integer sort = 0;
 
-//    private String remark;
-//
-//    private Date createTime;
-//
-//    private String createBy;
-//
-//    private Date updateTime;
-//
-//    private String updateBy;
-//
-//    private Integer delFlag;
-
-
 }
