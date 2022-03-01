@@ -5,7 +5,9 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEnt
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.CheckAppGroupNameRequest;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,7 @@ public class IcreditAppGroupController {
     private IcreditAppGroupService appGroupService;
 
     @PostMapping("/save")
-    BusinessResult<String> saveDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AppGroupSaveRequest request) {
+    BusinessResult<String> saveDef(@RequestHeader(value = "userId") String userId, @RequestBody AppGroupSaveRequest request) {
         return appGroupService.saveDef(userId, request);
     }
 
@@ -36,9 +38,13 @@ public class IcreditAppGroupController {
         return appGroupService.getList(request);
     }
 
-    @PostMapping("/hasExist")
-    public BusinessResult<Boolean> hasExitTheme(@RequestBody AppGroupSaveRequest request) {
-        return BusinessResult.success(appGroupService.hasExit(request));
+    @PostMapping("/generateId")
+    BusinessResult<String> generateId() {
+        return appGroupService.generateId();
+    }
+
+    @PostMapping("/checkAppGroupName")
+    public BusinessResult<Boolean> checkAppGroupName(@RequestBody CheckAppGroupNameRequest request) {
+        return appGroupService.checkAppGroupName(request);
     }
 }
-

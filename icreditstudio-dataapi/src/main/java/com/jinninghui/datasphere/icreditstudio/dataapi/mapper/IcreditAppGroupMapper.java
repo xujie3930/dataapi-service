@@ -17,9 +17,9 @@ import java.util.List;
  */
 public interface IcreditAppGroupMapper extends BaseMapper<IcreditAppGroupEntity> {
 
-    Boolean hasExistAppGroupId(@Param("appGroupId") String appGroupId);
-
     List<IcreditAppGroupEntity> getList(@Param("param") AppGroupListParam param);
 
-    Boolean hasExit(@Param("name") String name, @Param("id") String id);
+    Boolean hasExitByName(@Param("name") String name, @Param("id") String id);
+
+    Boolean hasExitByGenerateId(@Param("generateId") String generateId, @Param("id") String id);
 }

@@ -82,4 +82,9 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         updateById(appEntity);
         return BusinessResult.success(appEntity.getToken());
     }
+
+    @Override
+    public Boolean hasExitByGenerateId(String generateId, String appGroupId) {
+        return appMapper.hasExitByGenerateId(generateId, appGroupId);
+    }
 }

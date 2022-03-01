@@ -2,18 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppGroupMapper">
 
-    <select id="hasExistAppGroupId"
-            resultType="java.lang.Boolean">
-        select 1
-        from icredit_app_group
-        <where>
-            <if test="appGroupId != null and appGroupId != '' ">
-                AND app_group_id = #{appGroupId}
-            </if>
-        </where>
-        limit 1
-    </select>
-
     <select id="getList"
             resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity">
         select *
@@ -26,13 +14,29 @@
         order by create_time desc
     </select>
 
-    <select id="hasExit"
+    <select id="hasExitByName"
             resultType="java.lang.Boolean">
         select 1
         from icredit_app_group
         <where>
             <if test="name != null and name != '' ">
                 AND name = #{name}
+            </if>
+            <if test="id != null and id != '' ">
+                AND id != #{id}
+            </if>
+            AND del_flag = 0
+        </where>
+        limit 1
+    </select>
+
+    <select id="hasExitByGenerateId"
+            resultType="java.lang.Boolean">
+        select 1
+        from icredit_app_group
+        <where>
+            <if test="generateId != null and generateId != '' ">
+                AND generate_id = #{generateId}
             </if>
             <if test="id != null and id != '' ">
                 AND id != #{id}

@@ -49,4 +49,19 @@
         </where>
         limit 1
     </select>
+
+    <select id="hasExitByGenerateId" resultType="java.lang.Boolean">
+        select 1
+        from icredit_app
+        <where>
+            <if test="generateId != null and generateId != '' ">
+                AND generate_id = #{generateId}
+            </if>
+            <if test="appGroupId != null and appGroupId != '' ">
+                AND app_group_id != #{appGroupId}
+            </if>
+            AND del_flag = 0
+        </where>
+        limit 1
+    </select>
 </mapper>

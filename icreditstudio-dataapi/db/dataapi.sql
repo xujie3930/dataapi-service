@@ -374,3 +374,6 @@ VALUES ('0', '业务流程', '默认业务流程', null, '2022-02-21 17:56:17', 
 INSERT INTO `dataapi`.`icredit_api_group`
 VALUES ('0', '0', '默认分组', '默认业务流程下的默认分组', null, '2022-02-21 17:58:06', 'admin', '2022-02-21 17:58:06', 'admin', '0',
         '2');
+
+ALTER TABLE icredit_app ADD generate_id varchar(14) COMMENT '应用id(页面展示)';
+ALTER TABLE icredit_app_group ADD generate_id varchar(14) COMMENT '分组id(页面展示)';

@@ -31,6 +31,8 @@ public class IcreditAppEntity extends BaseEntity implements Serializable {
     @TableId(type = IdType.ID_WORKER_STR)
     private String id;
 
+    //页面id
+    private String generateId;
     private String appFlag;
 
     private Integer certificationType;

@@ -27,4 +27,6 @@ public interface IcreditAppService extends IService<IcreditAppEntity> {
     BusinessResult<Boolean> enableById(String userId, AppEnableRequest request);
 
     BusinessResult<String> getToken(AccessTokenRequest request);
+
+    Boolean hasExitByGenerateId(String generateId, String appGroupId);
 }
