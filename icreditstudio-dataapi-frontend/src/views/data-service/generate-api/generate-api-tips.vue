@@ -56,13 +56,13 @@ export default {
         WHERE: [
           {
             sql: 'userid = ${uid}； ',
-            message: '支持SQL函数',
+            message: 'WHERE条件中的参数为API请求参数，参数格式为${参数名}',
             color: '#faad14'
           }
         ]
       },
       tips: [
-        '1、请先选择数据源后在编写SQL语句；',
+        '1、请先选择数据源后再编写SQL语句；',
         '2、只支持输入一条完整的SQL语句；',
         '3、支持同一数据源下的多张表的关联查询；',
         '4、编写好SQL后可点击测试进行参数设置，保证SQL查询语句正确以便API调用者成功调用； ',

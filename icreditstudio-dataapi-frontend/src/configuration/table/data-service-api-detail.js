@@ -15,19 +15,27 @@ export default {
       type: 'text',
       label: '设置为返回参数',
       prop: 'isResponse',
-      width: 130
+      width: 130,
+      formatter: ({ isResponse }) => (isResponse ? '否' : '是')
     },
     {
       type: 'text',
       label: '设置为请求参数',
       prop: 'isRequest',
-      width: 130
+      width: 130,
+      formatter: ({ isRequest }) => (isRequest ? '否' : '是')
     },
     {
       type: 'text',
       label: '字段名称',
       prop: 'fieldName',
       formatter: ({ fieldName }) => fieldName?.toLocaleLowerCase() ?? ''
+    },
+
+    {
+      type: 'text',
+      label: '来源表名称',
+      prop: 'fieldName'
     },
 
     {
@@ -40,7 +48,8 @@ export default {
       type: 'text',
       label: '是否必填',
       prop: 'required',
-      width: 100
+      width: 100,
+      formatter: ({ required }) => (required ? '否' : '是')
     },
     {
       type: 'text',

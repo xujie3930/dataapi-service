@@ -50,8 +50,8 @@
 <script>
 import API from '@/api/api'
 import { tableServiceApiDetailTableConfig } from '@/configuration/table'
-import { cloneDeep } from 'lodash'
 import { API_TYPE, STATUS_MAPPING, API_MODE } from '@/config/constant'
+import { cloneDeep } from 'lodash'
 
 export default {
   data() {
@@ -86,7 +86,7 @@ export default {
             value: '',
             key: 'publishStatus',
             color: '',
-            formatter: value => STATUS_MAPPING[value].name
+            formatter: value => STATUS_MAPPING[value]
           },
           {
             label: '版本号',
@@ -102,12 +102,11 @@ export default {
         ],
 
         table: [
+          { label: '数据库类型', value: 'MySQL', key: 'databaseType' },
           { label: '数据源名称', value: '', key: 'databaseName' },
           { label: '数据表名称', value: '', key: 'tableName' }
         ]
-      },
-
-      checkMapping: { 0: '否', 1: '是' }
+      }
     }
   },
 
@@ -126,33 +125,26 @@ export default {
           if (success && data) {
             const { paramList, generateApi, ...restData } = data
 
-            cloneDeep(this.renderParams.base).forEach(
-              ({ key, color, formatter }, idx) => {
-                const val = key === 'model' ? generateApi?.model : restData[key]
-                this.renderParams.base[idx].value = formatter
-                  ? formatter(val)
-                  : val
+            cloneDeep(this.renderParams.base).forEach((item, idx) => {
+              const { key, formatter } = item
+              const val = key === 'model' ? generateApi?.model : restData[key]
+              this.renderParams.base[idx].value = formatter
+                ? formatter(val)?.name
+                : val
 
-                color &&
-                  (this.renderParams.base[idx].color = formatter(val).color)
+              if ('color' in item) {
+                this.renderParams.base[idx].color = formatter(val)?.color
               }
-            )
-
-            cloneDeep(this.renderParams.table).forEach(({ key }, idx) => {
-              this.renderParams.table[idx].value =
-                key in cloneDeep(generateApi) ? generateApi[key] : ''
             })
 
-            this.tableData = paramList?.map(
-              ({ isRequest, isResponse, required, ...rest }) => {
-                return {
-                  isRequest: this.checkMapping[isRequest],
-                  isResponse: this.checkMapping[isResponse],
-                  required: this.checkMapping[required],
-                  ...rest
-                }
+            cloneDeep(this.renderParams.table).forEach(
+              ({ key, value }, idx) => {
+                this.renderParams.table[idx].value =
+                  key in cloneDeep(generateApi ?? {}) ? generateApi[key] : value
               }
             )
+
+            this.tableData = paramList ?? []
           }
         })
         .finally(() => {
