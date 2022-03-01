@@ -94,10 +94,7 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
         if(!request.getName().matches("^[a-zA-Z|\u4e00-\u9fa5][a-zA-Z0-9\u4e00-\u9fa5]{1,50}$")){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000011.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000011.getMessage());
         }
-        if(BooleanUtils.isTrue(appGroupMapper.hasExitByName(request.getName(), request.getId()))){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000012.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000012.getMessage());
-        }
-        return BusinessResult.success(true);
+        return BusinessResult.success(BooleanUtils.isTrue(appGroupMapper.hasExitByName(request.getName(), request.getId())));
     }
 
     @Override
