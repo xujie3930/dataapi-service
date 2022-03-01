@@ -29,5 +29,6 @@ export const TOEKN_PERIOD = { 0: '长期', 1: '8小时', 2: '自定义' }
 export default {
   STATUS_MAPPING,
   API_TYPE,
-  CERTIFICATION_TYPE
+  CERTIFICATION_TYPE,
+  TOEKN_PERIOD
 }

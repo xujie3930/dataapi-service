@@ -256,3 +256,13 @@ export const download = options => {
   open ? window.open(link.href) : link.click()
   document.body.removeChild(link)
 }
+
+// 讲对象转换成数据对象
+export const objectConvertToArray = sourceObj => {
+  const targetArray = []
+  for (const [key, value] of Object.entries(sourceObj ?? {})) {
+    targetArray.push({ label: value, value: parseInt(key) })
+  }
+
+  return targetArray
+}

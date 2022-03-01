@@ -136,7 +136,7 @@ export default {
     // 获取-应用分组ID
     fetchAppGroupId() {
       this.loading = true
-      API.getAppUniqueId()
+      API.getAppgGroupUniqueId()
         .then(({ success, data }) => {
           if (success && data) {
             this.appGroupForm.generateId = data

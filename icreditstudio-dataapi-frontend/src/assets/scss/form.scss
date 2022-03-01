@@ -97,3 +97,32 @@
     }
   }
 }
+
+.icredit-form {
+  &--title {
+    position: relative;
+    min-width: 78px;
+    height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
+    color: #262626;
+    line-height: 20px;
+    padding-left: 15px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 18px;
+      background: #1890ff;
+      border-radius: 0px 2px 2px 0px;
+    }
+  }
+
+  .el-form-item__content {
+    text-align: left;
+  }
+}

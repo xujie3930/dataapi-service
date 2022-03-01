@@ -1,5 +1,4 @@
 <!--
- * @Author: lizheng
  * @Description: 应用管理
  * @Date: 2022-02-27
 -->
@@ -44,6 +43,10 @@
       </div>
     </Crud>
 
+    <!-- 新增应用 -->
+    <AddApp ref="addApp" @on-close="closeAddAppCallback" />
+
+    <!-- 新增应用分组 -->
     <AddAppGroup ref="addAppGroup" @on-close="closeAddAppGroupCallback" />
   </div>
 </template>
@@ -53,12 +56,14 @@ import { crud } from '@/mixins'
 import { dataServiceAppForm } from '@/configuration/form'
 import { dataServiceAppTableConfig } from '@/configuration/table'
 
+import AddApp from './add-app'
 import AddAppGroup from './add-app-group'
 
 export default {
   mixins: [crud],
 
   components: {
+    AddApp,
     AddAppGroup
   },
 
@@ -92,10 +97,16 @@ export default {
     },
 
     // 点击-新增应用
-    handleAddAppClick() {},
+    handleAddAppClick() {
+      this.$refs.addApp.open({ title: '新增应用', opType: 'add' })
+    },
 
     closeAddAppGroupCallback(options) {
       console.log(options, 'options')
+      this.mixinRetrieveTableData()
+    },
+
+    closeAddAppCallback() {
       this.mixinRetrieveTableData()
     }
   }
