@@ -246,6 +246,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiBaseId(id);
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         result.setParamList(apiParamList);
+        result.setCreateTime(Optional.ofNullable(apiBaseEntity.getCreateTime()).orElse(new Date()).getTime());
+        result.setPublishTime(Optional.ofNullable(apiBaseEntity.getPublishTime()).orElse(new Date()).getTime());
         return BusinessResult.success(result);
     }
 

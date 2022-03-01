@@ -210,7 +210,6 @@ CREATE TABLE `dataapi`.`icredit_app`
     `secret_content`     text,
     `app_group_id`       varchar(30)  DEFAULT NULL,
     `desc`               varchar(200) DEFAULT NULL,
-    `token`              varchar(500) DEFAULT NULL,
     `period`             int(11) DEFAULT NULL,
     `allow_ip`           varchar(500) DEFAULT NULL,
     `remark`             varchar(255) DEFAULT NULL,
