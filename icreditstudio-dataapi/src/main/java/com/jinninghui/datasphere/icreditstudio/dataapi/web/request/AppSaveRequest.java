@@ -27,8 +27,6 @@ public class AppSaveRequest {
     private String appGroupId;
     //备注
     private String desc;
-    //应用token
-    private String token;
     //token有效期
     private Integer period;
     //允许访问ip
