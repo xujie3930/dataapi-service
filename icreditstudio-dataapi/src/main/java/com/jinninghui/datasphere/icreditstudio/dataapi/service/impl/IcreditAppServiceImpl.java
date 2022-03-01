@@ -39,16 +39,12 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     @Override
     public BusinessResult<String> saveDef(String userId, AppSaveRequest request) {
         StringLegalUtils.checkLegalNameForApp(request.getName());
-        String appFlag = CharacterUtils.getRandomString(STR_RAND_LENGTH);
-        while (BooleanUtils.isTrue(appMapper.hasExistappFlag(appFlag))) {
-            appFlag = CharacterUtils.getRandomString(STR_RAND_LENGTH);
-        }
         IcreditAppEntity appEntity = BeanCopyUtils.copyProperties(request, new IcreditAppEntity());
-        appEntity.setAppFlag(appFlag);
+        appEntity.setGenerateId(request.getGenerateId());
         save(appEntity);
         AppAuthInfo appAuthInfo = BeanCopyUtils.copyProperties(appEntity, new AppAuthInfo());
         //新增应用时候，保存应用信息至redis
-        redisTemplate.opsForValue().set(appFlag, JSON.toJSONString(appAuthInfo));
+        redisTemplate.opsForValue().set(request.getGenerateId(), JSON.toJSONString(appAuthInfo));
         return BusinessResult.success(appEntity.getId());
     }
 
