@@ -9,7 +9,6 @@ import com.jinninghui.datasphere.icreditstudio.gateway.common.RedisInterfaceInfo
 import com.jinninghui.datasphere.icreditstudio.gateway.common.TokenInfo;
 import com.jinninghui.datasphere.icreditstudio.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.gateway.utils.MapUtils;
-import com.jinninghui.datasphere.icreditstudio.gateway.utils.NetUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private static final String TOKEN_MARK = "token";
     private static final String PATH_MARK = "path";
     private static final String VERSION_MARK = "apiVersion";
+    private static final String SECRET_CONTENT_MARK = "secretContent";
     private static final Long NOT_LIMIT = -1L;
 
     @Override
@@ -62,6 +62,49 @@ public class AuthServiceImpl implements AuthService {
         String token = (String) map.get(TOKEN_MARK);
         String path = (String) map.get(PATH_MARK);
         String version = (String) map.get(VERSION_MARK);
+        checkToken(token, path, version);
+        checkAppAuth(request, map, token);
+        return BusinessResult.success(null);
+    }
+
+    private void checkAppAuth(HttpServletRequest request, Map map, String token) {
+        //校验应用密钥
+        Object redisObject1 = redisTemplate.opsForValue().get(token);
+        if (Objects.isNull(redisObject1)){
+            throw new AppException("token过期,请重新获取token！");
+        }
+        AppAuthInfo appAuthInfo = JSON.parseObject(redisObject1.toString(), AppAuthInfo.class);
+        if (appAuthInfo.getIsEnable() == 0){
+            //应用未启用报错
+            throw new AppException("应用未启用！");
+        }
+        Integer certificationType = appAuthInfo.getCertificationType();
+        //密钥认证
+        if (certificationType == 0){
+            String secretContent = (String) map.get(SECRET_CONTENT_MARK);
+            if (!secretContent.equals(appAuthInfo.getSecretContent())){
+                throw new AppException("密钥认证不通过,请确认密钥！");
+            }
+        }
+        //TODO:证书认证未实现
+        //IP白名单认证
+        if (!StringUtils.isBlank(appAuthInfo.getAllowIp())){
+            String remoteHost = request.getRemoteHost();
+            System.out.println("ip : " + remoteHost);
+            Set<String> allowIpSet = new HashSet<>(Arrays.asList(appAuthInfo.getAllowIp().split(",")));
+            if (!allowIpSet.contains(remoteHost)){
+                throw new AppException("白名单校验不通过");
+            }
+        }
+        //次数验证
+        if (NOT_LIMIT != appAuthInfo.getAllowCall().longValue() && appAuthInfo.getAllowCall() <= 0){
+            throw new AppException("已达到次数上线");
+        }
+        appAuthInfo.setAllowCall(appAuthInfo.getAllowCall());
+        redisTemplate.opsForValue().set(token,  JSON.toJSONString(appAuthInfo));
+    }
+
+    private void checkToken(String token, String path, String version) {
         Object redisObject = redisTemplate.opsForValue().get(path + version);
         if (Objects.isNull(redisObject)){
             throw new AppException("token校验失败！");
@@ -75,44 +118,13 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException("token校验失败！");
         }
         TokenInfo tokenInfo = optional.get();
-        if (!NOT_LIMIT.equals(tokenInfo.getPeriod()) && System.currentTimeMillis() > tokenInfo.getPeriod()){
-            throw new AppException("token过期！");
-        }
-        //校验应用密钥
-        Object redisObject1 = redisTemplate.opsForValue().get(token);
-        if (Objects.isNull(redisObject1)){
-            throw new AppException("token过期,请重新获取token！");
-        }
-        AppAuthInfo appAuthInfo = JSON.parseObject(redisObject1.toString(), AppAuthInfo.class);
-        if (appAuthInfo.getIsEnable() == 0){
-            //应用未启用报错
-            throw new AppException("应用未启用！");
-        }
-        Integer certificationType = appAuthInfo.getCertificationType();
-        String secretContent = appAuthInfo.getSecretContent();
-        //密钥认证
-        if (certificationType == 0){
-
-        }
-        //证书认证
-        if (certificationType == 1){
-
-        }
-        //白名单认证
-        if (StringUtils.isBlank(appAuthInfo.getAllowIp())){
-            String ip = NetUtils.getIpAddr(request);
-            Set<String> allowIpSet = new HashSet<>(Arrays.asList(appAuthInfo.getAllowIp().split(",")));
-            if (!allowIpSet.contains(ip)){
-                throw new AppException("白名单校验不通过");
+        if (!NOT_LIMIT.equals(tokenInfo.getPeriod())){
+            Long period = tokenInfo.getPeriod();
+            Long secondOfHours = period * 60 * 60 * 1000L;
+            if (tokenInfo.getCreateTime() + secondOfHours <= System.currentTimeMillis()){
+                throw new AppException("token过期,请重新去授权！");
             }
         }
-        //次数验证
-        if (NOT_LIMIT != appAuthInfo.getAllowCall().longValue() && appAuthInfo.getAllowCall() <= 0){
-            throw new AppException("已达到次数上线");
-        }
-        appAuthInfo.setAllowCall(appAuthInfo.getAllowCall());
-        redisTemplate.opsForValue().set(token,  JSON.toJSONString(appAuthInfo));
-        return BusinessResult.success(null);
     }
 
     private Map checkRequestParam(HttpServletRequest request) {
