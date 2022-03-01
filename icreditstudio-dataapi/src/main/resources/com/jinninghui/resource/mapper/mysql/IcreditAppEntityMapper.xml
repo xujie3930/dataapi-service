@@ -15,18 +15,6 @@
         limit 1
     </select>
 
-    <select id="getList"
-            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity">
-        select *
-        from icredit_app
-        <where>
-            <if test="appGroupId != null and appGroupId != '' ">
-                AND app_group_id = #{appGroupId}
-            </if>
-        </where>
-        order by is_enable desc, create_time desc
-    </select>
-
     <update id="enableById">
         update icredit_app
         <set>

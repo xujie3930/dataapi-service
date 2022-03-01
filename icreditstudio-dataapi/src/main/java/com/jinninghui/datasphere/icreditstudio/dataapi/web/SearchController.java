@@ -2,14 +2,12 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.CharacterUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,5 +32,10 @@ public class SearchController {
         return BusinessResult.success(workFlowResults);
     }
 
+    @GetMapping ("/generate/random")
+    public BusinessResult<String> generateRandom(@RequestParam(value = "len", defaultValue = "16") Integer len) {
+        String randomString = CharacterUtils.getRandomString(len);
+        return BusinessResult.success(randomString);
+    }
 }
 

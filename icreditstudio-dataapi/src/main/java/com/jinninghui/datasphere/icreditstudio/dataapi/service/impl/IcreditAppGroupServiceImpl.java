@@ -67,6 +67,7 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
             if(StringUtils.isEmpty(appQueryListDTO.getAppGroupId())){//第一层级
                 AppGroupQueryListResult appGroupQueryListResult = new AppGroupQueryListResult();
                 BeanUtils.copyProperties(appQueryListDTO, appGroupQueryListResult);
+                appGroupQueryListResult.setCreateTime(appQueryListDTO.getCreateTime().getTime());
                 appGroupQueryListResultList.add(appGroupQueryListResult);
             }
         }
@@ -83,6 +84,7 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
             if(id.equals(appQueryListDTO.getAppGroupId())){
                 AppQueryListResult appQueryListResult = new AppQueryListResult();
                 BeanUtils.copyProperties(appQueryListDTO, appQueryListResult);
+                appQueryListResult.setCreateTime(appQueryListDTO.getCreateTime().getTime());
                 appQueryListResultList.add(appQueryListResult);
             }
         }

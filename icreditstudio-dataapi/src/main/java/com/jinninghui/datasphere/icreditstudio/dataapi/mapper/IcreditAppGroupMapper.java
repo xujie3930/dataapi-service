@@ -5,6 +5,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.dto.AppQueryListDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.AppQueryListParam;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public interface IcreditAppGroupMapper extends BaseMapper<IcreditAppGroupEntity> {
 
-    List<AppQueryListDTO> getList(@Param("param") AppQueryListParam param);
+    List<AppQueryListDTO> getList(@RequestBody AppQueryListParam param);
 
     Boolean hasExitByName(@Param("name") String name, @Param("id") String id);
 
