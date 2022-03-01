@@ -21,8 +21,14 @@
           <if test="isEnable != null">
               AND app.is_enable = #{isEnable}
           </if>
-          <if test="period != null">
-              AND app.period = #{period}
+          <if test="period == 0">
+              AND app.period = -1
+          </if>
+          <if test="period == 1">
+              AND app.period = 8
+          </if>
+          <if test="period == 2">
+              AND (app.period != -1 AND app.period != 8)
           </if>
           ORDER BY appGroup.create_time DESC
         )
@@ -44,8 +50,14 @@
             <if test="isEnable != null">
                 AND app.is_enable = #{isEnable}
             </if>
-            <if test="period != null">
-                AND app.period = #{period}
+            <if test="period == 0">
+                AND app.period = -1
+            </if>
+            <if test="period == 1">
+                AND app.period = 8
+            </if>
+            <if test="period == 2">
+                AND (app.period != null AND app.period != -1 AND app.period != 8)
             </if>
           ORDER BY app.create_time DESC
         )

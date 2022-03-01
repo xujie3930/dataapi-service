@@ -1,16 +1,10 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
-
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AccessTokenRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * <p>
@@ -30,11 +24,6 @@ public class IcreditAppController {
     @PostMapping("/save")
     BusinessResult<String> saveDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AppSaveRequest request) {
         return appService.saveDef(userId, request);
-    }
-
-    @PostMapping("/list")
-    BusinessResult<List<IcreditAppEntity>> list(@RequestBody AppListRequest request) {
-        return appService.getList(request);
     }
 
     @PostMapping("/enableById")
