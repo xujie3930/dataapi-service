@@ -4,7 +4,7 @@
  * @Date: 2022-02-27
 -->
 <template>
-  <div>
+  <div class="app-manage">
     <Crud
       ref="crud"
       :form-items-search="mixinSearchFormItems"
@@ -28,8 +28,23 @@
       :handleExport="mixinHandleExport"
       :handleUpdate="mixinHandleCreateOrUpdate"
       :handleCancel="mixinHandleCancel"
-      @handleAddDataServiceApi="handleAddDataServiceApi"
-    />
+    >
+      <div class="header-operate" slot="operation">
+        <div class="header-operate-left">
+          <el-button class="jui-button--default">批量删除</el-button>
+        </div>
+        <div class="header-operate-right">
+          <el-button type="primary" @click="handleAddAppGroupClick">
+            新增应用分组
+          </el-button>
+          <el-button type="primary" @click="handleAddAppClick">
+            新增应用
+          </el-button>
+        </div>
+      </div>
+    </Crud>
+
+    <AddAppGroup ref="addAppGroup" @on-close="closeAddAppGroupCallback" />
   </div>
 </template>
 
@@ -38,8 +53,14 @@ import { crud } from '@/mixins'
 import { dataServiceAppForm } from '@/configuration/form'
 import { dataServiceAppTableConfig } from '@/configuration/table'
 
+import AddAppGroup from './add-app-group'
+
 export default {
   mixins: [crud],
+
+  components: {
+    AddAppGroup
+  },
 
   data() {
     return {
@@ -47,15 +68,46 @@ export default {
       formOption: dataServiceAppForm,
 
       mixinSearchFormConfig: {
-        models: { name: '', type: '', path: '', publishStatus: '', time: [] }
-      }
+        models: {
+          appGroupName: '',
+          appName: '',
+          certificationType: '',
+          isEnable: '',
+          period: ''
+        }
+      },
+
+      fetchConfig: { retrieve: { url: '/appGroup/list', method: 'post' } }
     }
   },
 
+  created() {
+    this.mixinRetrieveTableData()
+  },
+
   methods: {
-    handleAddDataServiceApi() {}
+    // 点击-新增应用分组
+    handleAddAppGroupClick() {
+      this.$refs.addAppGroup.open({ title: '新增应用分组', opType: 'add' })
+    },
+
+    // 点击-新增应用
+    handleAddAppClick() {},
+
+    closeAddAppGroupCallback(options) {
+      console.log(options, 'options')
+    }
   }
 }
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+@import '~@/assets/scss/button';
+
+.app-manage {
+  .header-operate {
+    @include flex(space-between);
+    padding: 20px 0;
+  }
+}
+</style>

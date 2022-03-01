@@ -7,6 +7,7 @@
   <div class="h100">
     <Container
       :title="title"
+      :custom-header-button="tableConfiguration.customHeaderButton"
       :show-menu="!hideMenu"
       :custom-btn-config="
         tableConfiguration.customBtnConfig &&
@@ -32,6 +33,7 @@
         </slot>
       </template>
       <template #content v-if="!hideContent">
+        <slot name="operation" />
         <slot name="content">
           <j-table
             ref="table"

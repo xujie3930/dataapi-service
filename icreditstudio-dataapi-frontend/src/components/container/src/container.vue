@@ -3,8 +3,11 @@
     <div class="iframe-layout-basic-header" v-if="$slots.header">
       <slot name="header"></slot>
     </div>
+
     <div class="iframe-layout-basic-main" v-if="$slots.content">
-      <div class="iframe-layout-basic-main-top flex-row-sp-center">
+      <slot v-if="customHeaderButton" name="operation"></slot>
+
+      <div v-else class="iframe-layout-basic-main-top flex-row-sp-center">
         <slot name="title">
           <span>{{ title }}</span>
         </slot>
@@ -69,6 +72,10 @@ export default {
       default: true
     },
     showCreate: {
+      type: Boolean,
+      default: false
+    },
+    customHeaderButton: {
       type: Boolean,
       default: false
     },

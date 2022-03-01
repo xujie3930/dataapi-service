@@ -8,14 +8,14 @@ export default [
     type: 'text',
     label: '分组名称',
     model: '',
-    ruleProp: 'name',
+    ruleProp: 'appGroupName',
     isSearch: true
   },
   {
     type: 'text',
     label: '应用名称',
     model: '',
-    ruleProp: 'path',
+    ruleProp: 'appName',
     isSearch: true
   },
   {
@@ -35,7 +35,7 @@ export default [
   {
     type: 'select',
     label: '状态',
-    ruleProp: 'type',
+    ruleProp: 'isEnable',
     model: '',
     inline: true,
     isSearch: true,
@@ -48,7 +48,7 @@ export default [
   {
     type: 'select',
     label: 'token有效期',
-    ruleProp: 'type1',
+    ruleProp: 'period',
     model: '',
     inline: true,
     isSearch: true,

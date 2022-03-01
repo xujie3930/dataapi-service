@@ -38,3 +38,8 @@ export const validIpAddress = ip => {
     /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
   return regStr.test(ip)
 }
+
+// 当前字符串是否以数字开头
+export const verifyStringStartsWithNumber = str => {
+  str?.startsWith(typeof parseInt(str))
+}

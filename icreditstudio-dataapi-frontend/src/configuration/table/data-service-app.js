@@ -10,38 +10,7 @@ export default that => ({
   isBorder: true,
   isStripe: true,
   hasPage: true,
-  customBtnConfig: [
-    {
-      label: '新增应用分组',
-      type: 'primary',
-      key: 'addDataSource',
-      isHide: false,
-      options: {
-        eventType: 'click',
-        eventName: 'handleAddDataServiceApi'
-      }
-    },
-    {
-      label: '新增应用',
-      type: 'primary',
-      key: 'addDataSource',
-      isHide: false,
-      options: {
-        eventType: 'click',
-        eventName: 'handleAddDataServiceApi'
-      }
-    },
-    {
-      label: '批量删除',
-      type: 'primary',
-      key: 'addDataSource',
-      isHide: false,
-      options: {
-        eventType: 'click',
-        eventName: 'handleAddDataServiceApi'
-      }
-    }
-  ],
+  customHeaderButton: true,
   group: [
     {
       type: 'selection',
