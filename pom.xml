@@ -164,5 +164,6 @@
     <modules>
         <module>icreditstudio-framework</module>
         <module>icreditstudio-dataapi</module>
+        <module>icreditstudio-dataapi-getway</module>
     </modules>
 </project>
