@@ -32,7 +32,7 @@ public class IcreditAppGroupEntity extends BaseEntity implements Serializable {
     private String id;
 
     //页面id
-    private String generateId;
+    private String appGroupId;
     private String name;
 
     @TableField("`desc`")

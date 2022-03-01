@@ -8,6 +8,8 @@ import lombok.Data;
 public class TokenInfo {
     //token
     private String token;
-    //有效期时间戳
+    //开始时间
+    private Long createTime;
+    //有效时长,单位小时
     private Long period;
 }

@@ -81,17 +81,15 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
 
     private void saveToRedis(AuthSaveRequest request, IcreditAppEntity appEntity, IcreditApiBaseEntity apiBaseEntity, RedisInterfaceInfo info, IcreditAuthConfigEntity authConfigEntity) {
         String token = UUID.randomUUID().toString().replaceAll("-", "");
-        TokenInfo tokenInfo = new TokenInfo(token, request.getPeriodEnd());
+        TokenInfo tokenInfo = new TokenInfo(token, System.currentTimeMillis(), request.getPeriodEnd());
         info.getTokenList().add(tokenInfo);
-        //根据API的PATH和版本，获取已授权的应用token列表，若过期则鉴权失败
+        //根据API的PATH和版本，获取已授权的应用token列表
         redisTemplate.opsForValue().set(apiBaseEntity.getPath() + apiBaseEntity.getApiVersion(), JSON.toJSONString(info));
         //根据appFlag，获取token
-        Object redisObject = redisTemplate.opsForValue().get(appEntity.getAppFlag());
-        if (Objects.isNull(redisObject)){
-            AppAuthInfo appAuthInfo = JSON.parseObject(redisObject.toString(), AppAuthInfo.class);
-            appAuthInfo.setToken(token);
-            BeanCopyUtils.copyProperties(authConfigEntity, appAuthInfo);
-            redisTemplate.opsForValue().set(appEntity.getAppFlag(), JSON.toJSONString(appAuthInfo));
-        }
+        Object redisObject = redisTemplate.opsForValue().get(appEntity.getGenerateId());
+        AppAuthInfo appAuthInfo = JSON.parseObject(redisObject.toString(), AppAuthInfo.class);
+        appAuthInfo.setToken(token);
+        BeanCopyUtils.copyProperties(authConfigEntity, appAuthInfo);
+        redisTemplate.opsForValue().set(appEntity.getGenerateId(), JSON.toJSONString(appAuthInfo));
     }
 }
