@@ -3,24 +3,28 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.AppQueryListDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppGroupMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.utils.CharacterUtils;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.AppGroupListParam;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.AppQueryListParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.CheckAppGroupNameRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppGroupQueryListResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppQueryListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +38,7 @@ import java.util.List;
 @Service
 public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMapper, IcreditAppGroupEntity> implements IcreditAppGroupService {
 
+    private static final Integer STR_RAND_LENGTH = 11;
     @Resource
     private IcreditAppGroupMapper appGroupMapper;
     @Resource
@@ -54,10 +59,34 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     @Override
     @ResultReturning
     //查询所有的应用分组
-    public BusinessResult<List<IcreditAppGroupEntity>> getList(AppGroupListRequest request) {
-        AppGroupListParam param = BeanCopyUtils.copyProperties(request, new AppGroupListParam());
-        List<IcreditAppGroupEntity> list = appGroupMapper.getList(param);
-        return BusinessResult.success(list);
+    public BusinessResult<List<AppGroupQueryListResult>> getList(AppQueryListRequest request) {
+        AppQueryListParam param = BeanCopyUtils.copyProperties(request, new AppQueryListParam());
+        List<AppQueryListDTO> list = appGroupMapper.getList(param);
+        List<AppGroupQueryListResult> appGroupQueryListResultList = new ArrayList<>();
+        for (AppQueryListDTO appQueryListDTO : list) {
+            if(StringUtils.isEmpty(appQueryListDTO.getAppGroupId())){//第一层级
+                AppGroupQueryListResult appGroupQueryListResult = new AppGroupQueryListResult();
+                BeanUtils.copyProperties(appQueryListDTO, appGroupQueryListResult);
+                appGroupQueryListResultList.add(appGroupQueryListResult);
+            }
+        }
+        for (AppGroupQueryListResult appGroupQueryListResult : appGroupQueryListResultList) {
+            List<AppQueryListResult> appQueryListResultList = getChildren(appGroupQueryListResult.getId(), list);
+            appGroupQueryListResult.setChildren(appQueryListResultList);
+        }
+        return BusinessResult.success(appGroupQueryListResultList);
+    }
+
+    private List<AppQueryListResult> getChildren(String id, List<AppQueryListDTO> list) {
+        List<AppQueryListResult> appQueryListResultList = new ArrayList<>();
+        for (AppQueryListDTO appQueryListDTO : list) {
+            if(id.equals(appQueryListDTO.getAppGroupId())){
+                AppQueryListResult appQueryListResult = new AppQueryListResult();
+                BeanUtils.copyProperties(appQueryListDTO, appQueryListResult);
+                appQueryListResultList.add(appQueryListResult);
+            }
+        }
+        return appQueryListResultList;
     }
 
     @Override
@@ -73,9 +102,9 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
 
     @Override
     public BusinessResult<String> generateId() {
-        String generateId = RandomStringUtils.randomNumeric(11);
+        String generateId = RandomStringUtils.randomNumeric(STR_RAND_LENGTH);
         while (generateId.startsWith("0")){
-            generateId = RandomStringUtils.randomNumeric(11);
+            generateId = RandomStringUtils.randomNumeric(STR_RAND_LENGTH);
         }
         return BusinessResult.success(generateId);
     }

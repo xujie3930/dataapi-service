@@ -1,13 +1,11 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
-
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.CheckAppGroupNameRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppGroupQueryListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +32,7 @@ public class IcreditAppGroupController {
     }
 
     @PostMapping("/list")
-    BusinessResult<List<IcreditAppGroupEntity>> list(@RequestBody AppGroupListRequest request) {
+    BusinessResult<List<AppGroupQueryListResult>> list(@RequestBody AppQueryListRequest request) {
         return appGroupService.getList(request);
     }
 
