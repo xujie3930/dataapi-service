@@ -376,3 +376,4 @@ VALUES ('0', '0', '默认分组', '默认业务流程下的默认分组', null, 
         '2');
 
 ALTER TABLE icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期，1-8小时，2-自定义';
+ALTER TABLE icredit_app ADD generateId varchar(30) COMMENT '应用id';

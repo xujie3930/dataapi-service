@@ -86,10 +86,10 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         //根据API的PATH和版本，获取已授权的应用token列表
         redisTemplate.opsForValue().set(apiBaseEntity.getPath() + apiBaseEntity.getApiVersion(), JSON.toJSONString(info));
         //根据appFlag，获取token
-        Object redisObject = redisTemplate.opsForValue().get(appEntity.getAppFlag());
+        Object redisObject = redisTemplate.opsForValue().get(appEntity.getGenerateId());
         AppAuthInfo appAuthInfo = JSON.parseObject(redisObject.toString(), AppAuthInfo.class);
         appAuthInfo.setToken(token);
         BeanCopyUtils.copyProperties(authConfigEntity, appAuthInfo);
-        redisTemplate.opsForValue().set(appEntity.getAppFlag(), JSON.toJSONString(appAuthInfo));
+        redisTemplate.opsForValue().set(appEntity.getGenerateId(), JSON.toJSONString(appAuthInfo));
     }
 }

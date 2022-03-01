@@ -34,4 +34,6 @@ public class AppSaveRequest {
     private Integer period;
     //允许访问ip
     private String allowIp;
+    //应用id
+    private String generateId;
 }
