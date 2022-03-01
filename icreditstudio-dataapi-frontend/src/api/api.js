@@ -3,7 +3,9 @@
  * @Date: 2022-02-18
  */
 import dataServiceApi from './data-service-api'
+import dataServiceApp from './data-servide-app'
 
 export default {
-  ...dataServiceApi
+  ...dataServiceApi,
+  ...dataServiceApp
 }

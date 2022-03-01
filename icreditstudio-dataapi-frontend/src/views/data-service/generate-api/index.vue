@@ -545,10 +545,6 @@ export default {
     }
   },
 
-  props: {
-    operate: { type: String, default: '' }
-  },
-
   filters: {
     filterTableName(item) {
       const { tableName, comment } = item

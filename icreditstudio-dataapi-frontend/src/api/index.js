@@ -1,5 +1,4 @@
 /*
- * @Author: lizheng
  * @Description: 封装常用的请求方法
  * @Date: 2022-01-22
  */

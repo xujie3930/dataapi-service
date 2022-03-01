@@ -223,29 +223,28 @@ export default {
           }
         )
           .then(() => {
-            this.handlePublishDataApi(id, publishStatus)
+            this.handlePublishDataApi(id, 1)
           })
           .catch(() => {})
       } else {
-        this.handlePublishDataApi(id, publishStatus)
+        this.handlePublishDataApi(id, 2)
       }
     },
 
     handlePublishDataApi(id, publishStatus) {
-      API.updateDataApiStatus({
-        id,
-        publishStatus: publishStatus === 1 ? 2 : 1
-      }).then(({ success, data }) => {
-        if (success && data) {
-          this.$notify.success({
-            title: '操作结果',
-            message: `${publishStatus === 1 ? '发布' : '停止发布'}成功！`,
-            duration: 1500
-          })
+      API.updateDataApiStatus({ id, publishStatus }).then(
+        ({ success, data }) => {
+          if (success && data) {
+            this.$notify.success({
+              title: '操作结果',
+              message: `${publishStatus === 2 ? '发布' : '停止发布'}成功！`,
+              duration: 1500
+            })
 
-          this.mixinRetrieveTableData()
+            this.mixinRetrieveTableData()
+          }
         }
-      })
+      )
     },
 
     // 点击-详情

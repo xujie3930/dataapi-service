@@ -21,13 +21,13 @@ export const API_MODE = {
   2: '链上生成api'
 }
 
-// API模式
-export const API_MODE_MAPPING = { TABLE: 0, SQL: 1, CHAIN: 2 }
+// 认证方式
+export const CERTIFICATION_TYPE = { 0: '密钥认证', 1: '证书认证' }
 
-// API类型
-export const API_TYPE_MAPPING = { REGISTER: 0, SOURCE: 1 }
+export const TOEKN_PERIOD = { 0: '长期', 1: '8小时', 2: '自定义' }
 
 export default {
   STATUS_MAPPING,
-  API_TYPE
+  API_TYPE,
+  CERTIFICATION_TYPE
 }

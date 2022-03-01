@@ -65,7 +65,9 @@ export default {
     },
     'mixinTablePagination.currentPage': {
       handler(nVal, oVal) {
-        nVal !== oVal && this.mixinRetrieveTableData()
+        nVal !== oVal &&
+          this.tableConfiguration?.hasPage &&
+          this.mixinRetrieveTableData()
       }
     }
   },
