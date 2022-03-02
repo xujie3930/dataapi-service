@@ -29,10 +29,5 @@ public class AuthController {
     public BusinessResult<String> getToken(@RequestParam("appFlag") String appFlag) {
         return authService.getToken(appFlag);
     }
-
-    @GetMapping("getData")
-    public BusinessResult<List<Object>> getData() {
-        return authService.getData();
-    }
 }
 

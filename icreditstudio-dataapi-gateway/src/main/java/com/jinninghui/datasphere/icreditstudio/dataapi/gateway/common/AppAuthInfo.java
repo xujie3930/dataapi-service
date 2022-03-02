@@ -39,8 +39,7 @@ public class AppAuthInfo extends BaseEntity implements Serializable {
 
     private String desc;
 
-    private String token;
-
+    //token有效期，单位小时
     private Integer period;
 
     private String allowIp;
@@ -50,4 +49,6 @@ public class AppAuthInfo extends BaseEntity implements Serializable {
     private Long periodEnd;
 
     private Integer allowCall;
+
+    private Long tokenUpdateTime;
 }

@@ -44,10 +44,11 @@ public class AuthServiceImpl implements AuthService {
     public BusinessResult<String> getToken(String appFlag) {
         Object value = redisTemplate.opsForValue().get(appFlag);
         if (Objects.isNull(value)){
-            throw new AppException("获取token失败,请先去授权应用和对应API");
+            throw new AppException("应用状态异常");
         }
         AppAuthInfo appAuthInfo = JSON.parseObject(value.toString(), AppAuthInfo.class);
-        String token = appAuthInfo.getToken();
+        String token = UUID.randomUUID().toString().replaceAll("-", "");
+        appAuthInfo.setTokenUpdateTime(System.currentTimeMillis());
         redisTemplate.opsForValue().set(token, JSON.toJSONString(appAuthInfo));
         return BusinessResult.success(token);
     }
