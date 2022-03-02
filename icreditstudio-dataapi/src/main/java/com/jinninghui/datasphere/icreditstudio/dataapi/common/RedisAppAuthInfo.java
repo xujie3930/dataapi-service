@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RedisAppAuthInfo {
 
-    private String apiId;
-    private String appId;
     //有效起始时间(-1表示无穷)
     private Long periodBegin;
     //有效结束时间(-1表示无穷)
