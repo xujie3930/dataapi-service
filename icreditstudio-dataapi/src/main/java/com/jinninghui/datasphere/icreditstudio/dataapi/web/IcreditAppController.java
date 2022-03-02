@@ -1,6 +1,8 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppDetailRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +32,11 @@ public class IcreditAppController {
     BusinessResult<Boolean> enableById(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AppEnableRequest request) {
         return appService.enableById(userId, request);
     }
+
+//    @PostMapping("/detail")
+//    BusinessResult<AppDetailResult> detail(@RequestBody AppDetailRequest request) {
+//        return appService.findById(request);
+//    }
+
 }
 

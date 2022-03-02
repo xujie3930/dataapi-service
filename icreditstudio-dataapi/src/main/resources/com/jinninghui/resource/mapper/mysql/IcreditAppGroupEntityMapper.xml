@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppGroupMapper">
 
-    <select id="getList" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.AppQueryListParam"
+    <select id="getList" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.service.param.AppQueryListParam"
             resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.AppQueryListDTO">
         (
           SELECT appGroup.id,appGroup.`name`,appGroup.generate_id AS generateId,NULL AS certificationType,NULL AS isEnable,NULL AS period,

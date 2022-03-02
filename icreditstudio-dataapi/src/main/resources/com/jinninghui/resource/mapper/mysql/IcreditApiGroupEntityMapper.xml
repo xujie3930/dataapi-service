@@ -51,8 +51,9 @@
     <select id="getGroupListByWorkFlowId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.GroupIdAndNameVO">
         select id,name from icredit_api_group
         where del_flag = 0
-        <if test="workFlowId != null and workFlowId != '' ">
-            and work_id = #{workFlowId}
-        </if>
+        and work_id in
+        <foreach collection="list" index="index" item="workFlowId" open="(" close=")" separator=",">
+            #{workFlowId}
+        </foreach>
     </select>
 </mapper>

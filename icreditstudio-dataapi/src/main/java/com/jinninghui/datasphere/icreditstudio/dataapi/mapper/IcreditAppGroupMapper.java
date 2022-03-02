@@ -3,7 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.AppQueryListDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.AppQueryListParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.AppQueryListParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.RequestBody;
 

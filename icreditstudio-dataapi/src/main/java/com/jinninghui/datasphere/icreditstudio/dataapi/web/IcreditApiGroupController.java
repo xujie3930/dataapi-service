@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupIdAndNameListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
@@ -44,7 +45,7 @@ public class IcreditApiGroupController {
     }
 
     @PostMapping("/getGroupListByWorkFlowId")
-    BusinessResult<List<GroupIdAndNameVO>> getGroupListByWorkFlowId(@RequestBody ApiGroupListRequest request) {
+    BusinessResult<List<GroupIdAndNameVO>> getGroupListByWorkFlowId(@RequestBody ApiGroupIdAndNameListRequest request) {
         return apiGroupService.getGroupListByWorkFlowId(request);
     }
 

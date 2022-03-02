@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisInterfaceInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
@@ -209,7 +209,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
         //存放信息到redis
         String sql = ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel()) ? querySql : param.getApiGenerateSaveRequest().getSql();
-        saveApiInfoToRedis(generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), sql, requiredFieldStr);
+        saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), sql, requiredFieldStr);
 
         //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
@@ -413,20 +413,26 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(requiredFields.length() >= 1) {
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
             }
-            saveApiInfoToRedis(generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr);
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr);
         }
         return BusinessResult.success(true);
     }
 
-    private void saveApiInfoToRedis(String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr) {
+    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr) {
         BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(datasourceId));
         ConnectionInfoVO connInfo = connResult.getData();
-        RedisInterfaceInfo redisInterfaceInfo = new RedisInterfaceInfo();
-        redisInterfaceInfo.setUrl(handleUrl(connInfo.getUrl()));
-        redisInterfaceInfo.setUserName(connInfo.getUsername());
-        redisInterfaceInfo.setPassword(connInfo.getPassword());
-        redisInterfaceInfo.setQuerySql(sql);
-        redisInterfaceInfo.setRequiredFields(requiredFieldStr);
-        redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiVersion)), JSON.toJSONString(redisInterfaceInfo));
+        RedisApiInfo redisApiInfo = new RedisApiInfo();
+        redisApiInfo.setApiId(apiId);
+        redisApiInfo.setUrl(handleUrl(connInfo.getUrl()));
+        redisApiInfo.setUserName(connInfo.getUsername());
+        redisApiInfo.setPassword(connInfo.getPassword());
+        redisApiInfo.setQuerySql(sql);
+        redisApiInfo.setRequiredFields(requiredFieldStr);
+        redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiVersion)), JSON.toJSONString(redisApiInfo));
+    }
+
+    @Override
+    public BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request) {
+        return BusinessResult.success(apiBaseMapper.getApiByApiGroupId(request.getApiGroupIds()));
     }
 }

@@ -8,7 +8,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEnt
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppGroupMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.AppQueryListParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.AppQueryListParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.CheckAppGroupNameRequest;

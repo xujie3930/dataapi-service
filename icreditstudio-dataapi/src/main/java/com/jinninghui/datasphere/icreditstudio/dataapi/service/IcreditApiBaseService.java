@@ -11,6 +11,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableFieldLis
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableNameListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -47,4 +48,6 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
     List<IcreditApiParamEntity> checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type);
 
     BusinessResult<Boolean> publishOrStop(ApiPublishRequest request);
+
+    BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request);
 }

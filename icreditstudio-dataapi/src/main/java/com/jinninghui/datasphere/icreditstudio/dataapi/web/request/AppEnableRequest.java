@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.web;
+package com.jinninghui.datasphere.icreditstudio.dataapi.web.request;
 
 import lombok.Data;
 
@@ -13,6 +13,6 @@ import javax.validation.constraints.NotBlank;
 public class AppEnableRequest {
     @NotBlank(message = "应用id不能为空")
     private String id;
-    ////是否启用(0-未启用,1-启用),默认1
+    //是否启用(0-未启用,1-启用),默认1
     private Integer isEnable;
 }
