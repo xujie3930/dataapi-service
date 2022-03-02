@@ -212,12 +212,12 @@ export default {
     // 点击-新增或编辑API授权
     addApiAuthorization() {
       this.$refs?.authorizeForm.validate(valid => {
-        const { appId, allowCall, apiId, callType, validTime } =
+        const { appId, allowCall, apiId, authPeriod, validTime } =
           this.authorizeForm
         const params = {
           appId,
           apiId: apiId.map(item => item[2]),
-          allowCall: callType ? allowCall : -1,
+          allowCall: authPeriod ? -1 : allowCall,
           periodBegin: validTime.length ? validTime[0] : -1,
           periodEnd: validTime.length ? validTime[1] : -1
         }
