@@ -29,7 +29,7 @@ public class AppAuthInfo extends BaseEntity implements Serializable {
      */
     private String id;
 
-    private String appFlag;
+    private String generateId;
 
     private Integer certificationType;
 
@@ -43,15 +43,20 @@ public class AppAuthInfo extends BaseEntity implements Serializable {
 
     private String desc;
 
-    private String token;
-
+    //token有效期,单位：小时
     private Integer period;
 
     private String allowIp;
 
+    //有效起始时间(-1表示无穷)
     private Long periodBegin;
 
+    //有效结束时间(-1表示无穷)
     private Long periodEnd;
 
+    //允许调用次数
     private Integer allowCall;
+
+    //token创建时间
+    private Long tokenCreateTime;
 }

@@ -13,5 +13,4 @@ public class RedisInterfaceInfo {
     private String password;
     private String requiredFields;
     private String querySql;
-    private List<TokenInfo> tokenList = new LinkedList<>();
 }
