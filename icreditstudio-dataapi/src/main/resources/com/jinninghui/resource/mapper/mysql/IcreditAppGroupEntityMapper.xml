@@ -94,4 +94,13 @@
         </where>
         limit 1
     </select>
+
+    <select id="findNameById" resultType="java.lang.String">
+        select name
+        from icredit_app_group
+        where del_flag = 0
+        <if test="id != null and id != ''">
+            and id = #{id}
+        </if>
+    </select>
 </mapper>

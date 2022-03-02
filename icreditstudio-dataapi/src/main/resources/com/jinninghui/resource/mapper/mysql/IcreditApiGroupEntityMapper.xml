@@ -48,7 +48,7 @@
         </where>
     </select>
 
-    <select id="getGroupListByWorkFlowId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.GroupIdAndNameVO">
+    <select id="getGroupListByWorkFlowId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GroupIdAndNameResult">
         select id,name from icredit_api_group
         where del_flag = 0
         and work_id in

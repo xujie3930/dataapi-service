@@ -24,4 +24,6 @@ public interface IcreditAppGroupMapper extends BaseMapper<IcreditAppGroupEntity>
     Boolean hasExitByName(@Param("name") String name, @Param("id") String id);
 
     Boolean hasExitByGenerateId(@Param("generateId") String generateId, @Param("id") String id);
+
+    String findNameById(@Param("id") String id);
 }

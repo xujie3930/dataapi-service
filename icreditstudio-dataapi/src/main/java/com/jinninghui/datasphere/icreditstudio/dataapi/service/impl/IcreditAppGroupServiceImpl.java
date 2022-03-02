@@ -107,4 +107,9 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
         }
         return BusinessResult.success(generateId);
     }
+
+    @Override
+    public String findNameById(String appGroupId) {
+        return appGroupMapper.findNameById(appGroupId);
+    }
 }

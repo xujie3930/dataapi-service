@@ -16,12 +16,12 @@ import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppE
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -34,10 +34,12 @@ import javax.annotation.Resource;
 @Service
 public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, IcreditAuthEntity> implements IcreditAuthService {
 
-    @Autowired
+    @Resource
     private IcreditAuthConfigService authConfigService;
-    @Autowired
+    @Resource
     private IcreditAppService appService;
+    @Resource
+    private IcreditAuthMapper authMapper;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
     @Override
@@ -60,5 +62,10 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             redisTemplate.opsForValue().set(apiId + appEntity.getGenerateId(), JSON.toJSONString(appAuthInfo));
         }
         return BusinessResult.success(true);
+    }
+
+    @Override
+    public List<IcreditAuthEntity> findByAppId(String appId) {
+        return authMapper.findByAppId(appId);
     }
 }

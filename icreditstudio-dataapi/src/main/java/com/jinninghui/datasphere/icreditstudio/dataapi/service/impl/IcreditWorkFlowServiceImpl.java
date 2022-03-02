@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditWorkFlowMapper;
@@ -16,7 +17,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.WorkFlowIdAndNameVO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
@@ -181,7 +182,12 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     }
 
     @Override
-    public BusinessResult<List<WorkFlowIdAndNameVO>> getWorkFlowList() {
+    public BusinessResult<List<WorkFlowIdAndNameResult>> getWorkFlowList() {
         return BusinessResult.success(workFlowMapper.getWorkFlowList());
+    }
+
+    @Override
+    public List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds) {
+        return workFlowMapper.findApiInfoByApiIds(apiIds);
     }
 }
