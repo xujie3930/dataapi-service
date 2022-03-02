@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisAppAuthInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.config.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -37,9 +39,13 @@ public class AuthServiceImpl implements AuthService {
     private static final String TOKEN_MARK = "token";
     private static final String PATH_MARK = "path";
     private static final String VERSION_MARK = "apiVersion";
-    private static final String SECRET_CONTENT_MARK = "secretContent";
+    private static final String TRACE_ID = "traceId";
+    private static final String INVOKING_TIME = "invokingTime";
     private static final Long NOT_LIMIT = -1L;
     private static final Long SECOND_OF_HOUR = 60 * 60 *1000L;
+
+    @Autowired
+    private KafkaProducer kafkaProducer;
 
     @Override
     public BusinessResult<String> getToken(String appFlag, String secretContent) {
@@ -63,16 +69,15 @@ public class AuthServiceImpl implements AuthService {
                 cast(RequestContextHolder.getRequestAttributes());
         HttpServletRequest request = requestAttributes.getRequest();
         Map map = checkRequestParam(request);
+        //kafka推送消息
+        //kafkaProducer.send(map);
         //1：根据token鉴权
-        String token = (String) map.get(TOKEN_MARK);
-        String path = (String) map.get(PATH_MARK);
-        String version = (String) map.get(VERSION_MARK);
         AppAuthInfo appAuthInfo = checkApp(map, request);
-        checkApi(request, map, appAuthInfo);
+        RedisApiInfo apiInfo = checkApi(map, appAuthInfo);
         return BusinessResult.success(null);
     }
 
-    private void checkApi(HttpServletRequest request, Map map, AppAuthInfo appAuthInfo) {
+    private RedisApiInfo checkApi(Map map, AppAuthInfo appAuthInfo) {
         String path = (String) map.get(PATH_MARK);
         String version = (String) map.get(VERSION_MARK);
         Object apiObject = redisTemplate.opsForValue().get(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(version));
@@ -99,6 +104,7 @@ public class AuthServiceImpl implements AuthService {
         //调用次数减一
         appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
         redisTemplate.opsForValue().set(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId(),  JSON.toJSONString(appAuthApp));
+        return apiAuthInfo;
     }
 
     private AppAuthInfo checkApp(Map map, HttpServletRequest request) {
@@ -143,6 +149,9 @@ public class AuthServiceImpl implements AuthService {
         if (!map.containsKey(VERSION_MARK)){
             throw new AppException("请求中缺失API版本！");
         }
+        String traceId = UUID.randomUUID().toString().replaceAll("-", "");
+        map.put(TRACE_ID, TRACE_ID);
+        map.put(INVOKING_TIME, new Date());
         return map;
     }
 }
