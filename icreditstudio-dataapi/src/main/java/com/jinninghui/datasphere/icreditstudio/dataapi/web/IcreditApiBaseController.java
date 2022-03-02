@@ -85,7 +85,7 @@ public class IcreditApiBaseController {
 
     @PostMapping("/checkQuerySql")
     public BusinessResult<Boolean> checkQuerySql(@RequestBody CheckQuerySqlRequest request){
-        return apiBaseService.checkQuerySql(request);
+        return BusinessResult.success(null == apiBaseService.checkQuerySql(request, "", 0, 0));
     }
 
     @PostMapping("/publishOrStop")

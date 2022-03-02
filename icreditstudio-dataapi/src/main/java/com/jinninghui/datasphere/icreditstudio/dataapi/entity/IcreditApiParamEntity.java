@@ -31,6 +31,8 @@ public class IcreditApiParamEntity extends BaseEntity implements Serializable {
 
     private String fieldName;
 
+    private String tableName;
+
     private String fieldType;
 
     private Integer required;

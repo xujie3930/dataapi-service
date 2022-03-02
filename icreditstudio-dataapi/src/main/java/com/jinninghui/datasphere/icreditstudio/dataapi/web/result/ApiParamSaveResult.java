@@ -9,6 +9,8 @@ public class ApiParamSaveResult {
 
     private String fieldName;
 
+    private String tableName;
+
     private String fieldType;
 
     private Integer required;
