@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface AuthService {
 
-    BusinessResult<String> getToken(String appFlag);
+    BusinessResult<String> getToken(String appFlag, String secretContent);
 
     BusinessResult<List<Object>> getData();
 }
