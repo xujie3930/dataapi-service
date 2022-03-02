@@ -18,9 +18,6 @@ import java.util.Optional;
 @Slf4j
 public class KafkaConsumer {
 
-    //自定义topic
-    public static final String TOPIC_TEST = "topic.test";
-
     @KafkaListener(topics = KafkaProducer.TOPIC)
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 

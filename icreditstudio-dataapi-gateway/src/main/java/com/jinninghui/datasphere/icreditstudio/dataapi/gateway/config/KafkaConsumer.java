@@ -1,6 +1,5 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.config;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.config.KafkaProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,10 +19,8 @@ import java.util.Optional;
 @Slf4j
 public class KafkaConsumer {
 
-    //自定义topic
-    public static final String TOPIC_TEST = "topic.test";
 
-    @KafkaListener(topics = com.jinninghui.datasphere.icreditstudio.dataapi.config.KafkaProducer.TOPIC)
+    @KafkaListener(topics = KafkaProducer.TOPIC)
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         Optional message = Optional.ofNullable(record.value());

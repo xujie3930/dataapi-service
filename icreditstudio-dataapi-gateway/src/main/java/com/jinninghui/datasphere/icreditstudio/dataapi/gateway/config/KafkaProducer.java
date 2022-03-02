@@ -22,7 +22,7 @@ public class KafkaProducer {
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     //自定义topic
-    public static final String TOPIC = "topic.test";
+    public static final String TOPIC = "apiInvoke";
 
     public void send(Object obj) {
         String obj2String = JSONObject.toJSONString(obj);

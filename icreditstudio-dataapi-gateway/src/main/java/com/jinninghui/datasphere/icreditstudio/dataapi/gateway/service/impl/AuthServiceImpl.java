@@ -7,6 +7,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisAppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.config.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * <p>
@@ -69,11 +72,48 @@ public class AuthServiceImpl implements AuthService {
                 cast(RequestContextHolder.getRequestAttributes());
         HttpServletRequest request = requestAttributes.getRequest();
         Map map = checkRequestParam(request);
+        //记录日志唯一id
+        String traceId = UUID.randomUUID().toString().replaceAll("-", "");
+        map.put(TRACE_ID, TRACE_ID);
+        map.put(INVOKING_TIME, new Date());
         //kafka推送消息
-        //kafkaProducer.send(map);
+        kafkaProducer.send(map);
         //1：根据token鉴权
         AppAuthInfo appAuthInfo = checkApp(map, request);
         RedisApiInfo apiInfo = checkApi(map, appAuthInfo);
+        //对入参做校验
+        List<String> params = MapUtils.MapKeyToList(map);
+        Set<String> requestList = new HashSet<>(Arrays.asList(apiInfo.getRequiredFields().split(",")));
+        if (!requestList.containsAll(params)){
+            throw new AppException("参数缺失!");
+        }
+        //处理sql，替换其中参数为入参
+        String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), map);
+        //连接数据源，执行SQL
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword());
+            Statement stmt = conn.createStatement();
+            ResultSet pagingRs = stmt.executeQuery(querySql);
+            if (pagingRs.next()) {
+                List list = ResultSetToListUtils.convertList(pagingRs);
+                //发送成功消息
+                kafkaProducer.send("");
+                return BusinessResult.success(list);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            if (null != conn) {
+                try {
+                    conn.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            //发送kafka失败信息
+            kafkaProducer.send("");
+        }
         return BusinessResult.success(null);
     }
 
@@ -149,9 +189,6 @@ public class AuthServiceImpl implements AuthService {
         if (!map.containsKey(VERSION_MARK)){
             throw new AppException("请求中缺失API版本！");
         }
-        String traceId = UUID.randomUUID().toString().replaceAll("-", "");
-        map.put(TRACE_ID, TRACE_ID);
-        map.put(INVOKING_TIME, new Date());
         return map;
     }
 }
