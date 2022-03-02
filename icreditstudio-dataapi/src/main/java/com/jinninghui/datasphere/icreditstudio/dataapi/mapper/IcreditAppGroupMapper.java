@@ -3,7 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.AppQueryListDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppGroupEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.AppQueryListParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.AppQueryListParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -24,4 +24,6 @@ public interface IcreditAppGroupMapper extends BaseMapper<IcreditAppGroupEntity>
     Boolean hasExitByName(@Param("name") String name, @Param("id") String id);
 
     Boolean hasExitByGenerateId(@Param("generateId") String generateId, @Param("id") String id);
+
+    String findNameById(@Param("id") String id);
 }

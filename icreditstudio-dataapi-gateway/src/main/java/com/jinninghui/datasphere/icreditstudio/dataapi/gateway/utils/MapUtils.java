@@ -1,7 +1,9 @@
-package com.jinninghui.datasphere.icreditstudio.gateway.utils;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author xujie
@@ -26,6 +28,13 @@ public class MapUtils {
         return map;
     }
 
+
+    public static List<String> MapKeyToList(Map map){
+        List<String> keyList = (List<String>) map.keySet()
+                .stream()
+                .collect(Collectors.toList());
+        return keyList;
+    }
     public static void main(String[] args) {
         String str = "a=b&c=d&e=f";
         Map map = str2Map(str);

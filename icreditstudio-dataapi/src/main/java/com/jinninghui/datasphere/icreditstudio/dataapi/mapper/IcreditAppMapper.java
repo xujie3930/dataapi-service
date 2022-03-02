@@ -2,7 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.AppEnableRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequest;
 import org.apache.ibatis.annotations.Param;
 
 /**

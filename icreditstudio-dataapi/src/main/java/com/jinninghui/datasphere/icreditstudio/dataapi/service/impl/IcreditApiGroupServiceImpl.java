@@ -10,11 +10,12 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEnt
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiGroupMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupIdAndNameListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.GroupIdAndNameVO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GroupIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
@@ -101,7 +102,7 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     }
 
     @Override
-    public BusinessResult<List<GroupIdAndNameVO>> getGroupListByWorkFlowId(ApiGroupListRequest request) {
-        return BusinessResult.success(apiGroupMapper.getGroupListByWorkFlowId(request.getWorkId()));
+    public BusinessResult<List<GroupIdAndNameResult>> getGroupListByWorkFlowId(ApiGroupIdAndNameListRequest request) {
+        return BusinessResult.success(apiGroupMapper.getGroupListByWorkFlowId(request.getWorkIds()));
     }
 }

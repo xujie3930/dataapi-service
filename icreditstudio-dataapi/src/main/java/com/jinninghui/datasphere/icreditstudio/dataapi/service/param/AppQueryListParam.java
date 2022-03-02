@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.web;
+package com.jinninghui.datasphere.icreditstudio.dataapi.service.param;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
 import lombok.Data;

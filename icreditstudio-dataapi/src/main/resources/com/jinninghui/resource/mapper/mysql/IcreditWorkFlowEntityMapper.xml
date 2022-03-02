@@ -47,7 +47,18 @@
         </where>
     </select>
 
-    <select id="getWorkFlowList" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.WorkFlowIdAndNameVO">
+    <select id="getWorkFlowList" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult">
         select id,name from icredit_work_flow where del_flag = 0
+    </select>
+
+    <select id="findApiInfoByApiIds" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO">
+        select iwf.name as workFlowName,iag.name as apiGroupName,iab.name as apiName
+        from icredit_work_flow iwf right join icredit_api_group iag on iwf.id = iag.work_id
+        right join icredit_api_base iab on iab.api_group_id = iag.id
+        where iab.del_flag = 0
+        and iab.id in
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
     </select>
 </mapper>

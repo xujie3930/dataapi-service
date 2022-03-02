@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
@@ -85,12 +86,17 @@ public class IcreditApiBaseController {
 
     @PostMapping("/checkQuerySql")
     public BusinessResult<Boolean> checkQuerySql(@RequestBody CheckQuerySqlRequest request){
-        return apiBaseService.checkQuerySql(request);
+        return BusinessResult.success(null == apiBaseService.checkQuerySql(request, "", 0, 0));
     }
 
     @PostMapping("/publishOrStop")
     public BusinessResult<Boolean> publishOrStop(@RequestBody ApiPublishRequest request){
         return apiBaseService.publishOrStop(request);
+    }
+
+    @PostMapping("/getApiList")
+    public BusinessResult<List<ApiNameAndIdListResult>> getApiList(@RequestBody ApiNameAndIdListRequest request){
+        return apiBaseService.getApiByApiGroupId(request);
     }
 
 }

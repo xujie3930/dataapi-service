@@ -10,7 +10,7 @@
         <version>0.0.1</version>
     </parent>
 
-    <artifactId>icreditstudio-dataapi-getway</artifactId>
+    <artifactId>icreditstudio-dataapi-gateway</artifactId>
 
 
     <properties>
@@ -31,6 +31,16 @@
                     <groupId>com.baomidou</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.jinninghui.datasphere</groupId>
+            <artifactId>icreditstudio-dataapi</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
     </dependencies>
 
@@ -103,7 +113,7 @@
 
                         <configuration>
                             <skipAssembly>false</skipAssembly>
-                            <finalName>jnh-datasphere-icreditstudio-dataapi-${project.version}-dist</finalName>
+                            <finalName>jnh-datasphere-icreditstudio-dataapi-gateway-${project.version}-dist</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <attach>false</attach>
                             <descriptors>

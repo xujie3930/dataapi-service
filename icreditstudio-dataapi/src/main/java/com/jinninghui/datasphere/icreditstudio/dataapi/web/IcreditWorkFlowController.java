@@ -4,7 +4,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.WorkFlowIdAndNameVO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +48,7 @@ public class IcreditWorkFlowController {
     }
 
     @PostMapping("/getBusinessProcessList")
-    BusinessResult<List<WorkFlowIdAndNameVO>> getWorkFlowList() {
+    BusinessResult<List<WorkFlowIdAndNameResult>> getWorkFlowList() {
         return workFlowService.getWorkFlowList();
     }
 

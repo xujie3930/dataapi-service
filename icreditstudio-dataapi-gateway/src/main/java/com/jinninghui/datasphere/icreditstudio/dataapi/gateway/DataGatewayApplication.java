@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.gateway;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

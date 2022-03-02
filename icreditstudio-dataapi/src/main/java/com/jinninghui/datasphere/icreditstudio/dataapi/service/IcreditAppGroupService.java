@@ -27,4 +27,6 @@ public interface IcreditAppGroupService extends IService<IcreditAppGroupEntity> 
     BusinessResult<Boolean> checkAppGroupName(CheckAppGroupNameRequest request);
 
     BusinessResult<String> generateId();
+
+    String findNameById(String appGroupId);
 }

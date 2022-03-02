@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -1379,5 +1380,23 @@ public abstract class StringUtils {
 
 		return JSON.parseArray(oldOb, clazz);
 
+	}
+
+	/**
+	 *
+	 * @param content:待转换sql
+	 * @param kvs:待转换参数
+	 * @return
+	 */
+	public static String parseSql(String content, Map<String, String> kvs) {
+		Pattern p = Pattern.compile("(\\$\\{)([\\w]+)(\\})");
+		Matcher m = p.matcher(content);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			String group = m.group();
+			m.appendReplacement(sb, "'" + kvs.get(group) + "'");
+		}
+		m.appendTail(sb);
+		return sb.toString();
 	}
 }

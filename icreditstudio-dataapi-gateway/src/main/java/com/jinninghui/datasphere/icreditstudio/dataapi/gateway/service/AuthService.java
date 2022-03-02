@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.gateway.service;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service;
 
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface AuthService {
 
-    BusinessResult<String> getToken(String appFlag);
+    BusinessResult<String> getToken(String appFlag, String secretContent);
 
     BusinessResult<List<Object>> getData();
 }

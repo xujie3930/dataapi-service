@@ -2,11 +2,12 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupIdAndNameListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.vo.GroupIdAndNameVO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GroupIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.apache.ibatis.annotations.Param;
 
@@ -32,5 +33,5 @@ public interface IcreditApiGroupService extends IService<IcreditApiGroupEntity> 
 
     List<IcreditApiGroupEntity> searchFromName(String name);
 
-    BusinessResult<List<GroupIdAndNameVO>> getGroupListByWorkFlowId(ApiGroupListRequest request);
+    BusinessResult<List<GroupIdAndNameResult>> getGroupListByWorkFlowId(ApiGroupIdAndNameListRequest request);
 }

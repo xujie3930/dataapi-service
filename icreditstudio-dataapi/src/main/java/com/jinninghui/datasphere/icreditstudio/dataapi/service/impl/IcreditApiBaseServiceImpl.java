@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisInterfaceInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
@@ -37,11 +37,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * <p>
@@ -71,9 +69,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Autowired
     private ApiBaseFactory apiBaseFactory;
 
-    private static final String SQL_AND = " AND ";
+    private static final String SQL_AND = " and ";
     private static final String SQL_FIELD_SPLIT_CHAR = ",";
-    private static final String SQL_WHERE = " WHERE ";
+    private static final String SQL_WHERE = " where ";
     private static final String SEPARATOR = "|";
     private static final String SPLIT_URL_FLAG = "?";
     private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
@@ -148,7 +146,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
         if(ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {//表单生成模式
             boolean isHaveRespField = false;
-            StringBuffer querySqlPrefix = new StringBuffer("SELECT ");
+            StringBuffer querySqlPrefix = new StringBuffer("select ");
             StringBuffer querySqlSuffix = new StringBuffer(SQL_WHERE);
             StringBuffer requiredFields = new StringBuffer();
             //保存 api param
@@ -158,6 +156,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 apiParamEntity.setApiBaseId(apiBaseEntity.getId());
                 apiParamEntity.setApiVersion(apiBaseEntity.getApiVersion());
                 apiParamEntity.setDesc(datasourceApiParamSaveRequest.getDesc());
+                apiParamEntity.setTableName(param.getApiGenerateSaveRequest().getTableName());
                 apiParamEntity.setRequired(datasourceApiParamSaveRequest.getRequired());
                 apiParamEntity.setFieldName(datasourceApiParamSaveRequest.getFieldName());
                 apiParamEntity.setFieldType(datasourceApiParamSaveRequest.getFieldType());
@@ -192,8 +191,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
             }
         }else{
-            checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()));
+            apiParamEntityList = checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), 1);
+
         }
+        apiParamService.saveOrUpdateBatch(apiParamEntityList);
 
         //保存 generate api
         IcreditGenerateApiEntity generateApiEntity = new IcreditGenerateApiEntity();
@@ -208,7 +209,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
         //存放信息到redis
         String sql = ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel()) ? querySql : param.getApiGenerateSaveRequest().getSql();
-        saveApiInfoToRedis(generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), sql, requiredFieldStr);
+        saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), sql, requiredFieldStr);
 
         //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
@@ -334,7 +335,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     @Override
-    public BusinessResult<Boolean> checkQuerySql(CheckQuerySqlRequest request) {
+    public List<IcreditApiParamEntity> checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type) {
         if(StringUtils.isEmpty(request.getSql())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage());
         }
@@ -346,16 +347,49 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
         String uri = datasource.getUri();
         Connection conn = DBConnectionManager.getInstance().getConnection(uri, datasource.getType());
+        List<IcreditApiParamEntity> apiParamEntityList = null;
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
+            if(1 == type) {
+                apiParamEntityList = new ArrayList<>();
+                sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf("select "), sql.lastIndexOf(SQL_WHERE))).append(" limit 1"));
+                ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery(sql);
+                ResultSetMetaData metaData = rs.getMetaData();
+                int len = metaData.getColumnCount();
+                List<String> tableNameList = new ArrayList<>();
+                for (int i = 1; i <= len; i++) {//获取SQL语句中的表名称
+                    if(!tableNameList.contains(metaData.getTableName(i))){
+                        tableNameList.add(metaData.getTableName(i));
+                    }
+                }
+
+                DatabaseMetaData databaseMetaData = conn.getMetaData();
+                for (String tableName : tableNameList) {//根据表名称获取对应的表字段信息
+                    ResultSet columnRs = databaseMetaData.getColumns(null, "%", tableName, "%");
+                    while (columnRs.next()){
+                        IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
+                        apiParamEntity.setTableName(tableName);
+                        apiParamEntity.setFieldType(columnRs.getString("TYPE_NAME").toLowerCase());
+                        apiParamEntity.setFieldName(columnRs.getString("COLUMN_NAME"));
+                        //todo 字段中文描述
+                        apiParamEntity.setDesc(columnRs.getString("REMARKS"));
+//                  apiParamEntity.setId(datasourceApiParamSaveRequest.getId());
+                        apiParamEntity.setApiBaseId(id);
+                        apiParamEntity.setApiVersion(apiVersion);
+                        apiParamEntityList.add(apiParamEntity);
+                    }
+                }
+
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
         }finally {
             DBConnectionManager.getInstance().freeConnection(uri, conn);
         }
-        return BusinessResult.success(true);
+        return apiParamEntityList;
     }
 
     @Override
@@ -379,20 +413,26 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(requiredFields.length() >= 1) {
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
             }
-            saveApiInfoToRedis(generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr);
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr);
         }
         return BusinessResult.success(true);
     }
 
-    private void saveApiInfoToRedis(String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr) {
+    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr) {
         BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(datasourceId));
         ConnectionInfoVO connInfo = connResult.getData();
-        RedisInterfaceInfo redisInterfaceInfo = new RedisInterfaceInfo();
-        redisInterfaceInfo.setUrl(handleUrl(connInfo.getUrl()));
-        redisInterfaceInfo.setUserName(connInfo.getUsername());
-        redisInterfaceInfo.setPassword(connInfo.getPassword());
-        redisInterfaceInfo.setQuerySql(sql);
-        redisInterfaceInfo.setRequiredFields(requiredFieldStr);
-        redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiVersion)), JSON.toJSONString(redisInterfaceInfo));
+        RedisApiInfo redisApiInfo = new RedisApiInfo();
+        redisApiInfo.setApiId(apiId);
+        redisApiInfo.setUrl(handleUrl(connInfo.getUrl()));
+        redisApiInfo.setUserName(connInfo.getUsername());
+        redisApiInfo.setPassword(connInfo.getPassword());
+        redisApiInfo.setQuerySql(sql);
+        redisApiInfo.setRequiredFields(requiredFieldStr);
+        redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiVersion)), JSON.toJSONString(redisApiInfo));
+    }
+
+    @Override
+    public BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request) {
+        return BusinessResult.success(apiBaseMapper.getApiByApiGroupId(request.getApiGroupIds()));
     }
 }
