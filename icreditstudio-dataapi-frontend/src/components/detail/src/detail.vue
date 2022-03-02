@@ -1,0 +1,167 @@
+<!--
+ * @Description: 详情
+ * @Date: 2022-03-02
+-->
+
+<template>
+  <Dialog
+    hide-footer
+    class="detail-dialog"
+    ref="baseDialog"
+    width="850px"
+    :visible="visible"
+    :title="options.title"
+    @on-change="$emit('on-change', $event)"
+  >
+    <div class="detail-row" v-loading="loading">
+      <div
+        class="banner-title"
+        v-for="(item, key) in detailConfiguration"
+        :key="key"
+      >
+        <div class="text">{{ detailTitleKeyMapping[key] }}</div>
+
+        <el-row class="detail-row-wrap">
+          <el-col
+            class="detail-row-wrap--col"
+            :span="list.span || 12"
+            :key="list.label"
+            v-for="list in item"
+          >
+            <div class="label">{{ list.label }}</div>
+
+            <slot v-if="list.slot" :name="list.key"></slot>
+
+            <div v-else class="value" :style="{ color: list.color }">
+              {{ list.value }}
+            </div>
+          </el-col>
+        </el-row>
+      </div>
+    </div>
+  </Dialog>
+</template>
+
+<script>
+export default {
+  name: 'Detail',
+  data() {
+    return {
+      options: {},
+      dialogVisible: false
+    }
+  },
+
+  model: {
+    prop: 'visible',
+    event: 'on-change'
+  },
+
+  props: {
+    visible: {
+      type: Boolean,
+      default: false
+    },
+
+    loading: {
+      type: Boolean,
+      default: false
+    },
+
+    detailConfiguration: {
+      type: Object,
+      default: () => ({})
+    },
+
+    detailTitleKeyMapping: {
+      type: Object,
+      default: () => ({})
+    },
+
+    fetchDetailData: {
+      type: Function,
+      default: null
+    }
+  },
+
+  methods: {
+    open(options) {
+      this.options = options
+      this.fetchDetailData(options)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.detail-dialog {
+  ::v-deep {
+    .el-dialog__body {
+      padding: 20px;
+    }
+  }
+}
+.icredit-form {
+  @include icredit-form;
+
+  ::v-deep {
+    .el-form-item--small.el-form-item {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.detail-row,
+.detail-form,
+.detail-table {
+  margin-top: 30px;
+
+  .banner-title {
+    position: relative;
+    margin: 30px 0;
+    text-align: left;
+
+    .text {
+      height: 20px;
+      font-size: 14px;
+      font-family: PingFangSC, PingFangSC-Regular;
+      font-weight: 400;
+      text-align: left;
+      color: #262626;
+      line-height: 20px;
+      margin-left: 10px;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: 0;
+      width: 4px;
+      height: 18px;
+      background: #1890ff;
+      border-radius: 0px 2px 2px 0px;
+    }
+  }
+
+  &-wrap {
+    margin-left: 10px;
+
+    &--col {
+      @include flex(flex-start);
+      margin-top: 17px;
+    }
+    .label {
+      width: 100px;
+    }
+
+    .value {
+      width: calc(100% - 100px);
+      max-height: 80px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      margin-left: 24px;
+    }
+  }
+}
+</style>

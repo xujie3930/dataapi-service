@@ -70,10 +70,11 @@
           v-model="appForm.appGroupId"
           style="width: 500px"
           placeholder="请选择业务流程"
+          :disabled="!!options.row"
         >
           <el-option
-            v-for="item in groupNameOptions"
-            :key="item.id"
+            v-for="(item, idx) in groupNameOptions"
+            :key="`${item.id}-${idx}`"
             :label="item.name"
             :value="item.id"
           >
@@ -141,7 +142,7 @@
           style="width: 500px"
           type="textarea"
           v-model="appForm.allowId"
-          placeholder="请输入IP地址"
+          placeholder="请输入IP地址，IP地址之间以英文逗号隔开"
         ></el-input>
       </el-form-item>
     </el-form>
@@ -214,6 +215,12 @@ export default {
           trigger: 'blur'
         },
 
+        tokenType: {
+          required: true,
+          message: '请选择token自定义有效时间',
+          trigger: 'change'
+        },
+
         period: {
           required: true,
           message: '请选择token自定义有效时间',
@@ -225,7 +232,10 @@ export default {
 
   methods: {
     open(options) {
+      const { row } = options
+      this.appForm.appGroupId = row?.id
       this.options = options
+
       this.$refs.baseDialog.open()
       this.fetchAppGroupId()
       this.fetchAppGroupNameOptions()
@@ -310,14 +320,14 @@ export default {
           : API.addApp(this.appForm)
               .then(({ success, data }) => {
                 if ((success, data)) {
-                  const { apiGroupId, workId } = data
+                  // const { apiGroupId, workId } = data
                   this.$notify.success({
                     title: '操作结果',
                     message: '新增应用成功！',
                     duration: 1500
                   })
-                  this.options.currentTreeNodeId = apiGroupId
-                  this.options.workId = workId
+                  // this.options.currentTreeNodeId = apiGroupId
+                  // this.options.workId = workId
                   this.close('save')
                 }
               })

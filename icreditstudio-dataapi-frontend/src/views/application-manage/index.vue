@@ -30,7 +30,7 @@
     >
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
-          <el-button class="jui-button--default">批量删除</el-button>
+          <el-button class="jui-button--default" disabled>批量删除</el-button>
         </div>
         <div class="header-operate-right">
           <el-button type="primary" @click="handleAddAppGroupClick">
@@ -48,6 +48,19 @@
 
     <!-- 新增应用分组 -->
     <AddAppGroup ref="addAppGroup" @on-close="closeAddAppGroupCallback" />
+
+    <!-- 授权 -->
+    <AppAuthorization ref="authorize" @on-close="closeAuthorizeCallback" />
+
+    <!-- 详情 -->
+    <Detail
+      ref="appDetail"
+      v-model="detailVisible"
+      :loading="detailLoading"
+      :detail-configuration="detailConfiguration"
+      :detail-title-key-mapping="detailTitleKeyMapping"
+      :fetch-detail-data="fetchDetailData"
+    />
   </div>
 </template>
 
@@ -56,19 +69,29 @@ import { crud } from '@/mixins'
 import { dataServiceAppForm } from '@/configuration/form'
 import { dataServiceAppTableConfig } from '@/configuration/table'
 
+import API from '@/api/api'
+import { cloneDeep } from 'lodash'
+
 import AddApp from './add-app'
 import AddAppGroup from './add-app-group'
+import AppAuthorization from './app-authorization'
+
+import { detailConfiguration, detailTitleKeyMapping } from './detailConfig'
 
 export default {
   mixins: [crud],
 
   components: {
     AddApp,
-    AddAppGroup
+    AddAppGroup,
+    AppAuthorization
   },
 
   data() {
     return {
+      detailVisible: false,
+      detailLoading: false,
+      detailOptions: {},
       tableConfiguration: dataServiceAppTableConfig(this),
       formOption: dataServiceAppForm,
 
@@ -82,7 +105,10 @@ export default {
         }
       },
 
-      fetchConfig: { retrieve: { url: '/appGroup/list', method: 'post' } }
+      fetchConfig: { retrieve: { url: '/appGroup/list', method: 'post' } },
+
+      detailConfiguration: cloneDeep(detailConfiguration),
+      detailTitleKeyMapping: cloneDeep(detailTitleKeyMapping)
     }
   },
 
@@ -97,8 +123,22 @@ export default {
     },
 
     // 点击-新增应用
-    handleAddAppClick() {
-      this.$refs.addApp.open({ title: '新增应用', opType: 'add' })
+    handleAddAppClick({ row }) {
+      console.log(row, 'rowrowrow')
+
+      this.$refs.addApp.open({ row, title: '新增应用', opType: 'add' })
+    },
+
+    // 点击-详情
+    handleDetailClick({ row }) {
+      this.detailVisible = true
+      this.detailOptions = { title: '详情' }
+      this.$refs.appDetail.open({ id: row.id, title: '详情' })
+    },
+
+    // 点击-授权
+    handleAuthorizeClick({ row }) {
+      this.$refs.authorize.open({ row, title: '授权', opType: 'add' })
     },
 
     closeAddAppGroupCallback(options) {
@@ -108,6 +148,53 @@ export default {
 
     closeAddAppCallback() {
       this.mixinRetrieveTableData()
+    },
+
+    // 回调-授权设置弹窗回调
+    closeAuthorizeCallback() {},
+
+    // 获取-详情接口
+    fetchDetailData({ id }) {
+      this.detailLoading = true
+      this.detailConfiguration = cloneDeep(detailConfiguration)
+
+      API.getAppDetail({ id })
+        .then(({ success, data }) => {
+          if (success && data) {
+            const { authResult, apiResult } = data
+            cloneDeep(this.detailConfiguration.base).forEach((item, idx) => {
+              const { key, formatter } = item
+              const val = data[key]
+
+              this.detailConfiguration.base[idx].value = formatter
+                ? typeof formatter(val) === 'object'
+                  ? formatter(val)?.name
+                  : formatter(val)
+                : val
+
+              if ('color' in item) {
+                this.detailConfiguration.base[idx].color = formatter(val)?.color
+              }
+            })
+
+            this.detailConfiguration.auth[0].value = apiResult.apiNames
+
+            cloneDeep(this.detailConfiguration.authTime).forEach(
+              (item, idx) => {
+                const { key: k, formatter } = item
+
+                this.detailConfiguration.authTime[idx].value = formatter
+                  ? typeof formatter(authResult[k]) === 'object'
+                    ? formatter(authResult[k])?.name
+                    : formatter(authResult)
+                  : authResult[k]
+              }
+            )
+          }
+        })
+        .finally(() => {
+          this.detailLoading = false
+        })
     }
   }
 }

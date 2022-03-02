@@ -26,7 +26,7 @@ export default that => ({
       type: 'text',
       label: 'ID',
       prop: 'generateId',
-      width: 150
+      width: 160
     },
     {
       type: 'text',
@@ -71,30 +71,24 @@ export default that => ({
       type: 'operation',
       label: '操作',
       fixed: 'right',
-      width: 180,
+      width: 130,
       operationList: [
-        // {
-        //   func: that.handleAuthorizeClick,
-        //   label: '授权'
-        // },
-        // {
-        //   func: that.handleVersionClick,
-        //   label: '版本列表'
-        // }
+        {
+          func: that.handleAuthorizeClick,
+          label: '授权',
+          visible: ({ row }) => !('children' in row)
+        },
 
         {
-          func: that.handleUpdateStatusClick,
-          label: '发布',
-          visible: ({ row: { publishStatus } }) => publishStatus !== 2
-        },
-        {
-          func: that.handleUpdateStatusClick,
-          label: '停止发布',
-          visible: ({ row: { publishStatus } }) => publishStatus === 2
-        },
-        {
           func: that.handleDetailClick,
-          label: '详情'
+          label: '详情',
+          visible: ({ row }) => !('children' in row)
+        },
+
+        {
+          func: that.handleAddAppClick,
+          label: '新增应用',
+          visible: ({ row }) => 'children' in row
         }
       ]
     }

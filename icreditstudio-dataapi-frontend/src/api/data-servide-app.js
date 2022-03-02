@@ -21,15 +21,37 @@ const addAppGroup = params => postAction('/appGroup/save', params)
 // 新增应用
 const addApp = params => postAction('/app/save', params)
 
+// 获取应用详情
+const getAppDetail = params => postAction('/app/detail', params)
+
 // 校验分组名称是否唯一
 const checkNameUniqueness = params =>
   postAction('/appGroup/checkAppGroupName', params)
 
+// 更新-对API进行授权
+const updateApiAuthorization = params => postAction('/auth/save', params)
+
+// 获取业务流程
+const getBusinessPcoessList = params =>
+  postAction('/workFlow/getBusinessProcessList', params)
+
+// 获取分组信息
+const getGroupList = params =>
+  postAction('/apiGroup/getGroupListByWorkFlowId', params)
+
+// 获取api信息
+const getApiInfoList = params => postAction('/apiBase/getApiList', params)
+
 export default {
   getAppGroupList,
   getAppUniqueId,
+  getAppDetail,
   getAppgGroupUniqueId,
+  getBusinessPcoessList,
+  getGroupList,
+  getApiInfoList,
   addAppGroup,
   addApp,
-  checkNameUniqueness
+  checkNameUniqueness,
+  updateApiAuthorization
 }

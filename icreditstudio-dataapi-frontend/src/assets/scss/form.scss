@@ -125,4 +125,18 @@
   .el-form-item__content {
     text-align: left;
   }
+
+  .el-input-number {
+    line-height: 30px;
+  }
+
+  .el-input-number.is-controls-right .el-input-number__decrease,
+  .el-input-number.is-controls-right .el-input-number__increase {
+    line-height: 15px;
+  }
+
+  .el-input-group__append,
+  .el-input-group__prepend {
+    background-color: transparent;
+  }
 }

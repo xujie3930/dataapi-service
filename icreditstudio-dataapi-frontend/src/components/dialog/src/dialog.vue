@@ -63,6 +63,11 @@ export default {
   },
 
   props: {
+    visible: {
+      type: Boolean,
+      default: false
+    },
+
     top: {
       type: String
       // default: '25vh'
@@ -132,6 +137,10 @@ export default {
   watch: {
     dialogVisible(visible) {
       this.$emit('on-change', visible)
+    },
+
+    visible(nVal) {
+      this.dialogVisible = nVal
     }
   },
 

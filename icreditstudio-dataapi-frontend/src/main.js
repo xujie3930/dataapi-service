@@ -18,6 +18,7 @@ import '@/components/form'
 import '@/components/container'
 import '@/components/select-tree'
 import '@/components/crud'
+import '@/components/detail'
 
 import '@/utils/vue.ls.js'
 import '@/utils/vue.ss.js'
