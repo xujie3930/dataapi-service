@@ -10,7 +10,7 @@
         <version>0.0.1</version>
     </parent>
 
-    <artifactId>icreditstudio-dataapi-geteway</artifactId>
+    <artifactId>icreditstudio-dataapi-gateway</artifactId>
 
 
     <properties>
