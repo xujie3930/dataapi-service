@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.gateway.utils;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.gateway.common;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common;
 
 import com.jinninghui.datasphere.icreditstudio.framework.result.base.BaseEntity;
 import lombok.Data;

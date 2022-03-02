@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.gateway.service;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service;
 
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 

@@ -10,7 +10,7 @@
         <version>0.0.1</version>
     </parent>
 
-    <artifactId>icreditstudio-dataapi-getway</artifactId>
+    <artifactId>icreditstudio-dataapi-geteway</artifactId>
 
 
     <properties>
@@ -103,7 +103,7 @@
 
                         <configuration>
                             <skipAssembly>false</skipAssembly>
-                            <finalName>jnh-datasphere-icreditstudio-dataapi-${project.version}-dist</finalName>
+                            <finalName>jnh-datasphere-icreditstudio-dataapi-gateway-${project.version}-dist</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <attach>false</attach>
                             <descriptors>

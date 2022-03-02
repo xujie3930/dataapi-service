@@ -1,14 +1,14 @@
-package com.jinninghui.datasphere.icreditstudio.gateway.service.impl;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.AppAuthInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.RedisInterfaceInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.TokenInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
-import com.jinninghui.datasphere.icreditstudio.gateway.common.AppAuthInfo;
-import com.jinninghui.datasphere.icreditstudio.gateway.common.RedisInterfaceInfo;
-import com.jinninghui.datasphere.icreditstudio.gateway.common.TokenInfo;
-import com.jinninghui.datasphere.icreditstudio.gateway.service.AuthService;
-import com.jinninghui.datasphere.icreditstudio.gateway.utils.MapUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
