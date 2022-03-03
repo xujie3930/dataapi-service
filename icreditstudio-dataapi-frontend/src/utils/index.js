@@ -7,7 +7,7 @@ import { sm4Config } from '@/config/index'
  * @return { String | Object }
  */
 export const dateFormat = (date, fmt = 'yyyy-MM-dd hh:mm:ss') => {
-  const _date = new Date(parseInt(date))
+  const _date = new Date(date)
   if (isNaN(_date)) return date
   const o = {
     'M+': _date.getMonth() + 1,
@@ -18,12 +18,14 @@ export const dateFormat = (date, fmt = 'yyyy-MM-dd hh:mm:ss') => {
     'q+': Math.floor((_date.getMonth() + 3) / 3),
     S: _date.getMilliseconds()
   }
+
   if (/(y+)/.test(fmt)) {
     fmt = fmt.replace(
       RegExp.$1,
       `${_date.getFullYear()}`.substr(4 - RegExp.$1.length)
     )
   }
+
   for (const k in o) {
     if (new RegExp(`(${k})`).test(fmt)) {
       fmt = fmt.replace(

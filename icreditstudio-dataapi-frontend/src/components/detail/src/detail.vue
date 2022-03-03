@@ -8,18 +8,23 @@
     hide-footer
     class="detail-dialog"
     ref="baseDialog"
-    width="850px"
+    :width="width"
     :visible="visible"
     :title="options.title"
     @on-change="$emit('on-change', $event)"
   >
     <div class="detail-row" v-loading="loading">
       <div
-        class="banner-title"
+        :class="[
+          'banner-title',
+          detailTitleKeyMapping[key] ? '' : 'banner-title-hide'
+        ]"
         v-for="(item, key) in detailConfiguration"
         :key="key"
       >
-        <div class="text">{{ detailTitleKeyMapping[key] }}</div>
+        <div v-if="detailTitleKeyMapping[key]" class="text">
+          {{ detailTitleKeyMapping[key] }}
+        </div>
 
         <el-row class="detail-row-wrap">
           <el-col
@@ -68,6 +73,11 @@ export default {
       default: false
     },
 
+    width: {
+      type: String,
+      default: '850px'
+    },
+
     detailConfiguration: {
       type: Object,
       default: () => ({})
@@ -87,7 +97,7 @@ export default {
   methods: {
     open(options) {
       this.options = options
-      this.fetchDetailData(options)
+      // this.fetchDetailData(options)
     }
   }
 }
@@ -97,7 +107,7 @@ export default {
 .detail-dialog {
   ::v-deep {
     .el-dialog__body {
-      padding: 20px;
+      padding: 0 20px;
     }
   }
 }
@@ -130,6 +140,7 @@ export default {
       color: #262626;
       line-height: 20px;
       margin-left: 10px;
+      margin-bottom: 17px;
     }
 
     &::before {
@@ -144,12 +155,18 @@ export default {
     }
   }
 
+  .banner-title-hide {
+    &::before {
+      display: none;
+    }
+  }
+
   &-wrap {
     margin-left: 10px;
 
     &--col {
       @include flex(flex-start);
-      margin-top: 17px;
+      margin-bottom: 17px;
     }
     .label {
       width: 100px;
