@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface AuthService {
 
-    BusinessResult<String> getToken(String appFlag, String secretContent);
+    BusinessResult<String> getToken(String generateId, String secretContent);
 
     BusinessResult<List<Object>> getData(String version, String path, Map map);
 }
