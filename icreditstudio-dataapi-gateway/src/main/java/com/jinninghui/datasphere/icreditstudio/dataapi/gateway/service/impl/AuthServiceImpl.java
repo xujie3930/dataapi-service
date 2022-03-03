@@ -19,6 +19,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
@@ -65,6 +66,8 @@ public class AuthServiceImpl implements AuthService {
     public BusinessResult<List<Object>> getData(String version, String path,  Map map) {
         Connection conn = null;
         String querySql = null;
+        //对请求版本号进行截取
+        version = version.replaceAll("v", "").replaceAll("V", "");
         ApiLogInfo apiLogInfo = new ApiLogInfo();
         try {
             ServletRequestAttributes requestAttributes = ServletRequestAttributes.class.
@@ -102,6 +105,7 @@ public class AuthServiceImpl implements AuthService {
             //发送kafka失败信息
             ApiLogInfo failLog = generateFailLog(apiLogInfo, querySql, e);
             kafkaProducer.send(failLog);
+            throw new AppException(failLog.getErrorLog());
         } finally {
             if (null != conn) {
                 try {
@@ -118,8 +122,22 @@ public class AuthServiceImpl implements AuthService {
         apiLogInfo.setExecuteSql(querySql);
         apiLogInfo.setCallEndTime(new Date());
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_FAIL.getCode());
-        apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getRunTime());
-        apiLogInfo.setErrorLog(e.toString());
+        if (null != apiLogInfo.getRunTime()) {
+            apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getRunTime());
+        }
+        if (e instanceof AppException) {
+            try {
+                Field errorCode = e.getClass().getSuperclass().getDeclaredField("errorCode");
+                errorCode.setAccessible(true);
+                String errorLog = (String) errorCode.get(e);
+                apiLogInfo.setErrorLog(errorLog);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                apiLogInfo.setErrorLog(exception.toString());
+            }
+        } else {
+            apiLogInfo.setErrorLog(e.toString());
+        }
         return apiLogInfo;
     }
 
@@ -196,12 +214,12 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException("该API未授权该应用!");
         }
         RedisAppAuthInfo appAuthApp = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
-        if (null != appAuthApp.getPeriodEnd() && System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
+        if (!NOT_LIMIT.equals(appAuthApp.getPeriodEnd()) && System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
             throw new AppException("授权已到期");
         }
         //次数验证
-        if (NOT_LIMIT != appAuthApp.getAllowCall().longValue() && appAuthApp.getAllowCall() <= 0) {
-            throw new AppException("已达调用次数上线");
+        if (NOT_LIMIT.longValue() != appAuthApp.getAllowCall().longValue() && appAuthApp.getAllowCall() <= 0) {
+            throw new AppException("已达调用次数上限");
         }
         //调用次数减一
         appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
