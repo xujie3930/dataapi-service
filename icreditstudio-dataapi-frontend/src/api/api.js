@@ -3,9 +3,11 @@
  * @Date: 2022-02-18
  */
 import dataServiceApi from './data-service-api'
-import dataServiceApp from './data-servide-app'
+import dataServiceApp from './data-service-app'
+import dataServiceLog from './data-service-log'
 
 export default {
   ...dataServiceApi,
-  ...dataServiceApp
+  ...dataServiceApp,
+  ...dataServiceLog
 }

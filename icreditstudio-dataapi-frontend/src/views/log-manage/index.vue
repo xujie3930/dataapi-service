@@ -73,7 +73,7 @@ export default {
 
       fetchConfig: { retrieve: { url: '/log/list', method: 'post' } },
 
-      detailConfiguration: cloneDeep(detailConfiguration),
+      detailConfiguration: cloneDeep(detailConfiguration()),
       detailTitleKeyMapping: cloneDeep(detailTitleKeyMapping)
     }
   },
@@ -86,18 +86,17 @@ export default {
     // 点击-查看日志
     handleDetailClick({ row }) {
       this.detailVisible = true
-      this.$refs.logDetail.open({ id: row.id, title: '日志详情' })
+      this.$refs.logDetail.open({ row, title: '日志详情' })
     },
 
     // 获取-日志详情（供Detail子组件调用）
-    fetchDetailData({ id }) {
+    fetchDetailData({ row }) {
       this.detailLoading = true
-      this.detailConfiguration = cloneDeep(detailConfiguration)
+      this.detailConfiguration = cloneDeep(detailConfiguration(row))
 
-      API.getAppDetail({ id })
+      API.getLogDetail({ id: row.id })
         .then(({ success, data }) => {
           if (success && data) {
-            const { authResult, apiResult } = data
             cloneDeep(this.detailConfiguration.base).forEach((item, idx) => {
               const { key, formatter } = item
               const val = data[key]
@@ -112,20 +111,6 @@ export default {
                 this.detailConfiguration.base[idx].color = formatter(val)?.color
               }
             })
-
-            this.detailConfiguration.auth[0].value = apiResult.apiNames
-
-            cloneDeep(this.detailConfiguration.authTime).forEach(
-              (item, idx) => {
-                const { key: k, formatter } = item
-
-                this.detailConfiguration.authTime[idx].value = formatter
-                  ? typeof formatter(authResult[k]) === 'object'
-                    ? formatter(authResult[k])?.name
-                    : formatter(authResult)
-                  : authResult[k]
-              }
-            )
           }
         })
         .finally(() => {

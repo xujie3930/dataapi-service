@@ -3,6 +3,10 @@
  * @Description: 应用管理
  * @Date: 2022-02-28
  */
+
+import { ENABLED_STATUS } from '@/config/constant'
+import { objectConvertToArray } from '@/utils'
+
 export default [
   {
     type: 'text',
@@ -41,8 +45,7 @@ export default [
     isSearch: true,
     options: [
       { value: '', label: '全部' },
-      { value: 0, label: '启用' },
-      { value: 1, label: '停用' }
+      ...objectConvertToArray(ENABLED_STATUS)
     ]
   },
   {
