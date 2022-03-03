@@ -2,7 +2,9 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiLogService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogDetailRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -32,6 +34,11 @@ public class IcreditApiLogController {
     @PostMapping("/list")
     public BusinessResult<BusinessPageResult<LogListQueryResult>> list(@RequestBody LogListQueryRequest request){
         return apiLogService.getList(request);
+    }
+
+    @PostMapping("/detail")
+    public BusinessResult<LogDetailResult> detail(@RequestBody LogDetailRequest request){
+        return apiLogService.detail(request);
     }
 
 }

@@ -379,3 +379,6 @@ ALTER TABLE icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
 ALTER TABLE icredit_app_group ADD generate_id varchar(30) COMMENT '分组id';
 
 ALTER TABLE icredit_app DROP app_flag;
+
+ALTER TABLE icredit_api_log ADD api_type tinyint(1) COMMENT 'api类型';
+ALTER TABLE icredit_api_log ADD exception_detail text COMMENT '异常详情';
