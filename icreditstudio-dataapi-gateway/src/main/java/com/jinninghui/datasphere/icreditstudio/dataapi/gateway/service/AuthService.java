@@ -4,6 +4,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -17,5 +18,5 @@ public interface AuthService {
 
     BusinessResult<String> getToken(String appFlag, String secretContent);
 
-    BusinessResult<List<Object>> getData(String version, String path);
+    BusinessResult<List<Object>> getData(String version, String path, Map map);
 }

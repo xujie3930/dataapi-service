@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,6 @@ public class MapUtils {
         map.put("keya", "111");
         map.put("keyb", "222");
         List<String> str = mapKeyToList(map);
-        System.out.println(str);
+        System.out.println(map);
     }
 }
