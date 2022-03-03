@@ -4,10 +4,14 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntit
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiLogService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogDetailRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -29,9 +33,25 @@ public class IcreditApiLogServiceImpl extends ServiceImpl<IcreditApiLogMapper, I
 
     @Override
     public BusinessResult<BusinessPageResult<LogListQueryResult>> getList(LogListQueryRequest request) {
+        if(!StringUtils.isEmpty(request.getCallBeginTime())) {
+            request.setCallBeginTime(String.valueOf(new StringBuffer(request.getCallBeginTime()).append(" 00:00:00")));
+        }
+        if(!StringUtils.isEmpty(request.getCallEndTime())) {
+            request.setCallEndTime(String.valueOf(new StringBuffer(request.getCallEndTime()).append(" 59:59:59")));
+        }
         request.setPageStartNum((request.getPageNum() - 1) * request.getPageSize());
         Long logCount = apiLogMapper.countLog(request);
         List<LogListQueryResult> logList = apiLogMapper.getList(request);
         return BusinessResult.success(BusinessPageResult.build(logList, request, logCount));
+    }
+
+    @Override
+    public BusinessResult<LogDetailResult> detail(LogDetailRequest request) {
+        IcreditApiLogEntity logEntity = apiLogMapper.selectById(request.getId());
+        LogDetailResult logDetailResult = new LogDetailResult();
+        BeanUtils.copyProperties(logEntity, logDetailResult);
+        logDetailResult.setCallBeginTime(logEntity.getCallBeginTime().getTime());
+        logDetailResult.setCallEndTime(logEntity.getCallEndTime().getTime());
+        return BusinessResult.success(logDetailResult);
     }
 }

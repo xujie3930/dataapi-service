@@ -63,5 +63,8 @@ public class IcreditApiLogEntity implements Serializable {
 
     private Integer callStatus;
 
+    private Integer apiType;
+    private String exceptionDetail;
+
 
 }
