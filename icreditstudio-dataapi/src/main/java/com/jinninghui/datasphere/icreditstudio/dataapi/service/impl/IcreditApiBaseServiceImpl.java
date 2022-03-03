@@ -69,6 +69,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Autowired
     private ApiBaseFactory apiBaseFactory;
 
+    private static final String SQL_START = "select ";
     private static final String SQL_AND = " and ";
     private static final String SQL_FIELD_SPLIT_CHAR = ",";
     private static final String SQL_WHERE = " where ";
@@ -141,14 +142,16 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         }
         saveOrUpdate(apiBaseEntity);
 
-        String querySql = null;
+        String querySql;
         String requiredFieldStr = null;
+        String responseFieldStr = null;
+        StringBuffer requiredFields = new StringBuffer();//请求参数
+        StringBuffer responseFields = new StringBuffer();//返回参数
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
         if(ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {//表单生成模式
             boolean isHaveRespField = false;
-            StringBuffer querySqlPrefix = new StringBuffer("select ");
+            StringBuffer querySqlPrefix = new StringBuffer(SQL_START);
             StringBuffer querySqlSuffix = new StringBuffer(SQL_WHERE);
-            StringBuffer requiredFields = new StringBuffer();
             //保存 api param
             for (DatasourceApiParamSaveRequest datasourceApiParamSaveRequest : param.getApiParamSaveRequestList()) {
                 IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
@@ -165,6 +168,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 apiParamEntityList.add(apiParamEntity);
                 if(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsResponse())){
                     querySqlPrefix.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+                    responseFields.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                     isHaveRespField = true;
                 }
                 if(RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsRequest())){
@@ -187,12 +191,23 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(querySql.endsWith(SQL_AND)){
                 querySql = querySql.substring(0, querySql.lastIndexOf(SQL_AND));
             }
-            if(requiredFields.length() >= 1) {
-                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
-            }
         }else{
             apiParamEntityList = checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), 1);
-
+            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(" +", " ").toLowerCase();
+            String[] requiredFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(" from")).split(",");
+            String[] responseFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+            for (String requiredField : requiredFieldArr) {
+                requiredFields.append(requiredField.substring(0, requiredField.indexOf(" "))).append(",");
+            }
+            for (String responseField : responseFieldArr) {
+                responseFields.append(responseField.substring(0, responseField.indexOf(" ="))).append(",");
+            }
+        }
+        if(requiredFields.length() >= 1) {
+            requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
+        }
+        if(responseFields.length() >= 1) {
+            responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(","))));
         }
         apiParamService.saveOrUpdateBatch(apiParamEntityList);
 
@@ -208,8 +223,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         generateApiService.saveOrUpdate(generateApiEntity);
 
         //存放信息到redis
-        String sql = ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel()) ? querySql : param.getApiGenerateSaveRequest().getSql();
-        saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), sql, requiredFieldStr);
+        saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr);
 
         //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
@@ -353,7 +367,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             ps.execute();
             if(1 == type) {
                 apiParamEntityList = new ArrayList<>();
-                sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf("select "), sql.lastIndexOf(SQL_WHERE))).append(" limit 1"));
+                sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(" limit 1"));
                 ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery(sql);
                 ResultSetMetaData metaData = rs.getMetaData();
@@ -403,22 +417,30 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
 
             String requiredFieldStr = null;
+            String responseFieldStr = null;
             StringBuilder requiredFields = new StringBuilder();
+            StringBuilder responseFields = new StringBuilder();
             List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
             for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
                 if(RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(apiParamEntity.getRequired())){
                     requiredFields.append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                 }
+                if(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(apiParamEntity.getIsResponse())){
+                    responseFields.append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+                }
             }
             if(requiredFields.length() >= 1) {
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr);
+            if(responseFields.length() >= 1) {
+                responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(","))));
+            }
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr);
         }
         return BusinessResult.success(true);
     }
 
-    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr) {
+    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr, String responseFieldStr) {
         BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(datasourceId));
         ConnectionInfoVO connInfo = connResult.getData();
         RedisApiInfo redisApiInfo = new RedisApiInfo();
@@ -428,6 +450,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         redisApiInfo.setPassword(connInfo.getPassword());
         redisApiInfo.setQuerySql(sql);
         redisApiInfo.setRequiredFields(requiredFieldStr);
+        redisApiInfo.setResponseFields(responseFieldStr);
         redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiVersion)), JSON.toJSONString(redisApiInfo));
     }
 

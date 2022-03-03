@@ -10,5 +10,6 @@ public class RedisApiInfo {
     private String userName;
     private String password;
     private String requiredFields;
+    private String responseFields;
     private String querySql;
 }
