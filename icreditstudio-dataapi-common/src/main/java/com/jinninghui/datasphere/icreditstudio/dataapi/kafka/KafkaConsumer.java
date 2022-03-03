@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.config;
+package com.jinninghui.datasphere.icreditstudio.dataapi.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

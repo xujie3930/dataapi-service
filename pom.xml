@@ -117,6 +117,11 @@
                 <artifactId>icreditstudio-sparkx-engine</artifactId>
                 <version>${icredit.studio.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.jinninghui.datasphere</groupId>
+                <artifactId>icreditstudio-dataapi-common</artifactId>
+                <version>0.0.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -165,5 +170,6 @@
         <module>icreditstudio-framework</module>
         <module>icreditstudio-dataapi</module>
         <module>icreditstudio-dataapi-gateway</module>
+        <module>icreditstudio-dataapi-common</module>
     </modules>
 </project>

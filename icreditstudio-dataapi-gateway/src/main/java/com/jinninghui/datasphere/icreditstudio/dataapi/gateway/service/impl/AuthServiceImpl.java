@@ -1,19 +1,18 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.AppAuthInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.RedisApiInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.RedisAppAuthInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.config.KafkaProducer;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisAppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.kafka.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
-import java.util.Date;
 import java.util.*;
 
 /**
@@ -136,21 +134,21 @@ public class AuthServiceImpl implements AuthService {
         if (Objects.isNull(appAuthApiObject)){
             throw new AppException("该应用未授权!");
         }
-//        Object appAuthAppObject = redisTemplate.opsForValue().get(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId());
-//        if (Objects.isNull(appAuthAppObject)){
-//            throw new AppException("该API未授权该应用!");
-//        }
-//        RedisAppAuthInfo appAuthApp = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
-//        if (null != appAuthApp.getPeriodEnd() && System.currentTimeMillis() > appAuthApp.getPeriodEnd()){
-//            throw new AppException("授权已到期");
-//        }
-//        //次数验证
-//        if (NOT_LIMIT != appAuthApp.getAllowCall().longValue() && appAuthApp.getAllowCall() <= 0){
-//            throw new AppException("已达调用次数上线");
-//        }
-//        //调用次数减一
-//        appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
-//        redisTemplate.opsForValue().set(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId(),  JSON.toJSONString(appAuthApp));
+        Object appAuthAppObject = redisTemplate.opsForValue().get(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId());
+        if (Objects.isNull(appAuthAppObject)){
+            throw new AppException("该API未授权该应用!");
+        }
+        RedisAppAuthInfo appAuthApp = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
+        if (null != appAuthApp.getPeriodEnd() && System.currentTimeMillis() > appAuthApp.getPeriodEnd()){
+            throw new AppException("授权已到期");
+        }
+        //次数验证
+        if (NOT_LIMIT != appAuthApp.getAllowCall().longValue() && appAuthApp.getAllowCall() <= 0){
+            throw new AppException("已达调用次数上线");
+        }
+        //调用次数减一
+        appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
+        redisTemplate.opsForValue().set(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId(),  JSON.toJSONString(appAuthApp));
         return apiAuthInfo;
     }
 
