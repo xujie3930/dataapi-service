@@ -2,6 +2,10 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface IcreditApiLogMapper extends BaseMapper<IcreditApiLogEntity> {
 
+    Long countLog(LogListQueryRequest request);
+
+    List<LogListQueryResult> getList(LogListQueryRequest request);
 }

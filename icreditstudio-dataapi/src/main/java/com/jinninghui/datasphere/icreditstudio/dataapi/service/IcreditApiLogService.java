@@ -2,6 +2,10 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 /**
  * <p>
@@ -13,4 +17,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IcreditApiLogService extends IService<IcreditApiLogEntity> {
 
+    BusinessResult<BusinessPageResult<LogListQueryResult>> getList(LogListQueryRequest request);
 }
