@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.config;
+package com.jinninghui.datasphere.icreditstudio.dataapi.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -9,7 +9,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-
 /**
  * @author xujie
  * @description kafka消费者
@@ -18,7 +17,6 @@ import java.util.Optional;
 @Component
 @Slf4j
 public class KafkaConsumer {
-
 
     @KafkaListener(topics = KafkaProducer.TOPIC)
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {

@@ -1,9 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.common;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+
 import com.jinninghui.datasphere.icreditstudio.framework.result.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.config;
+package com.jinninghui.datasphere.icreditstudio.dataapi.kafka;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
