@@ -1394,8 +1394,7 @@ public abstract class StringUtils {
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
 			String group = m.group();
-			String temp = group.replace("${", "");
-			String key = temp.replace("}",  "");
+			String key = group.replace("${", "").replace("}",  "");
 			m.appendReplacement(sb, "'" + kvs.get(key)  + "'");
 		}
 		m.appendTail(sb);
