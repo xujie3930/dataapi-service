@@ -34,4 +34,9 @@ public class IcreditApiParamServiceImpl extends ServiceImpl<IcreditApiParamMappe
     public List<IcreditApiParamEntity> getByApiIdAndVersion(String id, Integer apiVersion) {
         return apiParamMapper.getByApiIdAndVersion(id, apiVersion);
     }
+
+    @Override
+    public void removeByApiId(String apiId) {
+        apiParamMapper.removeByApiId(apiId);
+    }
 }

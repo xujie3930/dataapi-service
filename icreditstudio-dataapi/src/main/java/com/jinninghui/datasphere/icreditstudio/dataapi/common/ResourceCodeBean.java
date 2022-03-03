@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ResourceCodeBean {
 
     public enum ResourceCode {
+        RESOURCE_CODE_00000001("00000001", "主键ID不能为空！"),
         RESOURCE_CODE_10000000("10000000", "用户异常！"),
         RESOURCE_CODE_10000002("10000002", "名称已存在，请重新输入！"),
         RESOURCE_CODE_10000003("10000003", "分组名称已存在，请重新输入！"),

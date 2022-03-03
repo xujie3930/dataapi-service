@@ -28,7 +28,7 @@
         )
         UNION
         (
-          SELECT app.id,app.`name`,app.generate_id AS generateId,app.certification_type AS certificationType,app.is_enable AS isEnable,app.period,
+          SELECT app.id,app.`name`,app.generate_id AS generateId,app.certification_type AS certificationType,app.is_enable AS isEnable,app.token_type AS period,
                 app.create_by AS createBy,app.create_time AS createTime,app.`desc`,app_group_id AS appGroupId
           FROM icredit_app_group appGroup LEFT JOIN icredit_app app ON appGroup.id = app.app_group_id
           WHERE app.del_flag = 0

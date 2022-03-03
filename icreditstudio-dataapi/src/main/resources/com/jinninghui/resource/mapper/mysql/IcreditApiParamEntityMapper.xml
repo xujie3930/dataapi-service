@@ -8,7 +8,7 @@
         from icredit_api_param
         <where>
             <if test="id != null and id != '' ">
-                AND api_base_id = #{id}
+                AND api_base_id = #{apiId}
             </if>
             AND del_flag = 0
         </where>
@@ -20,10 +20,14 @@
         from icredit_api_param
         where del_flag = 0
         <if test="id != null and id != '' ">
-            AND api_base_id = #{id}
+            AND api_base_id = #{apiId}
         </if>
         <if test="apiVersion != null and apiVersion != '' ">
             AND api_version = #{apiVersion}
         </if>
     </select>
+
+    <delete id="removeByApiId">
+        delete from icredit_api_param where api_base_id = #{apiId}
+    </delete>
 </mapper>
