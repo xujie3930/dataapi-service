@@ -17,5 +17,5 @@ public interface AuthService {
 
     BusinessResult<String> getToken(String appFlag, String secretContent);
 
-    BusinessResult<List<Object>> getData();
+    BusinessResult<List<Object>> getData(String version, String path);
 }

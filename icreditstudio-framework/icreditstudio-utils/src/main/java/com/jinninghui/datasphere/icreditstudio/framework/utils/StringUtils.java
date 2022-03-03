@@ -1394,9 +1394,19 @@ public abstract class StringUtils {
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
 			String group = m.group();
-			m.appendReplacement(sb, "'" + kvs.get(group) + "'");
+			String temp = group.replace("${", "");
+			String key = temp.replace("}",  "");
+			m.appendReplacement(sb, "'" + kvs.get(key)  + "'");
 		}
 		m.appendTail(sb);
 		return sb.toString();
+	}
+
+	public static void main(String[] args) {
+		String str = "SELECT * FROM table_setting WHERE id = ${id}";
+		Map<String, String> map = new HashMap<>();
+		map.put("id", "123456");
+		String s = parseSql(str, map);
+		System.out.println(s);
 	}
 }

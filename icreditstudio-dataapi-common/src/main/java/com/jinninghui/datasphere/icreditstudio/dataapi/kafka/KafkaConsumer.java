@@ -18,24 +18,13 @@ import java.util.Optional;
 @Slf4j
 public class KafkaConsumer {
 
-    @KafkaListener(topics = KafkaProducer.TOPIC)
+    @KafkaListener(groupId = "test",topics = KafkaProducer.TOPIC)
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         Optional message = Optional.ofNullable(record.value());
         if (message.isPresent()) {
             Object msg = message.get();
             log.info("topic_test 消费了： Topic:" + topic + ",Message:" + msg);
-            ack.acknowledge();
-        }
-    }
-
-    @KafkaListener(topics = KafkaProducer.TOPIC)
-    public void topic_test1(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-
-        Optional message = Optional.ofNullable(record.value());
-        if (message.isPresent()) {
-            Object msg = message.get();
-            log.info("topic_test1 消费了： Topic:" + topic + ",Message:" + msg);
             ack.acknowledge();
         }
     }

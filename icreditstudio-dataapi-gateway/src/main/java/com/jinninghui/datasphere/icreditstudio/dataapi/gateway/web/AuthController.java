@@ -26,7 +26,7 @@ public class AuthController {
     private AuthService authService;
 
     @GetMapping("access/token")
-    public BusinessResult<String> getToken(@RequestParam("appFlag") String appFlag, @RequestParam String secretContent) {
+    public BusinessResult<String> getToken(@RequestParam("appFlag") String appFlag, @RequestParam("secretContent") String secretContent) {
         return authService.getToken(appFlag, secretContent);
     }
 }
