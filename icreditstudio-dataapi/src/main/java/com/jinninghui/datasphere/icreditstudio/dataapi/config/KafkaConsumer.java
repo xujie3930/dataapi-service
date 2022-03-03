@@ -18,7 +18,7 @@ import java.util.Optional;
 @Slf4j
 public class KafkaConsumer {
 
-    @KafkaListener(topics = KafkaProducer.TOPIC)
+    @KafkaListener(groupId = "test",topics = KafkaProducer.TOPIC)
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         Optional message = Optional.ofNullable(record.value());
@@ -29,7 +29,7 @@ public class KafkaConsumer {
         }
     }
 
-    @KafkaListener(topics = KafkaProducer.TOPIC)
+    @KafkaListener(groupId = "test1",topics = KafkaProducer.TOPIC)
     public void topic_test1(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         Optional message = Optional.ofNullable(record.value());

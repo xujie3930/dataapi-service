@@ -5,10 +5,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthServi
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,9 +25,9 @@ public class ApiOpenController {
     @Autowired
     private AuthService authService;
 
-    @GetMapping("getData")
-    public BusinessResult<List<Object>> getData() {
-        return authService.getData();
+    @GetMapping("/{version}/{path}")
+    public BusinessResult<List<Object>> getData(@PathVariable("version") String version, @PathVariable("path") String path) {
+        return authService.getData(version, path);
     }
 }
 

@@ -29,15 +29,20 @@ public class MapUtils {
     }
 
 
-    public static List<String> MapKeyToList(Map map){
+    public static List<String> mapKeyToList(Map map){
         List<String> keyList = (List<String>) map.keySet()
                 .stream()
                 .collect(Collectors.toList());
         return keyList;
     }
     public static void main(String[] args) {
-        String str = "a=b&c=d&e=f";
+        /*String str = "a=b&c=d&e=f";
         Map map = str2Map(str);
-        System.out.println(map);
+        System.out.println(map);*/
+        Map<String, String> map = new HashMap<>();
+        map.put("keya", "111");
+        map.put("keyb", "222");
+        List<String> str = mapKeyToList(map);
+        System.out.println(str);
     }
 }
