@@ -105,35 +105,31 @@ CREATE TABLE `dataapi`.`icredit_api_group`
 -- Table structure for icredit_api_log
 -- ----------------------------
 DROP TABLE IF EXISTS `dataapi`.`icredit_api_log`;
-CREATE TABLE `dataapi`.`icredit_api_log`
-(
-    `id`                 varchar(30) NOT NULL,
-    `api_log_summary_id` varchar(30) NOT NULL,
-    `api_name`           varchar(50)  DEFAULT NULL,
-    `api_id`             varchar(30)  DEFAULT NULL,
-    `api_path`           varchar(100) DEFAULT NULL,
-    `app_name`           varchar(100) DEFAULT NULL,
-    `app_id`             varchar(30)  DEFAULT NULL,
-    `call_ip`            varchar(100) DEFAULT NULL,
-    `sql`                text,
-    `api_version`        varchar(10)  DEFAULT NULL,
-    `request_protocol`   varchar(20)  DEFAULT NULL,
-    `request_type`       varchar(20)  DEFAULT NULL,
-    `response_type`      varchar(20)  DEFAULT NULL,
-    `request_param`      varchar(200) DEFAULT NULL,
-    `response_patam`     text,
-    `call_begin_time`    varchar(50)  DEFAULT NULL,
-    `call_end_time`      varchar(50)  DEFAULT NULL,
-    `run_time`           varchar(10)  DEFAULT NULL,
-    `call_status_str`    varchar(10)  DEFAULT NULL,
-    `call_status`        tinyint(1) DEFAULT NULL,
-    `remark`             varchar(255) DEFAULT NULL,
-    `create_time`        datetime     DEFAULT NULL,
-    `create_by`          varchar(30)  DEFAULT NULL,
-    `update_time`        datetime     DEFAULT NULL,
-    `update_by`          varchar(30)  DEFAULT NULL,
-    `del_flag`           tinyint(1) DEFAULT NULL,
-    PRIMARY KEY (`id`)
+CREATE TABLE `dataapi`.`icredit_api_log` (
+  `id` varchar(30) NOT NULL,
+  `api_name` varchar(50) DEFAULT NULL,
+  `api_id` varchar(30) DEFAULT NULL,
+  `api_path` varchar(100) DEFAULT NULL,
+  `app_name` varchar(100) DEFAULT NULL,
+  `app_id` varchar(30) DEFAULT NULL,
+  `call_ip` varchar(100) DEFAULT NULL,
+  `api_version` int(11) DEFAULT NULL,
+  `request_protocol` varchar(20) DEFAULT NULL,
+  `request_type` varchar(20) DEFAULT NULL,
+  `response_type` varchar(20) DEFAULT NULL,
+  `request_param` text,
+  `response_param` text,
+  `call_begin_time` datetime DEFAULT NULL,
+  `call_end_time` datetime DEFAULT NULL,
+  `run_time` bigint(16) DEFAULT NULL,
+  `call_status` tinyint(1) DEFAULT NULL,
+  `remark` varchar(255) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `create_by` varchar(30) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `update_by` varchar(30) DEFAULT NULL,
+  `del_flag` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='调用日志';
 
 -- ----------------------------
@@ -379,3 +375,7 @@ ALTER TABLE icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期�
 ALTER TABLE icredit_app ADD generateId varchar(30) COMMENT '应用id';
 
 ALTER TABLE icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
+
+ALTER TABLE icredit_app_group ADD generate_id varchar(30) COMMENT '分组id';
+
+ALTER TABLE icredit_app DROP app_flag;

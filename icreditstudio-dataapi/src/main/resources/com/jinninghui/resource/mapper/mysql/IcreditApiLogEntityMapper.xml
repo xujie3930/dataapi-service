@@ -2,4 +2,56 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMapper">
 
+    <select id="countLog" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest" resultType="java.lang.Long">
+        select count(1)
+        from icredit_api_log
+        where del_flag = 0
+        <if test="callStatus != null">
+            AND call_status = #{callStatus}
+        </if>
+        <if test="apiVersion != null">
+            AND api_version = #{apiVersion}
+        </if>
+        <if test="callBeginTime != null and callBeginTime != ''">
+            AND call_begin_time &gt;= #{callBeginTime}
+        </if>
+        <if test="callEndTime != null and callEndTime != ''">
+            AND call_begin_time &lt;= #{callEndTime}
+        </if>
+        <if test="apiName != null and apiName != ''">
+            AND api_name like concat ('%', #{apiName}, '%')
+        </if>
+        <if test="appName != null and appName != ''">
+            AND app_name like concat ('%', #{appName}, '%')
+        </if>
+    </select>
+
+    <select id="getList" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest"
+            resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult">
+        select id,api_name as apiName,api_path as apiPath,app_name as appName,call_ip as callIp,api_version as apiVersion,call_begin_time as callBeginTime,
+              run_time as runTime,call_status as callStatus
+        from icredit_api_log
+        where del_flag = 0
+        <if test="callStatus != null">
+            AND call_status = #{callStatus}
+        </if>
+        <if test="apiVersion != null">
+            AND api_version = #{apiVersion}
+        </if>
+        <if test="callBeginTime != null and callBeginTime != ''">
+            AND call_begin_time &gt;= #{callBeginTime}
+        </if>
+        <if test="callEndTime != null and callEndTime != ''">
+            AND call_begin_time &lt;= #{callEndTime}
+        </if>
+        <if test="apiName != null and apiName != ''">
+            AND api_name like concat ('%', #{apiName}, '%')
+        </if>
+        <if test="appName != null and appName != ''">
+            AND app_name like concat ('%', #{appName}, '%')
+        </if>
+        order by call_begin_time desc
+        limit #{pageStartNum},#{pageSize}
+    </select>
+
 </mapper>

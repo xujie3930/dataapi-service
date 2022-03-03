@@ -34,13 +34,7 @@
         </dependency>
         <dependency>
             <groupId>com.jinninghui.datasphere</groupId>
-            <artifactId>icreditstudio-dataapi</artifactId>
-            <version>0.0.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
+            <artifactId>icreditstudio-dataapi-common</artifactId>
         </dependency>
     </dependencies>
 
