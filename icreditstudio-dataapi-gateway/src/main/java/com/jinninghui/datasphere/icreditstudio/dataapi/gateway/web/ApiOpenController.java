@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -26,8 +27,8 @@ public class ApiOpenController {
     private AuthService authService;
 
     @GetMapping("/{version}/{path}")
-    public BusinessResult<List<Object>> getData(@PathVariable("version") String version, @PathVariable("path") String path) {
-        return authService.getData(version, path);
+    public BusinessResult<List<Object>> getData(@PathVariable("version") String version, @PathVariable("path") String path, @RequestParam(required = false) Map<String, Object> params) {
+        return authService.getData(version, path, params);
     }
 }
 

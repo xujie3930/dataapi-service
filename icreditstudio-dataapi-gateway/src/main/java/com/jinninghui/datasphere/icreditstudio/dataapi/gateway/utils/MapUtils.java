@@ -44,6 +44,6 @@ public class MapUtils {
         map.put("keya", "111");
         map.put("keyb", "222");
         List<String> str = mapKeyToList(map);
-        System.out.println(str);
+        System.out.println(map);
     }
 }

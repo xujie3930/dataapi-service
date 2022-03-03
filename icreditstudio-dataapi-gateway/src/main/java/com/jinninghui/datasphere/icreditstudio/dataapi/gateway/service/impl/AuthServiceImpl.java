@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public BusinessResult<List<Object>> getData(String version, String path) {
+    public BusinessResult<List<Object>> getData(String version, String path,  Map map) {
         Connection conn = null;
         String querySql = null;
         ApiLogInfo apiLogInfo = new ApiLogInfo();
@@ -83,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
             //2：根据path和version,鉴权API信息
             checkApi(apiInfo, appAuthInfo);
             //3:对入参做校验
-            Map map = checkParam(request, apiInfo);
+            checkParam(map, apiInfo);
             //处理sql，替换其中参数为入参
             querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), map);
             //连接数据源，执行SQL
@@ -174,9 +174,7 @@ public class AuthServiceImpl implements AuthService {
         return appAuthInfo;
     }
 
-    private Map checkParam(HttpServletRequest request, RedisApiInfo apiInfo) {
-        String queryString = request.getQueryString();
-        Map map = MapUtils.str2Map(queryString);
+    private Map checkParam(Map map, RedisApiInfo apiInfo) {
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
         if (StringUtils.isNotBlank(apiInfo.getRequiredFields())) {
