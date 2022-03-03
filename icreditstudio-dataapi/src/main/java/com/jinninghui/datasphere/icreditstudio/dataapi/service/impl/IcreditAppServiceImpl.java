@@ -21,6 +21,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppDetailResul
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -91,42 +92,44 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         appDetailResult.setAppGroupName(appGroupService.findNameById(appEntity.getAppGroupId()));
 
         List<IcreditAuthEntity> authEntityList = authService.findByAppId(appEntity.getId());
-        List<String> apiIds = new ArrayList<>(authEntityList.size());
-        for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
-            apiIds.add(icreditAuthEntity.getApiId());
-        }
-        List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);
-        StringBuffer apiInfoStr = new StringBuffer();
-        int len = apiInfoList.size();
-        for (int i = 0;i < len;i++) {
-            apiInfoStr.append(apiInfoList.get(i).getWorkFlowName()).append(SPLIT_CHAR).append(apiInfoList.get(i).getApiGroupName()).append(SPLIT_CHAR).append(apiInfoList.get(i).getApiName());
-            if(i < (len - 1)){
-                apiInfoStr.append("、");
+        if(!CollectionUtils.isEmpty(authEntityList)){//授权信息
+            List<String> apiIds = new ArrayList<>(authEntityList.size());
+            for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
+                apiIds.add(icreditAuthEntity.getApiId());
             }
-        }
-        ApiResult apiResult = new ApiResult();
-        apiResult.setApiNames(String.valueOf(apiInfoStr));
+            List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);
+            StringBuffer apiInfoStr = new StringBuffer();
+            int len = apiInfoList.size();
+            for (int i = 0;i < len;i++) {
+                apiInfoStr.append(apiInfoList.get(i).getWorkFlowName()).append(SPLIT_CHAR).append(apiInfoList.get(i).getApiGroupName()).append(SPLIT_CHAR).append(apiInfoList.get(i).getApiName());
+                if(i < (len - 1)){
+                    apiInfoStr.append("、");
+                }
+            }
+            ApiResult apiResult = new ApiResult();
+            apiResult.setApiNames(String.valueOf(apiInfoStr));
 
-        IcreditAuthConfigEntity authConfigEntity = authConfigService.getById(authEntityList.get(0).getAuthConfigId());
-        AuthResult authResult = new AuthResult();
-        authResult.setAllowCall(authConfigEntity.getAllowCall());
-        authResult.setPeriodBegin(authConfigEntity.getPeriodBegin());
-        authResult.setPeriodEnd(authConfigEntity.getPeriodEnd());
-        if(CallCountEnum.CALL_INFINITE_TIMES.getCode().equals(authConfigEntity.getAllowCall())){
-            authResult.setCallCountType(CallCountEnum.CALL_INFINITE_TIMES.getMsg());
-        }else {
-            authResult.setCallCountType(CallCountEnum.CALL_FINITE_TIMES.getMsg());
-        }
-        if(TokenTypeEnum.LONG_TIME.getPeriod().equals(appDetailResult.getPeriod())) {
-            authResult.setTokenType(TokenTypeEnum.LONG_TIME.getCode());
-        }else if(TokenTypeEnum.EIGHT_HOURS.getPeriod().equals(appDetailResult.getPeriod())){
-            authResult.setTokenType(TokenTypeEnum.EIGHT_HOURS.getCode());
-        }else{
-            authResult.setTokenType(TokenTypeEnum.CUSTOM.getCode());
-        }
+            IcreditAuthConfigEntity authConfigEntity = authConfigService.getById(authEntityList.get(0).getAuthConfigId());
+            AuthResult authResult = new AuthResult();
+            authResult.setAllowCall(authConfigEntity.getAllowCall());
+            authResult.setPeriodBegin(authConfigEntity.getPeriodBegin());
+            authResult.setPeriodEnd(authConfigEntity.getPeriodEnd());
+            if(CallCountEnum.CALL_INFINITE_TIMES.getCode().equals(authConfigEntity.getAllowCall())){
+                authResult.setCallCountType(CallCountEnum.CALL_INFINITE_TIMES.getMsg());
+            }else {
+                authResult.setCallCountType(CallCountEnum.CALL_FINITE_TIMES.getMsg());
+            }
+            if(TokenTypeEnum.LONG_TIME.getPeriod().equals(appDetailResult.getPeriod())) {
+                authResult.setTokenType(TokenTypeEnum.LONG_TIME.getCode());
+            }else if(TokenTypeEnum.EIGHT_HOURS.getPeriod().equals(appDetailResult.getPeriod())){
+                authResult.setTokenType(TokenTypeEnum.EIGHT_HOURS.getCode());
+            }else{
+                authResult.setTokenType(TokenTypeEnum.CUSTOM.getCode());
+            }
 
-        appDetailResult.setApiResult(apiResult);
-        appDetailResult.setAuthResult(authResult);
+            appDetailResult.setApiResult(apiResult);
+            appDetailResult.setAuthResult(authResult);
+        }
         return BusinessResult.success(appDetailResult);
     }
 }

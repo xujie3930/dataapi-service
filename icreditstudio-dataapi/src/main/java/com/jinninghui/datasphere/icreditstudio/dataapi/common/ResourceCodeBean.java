@@ -24,7 +24,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_20000006("20000006", "sql语句不能使用【select *】的形式！"),
         RESOURCE_CODE_20000007("20000007", "请检查sql语句语法是否正确，或选择的数据源与sql语句中的表是否对应！"),
         RESOURCE_CODE_20000008("20000008", "sql语句不能为空！"),
-        RESOURCE_CODE_20000009("20000009", "请选择API！"),
+        RESOURCE_CODE_20000009("20000009", "请勾选API！"),
         RESOURCE_CODE_20000010("20000010", "无法匹配应用！"),
         RESOURCE_CODE_20000011("20000011", "应用分组名称不能为空，只能以英文字母或中文开头，并且只能包含英文、中文、数字，长度50以内！"),
         RESOURCE_CODE_20000013("20000013", "分组ID已存在！"),

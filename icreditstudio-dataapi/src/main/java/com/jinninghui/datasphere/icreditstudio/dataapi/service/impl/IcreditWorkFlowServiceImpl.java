@@ -12,7 +12,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEnt
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditWorkFlowMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.OauthApiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
@@ -24,11 +23,11 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUti
 import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -42,12 +41,10 @@ import java.util.*;
 @Service
 public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMapper, IcreditWorkFlowEntity> implements IcreditWorkFlowService {
 
-    @Autowired
+    @Resource
     private IcreditWorkFlowMapper workFlowMapper;
-    @Autowired
+    @Resource
     private IcreditApiGroupService apiGroupService;
-    @Autowired
-    private OauthApiService oauthApiService;
 
     @Override
     public Boolean hasExit(WorkFlowSaveRequest request) {
