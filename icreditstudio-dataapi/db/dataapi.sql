@@ -379,3 +379,7 @@ ALTER TABLE icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期�
 ALTER TABLE icredit_app ADD generateId varchar(30) COMMENT '应用id';
 
 ALTER TABLE icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
+
+ALTER TABLE icredit_app_group ADD generate_id varchar(30) COMMENT '分组id';
+
+ALTER TABLE icredit_app DROP app_flag;
