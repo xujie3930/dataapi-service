@@ -65,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public BusinessResult<List<Object>> getData(String version, String path,  Map map) {
+    public BusinessResult<List<Object>> getData(String version, String path, Map map) {
         Connection conn = null;
         String querySql = null;
         //对请求版本号进行截取
@@ -163,9 +163,9 @@ public class AuthServiceImpl implements AuthService {
         logInfo.setCallIp(request.getRemoteHost());
         logInfo.setApiVersion(version);
         //请求参数
-        logInfo.setRequestParam("");
+        logInfo.setRequestParam(apiInfo.getRequiredFields());
         //返回参数
-        logInfo.setResponsePatam("");
+        logInfo.setResponsePatam(apiInfo.getResponseFields());
         //请求开始时间
         logInfo.setCallStatus(CallStatusEnum.CALL_ON.getCode());
         logInfo.setCallBeginTime(date);
