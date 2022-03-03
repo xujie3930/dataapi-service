@@ -3,7 +3,6 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisAppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
@@ -13,7 +12,6 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -23,7 +21,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
-import java.util.Date;
 import java.util.*;
 
 /**
