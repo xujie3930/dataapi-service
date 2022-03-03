@@ -69,10 +69,13 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Autowired
     private ApiBaseFactory apiBaseFactory;
 
+    private static final String EMPTY_CHAR = " ";
+    private static final String MANY_EMPTY_CHAR = " +";
     private static final String SQL_START = "select ";
     private static final String SQL_AND = " and ";
     private static final String SQL_FIELD_SPLIT_CHAR = ",";
     private static final String SQL_WHERE = " where ";
+    private static final String SQL_FROM = " from ";
     private static final String SEPARATOR = "|";
     private static final String SPLIT_URL_FLAG = "?";
     private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
@@ -184,30 +187,38 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
             apiParamService.saveOrUpdateBatch(apiParamEntityList);
             querySql = String.valueOf(new StringBuffer(querySqlPrefix.substring(0, querySqlPrefix.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))
-                    .append(" FROM ").append(param.getApiGenerateSaveRequest().getTableName()).append(querySqlSuffix));
+                    .append(SQL_FROM).append(param.getApiGenerateSaveRequest().getTableName()).append(querySqlSuffix));
             if(querySql.endsWith(SQL_WHERE)){
                 querySql = querySql.substring(0, querySql.lastIndexOf(SQL_WHERE));
             }
             if(querySql.endsWith(SQL_AND)){
                 querySql = querySql.substring(0, querySql.lastIndexOf(SQL_AND));
             }
+            if(requiredFields.length() >= 1) {
+                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+            }
+            if(responseFields.length() >= 1) {
+                responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+            }
         }else{
             apiParamEntityList = checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), 1);
-            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(" +", " ").toLowerCase();
-            String[] requiredFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(" from")).split(",");
-            String[] responseFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
+            String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
+            String[] requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
             for (String requiredField : requiredFieldArr) {
-                requiredFields.append(requiredField.substring(0, requiredField.indexOf(" "))).append(",");
+                requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
             }
             for (String responseField : responseFieldArr) {
-                responseFields.append(responseField.substring(0, responseField.indexOf(" ="))).append(",");
+                responseFields.append(responseField.substring(0, responseField.indexOf(EMPTY_CHAR))).append(SQL_FIELD_SPLIT_CHAR);
             }
-        }
-        if(requiredFields.length() >= 1) {
-            requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
-        }
-        if(responseFields.length() >= 1) {
-            responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(","))));
+            if(requiredFields.length() >= 1) {
+                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+            }
+            if(responseFields.length() >= 1) {
+                responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+            }
+            handleField(apiParamEntityList, requiredFieldStr, responseFieldStr);
+            apiParamService.removeByApiId(apiBaseEntity.getId());
         }
         apiParamService.saveOrUpdateBatch(apiParamEntityList);
 
@@ -234,6 +245,26 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(apiParamEntityList, ApiParamSaveResult.class);
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
         return BusinessResult.success(apiSaveResult);
+    }
+
+    private void handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr) {
+        String[] requiredFieldArr =  requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
+        String[] responseFieldArr =  responseFieldStr.split(SQL_FIELD_SPLIT_CHAR);
+        for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
+            for (String requiredField : requiredFieldArr) {
+                if(requiredField.equals(apiParamEntity.getFieldName())){
+                    apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+                    apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                }
+            }
+        }
+        for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
+            for (String responseField : responseFieldArr) {
+                if(responseField.equals(apiParamEntity.getFieldName())){
+                    apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+                }
+            }
+        }
     }
 
     @Override
@@ -353,7 +384,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         if(StringUtils.isEmpty(request.getSql())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage());
         }
-        String sql = request.getSql().replaceAll(" +", " ").toLowerCase();
+        String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
         if(sql.contains("select *")){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
         }
@@ -389,7 +420,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                         apiParamEntity.setFieldName(columnRs.getString("COLUMN_NAME"));
                         //todo 字段中文描述
                         apiParamEntity.setDesc(columnRs.getString("REMARKS"));
-//                  apiParamEntity.setId(datasourceApiParamSaveRequest.getId());
+                        apiParamEntity.setIsRequest(RequestFiledEnum.NOT_IS_REQUEST_FIELD.getCode());
+                        apiParamEntity.setIsResponse(ResponseFiledEnum.NOT_IS_RESPONSE_FIELD.getCode());
+                        apiParamEntity.setRequired(RequiredFiledEnum.NOT_IS_REQUIRED_FIELD.getCode());
                         apiParamEntity.setApiBaseId(id);
                         apiParamEntity.setApiVersion(apiVersion);
                         apiParamEntityList.add(apiParamEntity);
@@ -430,10 +463,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 }
             }
             if(requiredFields.length() >= 1) {
-                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(","))));
+                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
             if(responseFields.length() >= 1) {
-                responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(","))));
+                responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr);
         }

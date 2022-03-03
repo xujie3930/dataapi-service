@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiLogService;
@@ -8,6 +9,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogDetailRequ
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
+import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
@@ -47,6 +49,9 @@ public class IcreditApiLogServiceImpl extends ServiceImpl<IcreditApiLogMapper, I
 
     @Override
     public BusinessResult<LogDetailResult> detail(LogDetailRequest request) {
+        if(StringUtils.isEmpty(request.getId())){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_00000001.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_00000001.getMessage());
+        }
         IcreditApiLogEntity logEntity = apiLogMapper.selectById(request.getId());
         LogDetailResult logDetailResult = new LogDetailResult();
         BeanUtils.copyProperties(logEntity, logDetailResult);
