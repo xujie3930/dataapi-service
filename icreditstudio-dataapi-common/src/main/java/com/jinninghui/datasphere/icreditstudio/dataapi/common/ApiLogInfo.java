@@ -39,14 +39,14 @@ public class ApiLogInfo implements Serializable {
     //可以获取
     private String apiVersion;
 
-    //请求协议?
-    private String requestProtocol;
+    //请求协议
+    private String requestProtocol = "HTTP";
 
     //GET
-    private String requestType;
+    private String requestType = "GET";
 
     //JSON
-    private String responseType;
+    private String responseType = "JSON";
 
     //可以获取
     private String requestParam;
@@ -55,16 +55,13 @@ public class ApiLogInfo implements Serializable {
     private String responsePatam;
 
     //可以获取
-    private String callBeginTime;
+    private Date callBeginTime;
 
     //可以获取
-    private String callEndTime;
+    private Date callEndTime;
 
     //可以获取
-    private String runTime;
-
-    //(请求中,成功,失败)
-    private String callStatusStr;
+    private Long runTime;
 
     //(0请求中,1成功,2失败)
     private Integer callStatus;
@@ -85,5 +82,13 @@ public class ApiLogInfo implements Serializable {
 
     private Integer delFlag = 0;
 
+    //kafka唯一id
+    private String traceId;
+
+    //具体执行sql
+    private String executeSql;
+
+    //异常日志
+    private String errorLog;
 
 }
