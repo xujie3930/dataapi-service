@@ -21,18 +21,12 @@
           <if test="isEnable != null">
               AND app.is_enable = #{isEnable}
           </if>
-          <if test="period == 0">
-              AND app.period = -1
-          </if>
-          <if test="period == 1">
-              AND app.period = 8
-          </if>
-          <if test="period == 2">
-              AND (app.period != -1 AND app.period != 8)
+          <if test="period != null">
+              AND app.token_type = #{period}
           </if>
           ORDER BY appGroup.create_time DESC
         )
-        UNION ALL
+        UNION
         (
           SELECT app.id,app.`name`,app.generate_id AS generateId,app.certification_type AS certificationType,app.is_enable AS isEnable,app.period,
                 app.create_by AS createBy,app.create_time AS createTime,app.`desc`,app_group_id AS appGroupId
@@ -50,14 +44,8 @@
             <if test="isEnable != null">
                 AND app.is_enable = #{isEnable}
             </if>
-            <if test="period == 0">
-                AND app.period = -1
-            </if>
-            <if test="period == 1">
-                AND app.period = 8
-            </if>
-            <if test="period == 2">
-                AND (app.period != null AND app.period != -1 AND app.period != 8)
+            <if test="period != null">
+                AND app.token_type = #{period}
             </if>
           ORDER BY app.create_time DESC
         )
