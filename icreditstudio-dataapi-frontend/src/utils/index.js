@@ -128,6 +128,9 @@ export const isDef = v => v !== undefined && v !== null
 
 export const isUndef = v => v === undefined || v === null
 
+export const isPlainObject = obj =>
+  Object.prototype.toString.call(obj) === '[object Object]'
+
 export const imageToBase64 = img => {
   const canvas = document.createElement('canvas')
   canvas.width = img.width
@@ -259,11 +262,14 @@ export const download = options => {
   document.body.removeChild(link)
 }
 
-// 讲对象转换成数据对象
+// 讲对象转换成数组对象
 export const objectConvertToArray = sourceObj => {
   const targetArray = []
   for (const [key, value] of Object.entries(sourceObj ?? {})) {
-    targetArray.push({ label: value, value: parseInt(key) })
+    targetArray.push({
+      label: isPlainObject(value) ? value.name : value,
+      value: parseInt(key)
+    })
   }
 
   return targetArray

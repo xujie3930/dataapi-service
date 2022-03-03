@@ -5,12 +5,11 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum CallStatusEnum {
-    //0请求中,1成功,2失败
+public enum AppEnableEnum {
+    //true启用,false未启用
 
-    CALL_ON(0, "请求中"),
-    CALL_SUCCESS(1, "成功"),
-    CALL_FAIL(2, "失败");
+    NOT_ENABLE(0, "未启用"),
+    ENABLE(1, "启用");
 
     private final Integer code;
     private final String msg;

@@ -2,6 +2,8 @@
  * @Description: 调用日志管理
  * @Date: 2022-03-03
  */
+import { REQUEST_STATUS } from '@/config/constant'
+import { objectConvertToArray } from '@/utils'
 
 export default [
   {
@@ -48,9 +50,7 @@ export default [
     isSearch: true,
     options: [
       { value: '', label: '全部' },
-      { value: 0, label: '成功' },
-      { value: 1, label: '失败' },
-      { value: 2, label: '请求中' }
+      ...objectConvertToArray(REQUEST_STATUS)
     ]
   }
 ]

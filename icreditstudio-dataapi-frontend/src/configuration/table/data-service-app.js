@@ -3,7 +3,11 @@
  * @Date: 2022-02-18
  */
 
-import { CERTIFICATION_TYPE, TOEKN_PERIOD } from '@/config/constant'
+import {
+  CERTIFICATION_TYPE,
+  TOEKN_PERIOD,
+  ENABLED_STATUS
+} from '@/config/constant'
 
 export default that => ({
   refName: 'dataServiceApi',
@@ -38,10 +42,10 @@ export default that => ({
     {
       type: 'statusText',
       label: '状态',
-      prop: 'publishStatus',
-      width: 100
-      // color: ({ row: { publishStatus: s } }) => STATUS_MAPPING[s].color,
-      // formatter: ({ publishStatus: s }) => STATUS_MAPPING[s].name
+      prop: 'isEnable',
+      width: 100,
+      color: ({ row: { isEnable: e } }) => ENABLED_STATUS[e]?.color,
+      formatter: ({ isEnable: e }) => ENABLED_STATUS[e]?.name
     },
     {
       type: 'text',

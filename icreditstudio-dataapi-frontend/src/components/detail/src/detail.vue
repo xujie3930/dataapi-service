@@ -31,7 +31,7 @@
             class="detail-row-wrap--col"
             :span="list.span || 12"
             :key="list.label"
-            v-for="list in item"
+            v-for="list in filterItem(item)"
           >
             <div class="label">{{ list.label }}</div>
 
@@ -97,7 +97,11 @@ export default {
   methods: {
     open(options) {
       this.options = options
-      // this.fetchDetailData(options)
+      this.fetchDetailData(options)
+    },
+
+    filterItem(item) {
+      return item?.filter(label => ('hide' in label ? label.hide : true))
     }
   }
 }

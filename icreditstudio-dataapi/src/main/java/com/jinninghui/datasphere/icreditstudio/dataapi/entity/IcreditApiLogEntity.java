@@ -3,13 +3,12 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.time.LocalDateTime;
-import java.io.Serializable;
-import java.util.Date;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.htrace.fasterxml.jackson.annotation.JsonFormat;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -65,6 +64,7 @@ public class IcreditApiLogEntity implements Serializable {
 
     private Integer apiType;
     private String exceptionDetail;
-
+    //具体执行sql
+    private String executeSql;
 
 }

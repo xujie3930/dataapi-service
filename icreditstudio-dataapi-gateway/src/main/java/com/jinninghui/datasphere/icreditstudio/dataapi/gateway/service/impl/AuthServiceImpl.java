@@ -2,6 +2,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.CallStatusEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
@@ -19,6 +21,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
@@ -46,14 +49,14 @@ public class AuthServiceImpl implements AuthService {
     private KafkaProducer kafkaProducer;
 
     @Override
-    public BusinessResult<String> getToken(String appFlag, String secretContent) {
-        Object value = redisTemplate.opsForValue().get(appFlag);
+    public BusinessResult<String> getToken(String generateId, String secretContent) {
+        Object value = redisTemplate.opsForValue().get(generateId);
         if (Objects.isNull(value)){
-            throw new AppException("应用状态异常!");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000000.getCode());
         }
         AppAuthInfo appAuthInfo = JSON.parseObject(value.toString(), AppAuthInfo.class);
         if (!secretContent.equals(appAuthInfo.getSecretContent())){
-            throw new AppException("密钥验证失败!");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000001.getCode());
         }
         String token = UUID.randomUUID().toString().replaceAll("-", "");
         appAuthInfo.setTokenCreateTime(System.currentTimeMillis());
@@ -65,6 +68,8 @@ public class AuthServiceImpl implements AuthService {
     public BusinessResult<List<Object>> getData(String version, String path,  Map map) {
         Connection conn = null;
         String querySql = null;
+        //对请求版本号进行截取
+        version = version.replaceAll("v", "").replaceAll("V", "");
         ApiLogInfo apiLogInfo = new ApiLogInfo();
         try {
             ServletRequestAttributes requestAttributes = ServletRequestAttributes.class.
@@ -102,6 +107,7 @@ public class AuthServiceImpl implements AuthService {
             //发送kafka失败信息
             ApiLogInfo failLog = generateFailLog(apiLogInfo, querySql, e);
             kafkaProducer.send(failLog);
+            throw new AppException(failLog.getErrorLog());
         } finally {
             if (null != conn) {
                 try {
@@ -118,8 +124,22 @@ public class AuthServiceImpl implements AuthService {
         apiLogInfo.setExecuteSql(querySql);
         apiLogInfo.setCallEndTime(new Date());
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_FAIL.getCode());
-        apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getRunTime());
-        apiLogInfo.setErrorLog(e.toString());
+        if (null != apiLogInfo.getRunTime()) {
+            apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getRunTime());
+        }
+        if (e instanceof AppException) {
+            try {
+                Field errorCode = e.getClass().getSuperclass().getDeclaredField("errorCode");
+                errorCode.setAccessible(true);
+                String errorLog = (String) errorCode.get(e);
+                apiLogInfo.setErrorLog(errorLog);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                apiLogInfo.setErrorLog(exception.toString());
+            }
+        } else {
+            apiLogInfo.setErrorLog(e.toString());
+        }
         return apiLogInfo;
     }
 
@@ -158,7 +178,7 @@ public class AuthServiceImpl implements AuthService {
     private RedisApiInfo getApiAuthInfoByVersionAndPath(String version, String path) {
         Object apiObject = redisTemplate.opsForValue().get(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(version)));
         if (Objects.isNull(apiObject)) {
-            throw new AppException("API尚未发布!");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getCode());
         }
         RedisApiInfo apiAuthInfo = JSON.parseObject(apiObject.toString(), RedisApiInfo.class);
         return apiAuthInfo;
@@ -168,7 +188,7 @@ public class AuthServiceImpl implements AuthService {
     private AppAuthInfo getAppAuthInfoByToken(String token) {
         Object tokenObject = redisTemplate.opsForValue().get(token);
         if (Objects.isNull(tokenObject)) {
-            throw new AppException("token失效，请重新获取!");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000003.getCode());
         }
         AppAuthInfo appAuthInfo = JSON.parseObject(tokenObject.toString(), AppAuthInfo.class);
         return appAuthInfo;
@@ -180,7 +200,7 @@ public class AuthServiceImpl implements AuthService {
         if (StringUtils.isNotBlank(apiInfo.getRequiredFields())) {
             Set<String> requestList = new HashSet<>(Arrays.asList(apiInfo.getRequiredFields().split(",")));
             if (!CollectionUtils.isEmpty(requestList) && !requestList.containsAll(params)) {
-                throw new AppException("参数缺失!");
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getCode());
             }
         }
         return map;
@@ -189,19 +209,19 @@ public class AuthServiceImpl implements AuthService {
     private RedisApiInfo checkApi(RedisApiInfo apiAuthInfo, AppAuthInfo appAuthInfo) {
         Object appAuthApiObject = redisTemplate.opsForValue().get(appAuthInfo.getGenerateId());
         if (Objects.isNull(appAuthApiObject)) {
-            throw new AppException("该应用未授权!");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000005.getCode());
         }
         Object appAuthAppObject = redisTemplate.opsForValue().get(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId());
         if (Objects.isNull(appAuthAppObject)) {
-            throw new AppException("该API未授权该应用!");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000006.getCode());
         }
         RedisAppAuthInfo appAuthApp = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
-        if (null != appAuthApp.getPeriodEnd() && System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
-            throw new AppException("授权已到期");
+        if (!NOT_LIMIT.equals(appAuthApp.getPeriodEnd()) && System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getCode());
         }
         //次数验证
-        if (NOT_LIMIT != appAuthApp.getAllowCall().longValue() && appAuthApp.getAllowCall() <= 0) {
-            throw new AppException("已达调用次数上线");
+        if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getAllowCall() <= 0) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getCode());
         }
         //调用次数减一
         appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
@@ -210,21 +230,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private AppAuthInfo checkApp(AppAuthInfo appAuthInfo, HttpServletRequest request) {
-        if (appAuthInfo.getIsEnable() == 0) {
-            throw new AppException("应用未启用！");
+        if (AppEnableEnum.NOT_ENABLE.getCode().equals(appAuthInfo.getIsEnable())) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000009.getCode());
         }
         //IP白名单认证
         if (!StringUtils.isBlank(appAuthInfo.getAllowIp())) {
             String remoteHost = request.getRemoteHost();
             Set<String> allowIpSet = new HashSet<>(Arrays.asList(appAuthInfo.getAllowIp().split(",")));
             if (!allowIpSet.contains(remoteHost)) {
-                throw new AppException("应用IP不在白名单内！");
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getCode());
             }
         }
         if (null != appAuthInfo.getPeriod()) {
             Long expireTime = appAuthInfo.getPeriod() * SECOND_OF_HOUR + appAuthInfo.getTokenCreateTime();
             if (System.currentTimeMillis() >= expireTime) {
-                throw new AppException("token失效，请重新获取！");
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getCode());
             }
         }
         return appAuthInfo;
@@ -236,7 +256,7 @@ public class AuthServiceImpl implements AuthService {
         if (!map.containsKey(TOKEN_MARK)){
             String token = request.getHeader(TOKEN_MARK);
             if (StringUtils.isBlank(token)){
-                throw new AppException("请求中缺失token！");
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000012.getCode());
             }
             return token;
         }
