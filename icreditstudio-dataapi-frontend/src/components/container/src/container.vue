@@ -137,9 +137,6 @@ export default {
 </script>
 <style scoped lang="scss">
 .iframe-layout-basic-container {
-  // @include flex(flex-start, flex-start, column);
-  // min-height: calc(100vh - 126px);
-  // padding: 0 16px 16px;
   width: 100%;
   height: 100%;
   overflow-y: auto;
@@ -149,12 +146,12 @@ export default {
 }
 
 .iframe-layout-basic-header {
-  // padding: 24px 0 0;
+  margin-bottom: 25px;
   border-bottom: 1px dashed #d9d9d9;
 }
 
 .iframe-layout-basic-main-top {
-  padding: 19px 0 16px;
+  padding-bottom: 16px;
 
   span {
     color: #333;

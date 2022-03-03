@@ -1,6 +1,5 @@
 /*
- * @Author: lizheng
- * @Description:
+ * @Description: 应用详情
  * @Date: 2022-03-02
  */
 

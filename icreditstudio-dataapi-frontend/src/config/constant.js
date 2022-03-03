@@ -33,10 +33,18 @@ export const ENABLED_STATUS = {
   1: { name: '启用', color: '#52c41a' }
 }
 
+// 是否启用
+export const REQUEST_STATUS = {
+  0: { name: '请求中', color: '#faad14' },
+  1: { name: '成功', color: '#52c41a' },
+  2: { name: '失败', color: '#ff4d4f' }
+}
+
 export default {
   STATUS_MAPPING,
   API_TYPE,
   CERTIFICATION_TYPE,
   TOEKN_PERIOD,
-  ENABLED_STATUS
+  ENABLED_STATUS,
+  REQUEST_STATUS
 }

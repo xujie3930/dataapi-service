@@ -160,6 +160,7 @@ export default {
   ::v-deep {
     .el-dialog__body {
       padding: 20px;
+      padding-top: 0;
     }
   }
 }

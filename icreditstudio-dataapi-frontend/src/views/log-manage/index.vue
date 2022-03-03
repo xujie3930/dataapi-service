@@ -3,7 +3,7 @@
  * @Date: 2022-02-27
 -->
 <template>
-  <div class="app-manage">
+  <div class="log-manage">
     <Crud
       ref="crud"
       :form-items-search="mixinSearchFormItems"
@@ -27,35 +27,13 @@
       :handleExport="mixinHandleExport"
       :handleUpdate="mixinHandleCreateOrUpdate"
       :handleCancel="mixinHandleCancel"
-    >
-      <div class="header-operate" slot="operation">
-        <div class="header-operate-left">
-          <el-button class="jui-button--default" disabled>批量删除</el-button>
-        </div>
-        <div class="header-operate-right">
-          <el-button type="primary" @click="handleAddAppGroupClick">
-            新增应用分组
-          </el-button>
-          <el-button type="primary" @click="handleAddAppClick">
-            新增应用
-          </el-button>
-        </div>
-      </div>
-    </Crud>
-
-    <!-- 新增应用 -->
-    <AddApp ref="addApp" @on-close="closeAddAppCallback" />
-
-    <!-- 新增应用分组 -->
-    <AddAppGroup ref="addAppGroup" @on-close="closeAddAppGroupCallback" />
-
-    <!-- 授权 -->
-    <AppAuthorization ref="authorize" @on-close="closeAuthorizeCallback" />
+    />
 
     <!-- 详情 -->
     <Detail
-      ref="appDetail"
+      ref="logDetail"
       v-model="detailVisible"
+      width="500px"
       :loading="detailLoading"
       :detail-configuration="detailConfiguration"
       :detail-title-key-mapping="detailTitleKeyMapping"
@@ -66,46 +44,34 @@
 
 <script>
 import { crud } from '@/mixins'
-import { dataServiceAppForm } from '@/configuration/form'
-import { dataServiceAppTableConfig } from '@/configuration/table'
+import { dataServiceLogForm } from '@/configuration/form'
+import { logManageTableConfig } from '@/configuration/table'
 
 import API from '@/api/api'
 import { cloneDeep } from 'lodash'
-
-import AddApp from './add-app'
-import AddAppGroup from './add-app-group'
-import AppAuthorization from './app-authorization'
-
 import { detailConfiguration, detailTitleKeyMapping } from './detail-config'
 
 export default {
   mixins: [crud],
 
-  components: {
-    AddApp,
-    AddAppGroup,
-    AppAuthorization
-  },
-
   data() {
     return {
       detailVisible: false,
       detailLoading: false,
-      detailOptions: {},
-      tableConfiguration: dataServiceAppTableConfig(this),
-      formOption: dataServiceAppForm,
+      tableConfiguration: logManageTableConfig(this),
+      formOption: dataServiceLogForm,
 
       mixinSearchFormConfig: {
         models: {
-          appGroupName: '',
+          apiName: '',
           appName: '',
-          certificationType: '',
-          isEnable: '',
-          period: ''
+          apiVersion: '',
+          time: '',
+          callStatus: ''
         }
       },
 
-      fetchConfig: { retrieve: { url: '/appGroup/list', method: 'post' } },
+      fetchConfig: { retrieve: { url: '/log/list', method: 'post' } },
 
       detailConfiguration: cloneDeep(detailConfiguration),
       detailTitleKeyMapping: cloneDeep(detailTitleKeyMapping)
@@ -117,43 +83,13 @@ export default {
   },
 
   methods: {
-    // 点击-新增应用分组
-    handleAddAppGroupClick() {
-      this.$refs.addAppGroup.open({ title: '新增应用分组', opType: 'add' })
-    },
-
-    // 点击-新增应用
-    handleAddAppClick({ row }) {
-      console.log(row, 'rowrowrow')
-
-      this.$refs.addApp.open({ row, title: '新增应用', opType: 'add' })
-    },
-
-    // 点击-详情
+    // 点击-查看日志
     handleDetailClick({ row }) {
       this.detailVisible = true
-      this.detailOptions = { title: '详情' }
-      this.$refs.appDetail.open({ id: row.id, title: '详情' })
+      this.$refs.logDetail.open({ id: row.id, title: '日志详情' })
     },
 
-    // 点击-授权
-    handleAuthorizeClick({ row }) {
-      this.$refs.authorize.open({ row, title: '授权', opType: 'add' })
-    },
-
-    closeAddAppGroupCallback(options) {
-      console.log(options, 'options')
-      this.mixinRetrieveTableData()
-    },
-
-    closeAddAppCallback() {
-      this.mixinRetrieveTableData()
-    },
-
-    // 回调-授权设置弹窗回调
-    closeAuthorizeCallback() {},
-
-    // 获取-详情接口
+    // 获取-日志详情（供Detail子组件调用）
     fetchDetailData({ id }) {
       this.detailLoading = true
       this.detailConfiguration = cloneDeep(detailConfiguration)
@@ -195,6 +131,19 @@ export default {
         .finally(() => {
           this.detailLoading = false
         })
+    },
+
+    // 拦截-表格请求接口参数拦截
+    interceptorsRequestRetrieve(params) {
+      const { time, ...restParams } = params
+      const callBeginTime = time?.length ? time[0] : ''
+      const callEndTime = time?.length ? time[1] : ''
+
+      return {
+        callBeginTime,
+        callEndTime,
+        ...restParams
+      }
     }
   }
 }
@@ -206,7 +155,7 @@ export default {
 .app-manage {
   .header-operate {
     @include flex(space-between);
-    padding-bottom: 20px;
+    padding: 20px 0;
   }
 }
 </style>
