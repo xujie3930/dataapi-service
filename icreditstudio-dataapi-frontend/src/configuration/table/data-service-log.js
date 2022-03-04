@@ -43,7 +43,7 @@ export default that => ({
       label: 'API版本',
       prop: 'apiVersion',
       width: 100,
-      formatter: ({ apiVersion }) => `v${apiVersion}`
+      formatter: ({ apiVersion }) => (apiVersion ? `v${apiVersion}` : '')
     },
     {
       type: 'date',
