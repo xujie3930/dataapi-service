@@ -92,11 +92,11 @@ public class AuthServiceImpl implements AuthService {
             //kafka推送消息
             kafkaProducer.send(apiLogInfo);
             //1：根据token,鉴权应用信息
-//            checkApp(appAuthInfo, request);
+            checkApp(appAuthInfo, request);
             //2：根据path和version,鉴权API信息
-//            checkApi(apiInfo, appAuthInfo);
+            checkApi(apiInfo, appAuthInfo);
             //3:对入参做校验
-//            checkParam(map, apiInfo);
+            checkParam(map, apiInfo);
             //处理sql，替换其中参数为入参
             querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), map);
             //连接数据源，执行SQL
@@ -104,10 +104,9 @@ public class AuthServiceImpl implements AuthService {
             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
             if (map.containsKey(PAGENUM_MARK) && map.containsKey(PAGESIZE_MARK)){
-                Integer pageNum = Integer.valueOf((String) map.get(PAGENUM_MARK));
-                Integer pageSize = Integer.valueOf((String) map.get(PAGESIZE_MARK));
+                Integer pageNum = Math.max(Integer.parseInt((String) map.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
+                Integer pageSize = Math.min(Integer.parseInt((String) map.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
                 String countSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.getSelectCountSql(querySql);
-                System.out.println(countSql);
                 ResultSet countRs = stmt.executeQuery(countSql);
                 if (countRs.next()) {
                     //rs结果集第一个参数即为记录数，且其结果集中只有一个参数

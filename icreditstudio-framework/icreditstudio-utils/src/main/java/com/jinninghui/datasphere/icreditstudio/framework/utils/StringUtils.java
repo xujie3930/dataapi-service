@@ -1402,7 +1402,6 @@ public abstract class StringUtils {
 	}
 
 	public static String addPageParam(String sql, Integer pageNum, Integer pageSize) {
-		pageSize = Math.min(pageSize, 500);
 		int index = (pageNum - 1) * pageSize;
 		String addPageParam = new StringBuilder(sql).append(" limit ").append(index).append(" , ").append(pageSize).toString();
 		return addPageParam;
