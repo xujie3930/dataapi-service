@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisAppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
@@ -11,7 +12,10 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthConfigService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthInfoRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
@@ -21,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -39,9 +45,14 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     @Resource
     private IcreditAppService appService;
     @Resource
+    private IcreditAuthService authService;
+    @Resource
+    private IcreditWorkFlowService workFlowService;
+    @Resource
     private IcreditAuthMapper authMapper;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request) {
@@ -49,9 +60,21 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getMessage());
         }
         IcreditAuthConfigEntity authConfigEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
-        authConfigService.save(authConfigEntity);
+        authConfigService.saveOrUpdate(authConfigEntity);
         //同时保存授权信息到redis
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
+
+        List<IcreditAuthEntity> authList = authMapper.findByAppId(request.getAppId());
+        if(!CollectionUtils.isEmpty(authList)) {
+            authMapper.removeByAppId(request.getAppId());//删除旧的auth信息
+            //清除redis中的旧数据
+            List<String> authInfoKeyList = new ArrayList<>();
+            for (IcreditAuthEntity icreditAuthEntity : authList) {
+                authInfoKeyList.add(String.valueOf(new StringBuilder(icreditAuthEntity.getApiId()).append(appEntity.getGenerateId())));
+            }
+            redisTemplate.delete(authInfoKeyList);
+        }
+        //保存auth信息
         for (String apiId : request.getApiId()) {
             IcreditAuthEntity authEntity = new IcreditAuthEntity();
             authEntity.setAppId(request.getAppId());
@@ -67,5 +90,47 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     @Override
     public List<IcreditAuthEntity> findByAppId(String appId) {
         return authMapper.findByAppId(appId);
+    }
+
+    @Override
+    public BusinessResult<AuthInfoResult> authInfo(AuthInfoRequest request) {
+        IcreditAppEntity appEntity = appService.getById(request.getAppId());
+        List<IcreditAuthEntity> authEntityList = authService.findByAppId(request.getAppId());
+        if(CollectionUtils.isEmpty(authEntityList)){
+            return BusinessResult.success(null);
+        }
+        List<String> apiIds = new ArrayList<>(authEntityList.size());
+        AuthInfoResult authInfoResult = new AuthInfoResult();
+        authInfoResult.setAppName(appEntity.getName());
+        authInfoResult.setAppId(appEntity.getId());
+        for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
+            apiIds.add(icreditAuthEntity.getApiId());
+        }
+        List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);
+        List<List<ApiCascadeInfoResult>> apiCascadeInfoStrList = new ArrayList<>();
+        int len = apiInfoList.size();
+        for (int i = 0;i < len;i++) {
+            List<ApiCascadeInfoResult> apiCascadeList = new LinkedList<>();
+            ApiCascadeInfoResult apiCascadeInfoResult = new ApiCascadeInfoResult();
+            apiCascadeInfoResult.setId(apiInfoList.get(i).getWorkFlowId());
+            apiCascadeInfoResult.setName(apiInfoList.get(i).getWorkFlowName());
+            apiCascadeList.add(apiCascadeInfoResult);
+
+            apiCascadeInfoResult = new ApiCascadeInfoResult();
+            apiCascadeInfoResult.setId(apiInfoList.get(i).getApiGroupId());
+            apiCascadeInfoResult.setName(apiInfoList.get(i).getApiGroupName());
+            apiCascadeList.add(apiCascadeInfoResult);
+
+            apiCascadeInfoResult = new ApiCascadeInfoResult();
+            apiCascadeInfoResult.setId(apiInfoList.get(i).getApiId());
+            apiCascadeInfoResult.setName(apiInfoList.get(i).getApiName());
+            apiCascadeList.add(apiCascadeInfoResult);
+            apiCascadeInfoStrList.add(apiCascadeList);
+        }
+        authInfoResult.setApiCascadeInfoStrList(apiCascadeInfoStrList);
+
+        AuthResult authResult = appService.generateAuthResultInfo(authEntityList.get(0).getAuthConfigId(), appEntity.getTokenType());
+        authInfoResult.setAuthResult(authResult);
+        return BusinessResult.success(authInfoResult);
     }
 }

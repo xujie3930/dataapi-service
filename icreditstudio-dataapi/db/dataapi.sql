@@ -382,3 +382,4 @@ ALTER TABLE icredit_app DROP app_flag;
 
 ALTER TABLE icredit_api_log ADD api_type tinyint(1) COMMENT 'api类型';
 ALTER TABLE icredit_api_log ADD exception_detail text COMMENT '异常详情';
+ALTER TABLE icredit_api_log ADD execute_sql text COMMENT '执行sql';

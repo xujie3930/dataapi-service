@@ -8,8 +8,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthEffectiveTimeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.CallCountEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.TokenTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
@@ -109,27 +109,33 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
             ApiResult apiResult = new ApiResult();
             apiResult.setApiNames(String.valueOf(apiInfoStr));
 
-            IcreditAuthConfigEntity authConfigEntity = authConfigService.getById(authEntityList.get(0).getAuthConfigId());
-            AuthResult authResult = new AuthResult();
-            authResult.setAllowCall(authConfigEntity.getAllowCall());
-            authResult.setPeriodBegin(authConfigEntity.getPeriodBegin());
-            authResult.setPeriodEnd(authConfigEntity.getPeriodEnd());
-            if(CallCountEnum.CALL_INFINITE_TIMES.getCode().equals(authConfigEntity.getAllowCall())){
-                authResult.setCallCountType(CallCountEnum.CALL_INFINITE_TIMES.getMsg());
-            }else {
-                authResult.setCallCountType(CallCountEnum.CALL_FINITE_TIMES.getMsg());
-            }
-            if(TokenTypeEnum.LONG_TIME.getPeriod().equals(appDetailResult.getPeriod())) {
-                authResult.setTokenType(TokenTypeEnum.LONG_TIME.getCode());
-            }else if(TokenTypeEnum.EIGHT_HOURS.getPeriod().equals(appDetailResult.getPeriod())){
-                authResult.setTokenType(TokenTypeEnum.EIGHT_HOURS.getCode());
-            }else{
-                authResult.setTokenType(TokenTypeEnum.CUSTOM.getCode());
-            }
+            AuthResult authResult = generateAuthResultInfo(authEntityList.get(0).getAuthConfigId(), appEntity.getTokenType());
 
             appDetailResult.setApiResult(apiResult);
             appDetailResult.setAuthResult(authResult);
         }
         return BusinessResult.success(appDetailResult);
     }
+
+    @Override
+    public AuthResult generateAuthResultInfo(String authConfigId, Integer tokenType){
+        AuthResult authResult = new AuthResult();
+        IcreditAuthConfigEntity authConfigEntity = authConfigService.getById(authConfigId);
+        authResult.setAllowCall(authConfigEntity.getAllowCall());
+        authResult.setPeriodBegin(authConfigEntity.getPeriodBegin());
+        authResult.setPeriodEnd(authConfigEntity.getPeriodEnd());
+        authResult.setTokenType(tokenType);
+        if(CallCountEnum.CALL_INFINITE_TIMES.getCode().equals(authConfigEntity.getAllowCall())){
+            authResult.setCallCountType(CallCountEnum.CALL_INFINITE_TIMES.getMsg());
+        }else {
+            authResult.setCallCountType(CallCountEnum.CALL_FINITE_TIMES.getMsg());
+        }
+        if(AuthEffectiveTimeEnum.LONG_TIME.getCode().equals(authConfigEntity.getPeriodBegin())){
+            authResult.setAuthEffectiveTime(AuthEffectiveTimeEnum.LONG_TIME.getMsg());
+        }else {
+            authResult.setAuthEffectiveTime(AuthEffectiveTimeEnum.SORT_TIME.getMsg());
+        }
+        return authResult;
+    }
+
 }

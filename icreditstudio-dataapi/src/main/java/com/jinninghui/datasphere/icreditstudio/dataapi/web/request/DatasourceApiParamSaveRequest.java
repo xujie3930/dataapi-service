@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class DatasourceApiParamSaveRequest {
 
-    private String id;
     private String fieldName;
     private String fieldType;
     private Integer required;

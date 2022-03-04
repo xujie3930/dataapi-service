@@ -5,15 +5,13 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum TokenTypeEnum {
+public enum AuthEffectiveTimeEnum {
 
-    LONG_TIME(0, -1, "长期"),
-    EIGHT_HOURS(1, 8, "8小时"),
-    CUSTOM(2, 0, "自定义")
+    SORT_TIME(0L, "短期"),
+    LONG_TIME(-1L, "永久")
     ;
 
-    private Integer code;
-    private Integer period;
+    private Long code;
     private String msg;
 
 }

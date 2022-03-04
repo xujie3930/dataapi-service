@@ -58,8 +58,8 @@ public final class HTMLFilter {
     private static final Pattern P_VALID_ENTITIES = Pattern.compile("&([^&;]*)(?=(;|&|$))");
     private static final Pattern P_VALID_QUOTES = Pattern.compile("(>|^)([^<]+?)(<|$)", Pattern.DOTALL);
     private static final Pattern P_END_ARROW = Pattern.compile("^>");
-    private static final Pattern P_BODY_TO_END = Pattern.compile("<([^>]*?)(?=<|$)");
-    private static final Pattern P_XML_CONTENT = Pattern.compile("(^|>)([^<]*?)(?=>)");
+//    private static final Pattern P_BODY_TO_END = Pattern.compile("<([^>]*?)(?=<|$)");
+//    private static final Pattern P_XML_CONTENT = Pattern.compile("(^|>)([^<]*?)(?=>)");
     private static final Pattern P_STRAY_LEFT_ARROW = Pattern.compile("<([^>]*?)(?=<|$)");
     private static final Pattern P_STRAY_RIGHT_ARROW = Pattern.compile("(^|>)([^<]*?)(?=>)");
     private static final Pattern P_AMP = Pattern.compile("&");
@@ -261,8 +261,8 @@ public final class HTMLFilter {
             // try and form html
             //
             s = regexReplace(P_END_ARROW, "", s);
-            s = regexReplace(P_BODY_TO_END, "<$1>", s);
-            s = regexReplace(P_XML_CONTENT, "$1<$2", s);
+//            s = regexReplace(P_BODY_TO_END, "<$1>", s);
+//            s = regexReplace(P_XML_CONTENT, "$1<$2", s);
 
         } else {
             //

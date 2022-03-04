@@ -19,7 +19,7 @@ public class ApiDetailResult {
     //API名称
     private String name;
     //API PATH
-    private String apipath;
+    private String apiPath;
     //请求方式
     private String requestType;
     //返回类型
