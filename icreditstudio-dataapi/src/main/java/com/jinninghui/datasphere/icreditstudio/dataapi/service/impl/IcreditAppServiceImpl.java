@@ -59,6 +59,9 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     @Override
     public BusinessResult<String> saveDef(String userId, AppSaveRequest request) {
         StringLegalUtils.checkLegalNameForApp(request.getName());
+        StringLegalUtils.checkLegalSecretContentForApp(request.getSecretContent());
+        StringLegalUtils.checkLegalDescForApp(request.getDesc());
+        StringLegalUtils.checkLegalAllowIpForApp(request.getAllowIp());
         IcreditAppEntity appEntity = BeanCopyUtils.copyProperties(request, new IcreditAppEntity());
         appEntity.setGenerateId(request.getGenerateId());
         save(appEntity);
