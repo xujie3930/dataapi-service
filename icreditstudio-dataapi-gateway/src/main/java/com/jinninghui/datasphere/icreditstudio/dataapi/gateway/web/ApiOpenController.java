@@ -27,7 +27,7 @@ public class ApiOpenController {
     private AuthService authService;
 
     @GetMapping("/{version}/{path}")
-    public BusinessResult<List<Object>> getData(@PathVariable("version") String version, @PathVariable("path") String path, @RequestParam(required = false) Map<String, Object> params) {
+    public BusinessResult<Object> getData(@PathVariable("version") String version, @PathVariable("path") String path, @RequestParam(required = false) Map<String, Object> params) {
         return authService.getData(version, path, params);
     }
 }

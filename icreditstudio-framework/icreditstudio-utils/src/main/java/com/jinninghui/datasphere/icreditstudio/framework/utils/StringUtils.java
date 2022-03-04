@@ -1401,6 +1401,22 @@ public abstract class StringUtils {
 		return sb.toString();
 	}
 
+	public static String addPageParam(String sql, Integer pageNum, Integer pageSize) {
+		pageSize = Math.min(pageSize, 500);
+		int index = (pageNum - 1) * pageSize;
+		String addPageParam = new StringBuilder(sql).append(" limit ").append(index).append(" , ").append(pageSize).toString();
+		return addPageParam;
+	}
+
+	public static String getSelectCountSql(String sql) {
+		String matterSelect = "select";
+		String matterFrom = "from";
+		String countSsql = " count(*) ";
+		int selectIndex = sql.indexOf(matterSelect);//第一个字符串的起始位置
+		int fromIndex = sql.indexOf(matterFrom);//第二个字符串的起始位置
+		return sql.substring(0, selectIndex + matterSelect.length()) + countSsql + sql.substring(fromIndex, sql.length());
+	}
+
 	public static String removeExtraStr(String str, List<String> extraList) {
 		if (CollectionUtils.isEmpty(extraList)){
 			return str;
@@ -1412,10 +1428,8 @@ public abstract class StringUtils {
 	}
 
 	public static void main(String[] args) {
-		String str = "SELECT * FROM table_setting WHERE id = ${id}";
-		Map<String, String> map = new HashMap<>();
-		map.put("id", "123456");
-		String s = parseSql(str, map);
+		String str = "select * from table_setting WHERE id = ${id}";
+		String s = getSelectCountSql(str);
 		System.out.println(s);
 	}
 }

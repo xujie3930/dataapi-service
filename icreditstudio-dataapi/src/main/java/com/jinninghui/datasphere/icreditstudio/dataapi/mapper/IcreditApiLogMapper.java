@@ -4,6 +4,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntit
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface IcreditApiLogMapper extends BaseMapper<IcreditApiLogEntity> {
     Long countLog(LogListQueryRequest request);
 
     List<LogListQueryResult> getList(LogListQueryRequest request);
+
+    IcreditApiLogEntity findByTraceId(@Param("traceId") String traceId);
 }
