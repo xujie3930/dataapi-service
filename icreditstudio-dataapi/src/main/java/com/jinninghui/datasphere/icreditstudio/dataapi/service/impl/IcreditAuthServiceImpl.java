@@ -66,7 +66,9 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
 
         List<IcreditAuthEntity> authList = authMapper.findByAppId(request.getAppId());
         if(!CollectionUtils.isEmpty(authList)) {
-            authMapper.removeByAppId(request.getAppId());//删除旧的auth信息
+            //删除旧的auth信息
+            authConfigService.removeById(authList.get(0).getAuthConfigId());
+            authMapper.removeByAppId(request.getAppId());
             //清除redis中的旧数据
             List<String> authInfoKeyList = new ArrayList<>();
             for (IcreditAuthEntity icreditAuthEntity : authList) {

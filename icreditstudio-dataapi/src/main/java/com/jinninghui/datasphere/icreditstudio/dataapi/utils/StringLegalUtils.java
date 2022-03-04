@@ -29,7 +29,7 @@ public class StringLegalUtils {
     }
 
     public static void main(String[] args) {
-        String str = "";
+        String str = "0.0.0.0";
         checkLegalAllowIpForApp(str);
     }
 
@@ -58,13 +58,11 @@ public class StringLegalUtils {
 
     public static void checkLegalAllowIpForApp(String allowIp) {
         if (!allowIp.matches("[0-9\\,\\.]{0,255}")) {
-            System.out.println(1);
             throw new AppException("IP白名单只能包含【数字】、【.】、【,】，且长度不能超过255");
         }
         String[] ipArr = allowIp.split(",");
         for (String ip : ipArr) {
-            if(!StringUtils.isEmpty(ip) && !ip.matches("([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}")){
-                System.out.println(2);
+            if(!StringUtils.isEmpty(ip) && !ip.matches("([0-9]|[0-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}")){
                 throw new AppException("IP白名单中有不规范的IP地址");
             }
         }
