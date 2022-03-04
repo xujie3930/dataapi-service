@@ -6,7 +6,8 @@
 import {
   ENABLED_STATUS,
   CERTIFICATION_TYPE,
-  TOEKN_PERIOD
+  TOEKN_PERIOD,
+  CALL_TYPE
 } from '@/config/constant'
 import { dateFormat } from '@/utils'
 
@@ -73,7 +74,7 @@ export const detailConfiguration = {
       key: 'allowCall',
       span: 24,
       formatter: ({ allowCall, callCountType }) =>
-        `${callCountType}  ${allowCall < 0 ? '' : `${allowCall}次`}`
+        `${CALL_TYPE[callCountType]}  ${allowCall < 0 ? '' : `${allowCall}次`}`
     }
   ]
 }

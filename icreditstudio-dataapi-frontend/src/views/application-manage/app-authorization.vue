@@ -50,7 +50,7 @@
         <el-form-item label="授权有效期" prop="authPeriod">
           <el-radio-group v-model="authorizeForm.authPeriod">
             <el-radio :label="0">短期</el-radio>
-            <el-radio :label="1">长久</el-radio>
+            <el-radio :label="1">永久</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -105,54 +105,7 @@ export default {
     return {
       timerId: null,
       options: {},
-      apiOptions: [
-        {
-          value: 'zhinan',
-          label: '指南',
-          children: [
-            {
-              value: '1111',
-              label: 'giao',
-              children: [
-                {
-                  value: 'breadcrumb',
-                  label: 'Breadcrumb 面包屑'
-                }
-              ]
-            },
-            {
-              value: '1111',
-              label: 'giao',
-              children: [
-                {
-                  value: 'breadcrumb',
-                  label: 'Breadcrumb 面包屑'
-                }
-              ]
-            },
-            {
-              value: '1111',
-              label: 'giao',
-              children: [
-                {
-                  value: 'breadcrumb',
-                  label: 'Breadcrumb 面包屑'
-                }
-              ]
-            },
-            {
-              value: '1111',
-              label: 'giao',
-              children: [
-                {
-                  value: 'breadcrumb',
-                  label: 'Breadcrumb 面包屑'
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      apiOptions: [],
       loading: false,
       veifyNameLoading: false,
       oldGroupName: '',
@@ -180,13 +133,21 @@ export default {
         ],
         authPeriod: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
+        ],
+        apiId: [
+          {
+            required: true,
+            type: 'array',
+            message: '必填项不能为空',
+            trigger: ['blur', 'change']
+          }
         ]
       }
     }
   },
 
   methods: {
-    open(options) {
+    async open(options) {
       const { row } = options
       this.options = options
       this.authorizeForm.name = row?.name
@@ -244,7 +205,6 @@ export default {
 
     // 级联-懒加载
     lazyLoad({ level, value }, resolve) {
-      console.log(value)
       level === 1
         ? this.fetchApiGroupList(value, resolve)
         : level === 2
@@ -308,7 +268,19 @@ export default {
       API.getAppAuthDetail({ appId })
         .then(({ success, data }) => {
           if (success && data) {
-            console.log(data, 'data')
+            const {
+              apiCascadeInfoStrList,
+              authResult: { allowCall, authEffectiveTime, callCountType }
+            } = data
+
+            // 级联回显
+            this.authorizeForm.apiId = apiCascadeInfoStrList.map(item =>
+              item.map(({ id }) => id)
+            )
+
+            this.authorizeForm.allowCall = allowCall
+            this.authorizeForm.callType = callCountType
+            this.authorizeForm.authPeriod = authEffectiveTime
           }
         })
         .finally(() => ({}))

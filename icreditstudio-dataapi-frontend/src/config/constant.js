@@ -40,6 +40,12 @@ export const REQUEST_STATUS = {
   2: { name: '失败', color: '#ff4d4f' }
 }
 
+// 应用-可调用次数
+export const CALL_TYPE = {
+  0: '有限次',
+  1: '无限次'
+}
+
 export default {
   STATUS_MAPPING,
   API_TYPE,
