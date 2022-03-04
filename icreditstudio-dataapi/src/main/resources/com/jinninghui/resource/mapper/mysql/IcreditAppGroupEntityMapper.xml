@@ -4,51 +4,51 @@
 
     <select id="getList" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.service.param.AppQueryListParam"
             resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.AppQueryListDTO">
+        select * from (
         (
-          SELECT appGroup.id,appGroup.`name`,appGroup.generate_id AS generateId,NULL AS certificationType,NULL AS isEnable,NULL AS period,
-                appGroup.create_by AS createBy,appGroup.create_time AS createTime,appGroup.`desc`,NULL AS appGroupId
-          FROM icredit_app_group appGroup LEFT JOIN icredit_app app ON appGroup.id = app.app_group_id
-          WHERE appGroup.del_flag = 0
-          <if test="appGroupName != null and appGroupName != ''">
-              AND appGroup.name LIKE concat ('%', #{appGroupName}, '%')
-          </if>
-          <if test="appName != null and appName != ''">
-              AND app.name LIKE concat ('%', #{appName}, '%')
-          </if>
-          <if test="certificationType != null">
-              AND app.certification_type = #{certificationType}
-          </if>
-          <if test="isEnable != null">
-              AND app.is_enable = #{isEnable}
-          </if>
-          <if test="period != null">
-              AND app.token_type = #{period}
-          </if>
-          ORDER BY appGroup.create_time DESC
-        )
-        UNION
-        (
-          SELECT app.id,app.`name`,app.generate_id AS generateId,app.certification_type AS certificationType,app.is_enable AS isEnable,app.token_type AS period,
-                app.create_by AS createBy,app.create_time AS createTime,app.`desc`,app_group_id AS appGroupId
-          FROM icredit_app_group appGroup LEFT JOIN icredit_app app ON appGroup.id = app.app_group_id
-          WHERE app.del_flag = 0
-            <if test="appGroupName != null and appGroupName != ''">
-                AND appGroup.name LIKE concat ('%', #{appGroupName}, '%')
-            </if>
-            <if test="appName != null and appName != ''">
-                AND app.name LIKE concat ('%', #{appName}, '%')
-            </if>
-            <if test="certificationType != null">
-                AND app.certification_type = #{certificationType}
-            </if>
-            <if test="isEnable != null">
-                AND app.is_enable = #{isEnable}
-            </if>
-            <if test="period != null">
-                AND app.token_type = #{period}
-            </if>
-          ORDER BY app.create_time DESC
-        )
+              SELECT appGroup.id,appGroup.`name`,appGroup.generate_id AS generateId,NULL AS certificationType,NULL AS isEnable,NULL AS period,
+                    appGroup.create_by AS createBy,appGroup.create_time AS createTime,appGroup.`desc`,NULL AS appGroupId,appGroup.create_time create_time
+              FROM icredit_app_group appGroup LEFT JOIN icredit_app app ON appGroup.id = app.app_group_id
+              WHERE appGroup.del_flag = 0
+              <if test="appGroupName != null and appGroupName != ''">
+                  AND appGroup.name LIKE concat ('%', #{appGroupName}, '%')
+              </if>
+              <if test="appName != null and appName != ''">
+                  AND app.name LIKE concat ('%', #{appName}, '%')
+              </if>
+              <if test="certificationType != null">
+                  AND app.certification_type = #{certificationType}
+              </if>
+              <if test="isEnable != null">
+                  AND app.is_enable = #{isEnable}
+              </if>
+              <if test="period != null">
+                  AND app.token_type = #{period}
+              </if>
+            )
+            UNION
+            (
+              SELECT app.id,app.`name`,app.generate_id AS generateId,app.certification_type AS certificationType,app.is_enable AS isEnable,app.token_type AS period,
+                    app.create_by AS createBy,app.create_time AS createTime,app.`desc`,app_group_id AS appGroupId,app.create_time create_time
+              FROM icredit_app_group appGroup LEFT JOIN icredit_app app ON appGroup.id = app.app_group_id
+              WHERE app.del_flag = 0
+                <if test="appGroupName != null and appGroupName != ''">
+                    AND appGroup.name LIKE concat ('%', #{appGroupName}, '%')
+                </if>
+                <if test="appName != null and appName != ''">
+                    AND app.name LIKE concat ('%', #{appName}, '%')
+                </if>
+                <if test="certificationType != null">
+                    AND app.certification_type = #{certificationType}
+                </if>
+                <if test="isEnable != null">
+                    AND app.is_enable = #{isEnable}
+                </if>
+                <if test="period != null">
+                    AND app.token_type = #{period}
+                </if>
+            )
+        ) as temp ORDER BY temp.create_time desc
     </select>
 
     <select id="hasExitByName"
