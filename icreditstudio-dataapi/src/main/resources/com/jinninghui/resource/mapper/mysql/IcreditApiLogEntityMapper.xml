@@ -54,4 +54,8 @@
         limit #{pageStartNum},#{pageSize}
     </select>
 
+    <select id="findByTraceId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntity">
+        select * from icredit_api_log where trace_id = #{traceId}
+    </select>
+
 </mapper>

@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.jinninghui.datasphere.icreditstudio.framework.result.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.htrace.fasterxml.jackson.annotation.JsonFormat;
@@ -21,7 +22,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("icredit_api_log")
-public class IcreditApiLogEntity implements Serializable {
+public class IcreditApiLogEntity extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,5 +67,6 @@ public class IcreditApiLogEntity implements Serializable {
     private String exceptionDetail;
     //具体执行sql
     private String executeSql;
+    private String traceId;
 
 }
