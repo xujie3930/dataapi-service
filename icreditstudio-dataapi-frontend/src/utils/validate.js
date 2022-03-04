@@ -21,12 +21,6 @@ export const verifyIncludeCnString = str => {
   return regExp.test(str)
 }
 
-// 是否只包含中文
-export const verifyExcludeCnString = str => {
-  const regExp = /^[\u4e00-\u9fa5]+$/gi
-  return regExp.test(str)
-}
-
 // 剔除字符串中所有空格
 export const strExcludeBlank = str => {
   return str.replace(/\s*/g, '')
@@ -38,6 +32,9 @@ export const validIpAddress = ip => {
     /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
   return regStr.test(ip)
 }
+
+// 验证字符串是否输入的是数字和英文
+export const verifyStrInputNumberEn = str => /^[\da-zA-Z]+$/i.test(str)
 
 // 当前字符串是否以数字开头
 export const verifyStringStartsWithNumber = str => {
