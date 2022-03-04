@@ -1401,6 +1401,16 @@ public abstract class StringUtils {
 		return sb.toString();
 	}
 
+	public static String removeExtraStr(String str, List<String> extraList) {
+		if (CollectionUtils.isEmpty(extraList)){
+			return str;
+		}
+		for (String s : extraList) {
+			str = str.replaceAll(s, "");
+		}
+		return str;
+	}
+
 	public static void main(String[] args) {
 		String str = "SELECT * FROM table_setting WHERE id = ${id}";
 		Map<String, String> map = new HashMap<>();
