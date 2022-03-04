@@ -8,6 +8,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthServi
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.kafka.KafkaProducer;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
@@ -70,17 +71,15 @@ public class AuthServiceImpl implements AuthService {
         String querySql = null;
         //对请求版本号进行截取
         version = version.replaceAll("v", "").replaceAll("V", "");
-        ApiLogInfo apiLogInfo = new ApiLogInfo();
+        ServletRequestAttributes requestAttributes = ServletRequestAttributes.class.
+                cast(RequestContextHolder.getRequestAttributes());
+        HttpServletRequest request = requestAttributes.getRequest();
+        //检查请求中是否有token
+        String token = checkRequestToken(request);
+        AppAuthInfo appAuthInfo = getAppAuthInfoByToken(token);
+        RedisApiInfo apiInfo = getApiAuthInfoByVersionAndPath(version, path);
+        ApiLogInfo apiLogInfo = generateLog(appAuthInfo, apiInfo, version, path, request);
         try {
-            ServletRequestAttributes requestAttributes = ServletRequestAttributes.class.
-                    cast(RequestContextHolder.getRequestAttributes());
-            HttpServletRequest request = requestAttributes.getRequest();
-            //检查请求中是否有token
-            String token = checkRequestToken(request);
-            AppAuthInfo appAuthInfo = getAppAuthInfoByToken(token);
-            RedisApiInfo apiInfo = getApiAuthInfoByVersionAndPath(version, path);
-            apiLogInfo = generateLog(appAuthInfo, apiInfo, version, path, request);
-            //记录日志唯一id
             //kafka推送消息
             kafkaProducer.send(apiLogInfo);
             //1：根据token,鉴权应用信息
@@ -92,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
             //处理sql，替换其中参数为入参
             querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), map);
             //连接数据源，执行SQL
-            conn = DriverManager.getConnection(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword());
+            conn = DBConnectionManager.getInstance().getConnection(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet pagingRs = stmt.executeQuery(querySql);
             if (pagingRs.next()) {
@@ -109,13 +108,7 @@ public class AuthServiceImpl implements AuthService {
             kafkaProducer.send(failLog);
             throw new AppException(failLog.getErrorLog());
         } finally {
-            if (null != conn) {
-                try {
-                    conn.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
         }
         return BusinessResult.success(null);
     }
@@ -162,11 +155,8 @@ public class AuthServiceImpl implements AuthService {
         logInfo.setAppId(appAuthInfo.getId());
         logInfo.setCallIp(request.getRemoteHost());
         logInfo.setApiVersion(version);
-        //请求参数
         logInfo.setRequestParam(apiInfo.getRequiredFields());
-        //返回参数
         logInfo.setResponsePatam(apiInfo.getResponseFields());
-        //请求开始时间
         logInfo.setCallStatus(CallStatusEnum.CALL_ON.getCode());
         logInfo.setCallBeginTime(date);
         logInfo.setCreateTime(date);
@@ -220,9 +210,9 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getCode());
         }
         //次数验证
-        if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getAllowCall() <= 0) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getCode());
-        }
+//        if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getAllowCall() <= 0) {
+//            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getCode());
+//        }
         //调用次数减一
         appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
         redisTemplate.opsForValue().set(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId(), JSON.toJSONString(appAuthApp));
