@@ -192,6 +192,7 @@ export default {
       this.authorizeForm.name = row?.name
       this.authorizeForm.appId = row?.id
       this.fetchBusinessProcessList()
+      this.fetchApiAuthDetail(row?.id)
       this.$refs.baseDialog.open()
     },
 
@@ -212,12 +213,12 @@ export default {
     // 点击-新增或编辑API授权
     addApiAuthorization() {
       this.$refs?.authorizeForm.validate(valid => {
-        const { appId, allowCall, apiId, authPeriod, validTime } =
+        const { appId, allowCall, apiId, callType, validTime } =
           this.authorizeForm
         const params = {
           appId,
           apiId: apiId.map(item => item[2]),
-          allowCall: authPeriod ? -1 : allowCall,
+          allowCall: callType ? -1 : allowCall,
           periodBegin: validTime.length ? validTime[0] : -1,
           periodEnd: validTime.length ? validTime[1] : -1
         }
@@ -300,6 +301,17 @@ export default {
           })
         }
       })
+    },
+
+    // 获取-API授权详情
+    fetchApiAuthDetail(appId) {
+      API.getAppAuthDetail({ appId })
+        .then(({ success, data }) => {
+          if (success && data) {
+            console.log(data, 'data')
+          }
+        })
+        .finally(() => ({}))
     }
   }
 }

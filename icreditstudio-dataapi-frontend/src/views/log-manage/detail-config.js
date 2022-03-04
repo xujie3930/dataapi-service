@@ -36,14 +36,14 @@ export const detailConfiguration = row => ({
       label: '调用开始时间',
       value: '',
       key: 'callBeginTime',
-      formatter: val => dateFormat(val)
+      formatter: val => (val ? dateFormat(val) : '')
     },
     {
       span: 24,
       label: '调用结束时间',
       value: '',
       key: 'callEndTime',
-      formatter: val => dateFormat(val)
+      formatter: val => (val ? dateFormat(val) : '')
     },
     {
       span: 24,
@@ -71,5 +71,5 @@ export const detailConfiguration = row => ({
 })
 
 export const detailTitleKeyMapping = {
-  base: null
+  base: { label: '' }
 }

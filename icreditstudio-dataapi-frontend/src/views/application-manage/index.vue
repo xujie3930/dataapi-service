@@ -166,6 +166,7 @@ export default {
         .then(({ success, data }) => {
           if (success && data) {
             const { authResult, apiResult } = data
+            // 基础信息模块赋值
             cloneDeep(this.detailConfiguration.base).forEach((item, idx) => {
               const { key, formatter } = item
               const val = data[key]
@@ -176,24 +177,42 @@ export default {
                   : formatter(val)
                 : val
 
+              // key值根据状态渲染颜色值
               if ('color' in item) {
                 this.detailConfiguration.base[idx].color = formatter(val)?.color
               }
             })
 
-            this.detailConfiguration.auth[0].value = apiResult.apiNames
+            // 显示授权信息模块
+            this.detailTitleKeyMapping.auth.visible = Boolean(apiResult)
 
-            cloneDeep(this.detailConfiguration.authTime).forEach(
-              (item, idx) => {
-                const { key: k, formatter } = item
+            // 显示授权时间模块
+            this.detailTitleKeyMapping.authTime.visible = Boolean(authResult)
 
-                this.detailConfiguration.authTime[idx].value = formatter
-                  ? typeof formatter(authResult[k]) === 'object'
-                    ? formatter(authResult[k])?.name
-                    : formatter(authResult)
-                  : authResult[k]
-              }
-            )
+            // 授权信息赋值
+            apiResult &&
+              (this.detailConfiguration.auth[0].value = apiResult?.apiNames)
+
+            // 授权时间赋值
+            authResult &&
+              cloneDeep(this.detailConfiguration.authTime).forEach(
+                (item, idx) => {
+                  const { key: k, formatter } = item
+
+                  this.detailConfiguration.authTime[idx].value = formatter
+                    ? typeof formatter(authResult[k]) === 'object'
+                      ? formatter(authResult[k])?.name
+                      : formatter(authResult)
+                    : authResult[k]
+
+                  // 根特定条件隐藏某个label
+                  if ('hide' in item) {
+                    const { periodBegin, periodEnd } = authResult
+                    this.detailConfiguration.authTime[idx].hide =
+                      periodBegin > -1 && periodEnd > -1
+                  }
+                }
+              )
           }
         })
         .finally(() => {

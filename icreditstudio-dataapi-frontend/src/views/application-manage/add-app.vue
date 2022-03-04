@@ -139,11 +139,11 @@
         <div slot="label" class="icredit-form--title">设置IP白名单</div>
       </el-form-item>
 
-      <el-form-item label="IP地址" prop="allowId">
+      <el-form-item label="IP地址" prop="allowIp">
         <el-input
           style="width: 500px"
           type="textarea"
-          v-model="appForm.allowId"
+          v-model="appForm.allowIp"
           placeholder="请输入IP地址，IP地址之间以英文逗号隔开"
         ></el-input>
       </el-form-item>
@@ -188,7 +188,7 @@ export default {
         desc: '',
         secretContent: '',
         tokenType: '',
-        allowId: '',
+        allowIp: '',
         isEnable: 1,
         certificationType: 0
       },
@@ -247,7 +247,7 @@ export default {
           trigger: 'change'
         },
 
-        allowId: {
+        allowIp: {
           validator: this.verifyAllowId
         }
       }
@@ -324,12 +324,14 @@ export default {
 
     // 校验-应用密钥
     verifyAllowId(rule, value, cb) {
-      this.appForm.allowId = strExcludeBlank(value)
-      if (cb && value) {
+      this.appForm.allowIp = strExcludeBlank(value)
+      if (cb) {
         const verifyIp = val =>
           validIpAddress(val)
             ? cb()
             : cb('请输入正确的IP地址格式，多个IP则用英文逗号分隔')
+
+        if (value === '') return cb()
 
         value?.includes(',')
           ? value.split(',').forEach(item => {

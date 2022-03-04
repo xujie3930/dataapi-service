@@ -42,6 +42,9 @@ const getGroupList = params =>
 // 获取api信息
 const getApiInfoList = params => postAction('/apiBase/getApiList', params)
 
+// 获取授权详情
+const getAppAuthDetail = params => postAction('/auth/info', params)
+
 export default {
   getAppGroupList,
   getAppUniqueId,
@@ -53,5 +56,6 @@ export default {
   addAppGroup,
   addApp,
   checkNameUniqueness,
-  updateApiAuthorization
+  updateApiAuthorization,
+  getAppAuthDetail
 }

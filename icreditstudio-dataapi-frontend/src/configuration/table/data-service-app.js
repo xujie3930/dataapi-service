@@ -50,9 +50,9 @@ export default that => ({
     {
       type: 'text',
       label: 'token有效期',
-      prop: 'period',
+      prop: 'tokenType',
       width: 120,
-      formatter: ({ period }) => TOEKN_PERIOD[period]
+      formatter: ({ tokenType }) => TOEKN_PERIOD[tokenType]
     },
     {
       type: 'text',
