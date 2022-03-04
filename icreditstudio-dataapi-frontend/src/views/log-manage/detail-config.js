@@ -10,6 +10,7 @@ export const detailConfiguration = row => ({
   base: [
     { span: 24, label: 'API名称', value: '', key: 'apiName' },
     { span: 24, label: 'API Path', value: '', key: 'apiPath' },
+    { span: 24, label: '调用应用', value: '', key: 'name' },
     { span: 24, label: '调用IP', value: '', key: 'callIp' },
     {
       span: 24,

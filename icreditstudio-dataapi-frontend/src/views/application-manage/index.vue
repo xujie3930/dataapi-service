@@ -36,7 +36,11 @@
           <el-button type="primary" @click="handleAddAppGroupClick">
             新增应用分组
           </el-button>
-          <el-button type="primary" @click="handleAddAppClick">
+          <el-button
+            type="primary"
+            :disabled="!mixinTableData.length"
+            @click="handleAddAppClick"
+          >
             新增应用
           </el-button>
         </div>

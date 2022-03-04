@@ -39,8 +39,8 @@
         <el-col :span="12">
           <el-form-item label="是否启用" prop="isEnable">
             <el-radio-group v-model="appForm.isEnable">
-              <el-radio :label="0">未启用</el-radio>
-              <el-radio :label="1">启用</el-radio>
+              <el-radio :label="1">是</el-radio>
+              <el-radio :label="0">否</el-radio>
             </el-radio-group>
           </el-form-item>
         </el-col>
@@ -49,7 +49,7 @@
       <el-form-item label="应用名称" prop="name">
         <el-input
           style="width: 500px"
-          v-model="appForm.name"
+          v-model.trim="appForm.name"
           placeholder="请输入应用名称"
           show-word-limit
           maxlength="50"
@@ -59,9 +59,11 @@
       <el-form-item label="应用密钥" prop="secretContent">
         <el-input
           style="width: 500px"
-          v-model="appForm.secretContent"
+          v-model.trim="appForm.secretContent"
           placeholder="请输入应用密钥"
           show-password
+          maxlength="16"
+          show-word-limit
         ></el-input>
       </el-form-item>
 
@@ -152,8 +154,13 @@
 <script>
 import API from '@/api/api'
 import { TOEKN_PERIOD } from '@/config/constant'
-import { objectConvertToArray } from '@/utils'
-import { verifySpecialString, strExcludeBlank } from '@/utils/validate'
+import { objectConvertToArray, UUStr } from '@/utils'
+import {
+  verifySpecialString,
+  verifyStrInputNumberEn,
+  validIpAddress,
+  strExcludeBlank
+} from '@/utils/validate'
 
 const customTokenOptions = () => {
   let obj = {}
@@ -181,7 +188,9 @@ export default {
         desc: '',
         secretContent: '',
         tokenType: '',
-        allowId: ''
+        allowId: '',
+        isEnable: 1,
+        certificationType: 0
       },
       rules: {
         appGroupId: [
@@ -193,8 +202,8 @@ export default {
         ],
 
         name: [
-          { required: true, message: '分组名称不能为空', trigger: 'blur' },
-          { validator: this.verifyAppGroupName, trigger: 'blur' }
+          { required: true, message: '应用名称不能为空', trigger: 'blur' },
+          { validator: this.verifyAppName, trigger: 'blur' }
         ],
 
         certificationType: {
@@ -209,11 +218,22 @@ export default {
           trigger: 'change'
         },
 
-        secretContent: {
-          required: true,
-          message: '应用密钥不能为空',
-          trigger: 'blur'
-        },
+        secretContent: [
+          {
+            required: true,
+            message: '应用密钥不能为空',
+            trigger: 'blur'
+          },
+          {
+            len: 16,
+            message: '输入错误，请输入16位英文字母和数字组合的密钥',
+            trigger: 'blur'
+          },
+          {
+            validator: this.verifySecretContent,
+            trigger: 'blur'
+          }
+        ],
 
         tokenType: {
           required: true,
@@ -225,6 +245,10 @@ export default {
           required: true,
           message: '请选择token自定义有效时间',
           trigger: 'change'
+        },
+
+        allowId: {
+          validator: this.verifyAllowId
         }
       }
     }
@@ -232,8 +256,9 @@ export default {
 
   methods: {
     open(options) {
-      const { row } = options
+      const { row, opType } = options
       this.appForm.appGroupId = row?.id
+      opType === 'add' && (this.appForm.secretContent = UUStr())
       this.options = options
 
       this.$refs.baseDialog.open()
@@ -256,14 +281,12 @@ export default {
     },
 
     // 校验-分组名称填写校验
-    verifyAppGroupName(rule, value, cb) {
+    verifyAppName(rule, value, cb) {
       this.appForm.name = strExcludeBlank(value)
       if (cb) {
         verifySpecialString(value)
           ? cb(new Error('该名称中包含不规范字符，请重新输入'))
-          : isNaN(parseInt(value))
-          ? this.verifyGroupNameUnique(rule, value, cb)
-          : cb('请输入以中文或英文开头的名称')
+          : cb()
       }
     },
 
@@ -285,6 +308,35 @@ export default {
             this.veifyNameLoading = false
           }, 300)
         })
+    },
+
+    // 校验-应用密钥
+    verifySecretContent(rule, value, cb) {
+      this.appForm.secretContent = strExcludeBlank(value)
+      if (cb) {
+        verifySpecialString(value)
+          ? cb(new Error('该名称中包含不规范字符，请重新输入'))
+          : verifyStrInputNumberEn(value)
+          ? cb()
+          : cb('输入错误，请输入16位英文字母和数字组合的密钥')
+      }
+    },
+
+    // 校验-应用密钥
+    verifyAllowId(rule, value, cb) {
+      this.appForm.allowId = strExcludeBlank(value)
+      if (cb && value) {
+        const verifyIp = val =>
+          validIpAddress(val)
+            ? cb()
+            : cb('请输入正确的IP地址格式，多个IP则用英文逗号分隔')
+
+        value?.includes(',')
+          ? value.split(',').forEach(item => {
+              item && verifyIp(item)
+            })
+          : verifyIp(value)
+      }
     },
 
     // 获取-应用分组ID
