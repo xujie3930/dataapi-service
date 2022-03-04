@@ -105,7 +105,23 @@ export default {
     return {
       timerId: null,
       options: {},
-      apiOptions: [],
+      apiOptions: [
+        {
+          label: 'aaaa',
+          value: '1499640552889176065',
+          leaf: false,
+          children: [
+            {
+              label: 'bbb',
+              value: '1499643033090183170',
+              leaf: false,
+              children: [
+                { label: 'ccc', value: '1499649577457364993', leaf: true }
+              ]
+            }
+          ]
+        }
+      ],
       loading: false,
       veifyNameLoading: false,
       oldGroupName: '',
@@ -152,7 +168,7 @@ export default {
       this.options = options
       this.authorizeForm.name = row?.name
       this.authorizeForm.appId = row?.id
-      this.fetchBusinessProcessList()
+      // this.fetchBusinessProcessList()
       this.fetchApiAuthDetail(row?.id)
       this.$refs.baseDialog.open()
     },
@@ -269,18 +285,28 @@ export default {
         .then(({ success, data }) => {
           if (success && data) {
             const {
-              apiCascadeInfoStrList,
-              authResult: { allowCall, authEffectiveTime, callCountType }
+              // apiCascadeInfoStrList,
+              authResult: {
+                allowCall,
+                authEffectiveTime,
+                callCountType,
+                periodBegin,
+                periodEnd
+              }
             } = data
 
             // 级联回显
-            this.authorizeForm.apiId = apiCascadeInfoStrList.map(item =>
-              item.map(({ id }) => id)
-            )
+            // this.authorizeForm.apiId = apiCascadeInfoStrList.map(item =>
+            //   item.map(({ id }) => id)
+            // )
 
             this.authorizeForm.allowCall = allowCall
             this.authorizeForm.callType = callCountType
             this.authorizeForm.authPeriod = authEffectiveTime
+
+            if (periodBegin > -1 && periodEnd > -1) {
+              this.authorizeForm.validTime = [periodBegin, periodEnd]
+            }
           }
         })
         .finally(() => ({}))

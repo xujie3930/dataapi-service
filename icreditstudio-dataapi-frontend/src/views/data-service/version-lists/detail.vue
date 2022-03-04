@@ -1,5 +1,4 @@
 <!--
- * @Author: lizheng
  * @Description: 详情
  * @Date: 2022-02-25
 -->
@@ -52,6 +51,7 @@ import API from '@/api/api'
 import { tableServiceApiDetailTableConfig } from '@/configuration/table'
 import { API_TYPE, STATUS_MAPPING, API_MODE } from '@/config/constant'
 import { cloneDeep } from 'lodash'
+import { isPlainObject } from '@/utils'
 
 export default {
   data() {
@@ -77,7 +77,7 @@ export default {
             key: 'model',
             formatter: value => API_MODE[value]
           },
-          { label: 'API Path', value: '', key: 'apipath,' },
+          { label: 'API Path', value: '', key: 'apiPath' },
           { label: '请求方式', value: '', key: 'requestType' },
           { label: '返回类型', value: '', key: 'responseType' },
           { label: '所属分组', value: '', key: 'destination' },
@@ -92,7 +92,7 @@ export default {
             label: '版本号',
             value: '',
             key: 'apiVersion',
-            formatter: value => `v${value}`
+            formatter: value => (value ? `v${value}` : '')
           },
           { label: '创建人', value: '', key: 'createBy' },
           { label: '创建时间', value: '', key: 'createTime' },
@@ -129,7 +129,9 @@ export default {
               const { key, formatter } = item
               const val = key === 'model' ? generateApi?.model : restData[key]
               this.renderParams.base[idx].value = formatter
-                ? formatter(val)?.name
+                ? isPlainObject(formatter(val))
+                  ? formatter(val)?.name
+                  : formatter(val)
                 : val
 
               if ('color' in item) {
