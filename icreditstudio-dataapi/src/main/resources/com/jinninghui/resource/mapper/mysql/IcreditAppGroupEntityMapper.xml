@@ -6,7 +6,7 @@
             resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.AppQueryListDTO">
         select * from (
         (
-              SELECT appGroup.id,appGroup.`name`,appGroup.generate_id AS generateId,NULL AS certificationType,NULL AS isEnable,NULL AS period,
+              SELECT appGroup.id,appGroup.`name`,appGroup.generate_id AS generateId,NULL AS certificationType,NULL AS isEnable,NULL AS tokenType,
                     appGroup.create_by AS createBy,appGroup.create_time AS createTime,appGroup.`desc`,NULL AS appGroupId,appGroup.create_time create_time
               FROM icredit_app_group appGroup LEFT JOIN icredit_app app ON appGroup.id = app.app_group_id
               WHERE appGroup.del_flag = 0
@@ -28,7 +28,7 @@
             )
             UNION
             (
-              SELECT app.id,app.`name`,app.generate_id AS generateId,app.certification_type AS certificationType,app.is_enable AS isEnable,app.token_type AS period,
+              SELECT app.id,app.`name`,app.generate_id AS generateId,app.certification_type AS certificationType,app.is_enable AS isEnable,app.token_type AS tokenType,
                     app.create_by AS createBy,app.create_time AS createTime,app.`desc`,app_group_id AS appGroupId,app.create_time create_time
               FROM icredit_app_group appGroup LEFT JOIN icredit_app app ON appGroup.id = app.app_group_id
               WHERE app.del_flag = 0

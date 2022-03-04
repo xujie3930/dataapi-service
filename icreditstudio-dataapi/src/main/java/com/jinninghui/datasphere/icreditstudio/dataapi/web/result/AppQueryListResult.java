@@ -10,7 +10,7 @@ public class AppQueryListResult {
     private String generateId;
     private Integer certificationType;
     private Integer isEnable;
-    private Integer period;
+    private Integer tokenType;
     private String createBy;
     private Long createTime;
     private String desc;
