@@ -90,8 +90,8 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/publishOrStop")
-    public BusinessResult<Boolean> publishOrStop(@RequestBody ApiPublishRequest request){
-        return apiBaseService.publishOrStop(request);
+    public BusinessResult<Boolean> publishOrStop(@RequestHeader(value = "userId") String userId, @RequestBody ApiPublishRequest request){
+        return apiBaseService.publishOrStop(userId, request);
     }
 
     @PostMapping("/getApiList")

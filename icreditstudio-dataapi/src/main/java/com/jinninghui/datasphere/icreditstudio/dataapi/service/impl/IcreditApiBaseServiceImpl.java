@@ -135,11 +135,11 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         //保存api基础信息
         IcreditApiBaseEntity apiBaseEntity = new IcreditApiBaseEntity();
         BeanUtils.copyProperties(param, apiBaseEntity);
-        if(ApiSaveStatusEnum.API_SAVE.getCode().equals(param.getSaveType())){//保存
-            apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.WAIT_PUBLISH.getCode());
-        }else{
-            apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.PUBLISHED.getCode());
+        if (ApiSaveStatusEnum.API_SAVE.getCode().equals(param.getSaveType())) {//保存
             apiBaseEntity.setApiVersion(1);
+            apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.WAIT_PUBLISH.getCode());
+        } else {
+            apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.PUBLISHED.getCode());
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
         }
@@ -151,14 +151,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         StringBuffer requiredFields = new StringBuffer();//请求参数
         StringBuffer responseFields = new StringBuffer();//返回参数
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
-        if(ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {//表单生成模式
+        apiParamService.removeByApiId(apiBaseEntity.getId());
+        if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {//表单生成模式
             boolean isHaveRespField = false;
             StringBuffer querySqlPrefix = new StringBuffer(SQL_START);
             StringBuffer querySqlSuffix = new StringBuffer(SQL_WHERE);
             //保存 api param
             for (DatasourceApiParamSaveRequest datasourceApiParamSaveRequest : param.getApiParamSaveRequestList()) {
                 IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
-                apiParamEntity.setId(datasourceApiParamSaveRequest.getId());
                 apiParamEntity.setApiBaseId(apiBaseEntity.getId());
                 apiParamEntity.setApiVersion(apiBaseEntity.getApiVersion());
                 apiParamEntity.setDesc(datasourceApiParamSaveRequest.getDesc());
@@ -169,38 +169,38 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 apiParamEntity.setIsRequest(datasourceApiParamSaveRequest.getIsRequest());
                 apiParamEntity.setIsResponse(datasourceApiParamSaveRequest.getIsResponse());
                 apiParamEntityList.add(apiParamEntity);
-                if(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsResponse())){
+                if (ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsResponse())) {
                     querySqlPrefix.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                     responseFields.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                     isHaveRespField = true;
                 }
-                if(RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsRequest())){
+                if (RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsRequest())) {
                     querySqlSuffix.append(datasourceApiParamSaveRequest.getFieldName())
                             .append(" = ${").append(datasourceApiParamSaveRequest.getFieldName()).append("}").append(SQL_AND);
                 }
-                if(RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getRequired())){
+                if (RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getRequired())) {
                     requiredFields.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                 }
             }
-            if(!isHaveRespField){//没有勾选返回参数
+            if (!isHaveRespField) {//没有勾选返回参数
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getMessage());
             }
             apiParamService.saveOrUpdateBatch(apiParamEntityList);
             querySql = String.valueOf(new StringBuffer(querySqlPrefix.substring(0, querySqlPrefix.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))
                     .append(SQL_FROM).append(param.getApiGenerateSaveRequest().getTableName()).append(querySqlSuffix));
-            if(querySql.endsWith(SQL_WHERE)){
+            if (querySql.endsWith(SQL_WHERE)) {
                 querySql = querySql.substring(0, querySql.lastIndexOf(SQL_WHERE));
             }
-            if(querySql.endsWith(SQL_AND)){
+            if (querySql.endsWith(SQL_AND)) {
                 querySql = querySql.substring(0, querySql.lastIndexOf(SQL_AND));
             }
-            if(requiredFields.length() >= 1) {
+            if (requiredFields.length() >= 1) {
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-            if(responseFields.length() >= 1) {
+            if (responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-        }else{
+        } else {
             apiParamEntityList = checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), 1);
             querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
             String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
@@ -211,14 +211,13 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             for (String responseField : responseFieldArr) {
                 responseFields.append(responseField.substring(0, responseField.indexOf(EMPTY_CHAR))).append(SQL_FIELD_SPLIT_CHAR);
             }
-            if(requiredFields.length() >= 1) {
+            if (requiredFields.length() >= 1) {
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-            if(responseFields.length() >= 1) {
+            if (responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
             handleField(apiParamEntityList, requiredFieldStr, responseFieldStr);
-            apiParamService.removeByApiId(apiBaseEntity.getId());
         }
         apiParamService.saveOrUpdateBatch(apiParamEntityList);
 
@@ -228,14 +227,15 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         generateApiEntity.setId(param.getApiGenerateSaveRequest().getId());
         generateApiEntity.setApiBaseId(apiBaseEntity.getId());
         generateApiEntity.setApiVersion(apiBaseEntity.getApiVersion());
-        if(ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())){
+        if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
             generateApiEntity.setSql(querySql);
         }
         generateApiService.saveOrUpdate(generateApiEntity);
 
-        //存放信息到redis
-        saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr);
-
+        //发布操作 存放信息到redis
+        if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr);
+        }
         //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
         apiSaveResult.setId(apiBaseEntity.getId());
@@ -276,6 +276,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             return BusinessResult.success(result);
         }
         BeanCopyUtils.copyProperties(apiBaseEntity, result);
+        result.setApiPath(apiBaseEntity.getPath());
         //根据不同API类型返回不同对象
         ApiBaseService apiService = apiBaseFactory.getApiService(apiBaseEntity.getType());
         apiService.setApiBaseResult(result);
@@ -325,7 +326,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         Connection conn = DBConnectionManager.getInstance().getConnection(uri, datasource.getType());
         List<FieldInfo> fieldList = new ArrayList<>();
         try {
-            ResultSet rs = conn.getMetaData().getColumns(null, null, request.getTableName(), "%");
+            ResultSet rs = conn.getMetaData().getColumns(null, "%", request.getTableName(), "%");
             while(rs.next()) {
                 FieldInfo fieldInfo = new FieldInfo();
                 fieldInfo.setDesc(rs.getString("REMARKS"));
@@ -441,9 +442,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     @Override
     @Transactional
-    public BusinessResult<Boolean> publishOrStop(ApiPublishRequest request) {
+    public BusinessResult<Boolean> publishOrStop(String userId, ApiPublishRequest request) {
         apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus());
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getId());
+        if(StringUtils.isEmpty(apiBaseEntity.getPublishUser())){
+            apiBaseEntity.setPublishUser(userId);
+            apiBaseEntity.setPublishTime(new Date());
+            saveOrUpdate(apiBaseEntity);
+        }
         if(ApiPublishStatusEnum.NO_PUBLISHED.getCode().equals(request.getPublishStatus())){//停止发布
             redisTemplate.delete(String.valueOf(new StringBuilder(apiBaseEntity.getPath()).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiBaseEntity.getApiVersion())));
         }else if(ApiPublishStatusEnum.PUBLISHED.getCode().equals(request.getPublishStatus())){//发布

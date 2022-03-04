@@ -47,7 +47,7 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
 
     List<IcreditApiParamEntity> checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type);
 
-    BusinessResult<Boolean> publishOrStop(ApiPublishRequest request);
+    BusinessResult<Boolean> publishOrStop(String userId, ApiPublishRequest request);
 
     BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request);
 }
