@@ -15,4 +15,6 @@ public class AuthResult {
 
     private Integer allowCall;
 
+    private String authEffectiveTime;
+
 }

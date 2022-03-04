@@ -11,4 +11,8 @@
         </if>
     </select>
 
+    <delete id="removeByAppId">
+        delete from icredit_auth where app_id = #{appId}
+    </delete>
+
 </mapper>

@@ -52,7 +52,7 @@
     </select>
 
     <select id="findApiInfoByApiIds" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO">
-        select iwf.name as workFlowName,iag.name as apiGroupName,iab.name as apiName
+        select iwf.name as workFlowName,iag.name as apiGroupName,iab.name as apiName,iwf.id as workFlowId,iag.id as apiGroupId,iab.id as apiId
         from icredit_work_flow iwf right join icredit_api_group iag on iwf.id = iag.work_id
         right join icredit_api_base iab on iab.api_group_id = iag.id
         where iab.del_flag = 0

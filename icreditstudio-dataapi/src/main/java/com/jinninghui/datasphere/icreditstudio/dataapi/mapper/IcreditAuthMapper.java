@@ -17,4 +17,6 @@ import java.util.List;
 public interface IcreditAuthMapper extends BaseMapper<IcreditAuthEntity> {
 
     List<IcreditAuthEntity> findByAppId(@Param("appId") String appId);
+
+    void removeByAppId(@Param("appId") String appId);
 }

@@ -6,6 +6,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppDetailRequ
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppDetailResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 /**
@@ -25,4 +26,6 @@ public interface IcreditAppService extends IService<IcreditAppEntity> {
     Boolean hasExitByGenerateId(String generateId, String appGroupId);
 
     BusinessResult<AppDetailResult> detail(AppDetailRequest request);
+
+    AuthResult generateAuthResultInfo(String authConfigId, Integer period);
 }

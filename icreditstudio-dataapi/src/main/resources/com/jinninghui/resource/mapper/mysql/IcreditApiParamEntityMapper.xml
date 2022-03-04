@@ -7,7 +7,7 @@
         select *
         from icredit_api_param
         <where>
-            <if test="id != null and id != '' ">
+            <if test="apiId != null and apiId != '' ">
                 AND api_base_id = #{apiId}
             </if>
             AND del_flag = 0
