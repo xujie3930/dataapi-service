@@ -7,11 +7,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AuthEffectiveTimeEnum {
 
-    SORT_TIME(0L, "短期"),
-    LONG_TIME(-1L, "永久")
+    SORT_TIME(0L, 0),
+    LONG_TIME(-1L, 1)
     ;
 
     private Long code;
-    private String msg;
+    private Integer effective;
 
 }

@@ -135,8 +135,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         //保存api基础信息
         IcreditApiBaseEntity apiBaseEntity = new IcreditApiBaseEntity();
         BeanUtils.copyProperties(param, apiBaseEntity);
+        apiBaseEntity.setApiVersion(1);
         if (ApiSaveStatusEnum.API_SAVE.getCode().equals(param.getSaveType())) {//保存
-            apiBaseEntity.setApiVersion(1);
             apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.WAIT_PUBLISH.getCode());
         } else {
             apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.PUBLISHED.getCode());
@@ -185,7 +185,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if (!isHaveRespField) {//没有勾选返回参数
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getMessage());
             }
-            apiParamService.saveOrUpdateBatch(apiParamEntityList);
             querySql = String.valueOf(new StringBuffer(querySqlPrefix.substring(0, querySqlPrefix.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))
                     .append(SQL_FROM).append(param.getApiGenerateSaveRequest().getTableName()).append(querySqlSuffix));
             if (querySql.endsWith(SQL_WHERE)) {

@@ -11,10 +11,10 @@ public class AuthResult {
 
     private Long periodEnd;
 
-    private String callCountType;
+    private Integer callCountType;
 
     private Integer allowCall;
 
-    private String authEffectiveTime;
+    private Integer authEffectiveTime;
 
 }

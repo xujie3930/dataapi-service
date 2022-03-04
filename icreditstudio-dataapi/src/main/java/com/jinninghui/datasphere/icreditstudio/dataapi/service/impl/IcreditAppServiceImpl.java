@@ -129,14 +129,14 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         authResult.setPeriodEnd(authConfigEntity.getPeriodEnd());
         authResult.setTokenType(tokenType);
         if(CallCountEnum.CALL_INFINITE_TIMES.getCode().equals(authConfigEntity.getAllowCall())){
-            authResult.setCallCountType(CallCountEnum.CALL_INFINITE_TIMES.getMsg());
+            authResult.setCallCountType(CallCountEnum.CALL_INFINITE_TIMES.getCallTime());
         }else {
-            authResult.setCallCountType(CallCountEnum.CALL_FINITE_TIMES.getMsg());
+            authResult.setCallCountType(CallCountEnum.CALL_FINITE_TIMES.getCallTime());
         }
         if(AuthEffectiveTimeEnum.LONG_TIME.getCode().equals(authConfigEntity.getPeriodBegin())){
-            authResult.setAuthEffectiveTime(AuthEffectiveTimeEnum.LONG_TIME.getMsg());
+            authResult.setAuthEffectiveTime(AuthEffectiveTimeEnum.LONG_TIME.getEffective());
         }else {
-            authResult.setAuthEffectiveTime(AuthEffectiveTimeEnum.SORT_TIME.getMsg());
+            authResult.setAuthEffectiveTime(AuthEffectiveTimeEnum.SORT_TIME.getEffective());
         }
         return authResult;
     }
