@@ -174,7 +174,7 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     private void checkRepetitionName(String name, String id) {
         boolean hasExit = BooleanUtils.isTrue(workFlowMapper.hasExit(name, id));
         if (hasExit) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000003.getCode());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getCode());
         }
     }
 

@@ -18,5 +18,5 @@ public interface AuthService {
 
     BusinessResult<String> getToken(String generateId, String secretContent);
 
-    BusinessResult<List<Object>> getData(String version, String path, Map map);
+    BusinessResult<Object> getData(String version, String path, Map map);
 }
