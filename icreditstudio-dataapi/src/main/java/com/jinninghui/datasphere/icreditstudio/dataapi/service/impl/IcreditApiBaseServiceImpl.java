@@ -233,7 +233,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
         //发布操作 存放信息到redis
         if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr);
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr);
         }
         //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
@@ -473,16 +473,18 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr);
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr);
         }
         return BusinessResult.success(true);
     }
 
-    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, Integer apiVersion, String sql, String requiredFieldStr, String responseFieldStr) {
+    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, String apiName, Integer apiType, Integer apiVersion, String sql, String requiredFieldStr, String responseFieldStr) {
         BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(datasourceId));
         ConnectionInfoVO connInfo = connResult.getData();
         RedisApiInfo redisApiInfo = new RedisApiInfo();
         redisApiInfo.setApiId(apiId);
+        redisApiInfo.setApiType(apiType);
+        redisApiInfo.setApiName(apiName);
         redisApiInfo.setUrl(handleUrl(connInfo.getUrl()));
         redisApiInfo.setUserName(connInfo.getUsername());
         redisApiInfo.setPassword(connInfo.getPassword());

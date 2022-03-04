@@ -35,8 +35,7 @@ public class KafkaConsumer {
         Optional message = Optional.ofNullable(record.value());
         if (message.isPresent()) {
             Object msg = message.get();
-            String o = JSON.toJSONString(msg);
-            ApiLogInfo logInfo = JSON.parseObject(o, ApiLogInfo.class) ;
+            ApiLogInfo logInfo = JSON.parseObject(String.valueOf(msg), ApiLogInfo.class) ;
             IcreditApiLogEntity logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
             if(null != logApiLogEntity){
                 String logId = logApiLogEntity.getId();

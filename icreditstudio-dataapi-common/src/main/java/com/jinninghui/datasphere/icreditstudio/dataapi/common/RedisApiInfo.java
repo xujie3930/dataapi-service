@@ -6,6 +6,8 @@ import lombok.Data;
 public class RedisApiInfo {
 
     private String apiId;
+    private Integer apiType;
+    private String apiName;
     private String url;
     private String userName;
     private String password;
