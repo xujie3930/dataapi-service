@@ -17,13 +17,13 @@
       <div
         :class="[
           'banner-title',
-          detailTitleKeyMapping[key] ? '' : 'banner-title-hide'
+          detailTitleKeyMapping[key].label ? '' : 'banner-title-hide'
         ]"
-        v-for="(item, key) in detailConfiguration"
+        v-for="(item, key) in configuration"
         :key="key"
       >
-        <div v-if="detailTitleKeyMapping[key]" class="text">
-          {{ detailTitleKeyMapping[key] }}
+        <div v-if="detailTitleKeyMapping[key].label" class="text">
+          {{ detailTitleKeyMapping[key].label }}
         </div>
 
         <el-row class="detail-row-wrap">
@@ -50,12 +50,6 @@
 <script>
 export default {
   name: 'Detail',
-  data() {
-    return {
-      options: {},
-      dialogVisible: false
-    }
-  },
 
   model: {
     prop: 'visible',
@@ -91,6 +85,29 @@ export default {
     fetchDetailData: {
       type: Function,
       default: null
+    }
+  },
+
+  data() {
+    return {
+      options: {},
+      dialogVisible: false
+    }
+  },
+
+  computed: {
+    configuration() {
+      const showDetailModule = {}
+      for (const key in this.detailTitleKeyMapping) {
+        if (
+          'visible' in this.detailTitleKeyMapping[key]
+            ? this.detailTitleKeyMapping[key].visible
+            : true
+        ) {
+          showDetailModule[key] = this.detailConfiguration[key]
+        }
+      }
+      return showDetailModule
     }
   },
 

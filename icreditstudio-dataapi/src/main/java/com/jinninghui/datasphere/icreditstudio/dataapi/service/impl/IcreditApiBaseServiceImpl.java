@@ -325,7 +325,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         Connection conn = DBConnectionManager.getInstance().getConnection(uri, datasource.getType());
         List<FieldInfo> fieldList = new ArrayList<>();
         try {
-            ResultSet rs = conn.getMetaData().getColumns(null, "%", request.getTableName(), "%");
+            ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), "%", request.getTableName(), "%");
             while(rs.next()) {
                 FieldInfo fieldInfo = new FieldInfo();
                 fieldInfo.setDesc(rs.getString("REMARKS"));

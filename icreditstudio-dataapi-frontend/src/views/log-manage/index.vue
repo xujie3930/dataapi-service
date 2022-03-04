@@ -73,7 +73,7 @@ export default {
 
       fetchConfig: { retrieve: { url: '/log/list', method: 'post' } },
 
-      detailConfiguration: cloneDeep(detailConfiguration()),
+      detailConfiguration: cloneDeep(detailConfiguration({})),
       detailTitleKeyMapping: cloneDeep(detailTitleKeyMapping)
     }
   },
