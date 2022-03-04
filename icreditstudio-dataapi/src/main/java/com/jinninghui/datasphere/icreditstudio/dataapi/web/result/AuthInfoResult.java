@@ -9,7 +9,7 @@ public class AuthInfoResult {
 
     private String appId;
     private String appName;
-    private List<List<ApiCascadeInfoResult>> apiCascadeInfoStrList;
+    private List<ApiCascadeInfoResult> apiCascadeInfoStrList;
     private AuthResult authResult;
 
 }

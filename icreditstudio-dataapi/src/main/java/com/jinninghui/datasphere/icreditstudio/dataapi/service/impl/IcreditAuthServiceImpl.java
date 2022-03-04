@@ -109,25 +109,23 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             apiIds.add(icreditAuthEntity.getApiId());
         }
         List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);
-        List<List<ApiCascadeInfoResult>> apiCascadeInfoStrList = new ArrayList<>();
+        List<ApiCascadeInfoResult> apiCascadeInfoStrList = new ArrayList<>();
         int len = apiInfoList.size();
         for (int i = 0;i < len;i++) {
-            List<ApiCascadeInfoResult> apiCascadeList = new LinkedList<>();
-            ApiCascadeInfoResult apiCascadeInfoResult = new ApiCascadeInfoResult();
-            apiCascadeInfoResult.setId(apiInfoList.get(i).getWorkFlowId());
-            apiCascadeInfoResult.setName(apiInfoList.get(i).getWorkFlowName());
-            apiCascadeList.add(apiCascadeInfoResult);
+            ApiCascadeInfoResult apiCascadeInfo = new ApiCascadeInfoResult();
+            apiCascadeInfo.setId(apiInfoList.get(i).getWorkFlowId());
+            apiCascadeInfo.setName(apiInfoList.get(i).getWorkFlowName());
 
-            apiCascadeInfoResult = new ApiCascadeInfoResult();
-            apiCascadeInfoResult.setId(apiInfoList.get(i).getApiGroupId());
-            apiCascadeInfoResult.setName(apiInfoList.get(i).getApiGroupName());
-            apiCascadeList.add(apiCascadeInfoResult);
+            ApiGroupIdAAndNameResult apiGroupInfoResult = new ApiGroupIdAAndNameResult();
+            apiGroupInfoResult.setId(apiInfoList.get(i).getApiGroupId());
+            apiGroupInfoResult.setName(apiInfoList.get(i).getApiGroupName());
 
-            apiCascadeInfoResult = new ApiCascadeInfoResult();
-            apiCascadeInfoResult.setId(apiInfoList.get(i).getApiId());
-            apiCascadeInfoResult.setName(apiInfoList.get(i).getApiName());
-            apiCascadeList.add(apiCascadeInfoResult);
-            apiCascadeInfoStrList.add(apiCascadeList);
+            ApiIdAAndNameResult apiInfoResult = new ApiIdAAndNameResult();
+            apiInfoResult.setId(apiInfoList.get(i).getApiId());
+            apiInfoResult.setName(apiInfoList.get(i).getApiName());
+            apiGroupInfoResult.setChildren(apiInfoResult);
+            apiCascadeInfo.setChildren(apiGroupInfoResult);
+            apiCascadeInfoStrList.add(apiCascadeInfo);
         }
         authInfoResult.setApiCascadeInfoStrList(apiCascadeInfoStrList);
 
