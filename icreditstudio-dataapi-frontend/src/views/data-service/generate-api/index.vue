@@ -21,7 +21,7 @@
         </div>
       </div>
       <div class="source-header-btn">
-        <el-button class="jui-button--default">预览</el-button>
+        <el-button class="jui-button--default" :disabled="true">预览</el-button>
         <el-button
           :disabled="true"
           :loading="isTestBtnLoading"
@@ -447,8 +447,12 @@
 </template>
 
 <script>
-import GenerateApiTips from './generate-api-tips.vue'
-
+import GenerateApiTips from './generate-api-tips'
+import {
+  verifySpecialString,
+  verifyOnlyEnString,
+  strExcludeBlank
+} from '@/utils/validate'
 import API from '@/api/api'
 import {
   dataServiceParamTableConfig,
@@ -511,7 +515,8 @@ export default {
         ],
         name: [
           { required: true, message: 'API名称不能为空', trigger: 'blur' },
-          { min: 2, message: '至少输入2个字符' }
+          { min: 2, message: '至少输入2个字符' },
+          { validator: this.verifyApiName, trigger: 'blur' }
         ],
         databaseTye: [
           { required: true, message: '必填项不能为空', trigger: 'change' }
@@ -524,7 +529,9 @@ export default {
             required: true,
             message: '接口地址不能为空',
             trigger: ['blur', 'change']
-          }
+          },
+          { len: 16, message: '仅支持16位的英文大小写字母组合' },
+          { validator: this.verifyPath, trigger: 'blur' }
         ],
         requestType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
@@ -568,6 +575,32 @@ export default {
         key: 'datasourceOptions',
         methodName: 'getDatasourceOptions'
       })
+    },
+
+    // 校验-API名称
+    verifyApiName(rule, value, cb) {
+      this.form.name = strExcludeBlank(value)
+
+      if (cb) {
+        verifySpecialString(value.replaceAll('_', ''))
+          ? cb(new Error('该名称中包含不规范字符，请重新输入'))
+          : value.startsWith('_')
+          ? cb(new Error('不能以下划线开头，请重新输入'))
+          : cb()
+      }
+    },
+
+    // 校验-API Path
+    verifyPath(rule, value, cb) {
+      this.form.path = strExcludeBlank(value)
+
+      if (cb) {
+        verifySpecialString(value)
+          ? cb(new Error('该名称中包含不规范字符，请重新输入'))
+          : verifyOnlyEnString(value)
+          ? cb()
+          : cb(new Error('仅支持16位的英文大小写字母组合'))
+      }
     },
 
     handleJumpBackClick() {

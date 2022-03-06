@@ -258,7 +258,7 @@ export default {
     open(options) {
       const { row, opType } = options
       this.appForm.appGroupId = row?.id
-      opType === 'add' && (this.appForm.secretContent = UUStr())
+      opType === 'add' && (this.appForm.secretContent = UUStr({}))
       this.options = options
 
       this.$refs.baseDialog.open()

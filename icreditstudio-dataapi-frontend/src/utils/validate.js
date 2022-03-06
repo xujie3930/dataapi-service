@@ -40,3 +40,6 @@ export const verifyStrInputNumberEn = str => /^[\da-zA-Z]+$/i.test(str)
 export const verifyStringStartsWithNumber = str => {
   str?.startsWith(typeof parseInt(str))
 }
+
+// 校验当前字符窜是否只输入英文
+export const verifyOnlyEnString = str => /^[a-zA-Z]+$/i.test(str)

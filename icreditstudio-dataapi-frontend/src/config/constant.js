@@ -12,13 +12,13 @@ export const STATUS_MAPPING = {
 }
 
 // API类型
-export const API_TYPE = { 0: '注册API', 1: '数据源生成' }
+export const API_TYPE = { 0: '注册API', 1: '数据源生成API' }
 
 // API模式
 export const API_MODE = {
-  0: '表单生成api',
-  1: 'SQL模式生成api',
-  2: '链上生成api'
+  0: '表单生成API',
+  1: 'SQL模式生成API',
+  2: '链上生成API'
 }
 
 // API: 认证方式

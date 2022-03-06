@@ -9,6 +9,8 @@
     width="600px"
     title="新建API分组"
     footer-placement="center"
+    :close-on-click-modal="false"
+    @on-change="change"
     @on-confirm="saveApiGroup"
   >
     <el-form
@@ -63,6 +65,7 @@
 
 <script>
 import API from '@/api/api'
+import { verifySpecialString, strExcludeBlank } from '@/utils/validate'
 
 export default {
   data() {
@@ -82,7 +85,8 @@ export default {
             trigger: 'blur'
           },
           { min: 2, message: '请至少输入2个字符' },
-          { max: 50, message: '最多只能输入50个字符' }
+          { max: 50, message: '最多只能输入50个字符' },
+          { validator: this.verifyApiGroupName, trigger: 'blur' }
         ]
       }
     }
@@ -108,6 +112,19 @@ export default {
 
     reset() {
       this.$refs.apiGroupForm.resetFields()
+    },
+
+    // 校验
+    verifyApiGroupName(rule, value, cb) {
+      this.apiGroupForm.name = strExcludeBlank(value)
+
+      if (cb) {
+        verifySpecialString(value.replaceAll('_', ''))
+          ? cb(new Error('该名称中包含不规范字符，请重新输入'))
+          : isNaN(parseInt(value)) && !value.startsWith('_')
+          ? cb()
+          : cb(new Error('请输入以中文或英文开头的名称'))
+      }
     },
 
     //获取-业务流程

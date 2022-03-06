@@ -9,6 +9,7 @@
     width="600px"
     title="新建业务流程"
     footer-placement="center"
+    :close-on-click-modal="false"
     @on-close="close"
     @on-change="change"
     @on-confirm="saveBusinessProcess"
@@ -48,6 +49,7 @@
 
 <script>
 import API from '@/api/api'
+import { verifySpecialString, strExcludeBlank } from '@/utils/validate'
 
 export default {
   data() {
@@ -59,7 +61,8 @@ export default {
         name: [
           { required: true, message: '请输入业务流程名称', trigger: 'blur' },
           { min: 2, message: '请至少输入2个字符' },
-          { max: 50, message: '最多只能输入50个字符' }
+          { max: 50, message: '最多只能输入50个字符' },
+          { validator: this.verifyBusinessName, trigger: 'blur' }
         ]
       }
     }
@@ -84,6 +87,19 @@ export default {
 
     change(visible) {
       !visible && this.reset()
+    },
+
+    // 校验
+    verifyBusinessName(rule, value, cb) {
+      this.processForm.name = strExcludeBlank(value)
+
+      if (cb) {
+        verifySpecialString(value.replaceAll('_', ''))
+          ? cb(new Error('该名称中包含不规范字符，请重新输入'))
+          : isNaN(parseInt(value)) && !value.startsWith('_')
+          ? cb()
+          : cb(new Error('请输入以中文或英文开头的名称'))
+      }
     },
 
     // 保存

@@ -31,18 +31,20 @@ export default that => ({
     {
       type: 'text',
       label: 'API名称',
-      prop: 'name'
+      prop: 'name',
+      minWidth: 220
     },
     {
       type: 'text',
       label: 'API Path',
-      prop: 'path'
+      prop: 'path',
+      width: 220
     },
     {
       type: 'text',
       label: 'API类型',
       prop: 'type',
-      width: 350,
+      width: 160,
       formatter: ({ type }) => API_TYPE[type]
     },
     // {
@@ -63,7 +65,7 @@ export default that => ({
       type: 'text',
       label: '发布人',
       prop: 'publishUser',
-      width: 80
+      width: 100
     },
     {
       type: 'date',
