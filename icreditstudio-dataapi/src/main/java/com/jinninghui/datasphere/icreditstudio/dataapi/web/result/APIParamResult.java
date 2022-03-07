@@ -21,4 +21,6 @@ public class APIParamResult {
     private Integer required;
     //说明
     private String desc;
+    //来源表
+    private String tableName;
 }

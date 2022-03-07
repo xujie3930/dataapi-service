@@ -21,6 +21,8 @@ public class ApiLogInfo implements Serializable {
     //需要插入redis?
     private String apiName;
 
+    private Integer apiType;
+
     //可以获取
     private String apiId;
 
@@ -52,7 +54,7 @@ public class ApiLogInfo implements Serializable {
     private String requestParam;
 
     //可以获取
-    private String responsePatam;
+    private String responseParam;
 
     //可以获取
     private Date callBeginTime;

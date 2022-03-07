@@ -104,38 +104,12 @@ public class AuthServiceImpl implements AuthService {
             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
             if (map.containsKey(PAGENUM_MARK) && map.containsKey(PAGESIZE_MARK)){
-                Integer pageNum = Math.max(Integer.parseInt((String) map.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
-                Integer pageSize = Math.min(Integer.parseInt((String) map.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
-                String countSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.getSelectCountSql(querySql);
-                ResultSet countRs = stmt.executeQuery(countSql);
-                if (countRs.next()) {
-                    //rs结果集第一个参数即为记录数，且其结果集中只有一个参数
-                    dataCount = countRs.getLong(1);
-                }
-                String pageSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, pageNum, pageSize);
-                ResultSet pagingRsForPageParam = stmt.executeQuery(pageSql);
-                if (pagingRsForPageParam.next()) {
-                    List list = ResultSetToListUtils.convertList(pagingRsForPageParam);
-                    //发送成功消息
-                    BusinessBasePageForm pageForm = new BusinessBasePageForm();
-                    pageForm.setPageNum(pageNum);
-                    pageForm.setPageSize(pageSize);
-                    BusinessPageResult build = BusinessPageResult.build(list, pageForm, dataCount);
-                    ApiLogInfo successLog = generateSuccessLog(apiLogInfo, pageSql);
-                    kafkaProducer.send(successLog);
-                    return BusinessResult.success(build);
-                }
+                BusinessPageResult<Object> build = getPageResult(map, querySql, dataCount, apiLogInfo, stmt);
+                return BusinessResult.success(build);
             }else {
                 //如果不传分页最大查询500条，不需要用分页对象包装
-                querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
-                ResultSet pagingRs = stmt.executeQuery(querySql);
-                if (pagingRs.next()) {
-                    List list = ResultSetToListUtils.convertList(pagingRs);
-                    //发送成功消息
-                    ApiLogInfo successLog = generateSuccessLog(apiLogInfo, querySql);
-                    kafkaProducer.send(successLog);
-                    return BusinessResult.success(list);
-                }
+                List list = getListResult(querySql, dataCount, apiLogInfo, stmt);
+                return BusinessResult.success(list);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,7 +120,44 @@ public class AuthServiceImpl implements AuthService {
         } finally {
             DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
         }
-        return BusinessResult.success(null);
+    }
+
+    private List getListResult(String querySql, Long dataCount, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
+        querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
+        ResultSet pagingRs = stmt.executeQuery(querySql);
+        if (pagingRs.next()) {
+            List list = ResultSetToListUtils.convertList(pagingRs);
+            //发送成功消息
+            ApiLogInfo successLog = generateSuccessLog(apiLogInfo, querySql);
+            kafkaProducer.send(successLog);
+            return list;
+        }
+        return null;
+    }
+
+    private BusinessPageResult<Object> getPageResult(Map map, String querySql, Long dataCount, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
+        Integer pageNum = Math.max(Integer.parseInt((String) map.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
+        Integer pageSize = Math.min(Integer.parseInt((String) map.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
+        String countSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.getSelectCountSql(querySql);
+        ResultSet countRs = stmt.executeQuery(countSql);
+        if (countRs.next()) {
+            //rs结果集第一个参数即为记录数，且其结果集中只有一个参数
+            dataCount = countRs.getLong(1);
+        }
+        String pageSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, pageNum, pageSize);
+        ResultSet pagingRsForPageParam = stmt.executeQuery(pageSql);
+        if (pagingRsForPageParam.next()) {
+            List list = ResultSetToListUtils.convertList(pagingRsForPageParam);
+            //发送成功消息
+            BusinessBasePageForm pageForm = new BusinessBasePageForm();
+            pageForm.setPageNum(pageNum);
+            pageForm.setPageSize(pageSize);
+            BusinessPageResult build = BusinessPageResult.build(list, pageForm, dataCount);
+            ApiLogInfo successLog = generateSuccessLog(apiLogInfo, pageSql);
+            kafkaProducer.send(successLog);
+            return build;
+        }
+        return null;
     }
 
     private ApiLogInfo generateFailLog(ApiLogInfo apiLogInfo, String querySql, Exception e) {
@@ -192,12 +203,14 @@ public class AuthServiceImpl implements AuthService {
         logInfo.setCallIp(request.getRemoteHost());
         logInfo.setApiVersion(version);
         logInfo.setRequestParam(apiInfo.getRequiredFields());
-        logInfo.setResponsePatam(apiInfo.getResponseFields());
+        logInfo.setResponseParam(apiInfo.getResponseFields());
         logInfo.setCallStatus(CallStatusEnum.CALL_ON.getCode());
         logInfo.setCallBeginTime(date);
         logInfo.setCreateTime(date);
         logInfo.setUpdateTime(date);
         logInfo.setRunTime(System.currentTimeMillis());
+        logInfo.setApiName(apiInfo.getApiName());
+        logInfo.setApiType(apiInfo.getApiType());
         return logInfo;
     }
 

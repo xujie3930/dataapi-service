@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.QuerySqlCheckType;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult;
@@ -86,7 +87,7 @@ public class IcreditApiBaseController {
 
     @PostMapping("/checkQuerySql")
     public BusinessResult<Boolean> checkQuerySql(@RequestBody CheckQuerySqlRequest request){
-        return BusinessResult.success(null == apiBaseService.checkQuerySql(request, "", 0, 0));
+        return BusinessResult.success(null == apiBaseService.checkQuerySql(request, "", 0, QuerySqlCheckType.NEED_NOT_GET_TABLE_FIELD.getCode()));
     }
 
     @PostMapping("/publishOrStop")
