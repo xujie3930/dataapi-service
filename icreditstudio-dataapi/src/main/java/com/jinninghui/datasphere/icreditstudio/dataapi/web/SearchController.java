@@ -34,7 +34,7 @@ public class SearchController {
 
     @GetMapping ("/generate/random")
     public BusinessResult<String> generateRandom(@RequestParam(value = "len", defaultValue = "16") Integer len) {
-        String randomString = CharacterUtils.getRandomString(len);
+        String randomString = CharacterUtils.getGUID(len);
         return BusinessResult.success(randomString);
     }
 }
