@@ -1,4 +1,4 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.utils;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
 /**
  * @author xujie
