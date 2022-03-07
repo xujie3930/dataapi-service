@@ -12,7 +12,7 @@ public class AppQueryListDTO {
     private String generateId;
     private Integer certificationType;
     private Integer isEnable;
-    private Integer period;
+    private Integer tokenType;
     private String createBy;
     private Date createTime;
     private String desc;
