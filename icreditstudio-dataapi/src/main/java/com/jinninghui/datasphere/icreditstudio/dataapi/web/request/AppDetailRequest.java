@@ -6,6 +6,6 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 public class AppDetailRequest {
-    @NotBlank(message = "应用id不能为空")
+    @NotBlank(message = "20000021")
     private String id;
 }

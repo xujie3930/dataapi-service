@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
  **/
 @Data
 public class AppEnableRequest {
-    @NotBlank(message = "应用id不能为空")
+    @NotBlank(message = "20000021")
     private String id;
     //是否启用(0-未启用,1-启用),默认1
     private Integer isEnable;

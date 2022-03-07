@@ -17,13 +17,13 @@ public class AppSaveRequest {
     //是否启用(0-未启用,1-启用),默认1
     private Integer isEnable;
     //应用名称
-    @NotBlank(message = "应用名称不能为空")
-    @Length(max = 50, message = "应用名称50字以内")
+    @NotBlank(message = "20000022")
+    @Length(max = 50, message = "20000023")
     private String name;
     //密钥/RSA公钥
     private String secretContent;
     //应用分组ID
-    @NotBlank(message = "应用分组id不能为空")
+    @NotBlank(message = "20000024")
     private String appGroupId;
     //备注
     private String desc;

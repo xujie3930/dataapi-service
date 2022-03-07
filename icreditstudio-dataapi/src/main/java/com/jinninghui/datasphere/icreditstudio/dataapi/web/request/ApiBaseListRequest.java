@@ -13,7 +13,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class ApiBaseListRequest  extends BusinessBasePageForm {
     //API分组id
-    @NotBlank(message = "API分组id不能为空")
+    @NotBlank(message = "20000028")
     private String apiGroupId;
     //API名称
     private String name;

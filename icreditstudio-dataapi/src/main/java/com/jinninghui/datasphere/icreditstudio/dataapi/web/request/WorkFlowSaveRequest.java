@@ -14,11 +14,11 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class WorkFlowSaveRequest extends BaseEntity {
     //业务流程名称
-    @NotBlank(message = "名称不能为空")
-    @Length(min = 2, max = 50, message = "请输入以英文字母或者汉字开头的2~50字的名称")
+    @NotBlank(message = "20000018")
+    @Length(min = 2, max = 50, message = "20000015")
     private String name;
     //业务描述
-    @Length(max = 250, message = "业务描述250字以内")
+    @Length(max = 250, message = "20000017")
     private String desc;
 
 }

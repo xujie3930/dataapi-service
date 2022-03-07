@@ -4,6 +4,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApi
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiModelTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.ApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditGenerateApiService;
@@ -35,11 +36,10 @@ public class ApiBaseGenerateService implements ApiBaseService {
         if (Objects.isNull(generateApiEntity)) {
             return;
         }
-        BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(generateApiEntity.getDatasourceId()));
+        BusinessResult<DatasourceDetailResult> connResult = dataSourceFeignClient.info(generateApiEntity.getDatasourceId());
         String databaseName = "";
         if (connResult.isSuccess() && !Objects.isNull(connResult.getData())) {
-            String url = connResult.getData().getUrl();
-            databaseName = DatasourceUtils.getDatabaseName(url);
+            databaseName = connResult.getData().getName();
         }
         ApiModelTypeEnum apiModelTypeEnum = ApiModelTypeEnum.findByModel(generateApiEntity.getModel());
         switch (apiModelTypeEnum) {

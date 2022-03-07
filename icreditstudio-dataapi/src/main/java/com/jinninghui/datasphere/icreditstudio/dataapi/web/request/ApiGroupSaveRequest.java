@@ -13,13 +13,13 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class ApiGroupSaveRequest {
     //业务流程id
-    @NotBlank(message = "业务流程id不能为空!")
+    @NotBlank(message = "20000029")
     private String workId;
     //api分组名称
-    @NotBlank(message = "分组名称不能为空")
-    @Length(min = 2, max = 50, message = "请输入以英文字母或者汉字开头的2~50字的分组名称")
+    @NotBlank(message = "20000011")
+    @Length(min = 2, max = 50, message = "20000030")
     private String name;
     //api分组描述
-    @Length(max = 200, message = "分组描述200字以内")
+    @Length(max = 200, message = "20000031")
     private String desc;
 }
