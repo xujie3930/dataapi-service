@@ -41,6 +41,7 @@
           size="mini"
           v-model.trim="selectValue"
           @input="fetchTreeDataByName"
+          @clear="fetchBusinessProcessList()"
         >
           <i slot="suffix" class="search el-icon-search"></i>
         </el-input>
@@ -54,7 +55,7 @@
         draggable
         highlight-current
         v-loading="isTreeLoading"
-        :prop="{ isLeaf: 'leaf' }"
+        :prop="treeProps"
         :data="treeData"
         :load="fetchTreeData"
         :expand-on-click-node="true"
@@ -189,7 +190,10 @@ export default {
       },
       fetchConfig: { retrieve: { url: '/apiBase/list', method: 'post' } },
       oldTreeData: [],
-      treeData: []
+      treeData: [],
+      treeProps: {
+        isLeaf: 'leaf'
+      }
     }
   },
 
@@ -209,7 +213,7 @@ export default {
       this.$refs.versionLists.open()
     },
 
-    // 点击-发布或停止发布
+    // 点击-发布或停止发布确认
     handleUpdateStatusClick({ row }) {
       const { id, publishStatus } = row
       if (publishStatus === 2) {
@@ -231,6 +235,7 @@ export default {
       }
     },
 
+    // 点击-发布或停止发布
     handlePublishDataApi(id, publishStatus) {
       API.updateDataApiStatus({ id, publishStatus }).then(
         ({ success, data }) => {
@@ -279,9 +284,22 @@ export default {
     },
 
     // 点击-当前高亮树节点发生更改
-    handleNodeChangeClick({ id }) {
-      this.setHighlightCurrentNode(id)
-      this.mixinRetrieveTableData()
+    handleNodeChangeClick(data, node) {
+      const { id } = data
+      const { level, childNodes } = node
+      console.log(level, node, 'mmmm')
+      if (level === 1) {
+        const { length } = childNodes
+        this.isFirstNodeHasChild = length
+        // length && this.setHighlightCurrentNode(childNodes[0]?.data?.id)
+      } else {
+        this.setHighlightCurrentNode(id)
+        this.isFirstNodeHasChild = level > 1
+        this.$nextTick(() => {
+          this.isFirstNodeHasChild && this.mixinHandleReset(false)
+          this.mixinRetrieveTableData()
+        })
+      }
     },
 
     // 鼠标-移入判断是否需要显示tootltip
@@ -388,6 +406,7 @@ export default {
 
     // 获取-符合输入的分组以及流程数据
     fetchTreeDataByName() {
+      if (!this.selectValue) return
       this.isTreeLoading = true
       API.searchProcessOrGroup({ name: this.selectValue })
         .then(({ success, data }) => {
