@@ -13,7 +13,7 @@ public class AppDetailResult {
     private String allowIp;
     private Integer certificationType;
     private Integer isEnable;
-    private Integer period;
+    private String period;
     private Long createTime;
     private String createBy;
     private ApiResult apiResult;
