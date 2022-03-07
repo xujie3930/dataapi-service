@@ -35,7 +35,7 @@ export default {
     {
       type: 'text',
       label: '来源表名称',
-      prop: 'sourceTable'
+      prop: 'tableName'
     },
 
     {

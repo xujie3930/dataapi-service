@@ -13,8 +13,7 @@ const routes = [
   {
     path: '/list',
     name: 'home',
-    component: () =>
-      import(/* webpackChunkName: "home" */ '@/views/data-service')
+    component: () => import(/* webpackChunkName: "home" */ '@/views/api-manage')
   },
   {
     path: '/app',
