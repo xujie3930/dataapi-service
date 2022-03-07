@@ -73,6 +73,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String EMPTY_CHAR = " ";
     private static final String MANY_EMPTY_CHAR = " +";
     private static final String SQL_START = "select ";
+    private static final String SQL_SELECT_ALL = "select *";
     private static final String SQL_AND = " and ";
     private static final String SQL_FIELD_SPLIT_CHAR = ",";
     private static final String SQL_WHERE = " where ";
@@ -201,7 +202,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
         } else {
-            apiParamEntityList = checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+            apiParamEntityList = (List<IcreditApiParamEntity>) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
             String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
             String[] requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
@@ -388,13 +389,22 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     @Override
-    public List<IcreditApiParamEntity> checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type) {
-        if(StringUtils.isEmpty(request.getSql())){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage());
-        }
+    public Object checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type) {
         String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
-        if(sql.contains("select *")){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
+        if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)){
+            if(StringUtils.isEmpty(request.getSql())){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage());
+            }
+            if(sql.contains(SQL_SELECT_ALL)){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
+            }
+        }else{
+            if(StringUtils.isEmpty(request.getSql())){
+                return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage();
+            }
+            if(sql.contains(SQL_SELECT_ALL)){
+                return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
+            }
         }
         sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''");
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
