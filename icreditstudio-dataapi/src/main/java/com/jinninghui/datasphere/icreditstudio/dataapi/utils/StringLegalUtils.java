@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.utils;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 
@@ -13,18 +14,18 @@ public class StringLegalUtils {
     public static void checkLegalName(String name) {
         boolean legal = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isLegal(name);
         if (!legal) {
-            throw new AppException("包含不规范字符，请重新输入");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000014.getCode());
         }
         boolean front = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isFrontWithEnglish(name) ||
                 com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isFrontWithChinese(name);
         if (!front) {
-            throw new AppException("请输入以英文字母或者汉字开头的2~50字的名称");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000015.getCode());
         }
     }
 
     public static void checkLegalNameForApp(String name) {
         if (!name.matches("[a-zA-Z0-9\u4e00-\u9fa5]{1,50}")) {
-            throw new AppException("应用名称不能为空，只能包含英文、中文及数字，50字以内");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000016.getCode());
         }
     }
 

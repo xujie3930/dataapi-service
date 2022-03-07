@@ -618,12 +618,12 @@ export default {
 
       if (cb) {
         API.checkSqlCorrectness({ datasourceId, sql: value })
-          .then(({ success }) => {
-            if (success) {
-              cb()
+          .then(({ success, data }) => {
+            if (success && data) {
+              cb(new Error(data))
             }
           })
-          .catch(err => cb(err))
+          .catch(err => cb(new Error(err)))
       }
     },
 
