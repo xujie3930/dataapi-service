@@ -149,14 +149,12 @@ export default {
           : API.addApiGroup(this.apiGroupForm)
               .then(({ success, data }) => {
                 if ((success, data)) {
-                  const { apiGroupId, workId } = data
                   this.$notify.success({
                     title: '操作结果',
                     message: '新增API分组成功！',
                     duration: 1500
                   })
-                  this.options.currentTreeNodeId = apiGroupId
-                  this.options.workId = workId
+                  this.options.currentTreeNodeId = data
                   this.close('save')
                 }
               })
