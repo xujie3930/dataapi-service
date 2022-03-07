@@ -27,8 +27,32 @@ public class CharacterUtils {
         return sb.toString();
     }
 
+    public static String getGUID(int length) {
+        StringBuilder uid = new StringBuilder();
+        Random rd = new Random();
+        for (int i = 0; i < length; ++i) {
+            int type = rd.nextInt(3);
+            switch (type) {
+
+                case 0:
+                    uid.append(rd.nextInt(10));
+                    break;
+                case 1:
+                    uid.append((char) (rd.nextInt(25) + 65));
+                    break;
+                case 2:
+                    uid.append((char) (rd.nextInt(25) + 97));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return uid.toString();
+    }
+
     public static void main(String[] args) {
-        System.out.println(getRandomString(11));
+        String uuidStr = getGUID(11);
+        System.out.println(uuidStr);
     }
 
 }

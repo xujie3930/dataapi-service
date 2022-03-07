@@ -110,12 +110,11 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         }
         List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);
         List<ApiCascadeInfoResult> apiCascadeInfoList = new ArrayList<>();
-        int len = apiInfoList.size();
-        String initWorkFolwId = apiInfoList.get(0).getWorkFlowId();
-        apiCascadeInfoList.add(new ApiCascadeInfoResult(initWorkFolwId, apiInfoList.get(0).getWorkFlowName(), null, false));
-        for (int i = 0;i < len;i++) {//获取业务流程
-            if(!initWorkFolwId.equals(apiInfoList.get(i).getWorkFlowId())){
-                apiCascadeInfoList.add(new ApiCascadeInfoResult(apiInfoList.get(i).getWorkFlowId(), apiInfoList.get(i).getWorkFlowName(), null, false));
+        String initWorkFlowId = apiInfoList.get(0).getWorkFlowId();
+        apiCascadeInfoList.add(new ApiCascadeInfoResult(initWorkFlowId, apiInfoList.get(0).getWorkFlowName(), null, false));
+        for (ApiInfoDTO apiInfo : apiInfoList) {//获取业务流程
+            if(!initWorkFlowId.equals(apiInfo.getWorkFlowId())){
+                apiCascadeInfoList.add(new ApiCascadeInfoResult(apiInfo.getWorkFlowId(), apiInfo.getWorkFlowName(), null, false));
             }
         }
         for (ApiCascadeInfoResult apiCascadeInfoResult : apiCascadeInfoList) {//获取api分组
