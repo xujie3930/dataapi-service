@@ -102,6 +102,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             ApiBaseResultList.add(apiBaseResult);
         }
         resultIPage.setRecords(ApiBaseResultList);
+        resultIPage.setPages(page.getPages());
+        resultIPage.setTotal(page.getTotal());
         return BusinessResult.success(BusinessPageResult.build(resultIPage, request));
     }
 

@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CheckAppGroupNameRequest {
-    @NotBlank(message = "应用分组id不能为空")
+    @NotBlank(message = "20000020")
     private String id;
     private String name;
 }

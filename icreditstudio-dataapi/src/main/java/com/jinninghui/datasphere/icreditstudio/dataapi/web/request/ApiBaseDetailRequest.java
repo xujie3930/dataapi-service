@@ -12,6 +12,6 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class ApiBaseDetailRequest {
     //API详情id
-    @NotBlank(message = "API详情id不能为空")
+    @NotBlank(message = "20000019")
     private String id;
 }

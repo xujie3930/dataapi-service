@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class AuthSaveRequest {
     //应用主键id
-    @NotBlank(message = "应用id不能为空")
+    @NotBlank(message = "20000021")
     private String appId;
     //API的主键id
     private List<String> apiId;
