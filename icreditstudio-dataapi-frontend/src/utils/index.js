@@ -277,3 +277,9 @@ export const objectConvertToArray = sourceObj => {
 
   return targetArray
 }
+
+export const flatten = arr => {
+  return [].concat(
+    ...arr.map(item => [].concat(item, ...flatten(item.children)))
+  )
+}

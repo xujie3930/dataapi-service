@@ -425,17 +425,22 @@
             <el-row type="flex" justify="space-between" class="form-row-item">
               <el-col class="form-row-item--col" style="padding-left: 30px">
                 <p class="tip" @click="handleSqlTipsClick">SQL编写提示</p>
-                <el-input
-                  type="textarea"
-                  :disabled="!form.apiGenerateSaveRequest.datasourceId"
-                  :autosize="{ minRows: 4 }"
-                  v-model="form.apiGenerateSaveRequest.sql"
-                  :placeholder="
-                    form.apiGenerateSaveRequest.datasourceId
-                      ? '请编写SQL语句'
-                      : '请先选择数据源（SQL模式支持多表关联）'
-                  "
-                ></el-input>
+                <el-form-item
+                  class="sql-form-item"
+                  prop="apiGenerateSaveRequest.sql"
+                >
+                  <el-input
+                    type="textarea"
+                    :disabled="!form.apiGenerateSaveRequest.datasourceId"
+                    :autosize="{ minRows: 4 }"
+                    v-model="form.apiGenerateSaveRequest.sql"
+                    :placeholder="
+                      form.apiGenerateSaveRequest.datasourceId
+                        ? '请编写SQL语句'
+                        : '请先选择数据源（SQL模式支持多表关联）'
+                    "
+                  ></el-input>
+                </el-form-item>
               </el-col>
             </el-row>
           </template>
@@ -547,6 +552,10 @@ export default {
         ],
         'apiGenerateSaveRequest.tableName': [
           { required: true, message: '必填项不能为空', trigger: 'change' }
+        ],
+        'apiGenerateSaveRequest.sql': [
+          { required: true, message: 'SQL语句不能为空', trigger: 'blur' },
+          { validator: this.verifySql, trigger: 'blur' }
         ]
       }
     }
@@ -600,6 +609,21 @@ export default {
           : verifyOnlyEnString(value)
           ? cb()
           : cb(new Error('仅支持16位的英文大小写字母组合'))
+      }
+    },
+
+    // 校验-API Path
+    verifySql(rule, value, cb) {
+      const { datasourceId } = this.form.apiGenerateSaveRequest
+
+      if (cb) {
+        API.checkSqlCorrectness({ datasourceId, sql: value })
+          .then(({ success }) => {
+            if (success) {
+              cb()
+            }
+          })
+          .catch(err => cb(err))
       }
     },
 
@@ -906,6 +930,14 @@ export default {
           color: #1890ff;
           margin-left: 5px;
           cursor: pointer;
+        }
+      }
+    }
+
+    .sql-form-item {
+      ::v-deep {
+        .el-form-item__content {
+          margin-left: 0 !important;
         }
       }
     }

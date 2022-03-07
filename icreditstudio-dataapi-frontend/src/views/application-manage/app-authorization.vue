@@ -34,10 +34,10 @@
           filterable
           style="width: 500px"
           placeholder="请选择API"
-          v-model="authorizeForm.apiId"
-          :options="apiOptions"
           collapse-tags
-          :props="{ multiple: true, lazy: true, lazyLoad }"
+          :options="apiOptions"
+          :props="cascaderProps"
+          v-model="authorizeForm.apiId"
           clearable
         ></el-cascader>
       </el-form-item>
@@ -99,29 +99,21 @@
 
 <script>
 import API from '@/api/api'
+import { cloneDeep } from 'lodash'
 
 export default {
   data() {
     return {
       timerId: null,
       options: {},
-      apiOptions: [
-        {
-          label: 'aaaa',
-          value: '1499640552889176065',
-          leaf: false,
-          children: [
-            {
-              label: 'bbb',
-              value: '1499643033090183170',
-              leaf: false,
-              children: [
-                { label: 'ccc', value: '1499649577457364993', leaf: true }
-              ]
-            }
-          ]
-        }
-      ],
+      cascaderProps: {
+        multiple: true,
+        lazy: true,
+        lazyLoad: this.lazyLoad,
+        label: 'name',
+        value: 'id'
+      },
+      apiOptions: [],
       loading: false,
       veifyNameLoading: false,
       oldGroupName: '',
@@ -155,7 +147,7 @@ export default {
             required: true,
             type: 'array',
             message: '必填项不能为空',
-            trigger: ['blur', 'change']
+            trigger: 'change'
           }
         ]
       }
@@ -168,8 +160,8 @@ export default {
       this.options = options
       this.authorizeForm.name = row?.name
       this.authorizeForm.appId = row?.id
-      // this.fetchBusinessProcessList()
-      this.fetchApiAuthDetail(row?.id)
+      const isFinish = await this.fetchApiAuthDetail(row?.id)
+      isFinish && this.fetchBusinessProcessList()
       this.$refs.baseDialog.open()
     },
 
@@ -235,8 +227,9 @@ export default {
           if (success && data) {
             const apiList = data.map(({ id, name }) => {
               return {
-                label: name,
-                value: id,
+                id,
+                name,
+                children: [],
                 leaf: true
               }
             })
@@ -253,8 +246,9 @@ export default {
           if (success && data) {
             const apiGroupList = data.map(({ id, name }) => {
               return {
-                label: name,
-                value: id,
+                id,
+                name,
+                children: [],
                 leaf: false
               }
             })
@@ -266,26 +260,32 @@ export default {
 
     // 获取-业务流程
     fetchBusinessProcessList() {
+      const processIds = cloneDeep(this.apiOptions).map(({ id }) => id)
+
       API.getBusinessPcoessList().then(({ success, data }) => {
         if (success) {
-          this.apiOptions = data.map(({ id, name }) => {
-            return {
-              label: name,
-              value: id,
-              leaf: false
-            }
-          })
+          const newApiOptions = data
+            .filter(item => !processIds.includes(item.id))
+            .map(({ id, name }) => {
+              return {
+                id,
+                name,
+                leaf: false
+              }
+            })
+
+          this.apiOptions = cloneDeep([...newApiOptions, ...this.apiOptions])
         }
       })
     },
 
     // 获取-API授权详情
     fetchApiAuthDetail(appId) {
-      API.getAppAuthDetail({ appId })
+      return API.getAppAuthDetail({ appId })
         .then(({ success, data }) => {
           if (success && data) {
             const {
-              // apiCascadeInfoStrList,
+              apiCascadeInfoStrList,
               authResult: {
                 allowCall,
                 authEffectiveTime,
@@ -296,9 +296,17 @@ export default {
             } = data
 
             // 级联回显
-            // this.authorizeForm.apiId = apiCascadeInfoStrList.map(item =>
-            //   item.map(({ id }) => id)
-            // )
+            console.log(this.apiOptions, 'apoopop')
+            this.apiOptions = apiCascadeInfoStrList
+            this.authorizeForm.apiId = []
+
+            apiCascadeInfoStrList?.forEach(({ id: pid, children: groups }) => {
+              groups?.forEach(({ id: gid, children: apis }) => {
+                apis?.forEach(({ id }) =>
+                  this.authorizeForm.apiId.push([pid, gid, id])
+                )
+              })
+            })
 
             this.authorizeForm.allowCall = allowCall
             this.authorizeForm.callType = callCountType
@@ -307,9 +315,13 @@ export default {
             if (periodBegin > -1 && periodEnd > -1) {
               this.authorizeForm.validTime = [periodBegin, periodEnd]
             }
+
+            return true
           }
         })
-        .finally(() => ({}))
+        .catch(() => {
+          return true
+        })
     }
   }
 }

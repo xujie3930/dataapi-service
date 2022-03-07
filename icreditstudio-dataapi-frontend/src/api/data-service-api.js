@@ -47,6 +47,10 @@ const searchProcessOrGroup = params => postAction('/search', params)
 const updateDataApiStatus = params =>
   postAction('/apiBase/publishOrStop', params)
 
+// 校验SQL输入是否正确
+const checkSqlCorrectness = params =>
+  postAction('/apiBase/checkQuerySql', params)
+
 export default {
   addBusinessProcess,
   addApiInfo,
@@ -60,5 +64,6 @@ export default {
   getDataApiPath,
   getDataApiDetail,
   searchProcessOrGroup,
-  updateDataApiStatus
+  updateDataApiStatus,
+  checkSqlCorrectness
 }
