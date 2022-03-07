@@ -329,13 +329,15 @@ export default {
     },
 
     // 设置-左侧树需要被高亮的节点
-    setHighlightCurrentNode(id) {
+    setHighlightCurrentNode(id, isCallTableData) {
       this.defalutExpandKey = [id]
       this.currentTreeNodeId = id
-      console.log(id, 'ididid')
       this.$nextTick(() => {
         const { tree } = this.$refs
         tree && tree.setCurrentKey(id)
+
+        // true->则调用右侧表格列表接口
+        isCallTableData && this.mixinRetrieveTableData()
       })
     },
 
@@ -363,6 +365,8 @@ export default {
       const isFinish = await this.fetchBusinessProcessList()
       if (isFinish) {
         command === 'process' && this.setHighlightCurrentNode(workId)
+
+        // 新增分组左侧树高亮节点
         command === 'group' && this.mixinRetrieveTableData()
       }
     },
@@ -485,7 +489,8 @@ export default {
             resolve(data)
 
             this.isFirstNodeHasChild = !!data.length
-            children?.length && this.setHighlightCurrentNode(children[0].id)
+            children?.length &&
+              this.setHighlightCurrentNode(children[0].id, true)
 
             // 首次加载
             if (this.isChilInterfaceFirstCalling) {
