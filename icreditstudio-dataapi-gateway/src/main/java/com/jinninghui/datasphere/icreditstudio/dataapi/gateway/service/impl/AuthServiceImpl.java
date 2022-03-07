@@ -140,12 +140,12 @@ public class AuthServiceImpl implements AuthService {
         Integer pageSize = Math.min(Integer.parseInt((String) map.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
         String countSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.getSelectCountSql(querySql);
         ResultSet countRs = stmt.executeQuery(countSql);
-        String pageSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, pageNum, pageSize);
-        ResultSet pagingRsForPageParam = stmt.executeQuery(pageSql);
         if (countRs.next()) {
             //rs结果集第一个参数即为记录数，且其结果集中只有一个参数
             dataCount = countRs.getLong(1);
         }
+        String pageSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, pageNum, pageSize);
+        ResultSet pagingRsForPageParam = stmt.executeQuery(pageSql);
         if (pagingRsForPageParam.next()) {
             List list = ResultSetToListUtils.convertList(pagingRsForPageParam);
             //发送成功消息
