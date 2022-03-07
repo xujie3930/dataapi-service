@@ -33,8 +33,7 @@ export const detailConfiguration = {
     {
       label: 'token有效期',
       value: '',
-      key: 'period',
-      formatter: val => (val ? `${val}小时` : '')
+      key: 'period'
     },
     { label: 'IP白名单', value: '', key: 'allowIp' },
     { label: '创建人', value: '', key: 'createBy' },
