@@ -61,11 +61,11 @@ public class AuthServiceImpl implements AuthService {
     public BusinessResult<String> getToken(String generateId, String secretContent) {
         Object value = redisTemplate.opsForValue().get(generateId);
         if (Objects.isNull(value)){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000000.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000000.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000000.getMessage());
         }
         AppAuthInfo appAuthInfo = JSON.parseObject(value.toString(), AppAuthInfo.class);
         if (!secretContent.equals(appAuthInfo.getSecretContent())){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000001.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000001.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000001.getMessage());
         }
         String token = UUID.randomUUID().toString().replaceAll("-", "");
         appAuthInfo.setTokenCreateTime(System.currentTimeMillis());
@@ -169,9 +169,9 @@ public class AuthServiceImpl implements AuthService {
         }
         if (e instanceof AppException) {
             try {
-                Field errorCode = e.getClass().getSuperclass().getDeclaredField("errorCode");
-                ReflectionUtils.makeAccessible(errorCode);
-                String errorLog = (String) errorCode.get(e);
+                Field errorMsg = e.getClass().getSuperclass().getDeclaredField("errorMsg");
+                ReflectionUtils.makeAccessible(errorMsg);
+                String errorLog = (String) errorMsg.get(e);
                 apiLogInfo.setErrorLog(errorLog);
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -217,7 +217,7 @@ public class AuthServiceImpl implements AuthService {
     private RedisApiInfo getApiAuthInfoByVersionAndPath(String version, String path) {
         Object apiObject = redisTemplate.opsForValue().get(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(version)));
         if (Objects.isNull(apiObject)) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getMessage());
         }
         RedisApiInfo apiAuthInfo = JSON.parseObject(apiObject.toString(), RedisApiInfo.class);
         apiAuthInfo.setQuerySql(apiAuthInfo.getQuerySql().toLowerCase());
@@ -228,7 +228,7 @@ public class AuthServiceImpl implements AuthService {
     private AppAuthInfo getAppAuthInfoByToken(String token) {
         Object tokenObject = redisTemplate.opsForValue().get(token);
         if (Objects.isNull(tokenObject)) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000003.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000003.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000003.getMessage());
         }
         AppAuthInfo appAuthInfo = JSON.parseObject(tokenObject.toString(), AppAuthInfo.class);
         return appAuthInfo;
@@ -240,7 +240,7 @@ public class AuthServiceImpl implements AuthService {
         if (StringUtils.isNotBlank(apiInfo.getRequiredFields())) {
             Set<String> requestList = new HashSet<>(Arrays.asList(apiInfo.getRequiredFields().split(",")));
             if (!CollectionUtils.isEmpty(requestList) && !requestList.containsAll(params)) {
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getMessage());
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getMessage());
             }
         }
         return map;
@@ -249,19 +249,19 @@ public class AuthServiceImpl implements AuthService {
     private RedisApiInfo checkApi(RedisApiInfo apiAuthInfo, AppAuthInfo appAuthInfo) {
         Object appAuthApiObject = redisTemplate.opsForValue().get(appAuthInfo.getGenerateId());
         if (Objects.isNull(appAuthApiObject)) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000005.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000005.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000005.getMessage());
         }
         Object appAuthAppObject = redisTemplate.opsForValue().get(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId());
         if (Objects.isNull(appAuthAppObject)) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000006.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000006.getMessage());
         }
         RedisAppAuthInfo appAuthApp = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
         if (!NOT_LIMIT.equals(appAuthApp.getPeriodEnd()) && System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getMessage());
         }
         //次数验证
         if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getAllowCall() <= 0) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getMessage());
         }
         //调用次数减一
         appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
@@ -271,20 +271,20 @@ public class AuthServiceImpl implements AuthService {
 
     private AppAuthInfo checkApp(AppAuthInfo appAuthInfo, HttpServletRequest request) {
         if (AppEnableEnum.NOT_ENABLE.getCode().equals(appAuthInfo.getIsEnable())) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000009.getMessage());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000009.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000009.getMessage());
         }
         //IP白名单认证
         if (!StringUtils.isBlank(appAuthInfo.getAllowIp())) {
             String remoteHost = request.getRemoteHost();
             Set<String> allowIpSet = new HashSet<>(Arrays.asList(appAuthInfo.getAllowIp().split(",")));
             if (!allowIpSet.contains(remoteHost)) {
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getMessage());
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getMessage());
             }
         }
         if (null != appAuthInfo.getPeriod()) {
             Long expireTime = appAuthInfo.getPeriod() * SECOND_OF_HOUR + appAuthInfo.getTokenCreateTime();
             if (System.currentTimeMillis() >= expireTime) {
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getMessage());
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getMessage());
             }
         }
         return appAuthInfo;
@@ -296,7 +296,7 @@ public class AuthServiceImpl implements AuthService {
         if (!map.containsKey(TOKEN_MARK)){
             String token = request.getHeader(TOKEN_MARK);
             if (StringUtils.isBlank(token)){
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000012.getMessage());
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000012.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000012.getMessage());
             }
             return token;
         }

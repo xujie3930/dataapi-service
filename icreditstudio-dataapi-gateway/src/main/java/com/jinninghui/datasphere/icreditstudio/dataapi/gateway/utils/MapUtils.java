@@ -1,5 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,9 @@ public class MapUtils {
 
     public static Map str2Map(String str){
         Map map = new HashMap();
+        if (StringUtils.isBlank(str)){
+            return map;
+        }
         String[] allStrings = str.split("&");
         if (allStrings != null && allStrings.length != 0) {
             for (String strings : allStrings) {

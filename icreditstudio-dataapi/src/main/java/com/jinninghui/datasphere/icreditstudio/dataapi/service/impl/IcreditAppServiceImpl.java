@@ -10,6 +10,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigE
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthEffectiveTimeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.CallCountEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.TokenTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
@@ -64,6 +65,11 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         StringLegalUtils.checkLegalAllowIpForApp(request.getAllowIp());
         IcreditAppEntity appEntity = BeanCopyUtils.copyProperties(request, new IcreditAppEntity());
         appEntity.setGenerateId(request.getGenerateId());
+        if(TokenTypeEnum.LONG_TIME.getCode().equals(request.getTokenType())){//token有效期--长期
+            appEntity.setPeriod(TokenTypeEnum.LONG_TIME.getDuration());
+        }if(TokenTypeEnum.EIGHT_HOURS.getCode().equals(request.getTokenType())){//token有效期--8小时
+            appEntity.setPeriod(TokenTypeEnum.EIGHT_HOURS.getDuration());
+        }
         save(appEntity);
         AppAuthInfo appAuthInfo = BeanCopyUtils.copyProperties(appEntity, new AppAuthInfo());
         //新增应用时候，保存应用信息至redis
@@ -90,6 +96,13 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         IcreditAppEntity appEntity = appMapper.selectById(request.getId());
         AppDetailResult appDetailResult = new AppDetailResult();
         BeanUtils.copyProperties(appEntity, appDetailResult);
+        if(TokenTypeEnum.LONG_TIME.getCode().equals(appEntity.getTokenType())){
+            appDetailResult.setPeriod(TokenTypeEnum.LONG_TIME.getMsg());
+        }else if(TokenTypeEnum.EIGHT_HOURS.getCode().equals(appEntity.getTokenType())){
+            appDetailResult.setPeriod(TokenTypeEnum.EIGHT_HOURS.getMsg());
+        }else{
+            appDetailResult.setPeriod(String.valueOf(new StringBuilder().append(appEntity.getPeriod()).append("小时")));
+        }
         appDetailResult.setSecretContent("******");
         appDetailResult.setCreateTime(appEntity.getCreateTime().getTime());
         appDetailResult.setAppGroupName(appGroupService.findNameById(appEntity.getAppGroupId()));
