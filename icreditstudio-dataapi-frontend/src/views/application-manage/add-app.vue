@@ -21,7 +21,7 @@
       :rules="rules"
       v-loading="loading"
     >
-      <el-form-item label="应用ID" prop="appGroupId">
+      <el-form-item label="应用ID" prop="generateId">
         <el-input style="width: 500px" disabled v-model="appForm.generateId">
         </el-input>
       </el-form-item>
@@ -61,8 +61,8 @@
           style="width: 500px"
           v-model.trim="appForm.secretContent"
           placeholder="请输入应用密钥"
-          show-password
-          maxlength="16"
+          :show-password="isShowPassword"
+          :maxlength="16"
           show-word-limit
         ></el-input>
       </el-form-item>
@@ -178,11 +178,13 @@ export default {
       options: {},
       loading: false,
       veifyNameLoading: false,
+      isShowPassword: false,
       oldGroupName: '',
       tokenOptions: objectConvertToArray(TOEKN_PERIOD),
       tokenCustomOptions: objectConvertToArray(customTokenOptions()),
       groupNameOptions: [],
       appForm: {
+        generateId: '',
         appGroupId: '',
         name: '',
         desc: '',
@@ -190,11 +192,12 @@ export default {
         tokenType: '',
         allowIp: '',
         isEnable: 1,
-        certificationType: 0
+        certificationType: 0,
+        period: ''
       },
       rules: {
         appGroupId: [
-          { required: true, message: '必填项不能为空', trigger: 'blur' }
+          { required: true, message: '分组名称不能为空', trigger: 'blur' }
         ],
 
         generateId: [
@@ -260,9 +263,10 @@ export default {
       this.appForm.appGroupId = row?.id
       opType === 'add' && (this.appForm.secretContent = UUStr({}))
       this.options = options
+      this.isShowPassword = true
 
       this.$refs.baseDialog.open()
-      this.fetchAppGroupId()
+      this.fetchAppId()
       this.fetchAppGroupNameOptions()
     },
 
@@ -277,6 +281,7 @@ export default {
     },
 
     reset() {
+      this.isShowPassword = false
       this.$refs.appForm.resetFields()
     },
 
@@ -342,7 +347,7 @@ export default {
     },
 
     // 获取-应用分组ID
-    fetchAppGroupId() {
+    fetchAppId() {
       this.loading = true
       API.getAppUniqueId()
         .then(({ success, data }) => {
@@ -374,14 +379,11 @@ export default {
           : API.addApp(this.appForm)
               .then(({ success, data }) => {
                 if ((success, data)) {
-                  // const { apiGroupId, workId } = data
                   this.$notify.success({
                     title: '操作结果',
                     message: '新增应用成功！',
                     duration: 1500
                   })
-                  // this.options.currentTreeNodeId = apiGroupId
-                  // this.options.workId = workId
                   this.close('save')
                 }
               })
