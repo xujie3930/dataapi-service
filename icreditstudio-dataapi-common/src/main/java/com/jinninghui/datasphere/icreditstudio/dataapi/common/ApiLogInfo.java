@@ -91,6 +91,6 @@ public class ApiLogInfo implements Serializable {
     private String executeSql;
 
     //异常日志
-    private String errorLog;
+    private String exceptionDetail;
 
 }
