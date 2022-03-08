@@ -201,7 +201,7 @@ public class AuthServiceImpl implements AuthService {
         logInfo.setAppName(appAuthInfo.getName());
         logInfo.setAppId(appAuthInfo.getId());
         logInfo.setCallIp(request.getRemoteHost());
-        logInfo.setApiVersion(version);
+        logInfo.setApiVersion(Integer.valueOf(version));
         logInfo.setRequestParam(apiInfo.getRequiredFields());
         logInfo.setResponseParam(apiInfo.getResponseFields());
         logInfo.setCallStatus(CallStatusEnum.CALL_ON.getCode());
