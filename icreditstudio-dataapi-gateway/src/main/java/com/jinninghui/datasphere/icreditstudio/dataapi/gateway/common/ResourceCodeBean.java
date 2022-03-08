@@ -24,6 +24,8 @@ public class ResourceCodeBean {
         RESOURCE_CODE_10000011("10000011", "token失效，请重新获取!"),
         RESOURCE_CODE_10000012("10000012", "请求中缺失token!"),
         RESOURCE_CODE_10000013("10000013", "请求失败!"),
+        RESOURCE_CODE_10000014("10000014", "授权时间未生效!"),
+        RESOURCE_CODE_10000015("10000015", "授权时间已失效!"),
         ;
 
         public final String code;
