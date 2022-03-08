@@ -187,8 +187,8 @@ export default {
           appId,
           apiId: apiId.map(item => item[2]),
           allowCall: callType ? -1 : allowCall,
-          periodBegin: validTime.length ? validTime[0] : -1,
-          periodEnd: validTime.length ? validTime[1] : -1
+          periodBegin: validTime?.length ? validTime[0] : -1,
+          periodEnd: validTime?.length ? validTime[1] : -1
         }
 
         !valid
