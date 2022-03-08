@@ -287,6 +287,14 @@ public class AuthServiceImpl implements AuthService {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getMessage());
             }
         }
+        if (null != appAuthInfo.getPeriodBegin() && !NOT_LIMIT.equals(appAuthInfo.getPeriodBegin()) &&
+                System.currentTimeMillis() < appAuthInfo.getPeriodBegin()) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getMessage());
+        }
+        if (null != appAuthInfo.getPeriodEnd() && !NOT_LIMIT.equals(appAuthInfo.getPeriodEnd()) &&
+                System.currentTimeMillis() > appAuthInfo.getPeriodEnd()) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getMessage());
+        }
         return appAuthInfo;
     }
 

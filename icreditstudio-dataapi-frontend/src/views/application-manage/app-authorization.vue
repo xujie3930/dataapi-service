@@ -72,21 +72,21 @@
           </el-date-picker>
         </el-form-item>
 
-        <el-form-item label="可调用次数" prop="callType">
-          <el-radio-group v-model="authorizeForm.callType">
+        <el-form-item label="可调用次数" prop="durationType">
+          <el-radio-group v-model="authorizeForm.durationType">
             <el-radio :label="0">有限次</el-radio>
             <el-radio :label="1">无限次</el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item prop="allowCall" v-if="!authorizeForm.callType">
+        <el-form-item prop="allowCall" v-if="!authorizeForm.durationType">
           <span slot="label"></span>
           <el-input
             style="width: 500px"
             clearable
             show-word-limit
             controls-position="right"
-            v-model.number.trim="authorizeForm.allowCall"
+            v-model.number="authorizeForm.allowCall"
             placeholder="请输入调用次数"
           >
             <template slot="append">次</template>
@@ -124,7 +124,7 @@ export default {
         apiId: [],
         appId: '',
         allowCall: '',
-        callType: 0,
+        durationType: 0,
         authPeriod: 0,
         validTime: []
       },
@@ -134,9 +134,10 @@ export default {
         ],
         allowCall: [
           { required: true, message: '请输入可调用次数', trigger: 'blur' },
-          { type: 'number', message: '请输入整数' }
+          { type: 'number', message: '请输入整数' },
+          { min: 0, message: '最小值为0，请重新输入', type: 'number' }
         ],
-        callType: [
+        durationType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
         ],
         authPeriod: [
@@ -181,14 +182,15 @@ export default {
     // 点击-新增或编辑API授权
     addApiAuthorization() {
       this.$refs?.authorizeForm.validate(valid => {
-        const { appId, allowCall, apiId, callType, validTime } =
+        const { appId, allowCall, apiId, durationType, authPeriod, validTime } =
           this.authorizeForm
         const params = {
           appId,
+          durationType,
           apiId: apiId.map(item => item[2]),
-          allowCall: callType ? -1 : allowCall,
-          periodBegin: validTime?.length ? validTime[0] : -1,
-          periodEnd: validTime?.length ? validTime[1] : -1
+          allowCall: durationType ? -1 : allowCall,
+          periodBegin: validTime?.length && authPeriod ? validTime[0] : -1,
+          periodEnd: validTime?.length && authPeriod ? validTime[1] : -1
         }
 
         !valid
@@ -307,7 +309,7 @@ export default {
             })
 
             this.authorizeForm.allowCall = allowCall
-            this.authorizeForm.callType = callCountType
+            this.authorizeForm.durationType = callCountType
             this.authorizeForm.authPeriod = authEffectiveTime
 
             if (periodBegin > -1 && periodEnd > -1) {
