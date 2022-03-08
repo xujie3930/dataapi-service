@@ -23,6 +23,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_10000010("10000010", "应用IP不在白名单内!"),
         RESOURCE_CODE_10000011("10000011", "token失效，请重新获取!"),
         RESOURCE_CODE_10000012("10000012", "请求中缺失token!"),
+        RESOURCE_CODE_10000013("10000013", "请求失败!"),
         ;
 
         public final String code;

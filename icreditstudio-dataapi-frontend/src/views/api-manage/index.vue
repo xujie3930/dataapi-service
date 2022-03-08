@@ -4,7 +4,10 @@
 -->
 <template>
   <div class="data-service" :style="style">
-    <aside class="data-service-aside">
+    <aside
+      class="data-service-aside"
+      :style="{ pointerEvents: opType ? 'none' : 'unset' }"
+    >
       <header class="data-service-aside__header">
         <h3 class="title">API开发</h3>
         <div>
@@ -13,7 +16,10 @@
             placement="bottom-start"
             @command="handleCommandClick"
           >
-            <i class="header-icon el-icon-circle-plus-outline"></i>
+            <i
+              class="header-icon el-icon-circle-plus-outline"
+              :style="{ color: opType ? '#bcbec2' : '' }"
+            ></i>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="process">
                 新建业务流程
@@ -28,6 +34,7 @@
               'el-icon-refresh',
               isRefreshTreeData ? 'is-refresh' : ''
             ]"
+            :style="{ color: opType ? '#bcbec2' : '' }"
             @click="handleRefreshClick"
           ></i>
         </div>
@@ -82,7 +89,12 @@
       </el-tree>
     </aside>
 
-    <transition v-if="isFirstNodeHasChild" name="data-service">
+    <div v-if="!isFirstNodeHasChild" class="data-service-empty">
+      <img class="img" :src="noGroupImg" />
+      <span class="text">该业务流程下暂无分组</span>
+    </div>
+
+    <transition v-else name="data-service">
       <Crud
         class="data-service-main"
         v-if="!opType"
@@ -118,11 +130,6 @@
         @on-save="saveCallback"
       />
     </transition>
-
-    <div v-else class="data-service-empty">
-      <img class="img" :src="noGroupImg" />
-      <span class="text">该业务流程下暂无分组</span>
-    </div>
 
     <!-- 新增业务流程 -->
     <AddBusinessPorcess
@@ -296,7 +303,9 @@ export default {
         this.setHighlightCurrentNode(id)
         this.isFirstNodeHasChild = level > 1
         this.$nextTick(() => {
-          this.isFirstNodeHasChild && this.mixinHandleReset(false)
+          this.isFirstNodeHasChild &&
+            this.$refs.crud &&
+            this.mixinHandleReset(false)
           this.mixinRetrieveTableData()
         })
       }
@@ -552,6 +561,7 @@ export default {
     @include flex(flex-start, flex-start, column);
     width: 240px;
     height: 100%;
+    overflow-x: hidden;
 
     &__header {
       @include flex(space-between);
@@ -717,7 +727,7 @@ export default {
     @include flex(flex-start);
     position: relative;
     // flex: 1;
-    width: 100%;
+    width: calc(100% - 240px);
     height: 100%;
     border-left: 1px solid #d9d9d9;
     overflow: hidden;
@@ -746,14 +756,14 @@ export default {
   }
 }
 
-.data-service-entry-active,
-.data-service-leave-active {
-  transition: all 0.35s ease-in-out;
-}
+// .data-service-entry-active,
+// .data-service-leave-active {
+//   transition: all 0.35s ease-in-out;
+// }
 
-.data-service-enter,
-.data-service-leave-to {
-  transform: translateY(30px);
-  opacity: 0;
-}
+// .data-service-enter,
+// .data-service-leave-to {
+//   transform: translateY(30px);
+//   opacity: 0;
+// }
 </style>

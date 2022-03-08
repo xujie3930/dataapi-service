@@ -155,13 +155,12 @@ export default {
   },
 
   methods: {
-    async open(options) {
+    open(options) {
       const { row } = options
       this.options = options
       this.authorizeForm.name = row?.name
       this.authorizeForm.appId = row?.id
-      const isFinish = await this.fetchApiAuthDetail(row?.id)
-      isFinish && this.fetchBusinessProcessList()
+      this.fetchApiAuthDetail(row?.id)
       this.$refs.baseDialog.open()
     },
 
@@ -188,8 +187,8 @@ export default {
           appId,
           apiId: apiId.map(item => item[2]),
           allowCall: callType ? -1 : allowCall,
-          periodBegin: validTime.length ? validTime[0] : -1,
-          periodEnd: validTime.length ? validTime[1] : -1
+          periodBegin: validTime?.length ? validTime[0] : -1,
+          periodEnd: validTime?.length ? validTime[1] : -1
         }
 
         !valid
@@ -296,7 +295,6 @@ export default {
             } = data
 
             // 级联回显
-            console.log(this.apiOptions, 'apoopop')
             this.apiOptions = apiCascadeInfoStrList
             this.authorizeForm.apiId = []
 
@@ -315,12 +313,10 @@ export default {
             if (periodBegin > -1 && periodEnd > -1) {
               this.authorizeForm.validTime = [periodBegin, periodEnd]
             }
-
-            return true
           }
         })
-        .catch(() => {
-          return true
+        .finally(() => {
+          this.fetchBusinessProcessList()
         })
     }
   }

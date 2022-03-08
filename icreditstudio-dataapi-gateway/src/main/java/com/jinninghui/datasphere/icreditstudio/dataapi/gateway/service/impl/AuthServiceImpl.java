@@ -116,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
             //发送kafka失败信息
             ApiLogInfo failLog = generateFailLog(apiLogInfo, querySql, e);
             kafkaProducer.send(failLog);
-            throw new AppException(failLog.getErrorLog());
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000013.getCode(), failLog.getErrorLog());
         } finally {
             DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
         }
@@ -239,7 +239,7 @@ public class AuthServiceImpl implements AuthService {
         List<String> params = MapUtils.mapKeyToList(map);
         if (StringUtils.isNotBlank(apiInfo.getRequiredFields())) {
             Set<String> requestList = new HashSet<>(Arrays.asList(apiInfo.getRequiredFields().split(",")));
-            if (!CollectionUtils.isEmpty(requestList) && !requestList.containsAll(params)) {
+            if (!CollectionUtils.isEmpty(requestList) && !params.containsAll(requestList)) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getMessage());
             }
         }
