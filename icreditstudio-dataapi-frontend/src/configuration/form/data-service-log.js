@@ -20,14 +20,14 @@ export default [
     ruleProp: 'appName',
     isSearch: true
   },
-  {
-    type: 'text',
-    label: 'API版本',
-    ruleProp: 'apiVersion',
-    model: '',
-    inline: true,
-    isSearch: true
-  },
+  // {
+  //   type: 'text',
+  //   label: 'API版本',
+  //   ruleProp: 'apiVersion',
+  //   model: '',
+  //   inline: true,
+  //   isSearch: true
+  // },
 
   {
     type: 'daterange',

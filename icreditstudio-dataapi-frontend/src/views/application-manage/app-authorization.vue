@@ -189,8 +189,8 @@ export default {
           durationType,
           apiId: apiId.map(item => item[2]),
           allowCall: durationType ? -1 : allowCall,
-          periodBegin: validTime?.length && authPeriod ? validTime[0] : -1,
-          periodEnd: validTime?.length && authPeriod ? validTime[1] : -1
+          periodBegin: validTime?.length && !authPeriod ? validTime[0] : -1,
+          periodEnd: validTime?.length && !authPeriod ? validTime[1] : -1
         }
 
         !valid

@@ -38,13 +38,13 @@ export default that => ({
       label: '调用IP',
       prop: 'callIp'
     },
-    {
-      type: 'text',
-      label: 'API版本',
-      prop: 'apiVersion',
-      width: 100,
-      formatter: ({ apiVersion }) => (apiVersion ? `v${apiVersion}` : '')
-    },
+    // {
+    //   type: 'text',
+    //   label: 'API版本',
+    //   prop: 'apiVersion',
+    //   width: 100,
+    //   formatter: ({ apiVersion }) => (apiVersion ? `v${apiVersion}` : '')
+    // },
     {
       type: 'date',
       label: '调用开始时间',
