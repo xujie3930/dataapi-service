@@ -34,7 +34,18 @@ export const validIpAddress = ip => {
 }
 
 // 验证字符串是否输入的是数字和英文
-export const verifyStrInputNumberEn = str => /^[\da-zA-Z]+$/i.test(str)
+export const verifyStrInputNumberEn = str => {
+  //是否为全英文
+  const isAllEnStr = /[a-zA-Z]{16}$/i.test(str)
+  // 是否为全数字
+  const isAllNum = /[0-9]{16}$/.test(str)
+  // 是否包含数字和英文
+  const isNumAndEn = /^[\da-zA-Z]+$/i.test(str)
+
+  if (isAllNum) return false
+  if (isAllEnStr) return false
+  return isNumAndEn
+}
 
 // 当前字符串是否以数字开头
 export const verifyStringStartsWithNumber = str => {
