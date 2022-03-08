@@ -86,7 +86,7 @@
             clearable
             show-word-limit
             controls-position="right"
-            v-model.number.trim="authorizeForm.allowCall"
+            v-model.number="authorizeForm.allowCall"
             placeholder="请输入调用次数"
           >
             <template slot="append">次</template>
@@ -134,7 +134,8 @@ export default {
         ],
         allowCall: [
           { required: true, message: '请输入可调用次数', trigger: 'blur' },
-          { type: 'number', message: '请输入整数' }
+          { type: 'number', message: '请输入整数' },
+          { min: 0, message: '最小值为0，请重新输入', type: 'number' }
         ],
         callType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
