@@ -464,11 +464,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     public BusinessResult<Boolean> publishOrStop(String userId, ApiPublishRequest request) {
         apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus());
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getId());
-        if(StringUtils.isEmpty(apiBaseEntity.getPublishUser())){
-            apiBaseEntity.setPublishUser(userId);
-            apiBaseEntity.setPublishTime(new Date());
-            saveOrUpdate(apiBaseEntity);
-        }
         if(ApiPublishStatusEnum.NO_PUBLISHED.getCode().equals(request.getPublishStatus())){//停止发布
             redisTemplate.delete(String.valueOf(new StringBuilder(apiBaseEntity.getPath()).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiBaseEntity.getApiVersion())));
         }else if(ApiPublishStatusEnum.PUBLISHED.getCode().equals(request.getPublishStatus())){//发布
@@ -494,6 +489,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr);
+            apiBaseEntity.setPublishUser(userId);
+            apiBaseEntity.setPublishTime(new Date());
+            saveOrUpdate(apiBaseEntity);
         }
         return BusinessResult.success(true);
     }
