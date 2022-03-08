@@ -7,11 +7,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CallCountEnum {
 
-    CALL_FINITE_TIMES(0L, 0),
-    CALL_INFINITE_TIMES(-1L, 1)
+    CALL_FINITE_TIMES(0, 0),
+    CALL_INFINITE_TIMES(-1, 1)
     ;
 
-    private Long code;
+    private Integer code;
     private Integer callTime;
 
 }

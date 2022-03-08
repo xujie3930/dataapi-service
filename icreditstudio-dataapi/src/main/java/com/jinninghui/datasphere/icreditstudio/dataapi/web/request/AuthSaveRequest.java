@@ -23,4 +23,5 @@ public class AuthSaveRequest {
     private Long periodEnd;
     //允许调用次数(-1表示无穷)
     private Integer allowCall;
+    private String durationType;//可调用次数类型，0--有限次，1--无限次
 }
