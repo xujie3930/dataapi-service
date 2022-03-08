@@ -15,6 +15,7 @@ export default that => ({
   isBorder: true,
   isStripe: true,
   hasPage: false,
+  indent: 0,
   customHeaderButton: true,
   group: [
     {
@@ -24,7 +25,9 @@ export default that => ({
     {
       type: 'text',
       label: '名称',
-      prop: 'name'
+      prop: 'name',
+      align: 'left',
+      className: 'name-column'
     },
     {
       type: 'text',

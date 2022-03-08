@@ -22,6 +22,7 @@
       :default-expand-all="tableConfiguration.defaultExpandAll"
       :tree-props="tableConfiguration.treeProps"
       :size="tableConfiguration.size"
+      :indent="tableConfiguration.indent"
       style="width: 100%"
       @select="handleSelect"
       @select-all="handleSelectAll"
@@ -369,6 +370,7 @@
           :resizable="resizable"
           :show-overflow-tooltip="true"
           :sortable="item.sortable || false"
+          :class-name="item.className"
         />
         <!-- date -->
         <el-table-column

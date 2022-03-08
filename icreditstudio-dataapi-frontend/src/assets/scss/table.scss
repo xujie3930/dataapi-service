@@ -44,4 +44,12 @@
       padding: 7px 0;
     }
   }
+
+  .el-table [class*='el-table__row--level'] .el-table__expand-icon {
+    margin-left: -24px;
+  }
+
+  .name-column .cell {
+    padding-left: 24px;
+  }
 }
