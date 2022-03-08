@@ -56,6 +56,9 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request) {
+        if(request.getAllowCall() < 0){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036.getMessage());
+        }
         if (CollectionUtils.isEmpty(request.getApiId())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getMessage());
         }
