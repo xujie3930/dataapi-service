@@ -53,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private static final Integer PAGENUM_DEFALUT = 1;
     private static final Integer PAGESIZE_DEFALUT = 500;
     private static final List<String> EXTRA_STR = Arrays.asList("v","V");
+    private static final String ALL_NETWORK = "0.0.0.0";
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -116,7 +117,8 @@ public class AuthServiceImpl implements AuthService {
             //发送kafka失败信息
             ApiLogInfo failLog = generateFailLog(apiLogInfo, querySql, e);
             kafkaProducer.send(failLog);
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000013.getCode(), failLog.getErrorLog());
+            log.info("发送kafka异常日志:{}", failLog);
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000013.getCode(), failLog.getExceptionDetail());
         } finally {
             DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
         }
@@ -130,6 +132,7 @@ public class AuthServiceImpl implements AuthService {
             //发送成功消息
             ApiLogInfo successLog = generateSuccessLog(apiLogInfo, querySql);
             kafkaProducer.send(successLog);
+            log.info("发送kafka成功日志:{}", successLog);
             return list;
         }
         return null;
@@ -155,6 +158,7 @@ public class AuthServiceImpl implements AuthService {
             BusinessPageResult build = BusinessPageResult.build(list, pageForm, dataCount);
             ApiLogInfo successLog = generateSuccessLog(apiLogInfo, pageSql);
             kafkaProducer.send(successLog);
+            log.info("发送kafka成功日志:{}", successLog);
             return build;
         }
         return null;
@@ -172,13 +176,13 @@ public class AuthServiceImpl implements AuthService {
                 Field errorMsg = e.getClass().getSuperclass().getDeclaredField("errorMsg");
                 ReflectionUtils.makeAccessible(errorMsg);
                 String errorLog = (String) errorMsg.get(e);
-                apiLogInfo.setErrorLog(errorLog);
+                apiLogInfo.setExceptionDetail(errorLog);
             } catch (Exception exception) {
                 exception.printStackTrace();
-                apiLogInfo.setErrorLog(exception.toString());
+                apiLogInfo.setExceptionDetail(exception.toString());
             }
         } else {
-            apiLogInfo.setErrorLog(e.toString());
+            apiLogInfo.setExceptionDetail(e.toString());
         }
         return apiLogInfo;
     }
@@ -260,11 +264,11 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getMessage());
         }
         //次数验证
-        if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getAllowCall() <= 0) {
+        if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getCalled() <= appAuthApp.getAllowCall()) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getMessage());
         }
-        //调用次数减一
-        appAuthApp.setAllowCall(appAuthApp.getAllowCall() - 1);
+        //调用次数加一
+        appAuthApp.setCalled(appAuthApp.getCalled() + 1);
         redisTemplate.opsForValue().set(apiAuthInfo.getApiId() + appAuthInfo.getGenerateId(), JSON.toJSONString(appAuthApp));
         return apiAuthInfo;
     }
@@ -277,7 +281,7 @@ public class AuthServiceImpl implements AuthService {
         if (!StringUtils.isBlank(appAuthInfo.getAllowIp())) {
             String remoteHost = request.getRemoteHost();
             Set<String> allowIpSet = new HashSet<>(Arrays.asList(appAuthInfo.getAllowIp().split(",")));
-            if (!allowIpSet.contains(remoteHost)) {
+            if (!allowIpSet.contains(ALL_NETWORK) && !allowIpSet.contains(remoteHost)) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getMessage());
             }
         }
