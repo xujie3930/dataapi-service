@@ -39,7 +39,7 @@ public class ApiLogInfo implements Serializable {
     private String callIp;
 
     //可以获取
-    private String apiVersion;
+    private Integer apiVersion;
 
     //请求协议
     private String requestProtocol = "HTTP";
