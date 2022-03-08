@@ -561,6 +561,7 @@ export default {
     @include flex(flex-start, flex-start, column);
     width: 240px;
     height: 100%;
+    overflow-x: hidden;
 
     &__header {
       @include flex(space-between);
@@ -726,7 +727,7 @@ export default {
     @include flex(flex-start);
     position: relative;
     // flex: 1;
-    width: 100%;
+    width: calc(100% - 240px);
     height: 100%;
     border-left: 1px solid #d9d9d9;
     overflow: hidden;
