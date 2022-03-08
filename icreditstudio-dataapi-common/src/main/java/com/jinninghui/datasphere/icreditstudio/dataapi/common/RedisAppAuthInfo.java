@@ -15,4 +15,6 @@ public class RedisAppAuthInfo {
     private Long periodEnd;
     //允许调用次数(-1表示无穷)
     private Integer allowCall;
+    //已经调用次数
+    private Integer called = 0;
 }
