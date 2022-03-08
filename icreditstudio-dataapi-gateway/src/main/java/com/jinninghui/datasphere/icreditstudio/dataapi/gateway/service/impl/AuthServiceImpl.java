@@ -164,8 +164,8 @@ public class AuthServiceImpl implements AuthService {
         apiLogInfo.setExecuteSql(querySql);
         apiLogInfo.setCallEndTime(new Date());
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_FAIL.getCode());
-        if (null != apiLogInfo.getRunTime()) {
-            apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getRunTime());
+        if (null != apiLogInfo.getCallBeginTime()) {
+            apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getCallBeginTime().getTime());
         }
         if (e instanceof AppException) {
             try {
@@ -187,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
         apiLogInfo.setExecuteSql(querySql);
         apiLogInfo.setCallEndTime(new Date());
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_SUCCESS.getCode());
-        apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getRunTime());
+        apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getCallBeginTime().getTime());
         return apiLogInfo;
     }
 
@@ -208,7 +208,7 @@ public class AuthServiceImpl implements AuthService {
         logInfo.setCallBeginTime(date);
         logInfo.setCreateTime(date);
         logInfo.setUpdateTime(date);
-        logInfo.setRunTime(System.currentTimeMillis());
+        logInfo.setRunTime(0L);
         logInfo.setApiName(apiInfo.getApiName());
         logInfo.setApiType(apiInfo.getApiType());
         return logInfo;

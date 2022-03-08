@@ -47,24 +47,24 @@ public class StringLegalUtils {
             }
         }
         if (0 == zhSize || 0 == engSize || 16 != (engSize + zhSize)) {
-            throw new AppException("密钥只能包含数字、英文字母且必须包含数字和英文字母，长度为16");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000032.getCode());
         }
     }
 
     public static void checkLegalDescForApp(String desc) {
         if(desc.length() > 250){
-            throw new AppException("描述文字必须在250以内");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000033.getCode());
         }
     }
 
     public static void checkLegalAllowIpForApp(String allowIp) {
         if (!allowIp.matches("[0-9\\,\\.]{0,255}")) {
-            throw new AppException("IP白名单只能包含【数字】、【.】、【,】，且长度不能超过255");
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000034.getCode());
         }
         String[] ipArr = allowIp.split(",");
         for (String ip : ipArr) {
             if(!StringUtils.isEmpty(ip) && !ip.matches("([0-9]|[0-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}")){
-                throw new AppException("IP白名单中有不规范的IP地址");
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000035.getCode());
             }
         }
     }
