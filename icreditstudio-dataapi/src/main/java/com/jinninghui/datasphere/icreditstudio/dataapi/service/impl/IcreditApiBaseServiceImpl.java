@@ -356,10 +356,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     private Connection getConnectionByUri(String uri, Integer datasourceType) {
-        String username = getUsername(uri);
-        String password = getPassword(uri);
-        String url = getUri(uri);
-        return DBConnectionManager.getInstance().getConnection(url, username, password, datasourceType);
+        return DBConnectionManager.getInstance().getConnection(uri, datasourceType);
     }
 
     private DatasourceDetailResult getDatasourceDetail(String datasourceId) {
@@ -526,36 +523,5 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     public BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request) {
         return BusinessResult.success(apiBaseMapper.getApiByApiGroupId(request.getApiGroupIds()));
-    }
-
-    private String getUsername(String uri) {
-        //根据uri获取username
-        String temp = uri.substring(uri.indexOf("username=") + "username=".length());
-        String username = temp.substring(0, temp.indexOf(SEPARATOR));
-        return username;
-    }
-
-    private String getPassword(String uri) {
-        //根据uri获取password
-        String temp = uri.substring(uri.indexOf("password=") + "password=".length());
-        String password;
-        if (!temp.endsWith(SEPARATOR)) {
-            password = temp;
-        } else {
-            password = temp.substring(0, temp.indexOf(SEPARATOR));
-        }
-        SM4Utils sm4 = new SM4Utils();
-        return sm4.decryptData_ECB(password);
-    }
-
-    private String getUri(String uri) {
-        //根据uri获取jdbc连接
-        if(uri.contains(SPLIT_URL_FLAG)){//url包含？ -- jdbc:mysql://192.168.0.193:3306/data_source?username=root
-            return String.valueOf(new StringBuffer(uri.substring(0, uri.indexOf(SPLIT_URL_FLAG))).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
-        }else if(uri.contains(SEPARATOR)){//url不包含？但包含|  -- jdbc:mysql://192.168.0.193:3306/data_source|username=root
-            return String.valueOf(new StringBuffer(uri.substring(0, uri.indexOf(SEPARATOR))).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
-        }else{//url不包含？和| -- jdbc:mysql://192.168.0.193:3306/daas
-            return String.valueOf(new StringBuffer(uri).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
-        }
     }
 }
