@@ -30,7 +30,7 @@
     >
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
-          <el-button class="jui-button--default" disabled>批量删除</el-button>
+          <!-- <el-button class="jui-button--default" disabled>批量删除</el-button> -->
         </div>
         <div class="header-operate-right">
           <el-button type="primary" @click="handleAddAppGroupClick">
@@ -96,7 +96,7 @@ export default {
       detailVisible: false,
       detailLoading: false,
       detailOptions: {},
-      tableConfiguration: dataServiceAppTableConfig(this),
+      expandRowKeys: [],
       formOption: dataServiceAppForm,
 
       mixinSearchFormConfig: {
@@ -113,6 +113,12 @@ export default {
 
       detailConfiguration: cloneDeep(detailConfiguration),
       detailTitleKeyMapping: cloneDeep(detailTitleKeyMapping)
+    }
+  },
+
+  computed: {
+    tableConfiguration() {
+      return dataServiceAppTableConfig(this)
     }
   },
 
@@ -218,6 +224,11 @@ export default {
         .finally(() => {
           this.detailLoading = false
         })
+    },
+
+    interceptorsResponseTableData(data) {
+      data?.length && (this.expandRowKeys = [data[0].id])
+      return data
     }
   }
 }
