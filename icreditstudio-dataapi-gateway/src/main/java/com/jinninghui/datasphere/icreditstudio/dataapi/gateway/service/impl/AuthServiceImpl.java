@@ -127,6 +127,7 @@ public class AuthServiceImpl implements AuthService {
 
     private List getListResult(String querySql, Long dataCount, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
         querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
+        log.info("查询sql:{}", querySql);
         ResultSet pagingRs = stmt.executeQuery(querySql);
         if (pagingRs.next()) {
             List list = ResultSetToListUtils.convertList(pagingRs);
@@ -149,6 +150,7 @@ public class AuthServiceImpl implements AuthService {
             dataCount = countRs.getLong(1);
         }
         String pageSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, pageNum, pageSize);
+        log.info("查询sql分页:{}", pageSql);
         ResultSet pagingRsForPageParam = stmt.executeQuery(pageSql);
         if (pagingRsForPageParam.next()) {
             List list = ResultSetToListUtils.convertList(pagingRsForPageParam);
