@@ -286,7 +286,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getMessage());
             }
         }
-        if (null != appAuthInfo.getPeriod()) {
+        if (null != appAuthInfo.getPeriod() && !NOT_LIMIT.equals(appAuthInfo.getPeriod().longValue())) {
             Long expireTime = appAuthInfo.getPeriod() * SECOND_OF_HOUR + appAuthInfo.getTokenCreateTime();
             if (System.currentTimeMillis() >= expireTime) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getMessage());
