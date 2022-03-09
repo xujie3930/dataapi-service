@@ -23,12 +23,14 @@ public class KafkaProducer {
 
     //自定义topic
     public static final String TOPIC = "apiInvoke";
+    public static final Integer PARTITION = 0;
+    public static final String Key = "api";
 
     public void send(Object obj) {
         String obj2String = JSON.toJSONString(obj);
         log.info("准备发送消息为：{}", obj2String);
         //发送消息
-        ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(TOPIC, obj2String);
+        ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(TOPIC, PARTITION, Key, obj2String);
         future.addCallback(new ListenableFutureCallback<SendResult<String, Object>>() {
             @Override
             public void onFailure(Throwable throwable) {
