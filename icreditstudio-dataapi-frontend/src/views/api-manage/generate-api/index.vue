@@ -692,7 +692,7 @@ export default {
 
     // 切换-是否必填
     handleRequireFieldChange(value, row) {
-      row.isRequest = value
+      !value && (row.isRequest = value)
     },
 
     // 切换-数据源名称发生更改
