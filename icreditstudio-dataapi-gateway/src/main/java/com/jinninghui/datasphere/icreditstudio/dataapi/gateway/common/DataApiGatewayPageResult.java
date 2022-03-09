@@ -1,4 +1,5 @@
-package com.jinninghui.datasphere.icreditstudio.dataapi.common;
+package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common;
+
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageInfo;
 import com.jinninghui.datasphere.icreditstudio.framework.result.base.BusinessBasePageForm;
 
@@ -7,7 +8,7 @@ import java.util.List;
 /**
  * @author liyanhui
  */
-public class BusinessPageResult<T> implements java.io.Serializable {
+public class DataApiGatewayPageResult<T> implements java.io.Serializable {
     private static final long serialVersionUID = -3628865867907230918L;
 
     /**
@@ -33,9 +34,9 @@ public class BusinessPageResult<T> implements java.io.Serializable {
      */
     private List<T> list;
 
-    private BusinessPageResult(){}
+    private DataApiGatewayPageResult(){}
 
-    public BusinessPageResult(long total, long pageNum, long pageSize, List<T> list) {
+    public DataApiGatewayPageResult(long total, long pageNum, long pageSize, List<T> list) {
         this.total = total;
         this.pageNum = pageNum;
         this.pageSize = pageSize;
@@ -44,8 +45,8 @@ public class BusinessPageResult<T> implements java.io.Serializable {
     }
 
     @Deprecated
-    public BusinessPageResult(List<T> list, BusinessPageInfo pageQueryRequest, long total){
-        BusinessPageResult result = build(list, pageQueryRequest, total);
+    public DataApiGatewayPageResult(List<T> list, BusinessPageInfo pageQueryRequest, long total){
+        DataApiGatewayPageResult result = build(list, pageQueryRequest, total);
         this.total = result.getTotal();
         this.pageCount = result.getPageCount();
         this.pageNum = result.getPageNum();
@@ -54,7 +55,7 @@ public class BusinessPageResult<T> implements java.io.Serializable {
     }
 
     @Deprecated
-    public static <T> BusinessPageResult<T> build(List<T> list, BusinessPageInfo pageQueryRequest, long total) {
+    public static <T> DataApiGatewayPageResult<T> build(List<T> list, BusinessPageInfo pageQueryRequest, long total) {
 
         int pageSize = pageQueryRequest.getPageSize();
         int pageNum = pageQueryRequest.getPageNum();
@@ -62,7 +63,7 @@ public class BusinessPageResult<T> implements java.io.Serializable {
             throw new IllegalArgumentException("total must more than 0");
         }
 
-        BusinessPageResult<T> result = new BusinessPageResult<>();
+        DataApiGatewayPageResult<T> result = new DataApiGatewayPageResult<>();
 
         result.setList(list);
         result.setTotal(total);
@@ -83,8 +84,8 @@ public class BusinessPageResult<T> implements java.io.Serializable {
         return result;
     }
 
-    public BusinessPageResult(List<T> list, BusinessBasePageForm pageQueryRequest, long total){
-        BusinessPageResult result = build(list, pageQueryRequest, total);
+    public DataApiGatewayPageResult(List<T> list, BusinessBasePageForm pageQueryRequest, long total){
+        DataApiGatewayPageResult result = build(list, pageQueryRequest, total);
         this.total = result.getTotal();
         this.pageCount = result.getPageCount();
         this.pageNum = result.getPageNum();
@@ -92,7 +93,7 @@ public class BusinessPageResult<T> implements java.io.Serializable {
         this.list = list;
     }
 
-    public static <T> BusinessPageResult<T> build(List<T> list, BusinessBasePageForm pageQueryRequest, long total) {
+    public static <T> DataApiGatewayPageResult<T> build(List<T> list, BusinessBasePageForm pageQueryRequest, long total) {
 
         int pageSize = pageQueryRequest.getPageSize();
         int pageNum = pageQueryRequest.getPageNum();
@@ -100,7 +101,7 @@ public class BusinessPageResult<T> implements java.io.Serializable {
             throw new IllegalArgumentException("total must more than 0");
         }
 
-        BusinessPageResult<T> result = new BusinessPageResult<>();
+        DataApiGatewayPageResult<T> result = new DataApiGatewayPageResult<>();
 
         result.setList(list);
         result.setTotal(total);
@@ -120,6 +121,7 @@ public class BusinessPageResult<T> implements java.io.Serializable {
 
         return result;
     }
+
 
     public long getTotal() {
         return total;
