@@ -719,6 +719,10 @@ export default {
             display: block;
           }
         }
+
+        .el-tree-node__children .el-tree-node__expand-icon {
+          visibility: hidden;
+        }
       }
     }
   }
