@@ -308,7 +308,7 @@ export default {
               })
             })
 
-            this.authorizeForm.allowCall = allowCall
+            this.authorizeForm.allowCall = allowCall < 0 ? undefined : allowCall
             this.authorizeForm.durationType = callCountType
             this.authorizeForm.authPeriod = authEffectiveTime
 
