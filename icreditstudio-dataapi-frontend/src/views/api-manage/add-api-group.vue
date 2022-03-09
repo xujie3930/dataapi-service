@@ -22,6 +22,7 @@
     >
       <el-form-item label="业务流程" prop="workId">
         <el-select
+          filterable
           v-model="apiGroupForm.workId"
           style="width: 100%"
           placeholder="请选择业务流程"
