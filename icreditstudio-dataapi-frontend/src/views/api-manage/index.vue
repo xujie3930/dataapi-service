@@ -645,6 +645,7 @@ export default {
     .tree {
       width: 100%;
       box-sizing: border-box;
+      overflow-x: hidden;
       overflow-y: auto;
 
       .custom-tree-node {
@@ -653,6 +654,7 @@ export default {
         padding-right: 8px;
         font-size: 14px;
         color: #262626;
+        overflow-x: hidden;
 
         box-sizing: border-box;
         cursor: pointer;

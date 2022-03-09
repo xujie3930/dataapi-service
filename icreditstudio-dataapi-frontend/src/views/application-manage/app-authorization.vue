@@ -287,7 +287,10 @@ export default {
 
     // 获取-API授权详情
     fetchApiAuthDetail(appId) {
-      return API.getAppAuthDetail({ appId })
+      this.authorizeForm.validTime = []
+      this.authorizeForm.allowCall = undefined
+
+      API.getAppAuthDetail({ appId })
         .then(({ success, data }) => {
           if (success && data) {
             const {
