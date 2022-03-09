@@ -189,7 +189,7 @@ export default {
         name: '',
         desc: '',
         secretContent: '',
-        tokenType: '',
+        tokenType: 1,
         allowIp: '',
         isEnable: 1,
         certificationType: 0,
@@ -197,7 +197,7 @@ export default {
       },
       rules: {
         appGroupId: [
-          { required: true, message: '分组名称不能为空', trigger: 'blur' }
+          { required: true, message: '分组名称不能为空', trigger: 'change' }
         ],
 
         generateId: [
