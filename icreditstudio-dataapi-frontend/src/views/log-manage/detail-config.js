@@ -30,7 +30,7 @@ export const detailConfiguration = row => ({
     { span: 24, label: '请求方式', value: '', key: 'requestType' },
     { span: 24, label: '返回类型', value: '', key: 'responseType' },
     { span: 24, label: '调用参数', value: '', key: 'requestParam' },
-    { span: 24, label: '返回结果', value: '', key: 'responseParam' },
+    // { span: 24, label: '返回结果', value: '', key: 'responseParam' },
     {
       span: 24,
       label: '调用开始时间',

@@ -21,14 +21,14 @@
         </div>
       </div>
       <div class="source-header-btn">
-        <el-button class="jui-button--default" :disabled="true">预览</el-button>
+        <!-- <el-button class="jui-button--default" :disabled="true">预览</el-button>
         <el-button
           :disabled="true"
           :loading="isTestBtnLoading"
           class="jui-button--default"
         >
           测试
-        </el-button>
+        </el-button> -->
         <el-button
           :loading="isPublishBtnLoading"
           class="jui-button--parimary"
