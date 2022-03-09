@@ -266,6 +266,15 @@ public class AuthServiceImpl implements AuthService {
         if (!NOT_LIMIT.equals(appAuthApp.getPeriodEnd()) && System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getMessage());
         }
+        //授权时间验证
+        if (null != appAuthApp.getPeriodBegin() && !NOT_LIMIT.equals(appAuthApp.getPeriodBegin()) &&
+                System.currentTimeMillis() < appAuthApp.getPeriodBegin()) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getMessage());
+        }
+        if (null != appAuthApp.getPeriodEnd() && !NOT_LIMIT.equals(appAuthApp.getPeriodEnd()) &&
+                System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getMessage());
+        }
         //次数验证
         if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getCalled() >= appAuthApp.getAllowCall()) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getMessage());
@@ -293,14 +302,6 @@ public class AuthServiceImpl implements AuthService {
             if (System.currentTimeMillis() >= expireTime) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getMessage());
             }
-        }
-        if (null != appAuthInfo.getPeriodBegin() && !NOT_LIMIT.equals(appAuthInfo.getPeriodBegin()) &&
-                System.currentTimeMillis() < appAuthInfo.getPeriodBegin()) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getMessage());
-        }
-        if (null != appAuthInfo.getPeriodEnd() && !NOT_LIMIT.equals(appAuthInfo.getPeriodEnd()) &&
-                System.currentTimeMillis() > appAuthInfo.getPeriodEnd()) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getMessage());
         }
         return appAuthInfo;
     }
