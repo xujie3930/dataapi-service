@@ -366,6 +366,7 @@
                     :true-label="0"
                     :false-label="1"
                     v-model="row.required"
+                    @change="handleRequireFieldChange($event, row)"
                   ></el-checkbox
                 ></template>
               </JTable>
@@ -687,6 +688,11 @@ export default {
     // 切换-是否设置为请求参数
     handleRequestFieldChange(value, row) {
       row.required = value
+    },
+
+    // 切换-是否必填
+    handleRequireFieldChange(value, row) {
+      row.isRequest = value
     },
 
     // 切换-数据源名称发生更改

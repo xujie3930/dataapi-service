@@ -135,7 +135,12 @@ export default {
         allowCall: [
           { required: true, message: '请输入可调用次数', trigger: 'blur' },
           { type: 'number', message: '请输入整数' },
-          { min: 0, message: '最小值为0，请重新输入', type: 'number' }
+          { min: 0, message: '最小值为0，请重新输入', type: 'number' },
+          {
+            max: 2147483647,
+            message: '最大值为2147483647，请重新输入',
+            type: 'number'
+          }
         ],
         durationType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
