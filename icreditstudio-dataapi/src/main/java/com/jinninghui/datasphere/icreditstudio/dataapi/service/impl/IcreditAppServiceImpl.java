@@ -103,7 +103,6 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         }else{
             appDetailResult.setPeriod(String.valueOf(new StringBuilder().append(appEntity.getPeriod()).append("小时")));
         }
-        appDetailResult.setSecretContent("******");
         appDetailResult.setCreateTime(appEntity.getCreateTime().getTime());
         appDetailResult.setAppGroupName(appGroupService.findNameById(appEntity.getAppGroupId()));
 
