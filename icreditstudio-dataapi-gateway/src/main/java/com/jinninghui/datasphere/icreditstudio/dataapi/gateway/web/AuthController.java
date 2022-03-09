@@ -26,8 +26,8 @@ public class AuthController {
     private AuthService authService;
 
     @GetMapping("access/token")
-    public BusinessResult<String> getToken(@RequestParam("generateId") String generateId, @RequestParam("secretContent") String secretContent) {
-        return authService.getToken(generateId, secretContent);
+    public BusinessResult<String> getToken(@RequestParam("id") String id, @RequestParam("secret") String secret) {
+        return authService.getToken(id, secret);
     }
 }
 

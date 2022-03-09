@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.DataApiGatewayPageResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
@@ -105,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
             if (map.containsKey(PAGENUM_MARK) && map.containsKey(PAGESIZE_MARK)){
-                BusinessPageResult<Object> build = getPageResult(map, querySql, dataCount, apiLogInfo, stmt);
+                DataApiGatewayPageResult<Object> build = getPageResult(map, querySql, dataCount, apiLogInfo, stmt);
                 return BusinessResult.success(build);
             }else {
                 //如果不传分页最大查询500条，不需要用分页对象包装
@@ -138,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
         return null;
     }
 
-    private BusinessPageResult<Object> getPageResult(Map map, String querySql, Long dataCount, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
+    private DataApiGatewayPageResult<Object> getPageResult(Map map, String querySql, Long dataCount, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
         Integer pageNum = Math.max(Integer.parseInt((String) map.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
         Integer pageSize = Math.min(Integer.parseInt((String) map.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
         String countSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.getSelectCountSql(querySql);
@@ -155,7 +156,7 @@ public class AuthServiceImpl implements AuthService {
             BusinessBasePageForm pageForm = new BusinessBasePageForm();
             pageForm.setPageNum(pageNum);
             pageForm.setPageSize(pageSize);
-            BusinessPageResult build = BusinessPageResult.build(list, pageForm, dataCount);
+            DataApiGatewayPageResult build = DataApiGatewayPageResult.build(list, pageForm, dataCount);
             ApiLogInfo successLog = generateSuccessLog(apiLogInfo, pageSql);
             kafkaProducer.send(successLog);
             log.info("发送kafka成功日志:{}", successLog);
@@ -285,7 +286,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000010.getMessage());
             }
         }
-        if (null != appAuthInfo.getPeriod()) {
+        if (null != appAuthInfo.getPeriod() && !NOT_LIMIT.equals(appAuthInfo.getPeriod().longValue())) {
             Long expireTime = appAuthInfo.getPeriod() * SECOND_OF_HOUR + appAuthInfo.getTokenCreateTime();
             if (System.currentTimeMillis() >= expireTime) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getMessage());
