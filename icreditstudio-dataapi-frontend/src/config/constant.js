@@ -16,7 +16,7 @@ export const API_TYPE = { 0: '注册API', 1: '数据源生成API' }
 
 // API模式
 export const API_MODE = {
-  0: '单表生成API',
+  0: '单表模式生成API',
   1: 'SQL模式生成API',
   2: '链上生成API'
 }

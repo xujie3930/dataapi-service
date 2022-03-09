@@ -20,6 +20,7 @@
           handleFunc({ row, treeNode, resolve }, tableConfiguration.load)
       "
       :default-expand-all="tableConfiguration.defaultExpandAll"
+      :expand-row-keys="tableConfiguration.expandRowKeys"
       :tree-props="tableConfiguration.treeProps"
       :size="tableConfiguration.size"
       :indent="tableConfiguration.indent"

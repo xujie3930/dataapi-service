@@ -17,10 +17,12 @@ export default that => ({
   hasPage: false,
   indent: 0,
   customHeaderButton: true,
+  expandRowKeys: that.expandRowKeys,
   group: [
     {
-      type: 'selection',
-      width: '80px'
+      type: 'index',
+      width: '80px',
+      label: '序号'
     },
     {
       type: 'text',
