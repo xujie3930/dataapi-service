@@ -260,14 +260,15 @@ export default {
   methods: {
     open(options) {
       const { row, opType } = options
-      this.appForm.appGroupId = row?.id
-      opType === 'add' && (this.appForm.secretContent = UUStr({}))
+      row && (this.appForm.appGroupId = row.id)
+
       this.options = options
       this.isShowPassword = true
 
       this.$refs.baseDialog.open()
       this.fetchAppId()
       this.fetchAppGroupNameOptions()
+      opType === 'add' && this.generateSecretContent()
     },
 
     close() {
@@ -283,6 +284,19 @@ export default {
     reset() {
       this.isShowPassword = false
       this.$refs.appForm.resetFields()
+    },
+
+    // 生成-应用密钥
+    generateSecretContent() {
+      const secretContent = UUStr({})
+      //是否为全英文
+      const isAllEnStr = /[a-zA-Z]{16}$/i.test(secretContent)
+      // 是否为全数字
+      const isAllNum = /[0-9]{16}$/.test(secretContent)
+
+      !isAllEnStr && !isAllNum
+        ? (this.appForm.secretContent = secretContent)
+        : this.generateSecretContent()
     },
 
     // 校验-分组名称填写校验

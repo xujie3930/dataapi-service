@@ -115,6 +115,7 @@ export const UUStr = ({
   const arr = combine ? [...numArr, ...enArr] : en ? enArr : numArr
 
   // 随机产生
+
   if (random) {
     range = Math.round(Math.random() * (max - min)) + min
   }

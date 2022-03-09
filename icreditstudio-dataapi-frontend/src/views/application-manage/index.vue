@@ -134,8 +134,6 @@ export default {
 
     // 点击-新增应用
     handleAddAppClick({ row }) {
-      console.log(row, 'rowrowrow')
-
       this.$refs.addApp.open({ row, title: '新增应用', opType: 'add' })
     },
 
