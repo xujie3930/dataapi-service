@@ -94,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
             //kafka推送消息
             kafkaProducer.send(apiLogInfo);
             //1：根据token,鉴权应用信息
-            checkApp(appAuthInfo, request);
+            checkApp(appAuthInfo, request, token);
             //2：根据path和version,鉴权API信息
             checkApi(apiInfo, appAuthInfo);
             //3:对入参做校验
@@ -266,6 +266,15 @@ public class AuthServiceImpl implements AuthService {
         if (!NOT_LIMIT.equals(appAuthApp.getPeriodEnd()) && System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000007.getMessage());
         }
+        //授权时间验证
+        if (null != appAuthApp.getPeriodBegin() && !NOT_LIMIT.equals(appAuthApp.getPeriodBegin()) &&
+                System.currentTimeMillis() < appAuthApp.getPeriodBegin()) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getMessage());
+        }
+        if (null != appAuthApp.getPeriodEnd() && !NOT_LIMIT.equals(appAuthApp.getPeriodEnd()) &&
+                System.currentTimeMillis() > appAuthApp.getPeriodEnd()) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getMessage());
+        }
         //次数验证
         if (!NOT_LIMIT.equals(appAuthApp.getAllowCall().longValue()) && appAuthApp.getCalled() >= appAuthApp.getAllowCall()) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000008.getMessage());
@@ -276,7 +285,7 @@ public class AuthServiceImpl implements AuthService {
         return apiAuthInfo;
     }
 
-    private AppAuthInfo checkApp(AppAuthInfo appAuthInfo, HttpServletRequest request) {
+    private AppAuthInfo checkApp(AppAuthInfo appAuthInfo, HttpServletRequest request, String token) {
         if (AppEnableEnum.NOT_ENABLE.getCode().equals(appAuthInfo.getIsEnable())) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000009.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000009.getMessage());
         }
@@ -291,16 +300,9 @@ public class AuthServiceImpl implements AuthService {
         if (null != appAuthInfo.getPeriod() && !NOT_LIMIT.equals(appAuthInfo.getPeriod().longValue())) {
             Long expireTime = appAuthInfo.getPeriod() * SECOND_OF_HOUR + appAuthInfo.getTokenCreateTime();
             if (System.currentTimeMillis() >= expireTime) {
+                redisTemplate.delete(token);
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000011.getMessage());
             }
-        }
-        if (null != appAuthInfo.getPeriodBegin() && !NOT_LIMIT.equals(appAuthInfo.getPeriodBegin()) &&
-                System.currentTimeMillis() < appAuthInfo.getPeriodBegin()) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000014.getMessage());
-        }
-        if (null != appAuthInfo.getPeriodEnd() && !NOT_LIMIT.equals(appAuthInfo.getPeriodEnd()) &&
-                System.currentTimeMillis() > appAuthInfo.getPeriodEnd()) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000015.getMessage());
         }
         return appAuthInfo;
     }
