@@ -7,6 +7,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.utils;
  **/
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DatasourceTypeEnum;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.sm4.SM4Utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -22,9 +23,13 @@ public class DBConnectionManager {
     static private DBConnectionManager instance;
     static private int clients;
     private final Vector drivers = new Vector();
-    private Hashtable pools = new Hashtable();
+    static private Hashtable pools = new Hashtable();
+    private static final String SEPARATOR = "|";
+    private static final String SPLIT_URL_FLAG = "?";
+    private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
     //cpu核心数*2
-    private final int defaultConn = 10;
+    //TODO：开发环境设置为1，复现生产问题
+    private final int defaultConn = 1;
 
     public Hashtable getPools() {
         return pools;
@@ -41,12 +46,46 @@ public class DBConnectionManager {
         return instance;
     }
 
-    public String createPools(String url, String username, String password, Integer type) {
-        String poolName = url;
+    public String createPools(String uri, Integer type) {
+        String poolName = uri;
+        String username = getUsername(uri);
+        String password = getPassword(uri);
+        String url = getUri(uri);
         String drvier = getDrvierByType(type);
         DBConnectionPool pool = new DBConnectionPool(poolName, drvier, url, username, password, defaultConn);
         pools.put(poolName, pool);
         return poolName;
+    }
+
+    private String getUsername(String uri) {
+        //根据uri获取username
+        String temp = uri.substring(uri.indexOf("username=") + "username=".length());
+        String username = temp.substring(0, temp.indexOf(SEPARATOR));
+        return username;
+    }
+
+    private String getPassword(String uri) {
+        //根据uri获取password
+        String temp = uri.substring(uri.indexOf("password=") + "password=".length());
+        String password;
+        if (!temp.endsWith(SEPARATOR)) {
+            password = temp;
+        } else {
+            password = temp.substring(0, temp.indexOf(SEPARATOR));
+        }
+        SM4Utils sm4 = new SM4Utils();
+        return sm4.decryptData_ECB(password);
+    }
+
+    private String getUri(String uri) {
+        //根据uri获取jdbc连接
+        if(uri.contains(SPLIT_URL_FLAG)){//url包含？ -- jdbc:mysql://192.168.0.193:3306/data_source?username=root
+            return String.valueOf(new StringBuffer(uri.substring(0, uri.indexOf(SPLIT_URL_FLAG))).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
+        }else if(uri.contains(SEPARATOR)){//url不包含？但包含|  -- jdbc:mysql://192.168.0.193:3306/data_source|username=root
+            return String.valueOf(new StringBuffer(uri.substring(0, uri.indexOf(SEPARATOR))).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
+        }else{//url不包含？和| -- jdbc:mysql://192.168.0.193:3306/daas
+            return String.valueOf(new StringBuffer(uri).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
+        }
     }
 
     static String getDrvierByType(Integer type) {
@@ -66,19 +105,41 @@ public class DBConnectionManager {
     }
 
     /**
+     * @param uri
+     * @param type
+     * @return
+     */
+    public Connection getConnection(String uri,Integer type) {
+        DBConnectionPool pool = (DBConnectionPool) pools.get(uri);
+        if (pool == null) {
+            createPools(uri, type);
+            pool = (DBConnectionPool) pools.get(uri);
+        }
+        return pool.getConnection();
+    }
+
+    /**
      * @param url
      * @param username
      * @param password
      * @param type
      * @return
      */
-    public Connection getConnection(String url, String username, String password, Integer type) {
+    public Connection getConnectionByUserNameAndPassword(String url, String username, String password, Integer type) {
         DBConnectionPool pool = (DBConnectionPool) pools.get(url);
         if (pool == null) {
             createPools(url, username, password, type);
             pool = (DBConnectionPool) pools.get(url);
         }
         return pool.getConnection();
+    }
+
+    public String createPools(String url, String username, String password, Integer type) {
+        String poolName = url;
+        String drvier = getDrvierByType(type);
+        DBConnectionPool pool = new DBConnectionPool(poolName, drvier, url, username, password, defaultConn);
+        pools.put(poolName, pool);
+        return poolName;
     }
 
 
