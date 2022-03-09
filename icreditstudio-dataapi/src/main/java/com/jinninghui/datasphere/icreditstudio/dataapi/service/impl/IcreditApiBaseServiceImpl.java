@@ -207,7 +207,12 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiParamEntityList = (List<IcreditApiParamEntity>) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
             String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
-            String[] requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+            String[] requiredFieldArr;
+            if(querySql.contains(SQL_WHERE)) {
+                requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+            }else{
+                requiredFieldArr = new String[]{};
+            }
             for (String requiredField : requiredFieldArr) {
                 requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
             }
@@ -251,13 +256,15 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     private void handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr) {
-        String[] requiredFieldArr =  requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
         String[] responseFieldArr =  responseFieldStr.split(SQL_FIELD_SPLIT_CHAR);
-        for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
-            for (String requiredField : requiredFieldArr) {
-                if(requiredField.substring(requiredField.contains(".") ? (requiredField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName())){
-                    apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
-                    apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+        if(StringUtils.isNotEmpty(requiredFieldStr)) {
+            String[] requiredFieldArr = requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
+            for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
+                for (String requiredField : requiredFieldArr) {
+                    if (requiredField.substring(requiredField.contains(".") ? (requiredField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName())) {
+                        apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+                        apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                    }
                 }
             }
         }
@@ -415,7 +422,11 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             ps.execute();
             if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
                 apiParamEntityList = new ArrayList<>();
-                sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(" limit 1"));
+                if(sql.contains(SQL_WHERE)) {
+                    sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(" limit 1"));
+                }else{
+                    sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START))).append(" limit 1"));
+                }
                 ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery(sql);
                 ResultSetMetaData metaData = rs.getMetaData();
