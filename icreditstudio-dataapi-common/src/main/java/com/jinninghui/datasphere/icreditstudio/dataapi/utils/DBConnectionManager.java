@@ -57,14 +57,14 @@ public class DBConnectionManager {
         return poolName;
     }
 
-    private String getUsername(String uri) {
+    public String getUsername(String uri) {
         //根据uri获取username
         String temp = uri.substring(uri.indexOf("username=") + "username=".length());
         String username = temp.substring(0, temp.indexOf(SEPARATOR));
         return username;
     }
 
-    private String getPassword(String uri) {
+    public String getPassword(String uri) {
         //根据uri获取password
         String temp = uri.substring(uri.indexOf("password=") + "password=".length());
         String password;
@@ -77,7 +77,7 @@ public class DBConnectionManager {
         return sm4.decryptData_ECB(password);
     }
 
-    private String getUri(String uri) {
+    public String getUri(String uri) {
         //根据uri获取jdbc连接
         if(uri.contains(SPLIT_URL_FLAG)){//url包含？ -- jdbc:mysql://192.168.0.193:3306/data_source?username=root
             return String.valueOf(new StringBuffer(uri.substring(0, uri.indexOf(SPLIT_URL_FLAG))).append(SPLIT_URL_FLAG).append(SQL_CHARACTER));
