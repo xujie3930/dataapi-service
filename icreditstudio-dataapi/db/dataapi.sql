@@ -205,7 +205,7 @@ CREATE TABLE `dataapi`.`icredit_app`
     `name`               varchar(50)  DEFAULT NULL,
     `secret_content`     text,
     `app_group_id`       varchar(30)  DEFAULT NULL,
-    `desc`               varchar(200) DEFAULT NULL,
+    `desc`               varchar(255) DEFAULT NULL,
     `period`             int(11) DEFAULT NULL,
     `allow_ip`           varchar(500) DEFAULT NULL,
     `remark`             varchar(255) DEFAULT NULL,
