@@ -59,7 +59,7 @@
                 v-model="form.type"
                 placeholder="选择API类型"
               >
-                <el-option label="注册API" :value="0"></el-option>
+                <!-- <el-option label="注册API" :value="0"></el-option> -->
                 <el-option label="数据源生成API" :value="1"></el-option>
               </el-select>
             </el-form-item>
@@ -520,7 +520,7 @@ export default {
         ],
         name: [
           { required: true, message: 'API名称不能为空', trigger: 'blur' },
-          { min: 2, message: '至少输入2个字符' },
+          { min: 2, message: '至少输入2个字符', trigger: 'blur' },
           { validator: this.verifyApiName, trigger: 'blur' }
         ],
         databaseTye: [
@@ -619,8 +619,8 @@ export default {
       if (cb) {
         API.checkSqlCorrectness({ datasourceId, sql: value })
           .then(({ success, data }) => {
-            if (success && data) {
-              cb(new Error(data))
+            if (success) {
+              data ? cb(new Error(data)) : cb()
             }
           })
           .catch(err => cb(new Error(err)))
