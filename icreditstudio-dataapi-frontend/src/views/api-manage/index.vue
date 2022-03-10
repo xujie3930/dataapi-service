@@ -392,6 +392,7 @@ export default {
         : [currentTreeNodeId]
       const isFinish = await this.fetchBusinessProcessList()
       if (isFinish) {
+        this.selectValue = ''
         command === 'process' && this.setHighlightCurrentNode(workId)
 
         // 新增分组左侧树高亮节点

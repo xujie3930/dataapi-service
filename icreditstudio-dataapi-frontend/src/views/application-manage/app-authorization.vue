@@ -102,7 +102,6 @@
 <script>
 import API from '@/api/api'
 import { cloneDeep } from 'lodash'
-import { unique } from '@/utils'
 
 export default {
   data() {
@@ -326,7 +325,7 @@ export default {
             } = data
 
             // 级联回显
-            this.apiOptions = unique(apiCascadeInfoStrList)
+            this.apiOptions = apiCascadeInfoStrList
             this.authorizeForm.apiId = []
             this.oldApiId = []
 
