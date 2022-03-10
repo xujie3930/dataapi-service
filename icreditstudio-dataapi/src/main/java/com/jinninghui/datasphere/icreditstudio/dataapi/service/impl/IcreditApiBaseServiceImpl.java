@@ -271,7 +271,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             String[] requiredFieldArr = requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
             for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
                 for (String requiredField : requiredFieldArr) {
-                    if (requiredField.substring(requiredField.contains(".") ? (requiredField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName())) {
+                    if (requiredField.substring(requiredField.contains(".") ? (requiredField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
                         apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
                         apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
                     }
@@ -280,7 +280,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         }
         for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
             for (String responseField : responseFieldArr) {
-                if(responseField.substring(responseField.contains(".") ? (responseField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName())){
+                if(responseField.substring(responseField.contains(".") ? (responseField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())){
                     apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
                 }
             }
