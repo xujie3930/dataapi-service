@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.CharacterUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
@@ -27,6 +28,7 @@ public class SearchController {
     private IcreditWorkFlowService icreditWorkFlowService;
 
     @PostMapping("/search")
+    @ResultReturning
     public BusinessResult<List<WorkFlowResult>> searchFromName(@RequestBody WorkFlowSaveRequest request) {
         List<WorkFlowResult> workFlowResults = icreditWorkFlowService.searchFromName(request);
         return BusinessResult.success(workFlowResults);

@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppDetailRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequest;
@@ -35,6 +36,7 @@ public class IcreditAppController {
     }
 
     @PostMapping("/detail")
+    @ResultReturning
     BusinessResult<AppDetailResult> detail(@RequestBody AppDetailRequest request) {
         return appService.detail(request);
     }

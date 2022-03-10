@@ -91,7 +91,6 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     }
 
     @Override
-    @ResultReturning
     public BusinessResult<AppDetailResult> detail(AppDetailRequest request) {
         IcreditAppEntity appEntity = appMapper.selectById(request.getId());
         AppDetailResult appDetailResult = new AppDetailResult();

@@ -56,7 +56,6 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     }
 
     @Override
-    @ResultReturning
     public BusinessResult<List<IcreditApiGroupEntity>> getList(ApiGroupListRequest request) {
         List<IcreditApiGroupEntity> list = list(queryWrapper(request));
         return BusinessResult.success(list);
@@ -68,7 +67,6 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     }
 
     @Override
-    @ResultReturning
     public List<IcreditApiGroupEntity> searchFromName(String name) {
         return apiGroupMapper.searchFromName(name);
     }

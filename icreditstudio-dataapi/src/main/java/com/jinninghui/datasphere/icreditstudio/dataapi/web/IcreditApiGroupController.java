@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiGroupIdAndNameListRequest;
@@ -40,6 +41,7 @@ public class IcreditApiGroupController {
     }
 
     @PostMapping("/list")
+    @ResultReturning
     BusinessResult<List<IcreditApiGroupEntity>> list(@RequestBody ApiGroupListRequest request) {
         return apiGroupService.getList(request);
     }
