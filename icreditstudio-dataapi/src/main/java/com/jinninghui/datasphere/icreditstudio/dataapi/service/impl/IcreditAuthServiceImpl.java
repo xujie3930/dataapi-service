@@ -126,12 +126,11 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         }
         for (ApiCascadeInfoResult apiCascadeInfoResult : apiCascadeInfoList) {//获取api分组
             List<ApiGroupIdAAndNameResult> apiGroupIdAAndNameResultList = new ArrayList<>();
-            String initApiGroupId = apiInfoList.get(0).getApiGroupId();
-            apiGroupIdAAndNameResultList.add(new ApiGroupIdAAndNameResult(initApiGroupId, apiInfoList.get(0).getApiGroupName(), null, false));
+            List<String> apiGroupIdList = new ArrayList<>();
             for (ApiInfoDTO apiInfo : apiInfoList) {
-                if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && !initApiGroupId.equals(apiInfo.getApiGroupId())){
+                if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && !apiGroupIdList.contains(apiInfo.getApiGroupId())){
                     apiGroupIdAAndNameResultList.add(new ApiGroupIdAAndNameResult(apiInfo.getApiGroupId(), apiInfo.getApiGroupName(), null, false));
-                    initApiGroupId = apiInfo.getApiGroupId();
+                    apiGroupIdList.add(apiInfo.getApiGroupId());
                 }
             }
             apiCascadeInfoResult.setChildren(apiGroupIdAAndNameResultList);
@@ -139,12 +138,11 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         for (ApiCascadeInfoResult apiCascadeInfoResult : apiCascadeInfoList) {//获取api
             for (ApiGroupIdAAndNameResult apiGroup : apiCascadeInfoResult.getChildren()) {
                 List<ApiIdAAndNameResult> apiIdAAndNameResultList = new ArrayList<>();
-                String initApiId = apiInfoList.get(0).getApiId();
-                apiIdAAndNameResultList.add(new ApiIdAAndNameResult(initApiId, apiInfoList.get(0).getApiName(), true));
+                List<String> apiIdList = new ArrayList<>();
                 for (ApiInfoDTO apiInfo : apiInfoList) {
-                    if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && apiGroup.getId().equals(apiInfo.getApiGroupId()) && !initApiId.equals(apiInfo.getApiId())){
-                        apiIdAAndNameResultList.add(new ApiIdAAndNameResult(apiInfo.getApiGroupId(), apiInfo.getApiGroupName(), true));
-                        initApiId = apiInfo.getApiId();
+                    if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && apiGroup.getId().equals(apiInfo.getApiGroupId()) && !apiIdList.contains(apiInfo.getApiId())){
+                        apiIdAAndNameResultList.add(new ApiIdAAndNameResult(apiInfo.getApiId(), apiInfo.getApiName(), true));
+                        apiIdList.add(apiInfo.getApiId());
                     }
                 }
                 apiGroup.setChildren(apiIdAAndNameResultList);
