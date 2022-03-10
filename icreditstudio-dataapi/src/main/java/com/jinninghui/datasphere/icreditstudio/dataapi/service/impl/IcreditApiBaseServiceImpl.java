@@ -222,7 +222,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
             }
             for (String responseField : responseFieldArr) {
-                responseFields.append(responseField.replaceAll(" ", "")).append(SQL_FIELD_SPLIT_CHAR);
+                responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
+                responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
+                responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
             }
             if (requiredFields.length() >= 1) {
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
@@ -429,7 +431,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         String uri = datasource.getUri();
         List<IcreditApiParamEntity> apiParamEntityList = null;
         Connection conn = null;
-        SqlModelInfoBO sqlModelInfoBO = new SqlModelInfoBO();
+        SqlModelInfoBO sqlModelInfoBO = null;
         StringBuilder tableNames = new StringBuilder();
         try {
             conn = getConnectionByUri(uri);
@@ -472,16 +474,17 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                         apiParamEntityList.add(apiParamEntity);
                     }
                 }
+                sqlModelInfoBO = new SqlModelInfoBO();
+                sqlModelInfoBO.setApiParamEntityList(apiParamEntityList);
+                sqlModelInfoBO.setTableNames(String.valueOf(new StringBuffer(tableNames.substring(0, tableNames.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
             }
-            sqlModelInfoBO.setApiParamEntityList(apiParamEntityList);
-            sqlModelInfoBO.setTableNames(String.valueOf(new StringBuffer(tableNames.substring(0, tableNames.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
         } catch (SQLException e) {
             e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
         }finally {
             closeConnection(conn);
         }
-        return apiParamEntityList;
+        return sqlModelInfoBO;
     }
 
     @Override
