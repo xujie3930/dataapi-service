@@ -222,7 +222,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
             }
             for (String responseField : responseFieldArr) {
-                responseFields.append(responseField.replaceAll(" ", "")).append(SQL_FIELD_SPLIT_CHAR);
+                responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
+                responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
+                responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
             }
             if (requiredFields.length() >= 1) {
                 requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
