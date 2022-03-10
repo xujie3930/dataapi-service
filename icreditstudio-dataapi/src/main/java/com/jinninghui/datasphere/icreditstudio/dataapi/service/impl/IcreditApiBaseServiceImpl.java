@@ -429,7 +429,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         String uri = datasource.getUri();
         List<IcreditApiParamEntity> apiParamEntityList = null;
         Connection conn = null;
-        SqlModelInfoBO sqlModelInfoBO = new SqlModelInfoBO();
+        SqlModelInfoBO sqlModelInfoBO = null;
         StringBuilder tableNames = new StringBuilder();
         try {
             conn = getConnectionByUri(uri);
@@ -472,16 +472,17 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                         apiParamEntityList.add(apiParamEntity);
                     }
                 }
+                sqlModelInfoBO = new SqlModelInfoBO();
+                sqlModelInfoBO.setApiParamEntityList(apiParamEntityList);
+                sqlModelInfoBO.setTableNames(String.valueOf(new StringBuffer(tableNames.substring(0, tableNames.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
             }
-            sqlModelInfoBO.setApiParamEntityList(apiParamEntityList);
-            sqlModelInfoBO.setTableNames(String.valueOf(new StringBuffer(tableNames.substring(0, tableNames.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
         } catch (SQLException e) {
             e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
         }finally {
             closeConnection(conn);
         }
-        return apiParamEntityList;
+        return sqlModelInfoBO;
     }
 
     @Override
