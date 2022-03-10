@@ -47,8 +47,10 @@ public class ApiBaseGenerateService implements ApiBaseService {
                 sqlModel.singleTableCreateModel(result, generateApiEntity, databaseName);
                 break;
             case SQL_CREATE_MODEL:
+                sqlModel.sqlCreateModel(result, generateApiEntity, databaseName);
                 break;
             case CHAIN_CREATE_MODEL:
+                sqlModel.chainCreateModel(result, generateApiEntity, databaseName);
                 break;
             default:
                 break;

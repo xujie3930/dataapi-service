@@ -20,7 +20,23 @@ public final class SqlModelImpl extends ApiBaseGenerateService {
     }
 
     public void singleTableCreateModel(ApiDetailResult result, IcreditGenerateApiEntity generateApiEntity, String databaseName) {
+        //单表生成模式
+        GenerateApiResult generateApiResult = new GenerateApiResult();
+        BeanCopyUtils.copyProperties(generateApiEntity, generateApiResult);
+        generateApiResult.setDatabaseName(databaseName);
+        result.setGenerateApi(generateApiResult);
+    }
+
+    public void sqlCreateModel(ApiDetailResult result, IcreditGenerateApiEntity generateApiEntity, String databaseName) {
         //sql生成模式
+        GenerateApiResult generateApiResult = new GenerateApiResult();
+        BeanCopyUtils.copyProperties(generateApiEntity, generateApiResult);
+        generateApiResult.setDatabaseName(databaseName);
+        result.setGenerateApi(generateApiResult);
+    }
+
+    public void chainCreateModel(ApiDetailResult result, IcreditGenerateApiEntity generateApiEntity, String databaseName) {
+        //链上生成模式
         GenerateApiResult generateApiResult = new GenerateApiResult();
         BeanCopyUtils.copyProperties(generateApiEntity, generateApiResult);
         generateApiResult.setDatabaseName(databaseName);
