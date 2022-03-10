@@ -1,7 +1,5 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
-import sun.awt.util.IdentityLinkedList;
-
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
