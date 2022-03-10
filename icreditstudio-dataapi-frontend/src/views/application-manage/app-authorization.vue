@@ -31,6 +31,8 @@
 
       <el-form-item label="选择API" prop="apiId">
         <el-cascader
+          ref="cascader"
+          clearable
           filterable
           style="width: 500px"
           placeholder="请选择API"
@@ -38,7 +40,7 @@
           :options="apiOptions"
           :props="cascaderProps"
           v-model="authorizeForm.apiId"
-          clearable
+          @change="handleCascaderChange"
         ></el-cascader>
       </el-form-item>
 
@@ -105,6 +107,7 @@ export default {
   data() {
     return {
       timerId: null,
+      oldApiId: [],
       options: {},
       cascaderProps: {
         multiple: true,
@@ -217,54 +220,71 @@ export default {
       })
     },
 
+    // 切换-选在API
+    handleCascaderChange(value) {
+      console.log(value, 'ooo')
+      // value.length && (this.oldApiId = value)
+    },
+
     // 级联-懒加载
-    lazyLoad({ level, value }, resolve) {
+    lazyLoad({ level, value, data }, resolve) {
       level === 1
-        ? this.fetchApiGroupList(value, resolve)
+        ? this.fetchApiGroupList(value, resolve, data)
         : level === 2
-        ? this.fetchApiList(value, resolve)
+        ? this.fetchApiList(value, resolve, data)
         : resolve([])
     },
 
-    // 获取-API节点
-    fetchApiList(id, resolve) {
+    // 获取-三级 API节点
+    fetchApiList(id, resolve, options) {
       API.getApiInfoList({ apiGroupIds: [id] })
         .then(({ success, data }) => {
           if (success && data) {
-            const apiList = data.map(({ id, name }) => {
-              return {
-                id,
-                name,
-                children: [],
-                leaf: true
-              }
-            })
+            const { children } = options
+            const curApiIds = children?.map(({ id }) => id) ?? []
+            const apiList = data
+              .filter(item => !curApiIds.includes(item.id))
+              .map(({ id, name }) => {
+                return {
+                  id,
+                  name,
+                  children: [],
+                  leaf: true
+                }
+              })
             resolve(apiList)
+            // this.authorizeForm.apiId = this.oldApiId
           }
         })
         .catch(() => resolve([]))
     },
 
-    // 获取-API分组节点
-    fetchApiGroupList(id, resolve) {
+    // 获取-二级 API分组节点
+    fetchApiGroupList(id, resolve, options) {
       API.getGroupList({ workIds: [id] })
         .then(({ success, data }) => {
           if (success && data) {
-            const apiGroupList = data.map(({ id, name }) => {
-              return {
-                id,
-                name,
-                children: [],
-                leaf: false
-              }
-            })
+            const { children } = options
+            const curGroupIds = children?.map(({ id }) => id) ?? []
+            const apiGroupList = data
+              .filter(item => !curGroupIds.includes(item.id))
+              .map(({ id, name }) => {
+                return {
+                  id,
+                  name,
+                  children: [],
+                  leaf: false
+                }
+              })
+
             resolve(apiGroupList)
+            // this.authorizeForm.apiId = this.oldApiId
           }
         })
         .catch(() => resolve([]))
     },
 
-    // 获取-业务流程
+    // 获取-一级 业务流程
     fetchBusinessProcessList() {
       const processIds = cloneDeep(this.apiOptions).map(({ id }) => id)
 
@@ -307,6 +327,7 @@ export default {
             // 级联回显
             this.apiOptions = apiCascadeInfoStrList
             this.authorizeForm.apiId = []
+            this.oldApiId = []
 
             apiCascadeInfoStrList?.forEach(({ id: pid, children: groups }) => {
               groups?.forEach(({ id: gid, children: apis }) => {
@@ -319,6 +340,7 @@ export default {
             this.authorizeForm.allowCall = allowCall < 0 ? undefined : allowCall
             this.authorizeForm.durationType = callCountType
             this.authorizeForm.authPeriod = authEffectiveTime
+            this.oldApiId = this.authorizeForm.apiId
 
             if (periodBegin > -1 && periodEnd > -1) {
               this.authorizeForm.validTime = [periodBegin, periodEnd]

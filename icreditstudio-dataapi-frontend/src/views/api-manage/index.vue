@@ -50,7 +50,7 @@
           @input="fetchTreeDataByName"
           @clear="fetchBusinessProcessList()"
         >
-          <i slot="suffix" class="search el-icon-search"></i>
+          <!-- <i slot="suffix" class="search el-icon-search"></i> -->
         </el-input>
       </div>
 
@@ -160,6 +160,7 @@ import formOption from '@/configuration/form/data-service-api'
 import crud from '@/mixins/crud'
 import { debounce } from 'lodash'
 import noGroupImg from '@/assets/images/bg-no-group.png'
+import { isUndef } from '@/utils'
 
 export default {
   mixins: [crud],
@@ -294,7 +295,7 @@ export default {
     handleNodeChangeClick(data, node) {
       const { id } = data
       const { level, childNodes } = node
-      console.log(level, node, 'mmmm')
+
       if (level === 1) {
         const { length } = childNodes
         this.isFirstNodeHasChild = length
@@ -391,6 +392,7 @@ export default {
         : [currentTreeNodeId]
       const isFinish = await this.fetchBusinessProcessList()
       if (isFinish) {
+        this.selectValue = ''
         command === 'process' && this.setHighlightCurrentNode(workId)
 
         // 新增分组左侧树高亮节点
@@ -415,7 +417,11 @@ export default {
 
     // 获取-符合输入的分组以及流程数据
     fetchTreeDataByName() {
-      if (!this.selectValue) return
+      if (this.selectValue === '' || isUndef(this.selectValue)) {
+        this.fetchBusinessProcessList()
+        return
+      }
+
       this.isTreeLoading = true
       API.searchProcessOrGroup({ name: this.selectValue })
         .then(({ success, data }) => {

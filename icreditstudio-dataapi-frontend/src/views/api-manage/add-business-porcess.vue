@@ -115,6 +115,7 @@ export default {
                     message: '新增业务流程成功！',
                     duration: 1500
                   })
+                  this.options.workId = data
                   this.close('save')
                 }
               })
