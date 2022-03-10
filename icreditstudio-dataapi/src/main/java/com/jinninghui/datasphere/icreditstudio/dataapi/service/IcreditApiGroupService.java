@@ -12,6 +12,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -23,7 +24,7 @@ import java.util.List;
  */
 public interface IcreditApiGroupService extends IService<IcreditApiGroupEntity> {
 
-    BusinessResult<String> saveDef(String userId, ApiGroupSaveRequest request);
+    BusinessResult<Map<String, String>> saveDef(String userId, ApiGroupSaveRequest request);
 
     Boolean hasExit(WorkFlowSaveRequest request);
 
