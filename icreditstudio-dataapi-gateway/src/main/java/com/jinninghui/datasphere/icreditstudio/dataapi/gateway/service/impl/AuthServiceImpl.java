@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
         String token = checkRequestToken(request);
         AppAuthInfo appAuthInfo = getAppAuthInfoByToken(token);
         RedisApiInfo apiInfo = getApiAuthInfoByVersionAndPath(version, path);
-        ApiLogInfo apiLogInfo = generateLog(appAuthInfo, apiInfo, version, path, request);
+        ApiLogInfo apiLogInfo = generateLog(appAuthInfo, apiInfo, version, path, request, map);
         try {
             //kafka推送消息
             kafkaProducer.send(apiLogInfo);
@@ -198,7 +198,7 @@ public class AuthServiceImpl implements AuthService {
         return apiLogInfo;
     }
 
-    private ApiLogInfo generateLog(AppAuthInfo appAuthInfo, RedisApiInfo apiInfo, String version, String path, HttpServletRequest request) {
+    private ApiLogInfo generateLog(AppAuthInfo appAuthInfo, RedisApiInfo apiInfo, String version, String path, HttpServletRequest request, Map map) {
         String traceId = UUID.randomUUID().toString().replaceAll("-", "");
         Date date = new Date();
         ApiLogInfo logInfo = new ApiLogInfo();
@@ -209,7 +209,12 @@ public class AuthServiceImpl implements AuthService {
         logInfo.setAppId(appAuthInfo.getId());
         logInfo.setCallIp(request.getRemoteHost());
         logInfo.setApiVersion(Integer.valueOf(version));
-        logInfo.setRequestParam(apiInfo.getRequiredFields());
+//        logInfo.setRequestParam(apiInfo.getRequiredFields());
+        map.remove(TOKEN_MARK);
+        List<String> params = MapUtils.mapKeyToList(map);
+        if (!CollectionUtils.isEmpty(params)){
+            logInfo.setRequestParam(String.join(",", params));
+        }
         logInfo.setResponseParam(apiInfo.getResponseFields());
         logInfo.setCallStatus(CallStatusEnum.CALL_ON.getCode());
         logInfo.setCallBeginTime(date);
