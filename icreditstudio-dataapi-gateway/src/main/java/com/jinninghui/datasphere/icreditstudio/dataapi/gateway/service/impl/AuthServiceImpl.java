@@ -207,9 +207,8 @@ public class AuthServiceImpl implements AuthService {
         logInfo.setApiPath(path);
         logInfo.setAppName(appAuthInfo.getName());
         logInfo.setAppId(appAuthInfo.getId());
-        logInfo.setCallIp(request.getRemoteHost());
+        logInfo.setCallIp(request.getRemoteAddr());
         logInfo.setApiVersion(Integer.valueOf(version));
-//        logInfo.setRequestParam(apiInfo.getRequiredFields());
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
         if (!CollectionUtils.isEmpty(params)){
