@@ -134,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
         kafkaProducer.send(successLog);
         log.info("发送kafka成功日志:{}", successLog);
         if (pagingRs.next()) {
-            List list = ResultSetToListUtils.convertList(pagingRs);
+            List list = ResultSetToListUtils.convertList(pagingRs, apiLogInfo.getResponseParam());
             return list;
         }
         return null;
@@ -156,7 +156,7 @@ public class AuthServiceImpl implements AuthService {
         kafkaProducer.send(successLog);
         log.info("发送kafka成功日志:{}", successLog);
         if (pagingRsForPageParam.next()) {
-            List list = ResultSetToListUtils.convertList(pagingRsForPageParam);
+            List list = ResultSetToListUtils.convertList(pagingRsForPageParam, apiLogInfo.getResponseParam());
             //发送成功消息
             BusinessBasePageForm pageForm = new BusinessBasePageForm();
             pageForm.setPageNum(pageNum);

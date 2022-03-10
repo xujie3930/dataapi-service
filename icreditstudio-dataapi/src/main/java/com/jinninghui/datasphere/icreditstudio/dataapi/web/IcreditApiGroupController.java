@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -36,7 +37,7 @@ public class IcreditApiGroupController {
     }
 
     @PostMapping("/save")
-    BusinessResult<String> saveDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody ApiGroupSaveRequest request) {
+    BusinessResult<Map<String, String>> saveDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody ApiGroupSaveRequest request) {
         return apiGroupService.saveDef(userId, request);
     }
 

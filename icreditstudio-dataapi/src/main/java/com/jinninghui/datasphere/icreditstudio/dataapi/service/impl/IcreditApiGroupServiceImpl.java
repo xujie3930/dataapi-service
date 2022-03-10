@@ -24,7 +24,9 @@ import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -42,12 +44,15 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
 
     @Override
     @BusinessParamsValidate(argsIndexs = {1})
-    public BusinessResult<String> saveDef(String userId, ApiGroupSaveRequest request) {
+    public BusinessResult<Map<String, String>> saveDef(String userId, ApiGroupSaveRequest request) {
         StringLegalUtils.checkLegalName(request.getName());
         checkRepetitionName(request.getName(), null);
         IcreditApiGroupEntity entity = getApiGroupEntitySaveEntity(request);
         save(entity);
-        return BusinessResult.success(entity.getId());
+        Map<String, String> map = new HashMap<>();
+        map.put("workId", request.getWorkId());
+        map.put("apiGroupId", entity.getId());
+        return BusinessResult.success(map);
     }
 
     @Override
