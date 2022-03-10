@@ -1,5 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
+import sun.awt.util.IdentityLinkedList;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -19,7 +21,7 @@ public class ResultSetToListUtils {
         int columnCount = md.getColumnCount();
         rs.beforeFirst();
         while (rs.next()) {
-            Map rowData = new IdentityHashMap();
+            Map rowData = new LinkedHashMap();
             String[] params = responseParam.split(",");
             for (int i = 1; i <= columnCount; i++) {
                 rowData.put(params[i-1], rs.getString(i));
