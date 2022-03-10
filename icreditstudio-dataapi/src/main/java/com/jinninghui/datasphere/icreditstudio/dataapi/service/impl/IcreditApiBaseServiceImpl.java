@@ -30,18 +30,19 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.Query;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
-import com.jinninghui.datasphere.icreditstudio.framework.utils.sm4.SM4Utils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
 
@@ -72,6 +73,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private IcreditApiBaseMapper apiBaseMapper;
     @Autowired
     private ApiBaseFactory apiBaseFactory;
+    @Value("${host.addr}")
+    private String host;
 
     private static final String EMPTY_CHAR = " ";
     private static final String MANY_EMPTY_CHAR = " +";
@@ -313,9 +316,25 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiBaseId(id);
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         result.setParamList(apiParamList);
+        List<APIParamResult> params = apiParamList.stream()
+                .filter((APIParamResult a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
+                .collect(Collectors.toList());
+        String address = getInterfaceAddress(apiBaseEntity, params);
+        result.setInterfaceAddress(address);
+        result.setProtocol("HTTP");
         result.setCreateTime(Optional.ofNullable(apiBaseEntity.getCreateTime()).orElse(new Date()).getTime());
         result.setPublishTime(Optional.ofNullable(apiBaseEntity.getPublishTime()).orElse(new Date()).getTime());
         return BusinessResult.success(result);
+    }
+
+    private String getInterfaceAddress(IcreditApiBaseEntity apiBaseEntity, List<APIParamResult> params) {
+        StringBuilder builder = new StringBuilder(host + "/v" + apiBaseEntity.getApiVersion() + "/" + apiBaseEntity.getPath() + "?");
+        for (APIParamResult param : params) {
+            builder.append(param.getFieldName()).append("=xxxxx" + "&");
+        }
+        String temp = builder.toString();
+        String address = temp.substring(0, temp.length() - 1);
+        return address;
     }
 
     private String handleUrl(String url) {

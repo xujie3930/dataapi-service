@@ -20,6 +20,10 @@ public class ApiDetailResult {
     private String name;
     //API PATH
     private String apiPath;
+    //接口地址
+    private String interfaceAddress;
+    //协议
+    private String protocol;
     //请求方式
     private String requestType;
     //返回类型
