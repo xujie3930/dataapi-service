@@ -396,7 +396,7 @@ export default {
         command === 'process' && this.setHighlightCurrentNode(workId)
 
         // 新增分组左侧树高亮节点
-        command === 'group' && this.mixinRetrieveTableData()
+        command === 'group' && this.setHighlightCurrentNode(workId)
       }
     },
 
