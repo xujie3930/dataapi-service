@@ -36,7 +36,7 @@
           filterable
           style="width: 500px"
           placeholder="请选择API"
-          collapse-tags
+          :collapse-tags="false"
           :options="apiOptions"
           :props="cascaderProps"
           v-model="authorizeForm.apiId"
@@ -156,7 +156,7 @@ export default {
             required: true,
             type: 'array',
             message: '必填项不能为空',
-            trigger: 'change'
+            trigger: ['change', 'blur']
           }
         ]
       }
