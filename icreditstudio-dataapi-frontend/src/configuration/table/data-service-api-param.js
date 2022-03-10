@@ -26,8 +26,8 @@ export default {
     {
       type: 'text',
       label: '字段名称',
-      prop: 'fieldName',
-      formatter: ({ fieldName }) => fieldName?.toLocaleLowerCase() ?? ''
+      prop: 'fieldName'
+      // formatter: ({ fieldName }) => fieldName?.toLocaleLowerCase() ?? ''
     },
 
     {
