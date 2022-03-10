@@ -426,7 +426,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
             }
         }
-        sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''");
+        sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''").replaceAll(";", "");
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
         String uri = datasource.getUri();
         List<IcreditApiParamEntity> apiParamEntityList = null;
