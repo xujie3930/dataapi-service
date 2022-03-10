@@ -19,6 +19,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.SqlModelInfoBO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableNameInfoBO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.factory.ApiBaseFactory;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
@@ -214,15 +215,30 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             apiParamEntityList = sqlModelInfo.getApiParamEntityList();
             querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
+            String[] tableNames = null;
             String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
             String[] requiredFieldArr;
             if(querySql.contains(SQL_WHERE)) {
                 requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
             }else{
                 requiredFieldArr = new String[]{};
+                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
             }
             for (String requiredField : requiredFieldArr) {
-                requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+                if(requiredField.contains("${")) {
+                    requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+                }
+            }
+            List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
+            for (String tableName : tableNames) {
+                TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
+                tableName = tableName.contains(" on ") ? tableName.substring(0, tableName.indexOf(" on ")) : tableName;
+                tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
+                String tableAlia = tableName.contains(" as ") ? tableName.substring(tableName.indexOf(" as ") + " as ".length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
+                tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
+                tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
+                tableNameInfoBOList.add(tableNameInfoBO);
             }
             for (String responseField : responseFieldArr) {
                 responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
@@ -235,7 +251,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if (responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-            handleField(apiParamEntityList, requiredFieldStr, responseFieldStr);
+            handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
         }
         apiParamService.saveOrUpdateBatch(apiParamEntityList);
 
@@ -268,23 +284,36 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(apiSaveResult);
     }
 
-    private void handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr) {
+    private void handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr, List<TableNameInfoBO> tableNameInfoBOList) {
         String[] responseFieldArr =  responseFieldStr.split(SQL_FIELD_SPLIT_CHAR);
         if(StringUtils.isNotEmpty(requiredFieldStr)) {
             String[] requiredFieldArr = requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
             for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
                 for (String requiredField : requiredFieldArr) {
-                    if (requiredField.substring(requiredField.contains(".") ? (requiredField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
-                        apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
-                        apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                    for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
+                        if(StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && requiredField.equals(apiParamEntity.getFieldName().toLowerCase())){//没有表别名，单表
+                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                            //有表别名，多表
+                        }else if (apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
+                                && requiredField.substring(requiredField.contains(tableNameInfoBO.getTableAlias() + ".") ? (requiredField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
+                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                        }
                     }
                 }
             }
         }
         for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
             for (String responseField : responseFieldArr) {
-                if(responseField.substring(responseField.contains(".") ? (responseField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())){
-                    apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+                for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
+                    if(StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && responseField.equals(apiParamEntity.getFieldName().toLowerCase())){//没有表别名，单表
+                        apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+                        //有表别名，多表
+                    }else if(apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
+                            && responseField.substring(responseField.contains(tableNameInfoBO.getTableAlias() + ".") ? (responseField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())){
+                        apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+                    }
                 }
             }
         }
