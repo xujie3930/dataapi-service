@@ -26,6 +26,7 @@ export default {
         pageSize: 10,
         total: 0,
         pagerCount: 5,
+        pageCount: 0,
         handleSizeChange: this.mixinHandleSizeChange,
         handleCurrentChange: this.mixinHandleCurrentChange
       },
@@ -137,6 +138,7 @@ export default {
               res
             )
             this.mixinTablePagination.total = total || 0
+            this.mixinTablePagination.pageCount = pageCount
             this.mixinTablePagination.currentPage =
               pageNum > pageCount ? (pageCount === 0 ? 1 : pageCount) : pageNum
           }
