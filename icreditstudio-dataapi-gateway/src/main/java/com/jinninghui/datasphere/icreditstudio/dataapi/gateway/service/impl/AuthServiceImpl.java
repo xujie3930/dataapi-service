@@ -110,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
                 return BusinessResult.success(build);
             }else {
                 //如果不传分页最大查询500条，不需要用分页对象包装
-                List list = getListResult(querySql, dataCount, apiLogInfo, stmt);
+                List list = getListResult(querySql, apiLogInfo, stmt);
                 return BusinessResult.success(list);
             }
         } catch (Exception e) {
@@ -125,16 +125,16 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private List getListResult(String querySql, Long dataCount, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
+    private List getListResult(String querySql, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
         querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("查询sql:{}", querySql);
         ResultSet pagingRs = stmt.executeQuery(querySql);
+        //发送成功消息
+        ApiLogInfo successLog = generateSuccessLog(apiLogInfo, querySql);
+        kafkaProducer.send(successLog);
+        log.info("发送kafka成功日志:{}", successLog);
         if (pagingRs.next()) {
             List list = ResultSetToListUtils.convertList(pagingRs);
-            //发送成功消息
-            ApiLogInfo successLog = generateSuccessLog(apiLogInfo, querySql);
-            kafkaProducer.send(successLog);
-            log.info("发送kafka成功日志:{}", successLog);
             return list;
         }
         return null;
@@ -152,6 +152,9 @@ public class AuthServiceImpl implements AuthService {
         String pageSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, pageNum, pageSize);
         log.info("查询sql分页:{}", pageSql);
         ResultSet pagingRsForPageParam = stmt.executeQuery(pageSql);
+        ApiLogInfo successLog = generateSuccessLog(apiLogInfo, pageSql);
+        kafkaProducer.send(successLog);
+        log.info("发送kafka成功日志:{}", successLog);
         if (pagingRsForPageParam.next()) {
             List list = ResultSetToListUtils.convertList(pagingRsForPageParam);
             //发送成功消息
@@ -159,9 +162,6 @@ public class AuthServiceImpl implements AuthService {
             pageForm.setPageNum(pageNum);
             pageForm.setPageSize(pageSize);
             DataApiGatewayPageResult build = DataApiGatewayPageResult.build(list, pageForm, dataCount);
-            ApiLogInfo successLog = generateSuccessLog(apiLogInfo, pageSql);
-            kafkaProducer.send(successLog);
-            log.info("发送kafka成功日志:{}", successLog);
             return build;
         }
         return null;
