@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.QuerySqlCheckType;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
@@ -34,6 +35,7 @@ public class IcreditApiBaseController {
     private IcreditApiBaseService apiBaseService;
 
     @PostMapping("/list")
+    @ResultReturning
     public BusinessResult<BusinessPageResult> list(@RequestBody ApiBaseListRequest request) {
         return apiBaseService.getList(request);
     }
@@ -51,6 +53,7 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/detail")
+    @ResultReturning
     public BusinessResult<ApiDetailResult> detail(@RequestBody ApiBaseDetailRequest request) {
         return apiBaseService.detail(request.getId());
     }

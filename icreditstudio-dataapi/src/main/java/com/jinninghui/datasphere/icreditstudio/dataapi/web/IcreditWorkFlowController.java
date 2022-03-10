@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
@@ -38,6 +39,7 @@ public class IcreditWorkFlowController {
     }
 
     @PostMapping("/list")
+    @ResultReturning
     BusinessResult<List<IcreditWorkFlowEntity>> list() {
         return workFlowService.getList();
     }

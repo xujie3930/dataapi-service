@@ -62,7 +62,6 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     }
 
     @Override
-    @ResultReturning
     public BusinessResult<List<IcreditWorkFlowEntity>> getList() {
         List<IcreditWorkFlowEntity> list = list(queryWrapper());
         return BusinessResult.success(list);

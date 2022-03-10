@@ -57,7 +57,6 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     }
 
     @Override
-    @ResultReturning
     //查询所有的应用分组
     public BusinessResult<List<AppGroupQueryListResult>> getList(AppQueryListRequest request) {
         AppQueryListParam param = BeanCopyUtils.copyProperties(request, new AppQueryListParam());

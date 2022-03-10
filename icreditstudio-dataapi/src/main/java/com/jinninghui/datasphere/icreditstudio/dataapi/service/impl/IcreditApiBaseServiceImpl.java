@@ -19,6 +19,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.SqlModelInfoBO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableNameInfoBO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.factory.ApiBaseFactory;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
@@ -30,18 +31,19 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.Query;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
-import com.jinninghui.datasphere.icreditstudio.framework.utils.sm4.SM4Utils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
 
@@ -72,22 +74,29 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private IcreditApiBaseMapper apiBaseMapper;
     @Autowired
     private ApiBaseFactory apiBaseFactory;
+    @Value("${host.addr}")
+    private String host;
 
     private static final String EMPTY_CHAR = " ";
     private static final String MANY_EMPTY_CHAR = " +";
     private static final String SQL_START = "select ";
+    private static final String SQL_ON = " on ";
+    private static final String SQL_AS = " as ";
     private static final String SQL_SELECT_ALL = "select *";
     private static final String SQL_AND = " and ";
     private static final String SQL_FIELD_SPLIT_CHAR = ",";
     private static final String SQL_WHERE = " where ";
     private static final String SQL_FROM = " from ";
+    private static final String SQL_END = ";";
+    private static final String SQL_LIMIT = " limit 1";
+    private static final String SQL_CONN_CHAR = ".";
     private static final String SEPARATOR = "|";
+    private static final String PERCENTAGE = "%";
     private static final String SPLIT_URL_FLAG = "?";
     private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
     private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
 
     @Override
-    @ResultReturning
     public BusinessResult<BusinessPageResult> getList(ApiBaseListRequest request) {
         Wrapper<IcreditApiBaseEntity> wrapper = queryWrapper(request);
         IPage<IcreditApiBaseEntity> page = this.page(
@@ -210,16 +219,31 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         } else {
             sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
+            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
+            String[] tableNames = null;
             String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
             String[] requiredFieldArr;
             if(querySql.contains(SQL_WHERE)) {
                 requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
             }else{
                 requiredFieldArr = new String[]{};
+                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
             }
             for (String requiredField : requiredFieldArr) {
-                requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+                if(requiredField.contains("${")) {
+                    requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+                }
+            }
+            List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
+            for (String tableName : tableNames) {
+                TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
+                tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
+                tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
+                String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
+                tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
+                tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
+                tableNameInfoBOList.add(tableNameInfoBO);
             }
             for (String responseField : responseFieldArr) {
                 responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
@@ -232,7 +256,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if (responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-            handleField(apiParamEntityList, requiredFieldStr, responseFieldStr);
+            handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
         }
         apiParamService.saveOrUpdateBatch(apiParamEntityList);
 
@@ -265,30 +289,42 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(apiSaveResult);
     }
 
-    private void handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr) {
+    private void handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr, List<TableNameInfoBO> tableNameInfoBOList) {
         String[] responseFieldArr =  responseFieldStr.split(SQL_FIELD_SPLIT_CHAR);
         if(StringUtils.isNotEmpty(requiredFieldStr)) {
             String[] requiredFieldArr = requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
             for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
                 for (String requiredField : requiredFieldArr) {
-                    if (requiredField.substring(requiredField.contains(".") ? (requiredField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
-                        apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
-                        apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                    for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
+                        if(StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && requiredField.equals(apiParamEntity.getFieldName().toLowerCase())){//没有表别名，单表
+                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                            //有表别名，多表
+                        }else if (apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
+                                && requiredField.substring(requiredField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (requiredField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
+                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+                        }
                     }
                 }
             }
         }
         for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
             for (String responseField : responseFieldArr) {
-                if(responseField.substring(responseField.contains(".") ? (responseField.indexOf(".") + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())){
-                    apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+                for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
+                    if(StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && responseField.equals(apiParamEntity.getFieldName().toLowerCase())){//没有表别名，单表
+                        apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+                        //有表别名，多表
+                    }else if(apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
+                            && responseField.substring(responseField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (responseField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())){
+                        apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+                    }
                 }
             }
         }
     }
 
     @Override
-    @ResultReturning
     public BusinessResult<ApiDetailResult> detail(String id) {
         ApiDetailResult result = new ApiDetailResult();
         IcreditApiBaseEntity apiBaseEntity = getById(id);
@@ -313,9 +349,25 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiBaseId(id);
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         result.setParamList(apiParamList);
+        List<APIParamResult> params = apiParamList.stream()
+                .filter((APIParamResult a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
+                .collect(Collectors.toList());
+        String address = getInterfaceAddress(apiBaseEntity, params);
+        result.setInterfaceAddress(address);
+        result.setProtocol("HTTP");
         result.setCreateTime(Optional.ofNullable(apiBaseEntity.getCreateTime()).orElse(new Date()).getTime());
         result.setPublishTime(Optional.ofNullable(apiBaseEntity.getPublishTime()).orElse(new Date()).getTime());
         return BusinessResult.success(result);
+    }
+
+    private String getInterfaceAddress(IcreditApiBaseEntity apiBaseEntity, List<APIParamResult> params) {
+        StringBuilder builder = new StringBuilder(host + "/v" + apiBaseEntity.getApiVersion() + "/" + apiBaseEntity.getPath() + "?");
+        for (APIParamResult param : params) {
+            builder.append(param.getFieldName()).append("=xxxxx" + "&");
+        }
+        String temp = builder.toString();
+        String address = temp.substring(0, temp.length() - 1);
+        return address;
     }
 
     private String handleUrl(String url) {
@@ -347,7 +399,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         Connection conn = null;
         try {
             conn = getConnectionByUri(uri);
-            ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), "%", request.getTableName(), "%");
+            ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), PERCENTAGE, request.getTableName(), PERCENTAGE);
             while(rs.next()) {
                 FieldInfo fieldInfo = new FieldInfo();
                 fieldInfo.setDesc(rs.getString("REMARKS"));
@@ -426,7 +478,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
             }
         }
-        sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''").replaceAll(";", "");
+        sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''").replaceAll(SQL_END, "");
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
         String uri = datasource.getUri();
         List<IcreditApiParamEntity> apiParamEntityList = null;
@@ -440,9 +492,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
                 apiParamEntityList = new ArrayList<>();
                 if(sql.contains(SQL_WHERE)) {
-                    sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(" limit 1"));
+                    sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(SQL_LIMIT));
                 }else{
-                    sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START))).append(" limit 1"));
+                    sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START))).append(SQL_LIMIT));
                 }
                 ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery(sql);
@@ -458,7 +510,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
                 DatabaseMetaData databaseMetaData = conn.getMetaData();
                 for (String tableName : tableNameList) {//根据表名称获取对应的表字段信息
-                    ResultSet columnRs = databaseMetaData.getColumns(conn.getCatalog(), "%", tableName, "%");
+                    ResultSet columnRs = databaseMetaData.getColumns(conn.getCatalog(), PERCENTAGE, tableName, PERCENTAGE);
                     while (columnRs.next()){
                         IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
                         apiParamEntity.setTableName(tableName);

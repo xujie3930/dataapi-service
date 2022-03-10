@@ -121,6 +121,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         for (ApiInfoDTO apiInfo : apiInfoList) {//获取业务流程
             if(!initWorkFlowId.equals(apiInfo.getWorkFlowId())){
                 apiCascadeInfoList.add(new ApiCascadeInfoResult(apiInfo.getWorkFlowId(), apiInfo.getWorkFlowName(), null, false));
+                initWorkFlowId = apiInfo.getWorkFlowId();
             }
         }
         for (ApiCascadeInfoResult apiCascadeInfoResult : apiCascadeInfoList) {//获取api分组
@@ -130,6 +131,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             for (ApiInfoDTO apiInfo : apiInfoList) {
                 if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && !initApiGroupId.equals(apiInfo.getApiGroupId())){
                     apiGroupIdAAndNameResultList.add(new ApiGroupIdAAndNameResult(apiInfo.getApiGroupId(), apiInfo.getApiGroupName(), null, false));
+                    initApiGroupId = apiInfo.getApiGroupId();
                 }
             }
             apiCascadeInfoResult.setChildren(apiGroupIdAAndNameResultList);
@@ -142,6 +144,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                 for (ApiInfoDTO apiInfo : apiInfoList) {
                     if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && apiGroup.getId().equals(apiInfo.getApiGroupId()) && !initApiId.equals(apiInfo.getApiId())){
                         apiIdAAndNameResultList.add(new ApiIdAAndNameResult(apiInfo.getApiGroupId(), apiInfo.getApiGroupName(), true));
+                        initApiId = apiInfo.getApiId();
                     }
                 }
                 apiGroup.setChildren(apiIdAAndNameResultList);

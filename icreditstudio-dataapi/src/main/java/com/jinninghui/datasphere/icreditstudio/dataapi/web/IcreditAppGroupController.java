@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
@@ -32,6 +33,7 @@ public class IcreditAppGroupController {
     }
 
     @PostMapping("/list")
+    @ResultReturning
     BusinessResult<List<AppGroupQueryListResult>> list(@RequestBody AppQueryListRequest request) {
         return appGroupService.getList(request);
     }
