@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntity;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.LogCallStatusEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiLogService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -56,7 +57,9 @@ public class IcreditApiLogServiceImpl extends ServiceImpl<IcreditApiLogMapper, I
         LogDetailResult logDetailResult = new LogDetailResult();
         BeanUtils.copyProperties(logEntity, logDetailResult);
         logDetailResult.setCallBeginTime(logEntity.getCallBeginTime().getTime());
-        logDetailResult.setCallEndTime(logEntity.getCallEndTime().getTime());
+        if(LogCallStatusEnum.SUCCEED.getCode().equals(logEntity.getCallStatus()) || LogCallStatusEnum.FAILED.getCode().equals(logEntity.getCallStatus())) {
+            logDetailResult.setCallEndTime(logEntity.getCallEndTime().getTime());
+        }
         return BusinessResult.success(logDetailResult);
     }
 }
