@@ -7,7 +7,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCo
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
-import com.jinninghui.datasphere.icreditstudio.dataapi.kafka.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -15,6 +14,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.base.BusinessBas
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
