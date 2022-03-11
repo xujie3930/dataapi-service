@@ -368,7 +368,7 @@ VALUES ('0', '业务流程', '默认业务流程', null, '2022-02-21 17:56:17', 
 -- Records of icredit_api_group
 -- ----------------------------
 INSERT INTO `dataapi`.`icredit_api_group`
-VALUES ('0', '0', '默认分组', '默认业务流程下的默认分组', null, '2022-02-21 17:58:06', 'admin', '2022-02-21 17:58:06', 'admin', '0',
+VALUES ('000', '0', '默认分组', '默认业务流程下的默认分组', null, '2022-02-21 17:58:06', 'admin', '2022-02-21 17:58:06', 'admin', '0',
         '2');
 
 ALTER TABLE icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期，1-8小时，2-自定义';
