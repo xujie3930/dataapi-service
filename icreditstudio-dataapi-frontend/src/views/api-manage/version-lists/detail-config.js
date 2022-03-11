@@ -19,6 +19,8 @@ export default {
     { label: 'API Path', value: '', key: 'apiPath' },
     { label: '请求方式', value: '', key: 'requestType' },
     { label: '返回类型', value: '', key: 'responseType' },
+    { label: '协议', value: '', key: 'protocol' },
+    { label: '接口地址', value: '', key: 'interfaceAddress' },
     { label: '所属分组', value: '', key: 'destination' },
     {
       label: '发布状态',
