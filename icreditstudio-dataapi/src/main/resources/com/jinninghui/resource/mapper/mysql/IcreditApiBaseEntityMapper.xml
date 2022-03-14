@@ -35,4 +35,34 @@
             #{appGroupId}
         </foreach>
     </select>
+
+    <select id="getIdsByApiGroupIds" resultType="java.lang.String">
+        select id
+        from icredit_api_base
+        where del_flag = 0
+        and api_group_id in
+        <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
+            #{appGroupId}
+        </foreach>
+    </select>
+
+    <select id="findPublishedByWorkFlowId" resultType="java.lang.String">
+        select api.id
+        from icredit_work_flow wf,icredit_api_group ag,icredit_api_base api
+        where wf.id = ag.work_id and ag.id = api.api_group_id and wf.del_flag = 0 and ag.del_flag = 0 and api.del_flag = 0 and api.publish_status = 2
+        <if test="workFlowId != null and workFlowId != ''">
+            and wf.id = #{workFlowId}
+        </if>
+        limit 1
+    </select>
+
+    <select id="findPublishedByApiGroupId" resultType="java.lang.String">
+        select api.id
+        from icredit_api_group ag,icredit_api_base api
+        where ag.id = api.api_group_id and ag.del_flag = 0 and api.del_flag = 0 and api.publish_status = 2
+        <if test="apiGroupId != null and apiGroupId != ''">
+            and ag.id = #{apiGroupId}
+        </if>
+        limit 1
+    </select>
 </mapper>

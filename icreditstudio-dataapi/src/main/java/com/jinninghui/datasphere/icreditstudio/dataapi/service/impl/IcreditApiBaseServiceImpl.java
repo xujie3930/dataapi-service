@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
@@ -33,7 +32,6 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUti
 import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -62,9 +60,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private IcreditGenerateApiService generateApiService;
     @Resource
     private IcreditApiParamService apiParamService;
-    @Autowired
+    @Resource
     private IcreditApiGroupService apiGroupService;
-    @Autowired
+    @Resource
     private IcreditWorkFlowService workFlowService;
     @Resource
     private DatasourceFeignClient dataSourceFeignClient;
@@ -72,7 +70,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private RedisTemplate<String, Object> redisTemplate;
     @Resource
     private IcreditApiBaseMapper apiBaseMapper;
-    @Autowired
+    @Resource
     private ApiBaseFactory apiBaseFactory;
     @Value("${host.addr}")
     private String host;
@@ -596,5 +594,20 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     public BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request) {
         return BusinessResult.success(apiBaseMapper.getApiByApiGroupId(request.getApiGroupIds()));
+    }
+
+    @Override
+    public String findPublishedByWorkFlowId(String workFlowId) {
+        return apiBaseMapper.findPublishedByWorkFlowId(workFlowId);
+    }
+
+    @Override
+    public List<String> getIdsByApiGroupIds(List<String> apiGroupIdList) {
+        return apiBaseMapper.getIdsByApiGroupIds(apiGroupIdList);
+    }
+
+    @Override
+    public String findPublishedByApiGroupId(String apiGroupId) {
+        return apiBaseMapper.findPublishedByApiGroupId(apiGroupId);
     }
 }
