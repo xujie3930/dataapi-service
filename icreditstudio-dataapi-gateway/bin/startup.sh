@@ -9,7 +9,7 @@ export PROFILE=$1
 
 if test -z "$SERVER_HEAP_SIZE"
 then
-  export SERVER_HEAP_SIZE="2048M"
+  export SERVER_HEAP_SIZE="512M"
 fi
 
 if test -z "$SERVER_JAVA_OPTS"
