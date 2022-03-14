@@ -363,7 +363,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private String getInterfaceAddress(IcreditApiBaseEntity apiBaseEntity, List<APIParamResult> params) {
         StringBuilder builder = new StringBuilder(host + "/v" + apiBaseEntity.getApiVersion() + "/" + apiBaseEntity.getPath() + "?");
         for (APIParamResult param : params) {
-            builder.append(param.getFieldName()).append("=xxxxx" + "&");
+            //参数拼接like:ID=${ID}
+            builder.append(param.getFieldName()).append("=${ ").append(param.getFieldName()).append(" }").append("&");
         }
         String temp = builder.toString();
         String address = temp.substring(0, temp.length() - 1);

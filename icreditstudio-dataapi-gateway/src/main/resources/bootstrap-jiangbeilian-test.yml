@@ -39,7 +39,7 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.0.107:8848
-        group: JIANGBEILIANDEV
+        group: JIANGBEILIANTEST
 
   redis:
     host: 192.168.0.125
