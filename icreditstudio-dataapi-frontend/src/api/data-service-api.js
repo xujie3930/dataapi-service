@@ -51,6 +51,12 @@ const updateDataApiStatus = params =>
 const checkSqlCorrectness = params =>
   postAction('/apiBase/checkQuerySql', params)
 
+// 删除业务流程
+const deleteProcessItem = params => postAction('/workFlow/delete', params)
+
+// 删除Api分组
+const deleteApiGroupItem = params => postAction('/apiGroup/delete', params)
+
 export default {
   addBusinessProcess,
   addApiInfo,
@@ -65,5 +71,7 @@ export default {
   getDataApiDetail,
   searchProcessOrGroup,
   updateDataApiStatus,
-  checkSqlCorrectness
+  checkSqlCorrectness,
+  deleteProcessItem,
+  deleteApiGroupItem
 }

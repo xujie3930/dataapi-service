@@ -68,11 +68,22 @@
         :expand-on-click-node="true"
         :default-expanded-keys="defalutExpandKey"
         @current-change="handleNodeChangeClick"
+        @node-contextmenu="handleNodeContextmenuClick"
+        @node-click="handleNodeExpandClick"
       >
-        <!-- @node-click="handleNodeExpandClick" -->
         <div slot-scope="{ node, data }" :id="node.id" class="custom-tree-node">
           <JSvg class="jsvg-icon" :svg-name="data.icon"></JSvg>
+
+          <el-input
+            style="width: 100%"
+            size="mini"
+            v-if="data.isRename"
+            v-model.trim="data.name"
+            @blur="handleTreeNodeInputBlur(data, node)"
+          ></el-input>
+
           <el-tooltip
+            v-else
             effect="light"
             :disabled="isTooltipDisabled"
             :content="data.name"
@@ -143,6 +154,18 @@
     <VersionLists ref="versionLists" />
 
     <Detail ref="apiDetail" />
+
+    <!-- 右键菜单 -->
+    <div
+      class="contentmenu"
+      v-if="isShowContentmenu"
+      :style="contentMenuStyle"
+      @click="handleContentmenuCommandClick"
+    >
+      <p data-command="rename" class="contentmenu-label">重命名</p>
+      <p data-command="view" class="contentmenu-label">查看</p>
+      <p data-command="delete" class="contentmenu-label">删除</p>
+    </div>
   </div>
 </template>
 
@@ -182,6 +205,7 @@ export default {
       selectValue: '',
       searchLoading: false,
       addPopovervisible: false,
+      isShowContentmenu: false,
       isRefreshTreeData: false,
       isTreeLoading: false,
       isTooltipDisabled: false,
@@ -201,7 +225,15 @@ export default {
       treeData: [],
       treeProps: {
         isLeaf: 'leaf'
-      }
+      },
+      contentMenuStyle: {
+        top: 0,
+        left: '125px'
+      },
+      contentmenuCommand: '',
+      curEditName: '',
+      curNode: {},
+      curNodeData: {}
     }
   },
 
@@ -210,6 +242,15 @@ export default {
       return {
         height: window.__POWERED_BY_QIANKUN__ ? 'calc(100vh - 126px)' : '100vh'
       }
+    }
+  },
+
+  watch: {
+    isShowContentmenu(nVal) {
+      const { addEventListener, removeEventListener } = document.body
+      nVal
+        ? addEventListener('click', this.handleCloseContentMenuClick)
+        : removeEventListener('click', this.handleCloseContentMenuClick)
     }
   },
 
@@ -310,6 +351,98 @@ export default {
           this.mixinRetrieveTableData()
         })
       }
+    },
+
+    handleNodeExpandClick() {
+      this.handleCloseContentMenuClick()
+    },
+
+    // 点击-右键
+    handleNodeContextmenuClick(evt, data, node) {
+      console.log(evt, data, node)
+      const { left, top } = this.getNextContextMenuPostion(evt)
+      this.contentMenuStyle.top = `${top}px`
+      this.contentMenuStyle.left = `${left}px`
+      this.isShowContentmenu = !this.isShowContentmenu
+      this.curNode = node
+      this.curNodeData = data
+    },
+
+    // 获取-右键菜单栏弹出位置
+    getNextContextMenuPostion(evt) {
+      const { clientX: x, clientY: y } = evt
+
+      let html = document.documentElement,
+        vx = html.clientWidth,
+        vy = html.clientHeight,
+        mw = 100,
+        mh = 100
+
+      return {
+        left: x + mw > vx ? vx - mw : x,
+        top: y + mh > vy ? vy - mh : y
+      }
+    },
+
+    // 点击-右键菜单选项选中
+    handleContentmenuCommandClick(evt) {
+      const { command } = evt.target?.dataset ?? {}
+      this.contentmenuCommand = command
+
+      switch (command) {
+        case 'rename':
+          this.handleTreeNodeInputFocus()
+          break
+
+        case 'delete':
+          this.handleTreeNodeDelete()
+          break
+      }
+    },
+
+    // 点击-节点删除
+    handleTreeNodeDelete() {
+      const { level } = this.curNode
+      const { id } = this.curNodeData
+      const paramsMapping = {
+        1: { method: 'deleteProcessItem', message: '业务流程删除成功！' },
+        2: { method: 'deleteApiGroupItem', message: 'API分组删除成功！' }
+      }
+
+      const { method, message } = paramsMapping[level]
+      API[method]({ id }).then(({ success }) => {
+        if (success) {
+          this.$notify.success({ title: '操作结果', message, duration: 1500 })
+          this.fetchBusinessProcessList()
+        }
+      })
+    },
+
+    handleTreeNodeInputBlur(data, node) {
+      const { id, workId } = data
+      const { childNodes } = node.parent
+      this.setCurEditTreeData(id, workId, childNodes, false)
+    },
+
+    handleTreeNodeInputFocus() {
+      const { childNodes } = this.curNode.parent
+      const { id, workId } = this.curNodeData
+      this.setCurEditTreeData(id, workId, childNodes, true)
+    },
+
+    // 设置-重命名当前节点名称
+    setCurEditTreeData(id, pid, childNodes, isEdit) {
+      const children = childNodes.map(({ data }) => {
+        return {
+          ...data,
+          isRename: data.id === id && isEdit
+        }
+      })
+      this.$refs.tree.updateKeyChildren(pid, children)
+    },
+
+    handleCloseContentMenuClick() {
+      this.isShowContentmenu = false
     },
 
     // 鼠标-移入判断是否需要显示tootltip
@@ -469,7 +602,7 @@ export default {
       }
     },
 
-    // 获取-左侧树节点数据
+    // 获取-左侧树一级节点数据
     fetchBusinessProcessList(resolve) {
       this.isTreeLoading = true
       return API.getBusinessProcess()
@@ -479,7 +612,9 @@ export default {
               return {
                 ...item,
                 leaf: false,
-                icon: 'process'
+                icon: 'process',
+                isRename: false,
+                newName: item.name
               }
             })
             this.oldTreeData = treeData
@@ -516,7 +651,9 @@ export default {
               return {
                 ...item,
                 leaf: true,
-                icon: 'group'
+                icon: 'group',
+                isRename: false,
+                newName: item.name
               }
             })
 
@@ -562,6 +699,7 @@ export default {
 .data-service {
   @include flex(center, flex-start);
   background: #fff;
+  position: relative;
 
   &-aside {
     @include flex(flex-start, flex-start, column);
@@ -731,6 +869,11 @@ export default {
         .el-tree-node__children .el-tree-node__expand-icon {
           visibility: hidden;
         }
+
+        .el-input--mini .el-input__inner {
+          border: none;
+          width: 100%;
+        }
       }
     }
   }
@@ -764,6 +907,30 @@ export default {
       font-family: PingFangSC, PingFangSC-Medium;
       font-weight: 500;
       color: #333;
+    }
+  }
+
+  .contentmenu {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0px 9px 28px 8px rgba(0, 0, 0, 0.05),
+      0px 6px 16px 0px rgba(0, 0, 0, 0.08), 0px 3px 6px -4px rgba(0, 0, 0, 0.12);
+
+    &-label {
+      cursor: pointer;
+      font-size: 14px;
+      font-family: PingFangSC, PingFangSC-Regular;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.65);
+      line-height: 34px;
+      text-align: center;
+      &:hover {
+        color: #1890ff;
+        background: #ecf5ff;
+      }
     }
   }
 }
