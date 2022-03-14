@@ -10,8 +10,7 @@ import {
 } from '@/config/constant'
 
 export default that => ({
-  refName: 'dataServiceApi',
-  id: 'dataServiceApi',
+  refName: 'dataServiceAppName',
   isBorder: true,
   isStripe: true,
   hasPage: false,
@@ -80,23 +79,56 @@ export default that => ({
       type: 'operation',
       label: '操作',
       fixed: 'right',
-      width: 130,
+      width: 250,
       operationList: [
+        // 停用状态
+        {
+          func: that.handleAuthorizeClick,
+          label: '启用',
+          visible: ({ row }) => row.isEnable === 0
+        },
+        {
+          func: that.handleAuthorizeClick,
+          label: '编辑',
+          visible: ({ row }) => row.isEnable === 0
+        },
+        {
+          func: that.handleAuthorizeClick,
+          label: '删除',
+          visible: ({ row }) => row.isEnable === 0
+        },
+
+        // 启用状态
+        {
+          func: that.handleAuthorizeClick,
+          label: '停用',
+          visible: ({ row }) => row.isEnable
+        },
         {
           func: that.handleAuthorizeClick,
           label: '授权',
-          visible: ({ row }) => !('children' in row)
+          visible: ({ row }) => row.isEnable
         },
-
         {
           func: that.handleDetailClick,
           label: '详情',
-          visible: ({ row }) => !('children' in row)
+          visible: ({ row }) => row.isEnable
         },
 
+        // 一级数据
         {
           func: that.handleAddAppClick,
           label: '新增应用',
+          visible: ({ row }) => 'children' in row
+        },
+        {
+          func: that.handleAddAppClick,
+          label: '编辑分组',
+          visible: ({ row }) => 'children' in row
+        },
+        {
+          func: that.handleAddAppClick,
+          label: '删除分组',
           visible: ({ row }) => 'children' in row
         }
       ]

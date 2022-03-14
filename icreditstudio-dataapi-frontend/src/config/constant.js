@@ -29,7 +29,7 @@ export const TOEKN_PERIOD = { 0: '长期', 1: '8小时', 2: '自定义' }
 
 // 应用：状态是否启用
 export const ENABLED_STATUS = {
-  0: { name: '未启用', color: '#ff4d4f' },
+  0: { name: '停用', color: '#ff4d4f' },
   1: { name: '启用', color: '#52c41a' }
 }
 

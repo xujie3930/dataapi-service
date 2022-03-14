@@ -27,10 +27,11 @@
       :handleExport="mixinHandleExport"
       :handleUpdate="mixinHandleCreateOrUpdate"
       :handleCancel="mixinHandleCancel"
+      :handleSelectChange="handleSelectChange"
     >
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
-          <!-- <el-button class="jui-button--default" disabled>批量删除</el-button> -->
+          <el-button class="jui-button--default" disabled>批量删除</el-button>
         </div>
         <div class="header-operate-right">
           <el-button type="primary" @click="handleAddAppGroupClick">
@@ -97,6 +98,7 @@ export default {
       detailLoading: false,
       detailOptions: {},
       expandRowKeys: [],
+      tableSelections: [],
       formOption: dataServiceAppForm,
 
       mixinSearchFormConfig: {
@@ -127,6 +129,12 @@ export default {
   },
 
   methods: {
+    // 点击-Table选择项发生变化时
+    handleSelectChange(selection) {
+      console.log(selection, this.$refs.crud.$refs.table, 'sectionsss')
+      this.tableSelections = selection
+    },
+
     // 点击-新增应用分组
     handleAddAppGroupClick() {
       this.$refs.addAppGroup.open({ title: '新增应用分组', opType: 'add' })

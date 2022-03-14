@@ -94,19 +94,21 @@ export default {
      * 处理table勾选项
      */
     toggleTableSelection(rows) {
-      if (this.$refs.crud) {
-        const refDom =
-          this.$refs.crud.$refs?.table?.$refs[this.tableConfiguration.refName]
-        if (refDom) {
-          if (rows) {
-            rows.forEach(row => {
-              refDom.toggleRowSelection(row)
-            })
-          } else {
-            refDom.clearSelection()
+      this.$nextTick(() => {
+        if (this.$refs.crud) {
+          const refDom =
+            this.$refs.crud.$refs?.table?.$refs[this.tableConfiguration.refName]
+          if (refDom) {
+            if (rows) {
+              rows.forEach(row => {
+                refDom.toggleRowSelection(row)
+              })
+            } else {
+              refDom.clearSelection()
+            }
           }
         }
-      }
+      })
     },
     /**
      * 通过权限过滤操作按钮 TODO 优化 纯函数

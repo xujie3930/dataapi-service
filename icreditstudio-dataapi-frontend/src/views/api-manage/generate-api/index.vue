@@ -575,8 +575,6 @@ export default {
       this.options = options
       this.pageLoading = true
 
-      console.log(cascaderOptions, 'ccccc')
-
       if (opType === 'add') {
         this.cascaderOptions = cascaderOptions
         this.form.apiGroupId = cascaderOptions[0].children[0].value
