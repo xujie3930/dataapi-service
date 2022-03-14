@@ -3,7 +3,6 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DataSourcesListRequest;
@@ -50,4 +49,10 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
     BusinessResult<Boolean> publishOrStop(String userId, ApiPublishRequest request);
 
     BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request);
+
+    String findPublishedByWorkFlowId(String id);
+
+    List<String> getIdsByApiGroupIds(List<String> apiGroupIdList);
+
+    String findPublishedByApiGroupId(String id);
 }
