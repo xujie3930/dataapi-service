@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: jiangbeilian-dev
   servlet:
     multipart:
       max-file-size: 30MB
@@ -27,7 +27,7 @@ spring:
     refresh:
       refreshable: none
 server:
-  port: 8109
+  port: 8119
   servlet:
     encoding:
       charset: UTF-8
