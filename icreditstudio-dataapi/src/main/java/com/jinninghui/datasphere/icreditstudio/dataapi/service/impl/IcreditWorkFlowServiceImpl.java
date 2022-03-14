@@ -10,9 +10,12 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditWorkFlowMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowDelRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowRenameRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
@@ -45,6 +48,8 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     private IcreditWorkFlowMapper workFlowMapper;
     @Resource
     private IcreditApiGroupService apiGroupService;
+    @Resource
+    private IcreditApiBaseService apiService;
 
     @Override
     public Boolean hasExit(WorkFlowSaveRequest request) {
@@ -185,5 +190,35 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     @Override
     public List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds) {
         return workFlowMapper.findApiInfoByApiIds(apiIds);
+    }
+
+    @Override
+    @Transactional
+    public BusinessResult<Boolean> delById(WorkFlowDelRequest request) {
+        StringLegalUtils.checkId(request.getId());
+        List<String> apiGroupIdList = apiGroupService.getIdsByWorkId(request.getId());
+        List<String> apiIdList = apiService.getIdsByApiGroupIds(apiGroupIdList);
+
+        String apiId = apiService.findPublishedByWorkFlowId(request.getId());
+        if(StringUtils.isNotEmpty(apiId)){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000037.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000037.getMessage());
+        }
+        if(!CollectionUtils.isEmpty(apiIdList)) {
+            apiService.removeByIds(apiIdList);
+        }
+        if(!CollectionUtils.isEmpty(apiGroupIdList)) {
+            apiGroupService.removeByIds(apiGroupIdList);
+        }
+        workFlowMapper.deleteById(request.getId());
+        return BusinessResult.success(true);
+    }
+
+    @Override
+    public BusinessResult<Boolean> renameById(WorkFlowRenameRequest request) {
+        StringLegalUtils.checkId(request.getId());
+        StringLegalUtils.checkLegalName(request.getNewName());
+        checkRepetitionName(request.getNewName(), request.getId());
+        workFlowMapper.renameById(request.getNewName(), request.getId());
+        return BusinessResult.success(true);
     }
 }

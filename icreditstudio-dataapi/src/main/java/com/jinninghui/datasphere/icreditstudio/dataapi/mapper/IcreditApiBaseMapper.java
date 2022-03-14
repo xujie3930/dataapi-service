@@ -24,4 +24,8 @@ public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
     void updatePublishStatusById(@Param("id") String id, @Param("publishStatus") Integer publishStatus);
 
     List<ApiNameAndIdListResult> getApiByApiGroupId(List<String> apiGroupIds);
+
+    String findPublishedByWorkFlowId(@Param("workFlowId") String workFlowId);
+
+    List<String> getIdsByApiGroupIds(List<String> apiGroupIds);
 }

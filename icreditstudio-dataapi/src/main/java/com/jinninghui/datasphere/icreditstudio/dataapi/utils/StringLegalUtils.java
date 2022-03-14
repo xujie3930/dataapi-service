@@ -11,6 +11,12 @@ import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
  **/
 public class StringLegalUtils {
 
+    public static void checkId(String id) {
+        if(org.apache.commons.lang.StringUtils.isEmpty(id)){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_00000001.getCode());
+        }
+    }
+
     public static void checkLegalName(String name) {
         boolean legal = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isLegal(name);
         if (!legal) {

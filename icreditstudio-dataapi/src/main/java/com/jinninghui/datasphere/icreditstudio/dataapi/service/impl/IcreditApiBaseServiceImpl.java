@@ -596,4 +596,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     public BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request) {
         return BusinessResult.success(apiBaseMapper.getApiByApiGroupId(request.getApiGroupIds()));
     }
+
+    @Override
+    public String findPublishedByWorkFlowId(String workFlowId) {
+        return apiBaseMapper.findPublishedByWorkFlowId(workFlowId);
+    }
+
+    @Override
+    public List<String> getIdsByApiGroupIds(List<String> apiGroupIdList) {
+        return apiBaseMapper.getIdsByApiGroupIds(apiGroupIdList);
+    }
 }
