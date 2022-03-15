@@ -31,8 +31,4 @@ public interface IcreditApiGroupService extends IService<IcreditApiGroupEntity> 
     List<IcreditApiGroupEntity> searchFromName(String name);
 
     BusinessResult<List<GroupIdAndNameResult>> getGroupListByWorkFlowId(ApiGroupIdAndNameListRequest request);
-
-    BusinessResult<Boolean> renameById(ApiGroupRenameRequest request);
-
-    List<String> getIdsByWorkId(String id);
 }

@@ -50,8 +50,4 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
     BusinessResult<Boolean> publishOrStop(String userId, ApiPublishRequest request);
 
     BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request);
-
-    String findPublishedByWorkFlowId(String id);
-
-    List<String> getIdsByApiGroupIds(List<String> apiGroupIdList);
 }

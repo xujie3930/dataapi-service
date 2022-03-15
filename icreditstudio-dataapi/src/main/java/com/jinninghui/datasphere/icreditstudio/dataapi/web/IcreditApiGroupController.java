@@ -1,6 +1,5 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
-
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
@@ -47,11 +46,6 @@ public class IcreditApiGroupController {
     @PostMapping("/getGroupListByWorkFlowId")
     BusinessResult<List<GroupIdAndNameResult>> getGroupListByWorkFlowId(@RequestBody ApiGroupIdAndNameListRequest request) {
         return apiGroupService.getGroupListByWorkFlowId(request);
-    }
-
-    @PostMapping("/rename")
-    BusinessResult<Boolean> renameById(@RequestBody ApiGroupRenameRequest request) {
-        return apiGroupService.renameById(request);
     }
 
 }

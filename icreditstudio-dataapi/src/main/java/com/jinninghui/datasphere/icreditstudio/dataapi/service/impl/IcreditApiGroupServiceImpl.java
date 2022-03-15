@@ -17,7 +17,6 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -104,19 +103,5 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     @Override
     public BusinessResult<List<GroupIdAndNameResult>> getGroupListByWorkFlowId(ApiGroupIdAndNameListRequest request) {
         return BusinessResult.success(apiGroupMapper.getGroupListByWorkFlowId(request.getWorkIds()));
-    }
-
-    @Override
-    public BusinessResult<Boolean> renameById(ApiGroupRenameRequest request) {
-        StringLegalUtils.checkId(request.getId());
-        StringLegalUtils.checkLegalName(request.getNewName());
-        checkRepetitionName(request.getNewName(), request.getId());
-        apiGroupMapper.renameById(request.getNewName(), request.getId());
-        return BusinessResult.success(true);
-    }
-
-    @Override
-    public List<String> getIdsByWorkId(String workFlowId){
-        return apiGroupMapper.getIdsByWorkId(workFlowId);
     }
 }
