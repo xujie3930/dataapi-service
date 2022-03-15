@@ -70,6 +70,8 @@
         @current-change="handleNodeChangeClick"
         @node-contextmenu="handleNodeContextmenuClick"
         @node-click="handleNodeExpandClick"
+        @node-expand="handleCloseContentMenuClick"
+        @node-collapse="handleCloseContentMenuClick"
       >
         <div slot-scope="{ node, data }" :id="node.id" class="custom-tree-node">
           <JSvg class="jsvg-icon" :svg-name="data.icon"></JSvg>
@@ -162,9 +164,34 @@
       :style="contentMenuStyle"
       @click="handleContentmenuCommandClick"
     >
-      <p data-command="rename" class="contentmenu-label">重命名</p>
-      <p data-command="view" class="contentmenu-label">查看</p>
-      <p data-command="delete" class="contentmenu-label">删除</p>
+      <p
+        v-if="!curNodeData.workId"
+        data-command="addGroup"
+        class="contentmenu-label"
+      >
+        新增API分组
+      </p>
+      <p
+        v-if="curNodeData.id !== '0'"
+        data-command="rename"
+        class="contentmenu-label"
+      >
+        重命名
+      </p>
+      <p
+        v-if="curNodeData.id !== '0' && curNodeData.workId"
+        data-command="view"
+        class="contentmenu-label"
+      >
+        查看
+      </p>
+      <p
+        v-if="curNodeData.id !== '0'"
+        data-command="delete"
+        class="contentmenu-label"
+      >
+        删除
+      </p>
     </div>
   </div>
 </template>
@@ -311,7 +338,7 @@ export default {
       console.log('curData, curNode=', curData, curNode)
     },
 
-    // 点击-左侧树顶部按钮
+    // 点击-左侧树顶部按钮-新增流程或分组
     handleCommandClick(command) {
       this.currentTreeNodeId = this.$refs?.tree.getCurrentKey()
       const { workId } = this.$refs?.tree.getCurrentNode() || {}
@@ -360,6 +387,8 @@ export default {
     // 点击-右键
     handleNodeContextmenuClick(evt, data, node) {
       console.log(evt, data, node)
+      // 默认API分组无右键操作
+      if (data.id === '000') return
       const { left, top } = this.getNextContextMenuPostion(evt)
       this.contentMenuStyle.top = `${top}px`
       this.contentMenuStyle.left = `${left}px`
@@ -397,33 +426,77 @@ export default {
         case 'delete':
           this.handleTreeNodeDelete()
           break
+
+        case 'addGroup':
+          this.$refs.addGroupDialog.open({
+            workId: this.curNodeData.id,
+            opType: 'addGroup'
+          })
+          break
       }
     },
 
     // 点击-节点删除
     handleTreeNodeDelete() {
       const { level } = this.curNode
-      const { id } = this.curNodeData
+      const { id, workId } = this.curNodeData
       const paramsMapping = {
-        1: { method: 'deleteProcessItem', message: '业务流程删除成功！' },
-        2: { method: 'deleteApiGroupItem', message: 'API分组删除成功！' }
+        1: {
+          method: 'deleteProcessItem',
+          message: '业务流程删除成功！',
+          tip: '删除该业务流程后，其下所有分组以及API都将全部删除，请确认是否删除该业务流程？'
+        },
+        2: {
+          method: 'deleteApiGroupItem',
+          message: 'API分组删除成功！',
+          tip: '删除该分组后，其下API都将全部删除，请确认是否删除该分组？'
+        }
       }
 
-      const { method, message } = paramsMapping[level]
-      API[method]({ id }).then(({ success }) => {
-        if (success) {
-          this.$notify.success({ title: '操作结果', message, duration: 1500 })
-          this.fetchBusinessProcessList()
-        }
+      const { method, message, tip } = paramsMapping[level]
+      this.$confirm(tip, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(() => {
+          API[method]({ id }).then(({ success, data }) => {
+            if (success && data) {
+              const { apiGroupId, workId: wid } = data
+              this.$notify.success({
+                title: '操作结果',
+                message,
+                duration: 1500
+              })
+
+              this.$refs.tree.remove(this.curNodeData)
+              if (level === 2 && this.currentTreeNodeId === id) {
+                // 删除某个流程下的某个API分组以及回显相应的状态
+                apiGroupId
+                  ? this.setHighlightCurrentNode(apiGroupId, true)
+                  : this.setHighlightCurrentNode(workId)
+                this.isFirstNodeHasChild = apiGroupId
+              } else if (level === 1) {
+                // 删除某个业务流程节点
+                const { workId } = this.$refs.tree.getCurrentNode() ?? {}
+                const isSameHighlightNode =
+                  workId === id || this.currentTreeNodeId === id
+                isSameHighlightNode && this.setHighlightCurrentNode(wid)
+              }
+            }
+          })
+        })
+        .catch(() => {})
     },
 
+    // 失焦
     handleTreeNodeInputBlur(data, node) {
       const { id, workId } = data
       const { childNodes } = node.parent
       this.setCurEditTreeData(id, workId, childNodes, false)
     },
 
+    // 编辑-分组名称或业务流程名称
     handleTreeNodeInputFocus() {
       const { childNodes } = this.curNode.parent
       const { id, workId } = this.curNodeData
@@ -699,7 +772,7 @@ export default {
 .data-service {
   @include flex(center, flex-start);
   background: #fff;
-  position: relative;
+  // position: relative;
 
   &-aside {
     @include flex(flex-start, flex-start, column);
@@ -911,15 +984,18 @@ export default {
   }
 
   .contentmenu {
+    @include flex(center, center, column);
     position: absolute;
     width: 100px;
-    height: 100px;
+    min-height: 50px;
+    max-height: 100px;
     background: #fff;
     border-radius: 4px;
     box-shadow: 0px 9px 28px 8px rgba(0, 0, 0, 0.05),
       0px 6px 16px 0px rgba(0, 0, 0, 0.08), 0px 3px 6px -4px rgba(0, 0, 0, 0.12);
 
     &-label {
+      width: 100%;
       cursor: pointer;
       font-size: 14px;
       font-family: PingFangSC, PingFangSC-Regular;

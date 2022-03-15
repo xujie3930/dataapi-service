@@ -57,6 +57,12 @@ const deleteProcessItem = params => postAction('/workFlow/delete', params)
 // 删除Api分组
 const deleteApiGroupItem = params => postAction('/apiGroup/delete', params)
 
+// 更改业务流程名称
+const editProcessName = params => postAction('/workFlow/rename', params)
+
+// 更改Api分组名称
+const editApiGroupName = params => postAction('/apiGroup/rename', params)
+
 export default {
   addBusinessProcess,
   addApiInfo,
@@ -73,5 +79,7 @@ export default {
   updateDataApiStatus,
   checkSqlCorrectness,
   deleteProcessItem,
-  deleteApiGroupItem
+  deleteApiGroupItem,
+  editProcessName,
+  editApiGroupName
 }
