@@ -21,12 +21,9 @@ public class KafkaProducer {
 
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
-    public static String topic;
-
     @Value("${kafkaProducer.topic}")
-    public static void setTopic(String topicConfig) {
-        topic = topicConfig;
-    }
+    private String topic;
+
 
     public void send(Object obj) {
         String obj2String = JSON.toJSONString(obj);

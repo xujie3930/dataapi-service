@@ -29,7 +29,7 @@ public class DBConnectionManager {
     private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
     //cpu核心数*2
     //TODO：开发环境设置为1，复现生产问题
-    private final int defaultConn = 1;
+    private final int defaultConn = 100;
 
     public Hashtable getPools() {
         return pools;
@@ -202,7 +202,7 @@ public class DBConnectionManager {
                 } catch (SQLException e) {
                     con = getConnection();
                 }
-            } else if (maxConn == 0 || checkedOut < maxConn) {
+            } else {
                 con = newConnection();
             }
             if (con != null) {
