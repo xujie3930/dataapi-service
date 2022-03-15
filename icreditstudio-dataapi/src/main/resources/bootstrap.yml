@@ -27,7 +27,7 @@ spring:
     refresh:
       refreshable: none
 server:
-  port: 8109
+  port: 8119
   servlet:
     encoding:
       charset: UTF-8
