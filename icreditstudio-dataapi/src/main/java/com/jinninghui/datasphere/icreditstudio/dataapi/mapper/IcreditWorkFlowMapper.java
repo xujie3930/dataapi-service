@@ -37,4 +37,6 @@ public interface IcreditWorkFlowMapper extends BaseMapper<IcreditWorkFlowEntity>
     void renameById(@Param("name") String name, @Param("id") String id);
 
     String findNextWorkId(@Param("sort") Integer sort);
+
+    String getFirstWorkFlowId();
 }

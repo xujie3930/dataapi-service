@@ -207,10 +207,6 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
         }
 
         IcreditWorkFlowEntity workFlowEntity = workFlowMapper.selectById(request.getId());
-        String nextSelectedWorkId = workFlowMapper.findNextWorkId(workFlowEntity.getSort());
-        WorkFlowDelResult workFlowDelResult = new WorkFlowDelResult();
-        workFlowDelResult.setWorkId(StringUtils.isEmpty(nextSelectedWorkId) ? DEFAULT_WORK_FLOW_ID : nextSelectedWorkId);
-        workFlowDelResult.setApiGroupId(apiGroupService.getFirstApiGroupForWorkFlow(workFlowDelResult.getWorkId()));
 
         List<String> apiIdList = null;
         List<String> apiGroupIdList = apiGroupService.getIdsByWorkId(request.getId());
@@ -223,6 +219,14 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
             apiService.removeByIds(apiIdList);
         }
         workFlowMapper.deleteById(request.getId());
+
+        String nextSelectedWorkId = workFlowMapper.findNextWorkId(workFlowEntity.getSort());
+        if(StringUtils.isEmpty(nextSelectedWorkId)){//没有下一个api分组
+            nextSelectedWorkId = workFlowMapper.getFirstWorkFlowId();
+        }
+        WorkFlowDelResult workFlowDelResult = new WorkFlowDelResult();
+        workFlowDelResult.setWorkId(nextSelectedWorkId);
+        workFlowDelResult.setApiGroupId(apiGroupService.getFirstApiGroupForWorkFlow(workFlowDelResult.getWorkId()));
         return BusinessResult.success(workFlowDelResult);
     }
 

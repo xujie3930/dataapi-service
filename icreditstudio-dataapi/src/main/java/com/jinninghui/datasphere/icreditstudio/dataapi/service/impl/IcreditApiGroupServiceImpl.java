@@ -140,10 +140,7 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000038.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000038.getMessage());
         }
         IcreditApiGroupEntity apiGroupEntity = apiGroupMapper.selectById(request.getId());
-        String nextSelectedApiGroupId = apiGroupMapper.findNextApiGroupId(apiGroupEntity.getWorkId(), apiGroupEntity.getSort());
-        if(StringUtils.isEmpty(nextSelectedApiGroupId)){//没有下一个api分组
-            nextSelectedApiGroupId = getFirstApiGroupForWorkFlow(apiGroupEntity.getWorkId());
-        }
+
         List<String> apiGroupIdList = new ArrayList<>();
         apiGroupIdList.add(request.getId());
         List<String> apiIdList = apiBaseService.getIdsByApiGroupIds(apiGroupIdList);
@@ -151,6 +148,11 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
             apiBaseService.removeByIds(apiIdList);
         }
         apiGroupMapper.deleteById(request.getId());
+
+        String nextSelectedApiGroupId = apiGroupMapper.findNextApiGroupId(apiGroupEntity.getWorkId(), apiGroupEntity.getSort());
+        if(StringUtils.isEmpty(nextSelectedApiGroupId)){//没有下一个api分组
+            nextSelectedApiGroupId = getFirstApiGroupForWorkFlow(apiGroupEntity.getWorkId());
+        }
         return BusinessResult.success(new ApiGroupDelResult(nextSelectedApiGroupId));
     }
 
