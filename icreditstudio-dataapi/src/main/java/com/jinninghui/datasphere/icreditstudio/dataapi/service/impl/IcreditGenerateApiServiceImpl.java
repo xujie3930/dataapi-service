@@ -30,4 +30,9 @@ public class IcreditGenerateApiServiceImpl extends ServiceImpl<IcreditGenerateAp
     public IcreditGenerateApiEntity getByApiIdAndVersion(String id, Integer apiVersion) {
         return generateApiMapper.getByApiIdAndVersion(id, apiVersion);
     }
+
+    @Override
+    public void removeByApiId(String id) {
+        generateApiMapper.removeByApiId(id);
+    }
 }

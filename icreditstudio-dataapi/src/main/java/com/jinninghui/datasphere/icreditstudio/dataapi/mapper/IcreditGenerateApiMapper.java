@@ -17,4 +17,6 @@ public interface IcreditGenerateApiMapper extends BaseMapper<IcreditGenerateApiE
     IcreditGenerateApiEntity getByApiBaseId(@Param("id") String id);
 
     IcreditGenerateApiEntity getByApiIdAndVersion(@Param("id") String id, @Param("apiVersion") Integer apiVersion);
+
+    void removeByApiId(@Param("apiId") String apiId);
 }

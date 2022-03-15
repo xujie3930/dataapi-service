@@ -231,7 +231,6 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getMessage());
         }
         RedisApiInfo apiAuthInfo = JSON.parseObject(apiObject.toString(), RedisApiInfo.class);
-        apiAuthInfo.setQuerySql(apiAuthInfo.getQuerySql().toLowerCase());
         return apiAuthInfo;
     }
 

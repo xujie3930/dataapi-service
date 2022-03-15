@@ -36,7 +36,7 @@
         </foreach>
     </select>
 
-    <select id="getIdsByApiGroupIds" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult">
+    <select id="getIdsByApiGroupIds" resultType="java.lang.String">
         select id
         from icredit_api_base
         where del_flag = 0
