@@ -489,29 +489,37 @@ export default {
         .catch(() => {})
     },
 
-    // 失焦
+    // 失焦-保存编辑名称
     handleTreeNodeInputBlur(data, node) {
+      const { parent, level } = node
       const { id, workId } = data
-      const { childNodes } = node.parent
-      this.setCurEditTreeData(id, workId, childNodes, false)
+      const { childNodes } = parent
+      level === 2
+        ? this.setCurEditTreeData(id, workId, childNodes, false)
+        : Object.assign(this.curNode.data, { isRename: false })
     },
 
-    // 编辑-分组名称或业务流程名称
+    // 聚焦-分组名称或业务流程名称
     handleTreeNodeInputFocus() {
-      const { childNodes } = this.curNode.parent
+      const { level, parent } = this.curNode
       const { id, workId } = this.curNodeData
-      this.setCurEditTreeData(id, workId, childNodes, true)
+      const { childNodes } = parent
+      level === 2
+        ? this.setCurEditTreeData(id, workId, childNodes, true)
+        : Object.assign(this.curNode.data, { isRename: true })
     },
 
     // 设置-重命名当前节点名称
-    setCurEditTreeData(id, pid, childNodes, isEdit) {
+    setCurEditTreeData(id, workId, childNodes, isEdit) {
       const children = childNodes.map(({ data }) => {
         return {
           ...data,
           isRename: data.id === id && isEdit
         }
       })
-      this.$refs.tree.updateKeyChildren(pid, children)
+
+      console.log(workId, children, 'kkoo')
+      this.$refs.tree.updateKeyChildren(workId, children)
     },
 
     handleCloseContentMenuClick() {
