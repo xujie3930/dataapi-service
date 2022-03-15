@@ -199,8 +199,11 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
         if(DEFAULT_WORK_FLOW_ID.equals(request.getId())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000039.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000039.getMessage());
         }
+        List<String> apiIdList = null;
         List<String> apiGroupIdList = apiGroupService.getIdsByWorkId(request.getId());
-        List<String> apiIdList = apiService.getIdsByApiGroupIds(apiGroupIdList);
+        if(!CollectionUtils.isEmpty(apiGroupIdList)) {
+            apiIdList = apiService.getIdsByApiGroupIds(apiGroupIdList);
+        }
 
         String apiId = apiService.findPublishedByWorkFlowId(request.getId());
         if(StringUtils.isNotEmpty(apiId)){
