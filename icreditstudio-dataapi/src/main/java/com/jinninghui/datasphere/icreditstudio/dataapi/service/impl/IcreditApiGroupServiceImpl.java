@@ -11,6 +11,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseSer
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupDelResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GroupIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
@@ -129,7 +130,7 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
 
     @Override
     @Transactional
-    public BusinessResult<Boolean> delById(ApiGroupDelRequest request) {
+    public BusinessResult<ApiGroupDelResult> delById(ApiGroupDelRequest request) {
         StringLegalUtils.checkId(request.getId());
         if(DEFAULT_API_GROUP_ID.equals(request.getId())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000040.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000040.getMessage());
@@ -138,6 +139,11 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
         if(StringUtils.isNotEmpty(apiId)){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000038.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000038.getMessage());
         }
+        IcreditApiGroupEntity apiGroupEntity = apiGroupMapper.selectById(request.getId());
+        String nextSelectedApiGroupId = apiGroupMapper.findNextApiGroupId(apiGroupEntity.getWorkId(), apiGroupEntity.getSort());
+        if(StringUtils.isEmpty(nextSelectedApiGroupId)){//没有下一个api分组
+            nextSelectedApiGroupId = getFirstApiGroupForWorkFlow(apiGroupEntity.getWorkId());
+        }
         List<String> apiGroupIdList = new ArrayList<>();
         apiGroupIdList.add(request.getId());
         List<String> apiIdList = apiBaseService.getIdsByApiGroupIds(apiGroupIdList);
@@ -145,6 +151,12 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
             apiBaseService.removeByIds(apiIdList);
         }
         apiGroupMapper.deleteById(request.getId());
-        return BusinessResult.success(true);
+        return BusinessResult.success(new ApiGroupDelResult(nextSelectedApiGroupId));
     }
+
+    @Override
+    public String getFirstApiGroupForWorkFlow(String workId) {
+        return apiGroupMapper.getFirstApiGroupForWorkFlow(workId);
+    }
+
 }

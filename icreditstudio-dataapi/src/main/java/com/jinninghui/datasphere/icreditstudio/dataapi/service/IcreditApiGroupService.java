@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupDelResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GroupIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -36,5 +37,7 @@ public interface IcreditApiGroupService extends IService<IcreditApiGroupEntity> 
 
     List<String> getIdsByWorkId(String id);
 
-    BusinessResult<Boolean> delById(ApiGroupDelRequest request);
+    BusinessResult<ApiGroupDelResult> delById(ApiGroupDelRequest request);
+
+    String getFirstApiGroupForWorkFlow(String workId);
 }

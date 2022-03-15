@@ -71,4 +71,19 @@
     <update id="renameById">
         update icredit_api_group SET `name` = #{name} WHERE id = #{id} AND del_flag = 0
     </update>
+
+    <select id="findNextApiGroupId" resultType="java.lang.String">
+        select id
+        from icredit_api_group
+        where work_id = #{workFlowId} and sort &gt; #{sort}
+        limit 1
+    </select>
+
+    <select id="getFirstApiGroupForWorkFlow" resultType="java.lang.String">
+        select id
+        from icredit_api_group
+        where del_flag = 0 and work_id = #{workFlowId}
+        order by sort
+        limit 1
+    </select>
 </mapper>

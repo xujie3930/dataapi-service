@@ -6,6 +6,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowSe
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowDelRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowRenameRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowDelResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class IcreditWorkFlowController {
     }
 
     @PostMapping("/delete")
-    BusinessResult<Boolean> deleteById(@RequestBody WorkFlowDelRequest request) {
+    BusinessResult<WorkFlowDelResult> deleteById(@RequestBody WorkFlowDelRequest request) {
         return workFlowService.delById(request);
     }
 

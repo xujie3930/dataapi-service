@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowDelResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult;
 import org.apache.ibatis.annotations.Param;
@@ -34,4 +35,6 @@ public interface IcreditWorkFlowMapper extends BaseMapper<IcreditWorkFlowEntity>
     List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds);
 
     void renameById(@Param("name") String name, @Param("id") String id);
+
+    String findNextWorkId(@Param("sort") Integer sort);
 }

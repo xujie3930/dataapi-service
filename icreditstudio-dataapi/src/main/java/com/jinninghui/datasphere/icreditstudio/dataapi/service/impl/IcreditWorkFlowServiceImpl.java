@@ -17,6 +17,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowDelRe
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowRenameRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowDelResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
@@ -50,6 +51,7 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     @Resource
     private IcreditApiBaseService apiService;
     private static String DEFAULT_WORK_FLOW_ID = "0";
+    private static String DEFAULT_API_GROUP_ID = "0";
 
     @Override
     public Boolean hasExit(WorkFlowSaveRequest request) {
@@ -194,29 +196,34 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
 
     @Override
     @Transactional
-    public BusinessResult<Boolean> delById(WorkFlowDelRequest request) {
+    public BusinessResult<WorkFlowDelResult> delById(WorkFlowDelRequest request) {
         StringLegalUtils.checkId(request.getId());
         if(DEFAULT_WORK_FLOW_ID.equals(request.getId())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000039.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000039.getMessage());
         }
-        List<String> apiIdList = null;
-        List<String> apiGroupIdList = apiGroupService.getIdsByWorkId(request.getId());
-        if(!CollectionUtils.isEmpty(apiGroupIdList)) {
-            apiIdList = apiService.getIdsByApiGroupIds(apiGroupIdList);
-        }
-
         String apiId = apiService.findPublishedByWorkFlowId(request.getId());
         if(StringUtils.isNotEmpty(apiId)){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000037.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000037.getMessage());
         }
+
+        IcreditWorkFlowEntity workFlowEntity = workFlowMapper.selectById(request.getId());
+        String nextSelectedWorkId = workFlowMapper.findNextWorkId(workFlowEntity.getSort());
+        WorkFlowDelResult workFlowDelResult = new WorkFlowDelResult();
+        workFlowDelResult.setWorkId(StringUtils.isEmpty(nextSelectedWorkId) ? DEFAULT_WORK_FLOW_ID : nextSelectedWorkId);
+        workFlowDelResult.setApiGroupId(apiGroupService.getFirstApiGroupForWorkFlow(workFlowDelResult.getWorkId()));
+
+        List<String> apiIdList = null;
+        List<String> apiGroupIdList = apiGroupService.getIdsByWorkId(request.getId());
+        if(!CollectionUtils.isEmpty(apiGroupIdList)) {
+            apiIdList = apiService.getIdsByApiGroupIds(apiGroupIdList);
+            apiGroupService.removeByIds(apiGroupIdList);
+        }
+
         if(!CollectionUtils.isEmpty(apiIdList)) {
             apiService.removeByIds(apiIdList);
         }
-        if(!CollectionUtils.isEmpty(apiGroupIdList)) {
-            apiGroupService.removeByIds(apiGroupIdList);
-        }
         workFlowMapper.deleteById(request.getId());
-        return BusinessResult.success(true);
+        return BusinessResult.success(workFlowDelResult);
     }
 
     @Override
