@@ -3,7 +3,11 @@
  * @Date: 2022-02-18
  */
 
-import { API_TYPE, STATUS_MAPPING, interfaceSource_TYPE } from '@/config/constant'
+import {
+  API_TYPE,
+  STATUS_MAPPING,
+  interfaceSource_TYPE
+} from '@/config/constant'
 
 export default that => ({
   refName: 'dataServiceApi',
