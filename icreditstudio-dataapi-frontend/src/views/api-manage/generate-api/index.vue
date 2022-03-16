@@ -81,7 +81,7 @@
         </el-row>
 
         <el-row type="flex" class="form-row-item" justify="space-between">
-          <el-col :lg="{ span: 11 }">
+          <el-col :lg="{ span: 11 }" v-if="form.type">
             <el-form-item label="API模式" prop="apiGenerateSaveRequest.model">
               <el-select
                 style="width: 100%"
@@ -172,11 +172,10 @@
 
           <el-row type="flex" class="form-row-item" justify="space-between">
             <el-col :span="11">
-              <el-form-item label="后端服务Host" prop="databaseTye">
+              <el-form-item label="后台服务Host" prop="reqHost">
                 <el-input
-                  readonly
                   style="width: 100%"
-                  v-model="form.databaseTye"
+                  v-model="form.reqHost"
                   placeholder="请选择数据库类型"
                 >
                 </el-input>
@@ -187,16 +186,12 @@
             </el-col>
 
             <el-col :span="11">
-              <el-form-item
-                label="后端Path"
-                prop="apiGenerateSaveRequest.datasourceId"
-              >
+              <el-form-item label="后台Path" prop="reqPath">
                 <el-input
                   filterable
                   style="width: 100%"
-                  v-model="form.apiGenerateSaveRequest.datasourceId"
-                  placeholder="请选择数据源名称"
-                  @change="handleDatasourceNameChange"
+                  v-model="form.reqPath"
+                  placeholder="请输入后台Path"
                 >
                 </el-input>
                 <p class="form-row-item--tip">
@@ -223,7 +218,6 @@
                   :true-label="0"
                   :false-label="1"
                   v-model="row.required"
-                  @change="handleRequireFieldChange($event, row)"
                 ></el-checkbox
               ></template>
 
@@ -547,6 +541,8 @@ export default {
         type: 0,
         path: '',
         name: '',
+        reqPath: '',
+        reqHost: '',
         databaseTye: 1,
         apiGroupId: null,
         requestType: 'GET',
@@ -589,6 +585,12 @@ export default {
         ],
         requestType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
+        ],
+        reqHost: [
+          { required: true, message: '后台服务Host不能为空', trigger: 'blur' }
+        ],
+        reqPath: [
+          { required: true, message: '后台Path不能为空', trigger: 'blur' }
         ],
         responseType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
@@ -779,7 +781,7 @@ export default {
     handleAddParamRowClick(key) {
       const commonParam = {
         fieldName: '',
-        fieldType: '',
+        fieldType: 'STRING',
         defaultValue: '',
         desc: ''
       }

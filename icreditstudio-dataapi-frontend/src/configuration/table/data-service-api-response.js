@@ -16,12 +16,12 @@ export default that => ({
     {
       type: 'editInput',
       label: '参数名称',
-      prop: 'filedName'
+      prop: 'fieldName'
     },
     {
       type: 'select',
       label: '参数类型',
-      prop: 'filedType',
+      prop: 'fieldType',
       width: 150,
       options: REGISTER_API_TYPR
     },
