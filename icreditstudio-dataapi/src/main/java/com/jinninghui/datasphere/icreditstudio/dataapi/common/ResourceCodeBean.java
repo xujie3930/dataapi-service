@@ -52,6 +52,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_20000034("20000034", "IP白名单只能包含【数字】、【.】、【,】，且长度不能超过255"),
         RESOURCE_CODE_20000035("20000035", "IP白名单中有不规范的IP地址"),
         RESOURCE_CODE_20000036("20000036", "调用次数不能输入负数"),
+        RESOURCE_CODE_20000041("20000041", "sql中的where条件只支持id = #{id}的形式！"),
 
         RESOURCE_CODE_60000001("60000001", "获取资源库连接失败！"),
         RESOURCE_CODE_60000002("60000002", "数据源不明确，id为空！"),
