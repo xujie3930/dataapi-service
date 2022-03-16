@@ -3,12 +3,11 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web.request;
 import lombok.Data;
 
 @Data
-public class DatasourceApiParamSaveRequest {
+public class RegisterResponseParamSaveRequest {
 
     private String fieldName;
     private String fieldType;
-    private Integer required;
     private String desc;
-    private Integer isRequest;
-    private Integer isResponse;
+    private Integer isResponse = 0;
+    private String defaultValue;
 }

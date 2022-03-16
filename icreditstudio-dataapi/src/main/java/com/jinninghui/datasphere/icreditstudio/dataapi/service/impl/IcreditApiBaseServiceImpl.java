@@ -170,28 +170,27 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         apiParamService.removeByApiId(apiBaseEntity.getId());
         CreateApiInfoBO createApiInfoBO = null;
         List<RegisterApiParamInfo> registerApiParamInfos = new ArrayList<>();
+        IcreditGenerateApiEntity generateApiEntity = new IcreditGenerateApiEntity();
         if(ApiTypeEnum.API_GENERATE.getCode().equals(param.getType())) {//数据源生成api
             createApiInfoBO = createApiByModel(param, apiBaseEntity.getApiVersion(), apiBaseEntity.getId());
+            //保存 generate api
+            BeanUtils.copyProperties(param.getApiGenerateSaveRequest(), generateApiEntity);
+            generateApiEntity.setId(param.getApiGenerateSaveRequest().getId());
+            generateApiEntity.setApiBaseId(apiBaseEntity.getId());
+            generateApiEntity.setApiVersion(apiBaseEntity.getApiVersion());
+            if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
+                generateApiEntity.setSql(createApiInfoBO.getQuerySql());
+            }
+            if (ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
+                generateApiEntity.setTableName(createApiInfoBO.getTableNames());
+            }
+            generateApiService.saveOrUpdate(generateApiEntity);
         }else{//注册api
             createApiInfoBO = createRegisterApi(param, apiBaseEntity.getApiVersion(), apiBaseEntity.getId());
             BeanUtils.copyProperties(createApiInfoBO.getApiParamEntityList(), registerApiParamInfos);
         }
 
         apiParamService.saveOrUpdateBatch(createApiInfoBO.getApiParamEntityList());
-
-        //保存 generate api
-        IcreditGenerateApiEntity generateApiEntity = new IcreditGenerateApiEntity();
-        BeanUtils.copyProperties(param.getApiGenerateSaveRequest(), generateApiEntity);
-        generateApiEntity.setId(param.getApiGenerateSaveRequest().getId());
-        generateApiEntity.setApiBaseId(apiBaseEntity.getId());
-        generateApiEntity.setApiVersion(apiBaseEntity.getApiVersion());
-        if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
-            generateApiEntity.setSql(createApiInfoBO.getQuerySql());
-        }
-        if (ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
-            generateApiEntity.setTableName(createApiInfoBO.getTableNames());
-        }
-        generateApiService.saveOrUpdate(generateApiEntity);
 
         //发布操作 存放信息到redis
         if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
@@ -202,11 +201,21 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
         apiSaveResult.setId(apiBaseEntity.getId());
+        List<ApiParamSaveResult> apiParamSaveResultList = new ArrayList<>();
+        List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList = new ArrayList<>();
+        List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList = new ArrayList<>();
         ApiGenerateSaveResult generateApiSaveResult = new ApiGenerateSaveResult();
-        BeanUtils.copyProperties(generateApiEntity, generateApiSaveResult);
+        if(ApiTypeEnum.API_GENERATE.getCode().equals(param.getType())) {//数据源生成api
+            BeanUtils.copyProperties(generateApiEntity, generateApiSaveResult);
+            apiParamSaveResultList = BeanCopyUtils.copy(createApiInfoBO.getApiParamEntityList(), ApiParamSaveResult.class);
+        }else{
+            registerRequestParamSaveRequestList = BeanCopyUtils.copy(param.getRegisterRequestParamSaveRequestList(), RegisterRequestParamSaveRequest.class);
+            registerResponseParamSaveRequestList = BeanCopyUtils.copy(param.getRegisterResponseParamSaveRequestList(), RegisterResponseParamSaveRequest.class);
+        }
         apiSaveResult.setApiGenerateSaveRequest(generateApiSaveResult);
-        List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(createApiInfoBO.getApiParamEntityList(), ApiParamSaveResult.class);
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
+        apiSaveResult.setRegisterRequestParamSaveRequestList(registerRequestParamSaveRequestList);
+        apiSaveResult.setRegisterResponseParamSaveRequestList(registerResponseParamSaveRequestList);
         return BusinessResult.success(apiSaveResult);
     }
 
@@ -226,31 +235,45 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private CreateApiInfoBO createRegisterApi(DatasourceApiSaveParam param, Integer apiVersion, String apiId) {
         CreateApiInfoBO createApiInfoBO = new CreateApiInfoBO();
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
-        for (DatasourceApiParamSaveRequest datasourceApiParamSaveRequest : param.getApiParamSaveRequestList()) {
-            if(!datasourceApiParamSaveRequest.getFieldName().matches("[a-zA-Z\u4e00-\u9fa5]{1,50}")){
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000044.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000044.getMessage());
-            }
-            if(datasourceApiParamSaveRequest.getDefaultValue().length() > 100){
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000045.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000045.getMessage());
-            }
-            if(datasourceApiParamSaveRequest.getDesc().length() > 100){
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000046.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000046.getMessage());
-            }
+        for (RegisterRequestParamSaveRequest registerRequestParamSaveRequest : param.getRegisterRequestParamSaveRequestList()) {
+            checkFieldRegisterApiParam(registerRequestParamSaveRequest.getFieldName(), registerRequestParamSaveRequest.getDefaultValue(), registerRequestParamSaveRequest.getDesc());
             IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
             apiParamEntity.setApiBaseId(apiId);
             apiParamEntity.setApiVersion(apiVersion);
-            apiParamEntity.setDesc(datasourceApiParamSaveRequest.getDesc());
-            apiParamEntity.setTableName(param.getApiGenerateSaveRequest().getTableName());
-            apiParamEntity.setRequired(datasourceApiParamSaveRequest.getRequired());
-            apiParamEntity.setFieldName(datasourceApiParamSaveRequest.getFieldName());
-            apiParamEntity.setFieldType(datasourceApiParamSaveRequest.getFieldType());
-            apiParamEntity.setIsRequest(datasourceApiParamSaveRequest.getIsRequest());
-            apiParamEntity.setIsResponse(datasourceApiParamSaveRequest.getIsResponse());
-            apiParamEntity.setDefaultValue(datasourceApiParamSaveRequest.getDefaultValue());
+            apiParamEntity.setDesc(registerRequestParamSaveRequest.getDesc());
+            apiParamEntity.setRequired(registerRequestParamSaveRequest.getRequired());
+            apiParamEntity.setFieldName(registerRequestParamSaveRequest.getFieldName());
+            apiParamEntity.setFieldType(registerRequestParamSaveRequest.getFieldType());
+            apiParamEntity.setIsRequest(registerRequestParamSaveRequest.getIsRequest());
+            apiParamEntity.setDefaultValue(registerRequestParamSaveRequest.getDefaultValue());
+            apiParamEntityList.add(apiParamEntity);
+        }
+        for (RegisterResponseParamSaveRequest registerResponseParamSaveRequest : param.getRegisterResponseParamSaveRequestList()) {
+            checkFieldRegisterApiParam(registerResponseParamSaveRequest.getFieldName(), registerResponseParamSaveRequest.getDefaultValue(), registerResponseParamSaveRequest.getDesc());
+            IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
+            apiParamEntity.setApiBaseId(apiId);
+            apiParamEntity.setApiVersion(apiVersion);
+            apiParamEntity.setDesc(registerResponseParamSaveRequest.getDesc());
+            apiParamEntity.setFieldName(registerResponseParamSaveRequest.getFieldName());
+            apiParamEntity.setFieldType(registerResponseParamSaveRequest.getFieldType());
+            apiParamEntity.setIsRequest(registerResponseParamSaveRequest.getIsResponse());
+            apiParamEntity.setDefaultValue(registerResponseParamSaveRequest.getDefaultValue());
             apiParamEntityList.add(apiParamEntity);
         }
         createApiInfoBO.setApiParamEntityList(apiParamEntityList);
         return createApiInfoBO;
+    }
+
+    private void checkFieldRegisterApiParam(String fieldName, String defaultValue, String desc) {
+        if(!fieldName.matches("[a-zA-Z\u4e00-\u9fa5]{1,50}")){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000044.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000044.getMessage());
+        }
+        if(defaultValue.length() > 100){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000045.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000045.getMessage());
+        }
+        if(desc.length() > 100){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000046.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000046.getMessage());
+        }
     }
 
     private CreateApiInfoBO createApiByModel(DatasourceApiSaveParam param, Integer apiVersion, String apiId) {
@@ -687,10 +710,12 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         redisApiInfo.setApiId(apiId);
         redisApiInfo.setApiType(apiType);
         redisApiInfo.setApiName(apiName);
-        redisApiInfo.setUrl(handleUrl(connInfo.getUrl()));
-        redisApiInfo.setUserName(connInfo.getUsername());
-        redisApiInfo.setPassword(connInfo.getPassword());
-        redisApiInfo.setQuerySql(sql);
+        if(null != connInfo){
+            redisApiInfo.setUrl(handleUrl(connInfo.getUrl()));
+            redisApiInfo.setUserName(connInfo.getUsername());
+            redisApiInfo.setPassword(connInfo.getPassword());
+            redisApiInfo.setQuerySql(sql);
+        }
         redisApiInfo.setRequiredFields(requiredFieldStr);
         redisApiInfo.setResponseFields(responseFieldStr);
         redisApiInfo.setRegisterApiParamInfoList(registerApiParamInfos);
