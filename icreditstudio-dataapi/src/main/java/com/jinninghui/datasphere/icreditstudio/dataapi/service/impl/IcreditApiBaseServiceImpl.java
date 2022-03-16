@@ -41,6 +41,8 @@ import javax.annotation.Resource;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
@@ -463,6 +465,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     public Object checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type) {
         String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
+        String regEx = "[!<>|between]";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()));
         if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)){
             if(StringUtils.isEmpty(request.getSql())){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage());
@@ -470,12 +475,18 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
             }
+            if(m.find()){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage());
+            }
         }else{
             if(StringUtils.isEmpty(request.getSql())){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage();
             }
             if(sql.contains(SQL_SELECT_ALL)){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
+            }
+            if(m.find()){
+                return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
             }
         }
         sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''").replaceAll(SQL_END, "");
