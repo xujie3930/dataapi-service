@@ -33,10 +33,8 @@ public class KafkaConsumer {
     private IcreditApiLogMapper apiLogMapper;
 
     private static final String TOPIC = "apiInvoke" ;
-    private static final String TOPIC_DEV = "apiInvoke_dev" ;
-    private static final String TOPIC_TEST = "apiInvoke_test" ;
 
-    @KafkaListener(groupId = "test", topics = {TOPIC, TOPIC_DEV, TOPIC_TEST})
+    @KafkaListener(groupId = "test", topics = {TOPIC})
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         Optional message = Optional.ofNullable(record.value());
         if (message.isPresent()) {
