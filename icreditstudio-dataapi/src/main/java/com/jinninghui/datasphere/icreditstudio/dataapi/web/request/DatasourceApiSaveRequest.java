@@ -22,4 +22,6 @@ public class DatasourceApiSaveRequest {
 
     private DatasourceApiGenerateSaveRequest apiGenerateSaveRequest;
     private List<DatasourceApiParamSaveRequest> apiParamSaveRequestList;
+    private List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList;
+    private List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList;
 }
