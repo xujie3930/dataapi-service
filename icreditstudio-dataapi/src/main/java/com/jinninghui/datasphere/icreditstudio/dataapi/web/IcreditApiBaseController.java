@@ -104,7 +104,7 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/datasourceApi/createAndPublish")
-    public BusinessResult<Boolean> createAndPublish(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
+    public BusinessResult<ApiSaveResult> createAndPublish(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
         DatasourceApiSaveParam param = new DatasourceApiSaveParam();
         BeanUtils.copyProperties(apiSaveRequest, param);
         return apiBaseService.createAndPublish(userId, param);

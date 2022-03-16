@@ -9,8 +9,8 @@ import java.util.Objects;
 @Getter
 public enum InterfaceSourceEnum {
 
-    DATA_SERVICES(0, "数据服务"),
-    DATA_RESOURCE(1, "资源管理");
+    IN_SIDE(0, "内部"),
+    OUT_SIDE(1, "外部");
 
     private Integer code;
     private String msg;

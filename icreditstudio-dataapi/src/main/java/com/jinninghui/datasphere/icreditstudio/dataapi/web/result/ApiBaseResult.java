@@ -35,4 +35,7 @@ public class ApiBaseResult implements Serializable {
     private Long publishTime;
 
     private Integer delFlag;
+
+    //0-数据服务，1-资源管理
+    private Integer interfaceSource;
 }
