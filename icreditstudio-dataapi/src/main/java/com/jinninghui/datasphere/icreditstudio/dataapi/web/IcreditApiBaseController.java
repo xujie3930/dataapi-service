@@ -41,10 +41,10 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/datasourceApi/create")
-    public BusinessResult<ApiSaveResult> createDataSourceApi(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
+    public BusinessResult<ApiSaveResult> createApi(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
         DatasourceApiSaveParam param = new DatasourceApiSaveParam();
         BeanUtils.copyProperties(apiSaveRequest, param);
-        return apiBaseService.createDataSourceApi(userId, param);
+        return apiBaseService.createApi(userId, param);
     }
 
     @PostMapping("/generate/apiPath")

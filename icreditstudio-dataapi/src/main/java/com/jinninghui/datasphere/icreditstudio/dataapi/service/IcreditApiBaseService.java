@@ -30,7 +30,7 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
 
     BusinessResult<BusinessPageResult> getList(ApiBaseListRequest request);
 
-    BusinessResult<ApiSaveResult> createDataSourceApi(String userId, DatasourceApiSaveParam param);
+    BusinessResult<ApiSaveResult> createApi(String userId, DatasourceApiSaveParam param);
 
     BusinessResult<List<Map<String, Object>>> getDataSourcesList(DataSourcesListRequest request);
 

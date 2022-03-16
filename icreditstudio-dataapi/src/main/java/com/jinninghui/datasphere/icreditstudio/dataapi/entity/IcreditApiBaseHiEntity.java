@@ -1,8 +1,13 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.Date;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -21,7 +26,10 @@ public class IcreditApiBaseHiEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Boolean type;
+    @TableId(type = IdType.ID_WORKER_STR)
+    private String id;
+
+    private Integer type;
 
     private String name;
 
@@ -31,31 +39,34 @@ public class IcreditApiBaseHiEntity implements Serializable {
 
     private String responseType;
 
+    @TableField("`desc`")
     private String desc;
+
+    private String reqPath;
+
+    private String reqHost;
 
     private String apiGroupId;
 
     private Integer apiVersion;
 
-    private Boolean publishStatus;
+    private Integer publishStatus;
 
     private String publishUser;
 
-    private LocalDateTime publishTime;
+    private Date publishTime;
 
     private String apiBaseId;
 
-    private String remark;
-
-    private LocalDateTime createTime;
+    private Date createTime;
 
     private String createBy;
 
-    private LocalDateTime updateTime;
+    private Date updateTime;
 
     private String updateBy;
 
-    private Boolean delFlag;
+    private Integer delFlag;
 
 
 }

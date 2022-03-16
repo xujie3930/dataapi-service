@@ -17,6 +17,8 @@ public class DatasourceApiSaveRequest {
     private String apiGroupId;
     private String desc;
     private Integer apiVersion;
+    private String reqHost;
+    private String reqPath;
 
     private DatasourceApiGenerateSaveRequest apiGenerateSaveRequest;
     private List<DatasourceApiParamSaveRequest> apiParamSaveRequestList;

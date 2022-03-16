@@ -177,7 +177,7 @@ CREATE TABLE `dataapi`.`icredit_api_param`
     `is_request`    tinyint(1) DEFAULT NULL,
     `is_response`   tinyint(1) DEFAULT NULL,
     `api_base_id`   varchar(30)  DEFAULT NULL,
-    `default_value` varchar(10)  DEFAULT NULL,
+    `default_value` varchar(120)  DEFAULT NULL,
     `api_version`   tinyint(1) DEFAULT NULL,
     `remark`        varchar(255) DEFAULT NULL,
     `create_time`   datetime     DEFAULT NULL,
@@ -371,16 +371,22 @@ INSERT INTO `dataapi`.`icredit_api_group`
 VALUES ('000', '0', '默认分组', '默认业务流程下的默认分组', null, '2022-02-21 17:58:06', 'admin', '2022-02-21 17:58:06', 'admin', '0',
         '2');
 
-ALTER TABLE icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期，1-8小时，2-自定义';
-ALTER TABLE icredit_app ADD generateId varchar(30) COMMENT '应用id';
+ALTER TABLE `dataapi`.icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期，1-8小时，2-自定义';
+ALTER TABLE `dataapi`.icredit_app ADD generateId varchar(30) COMMENT '应用id';
 
-ALTER TABLE icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
+ALTER TABLE `dataapi`.icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
 
-ALTER TABLE icredit_app_group ADD generate_id varchar(30) COMMENT '分组id';
+ALTER TABLE `dataapi`.icredit_app_group ADD generate_id varchar(30) COMMENT '分组id';
 
-ALTER TABLE icredit_app DROP app_flag;
+ALTER TABLE `dataapi`.icredit_app DROP app_flag;
 
-ALTER TABLE icredit_api_log ADD api_type tinyint(1) COMMENT 'api类型';
-ALTER TABLE icredit_api_log ADD exception_detail text COMMENT '异常详情';
-ALTER TABLE icredit_api_log ADD execute_sql text COMMENT '执行sql';
-ALTER TABLE icredit_api_log ADD trace_id varchar(40) COMMENT 'kakafa幂等性ID';
+ALTER TABLE `dataapi`.icredit_api_log ADD api_type tinyint(1) COMMENT 'api类型';
+ALTER TABLE `dataapi`.icredit_api_log ADD exception_detail text COMMENT '异常详情';
+ALTER TABLE `dataapi`.icredit_api_log ADD execute_sql text COMMENT '执行sql';
+ALTER TABLE `dataapi`.icredit_api_log ADD trace_id varchar(40) COMMENT 'kakafa幂等性ID';
+
+ALTER TABLE `dataapi`.icredit_api_base ADD req_host varchar(30) COMMENT '后台服务Host';
+ALTER TABLE `dataapi`.icredit_api_base ADD req_path varchar(255) COMMENT '后台path';
+
+ALTER TABLE `dataapi`.icredit_api_base_hi ADD req_host varchar(30) COMMENT '后台服务Host';
+ALTER TABLE `dataapi`.icredit_api_base_hi ADD req_path varchar(255) COMMENT '后台path';

@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SqlModelInfoBO {
+public class CreateApiInfoBO {
 
     private List<IcreditApiParamEntity> apiParamEntityList;
     private String tableNames;
+    private String requiredFieldStr;
+    private String responseFieldStr;
+    private String querySql;
 
 }

@@ -11,4 +11,5 @@ public class DatasourceApiParamSaveRequest {
     private String desc;
     private Integer isRequest;
     private Integer isResponse;
+    private String defaultValue;
 }
