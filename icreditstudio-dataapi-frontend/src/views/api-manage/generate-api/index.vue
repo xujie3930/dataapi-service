@@ -59,7 +59,7 @@
                 v-model="form.type"
                 placeholder="选择API类型"
               >
-                <!-- <el-option label="注册API" :value="0"></el-option> -->
+                <el-option label="注册API" :value="0"></el-option>
                 <el-option label="数据源生成API" :value="1"></el-option>
               </el-select>
             </el-form-item>
@@ -214,12 +214,38 @@
             <JTable
               ref="selectParamTable"
               :table-loading="tableLoading"
-              :table-data="form.apiParamSaveRequestList"
+              :table-data="form.registerRequestParamSaveRequestList"
               :table-configuration="tableRequestConfiguration"
             >
-              <div class="custom-table-empty" slot="empty">
-                <span class="add-icon">+</span>
+              <!-- 是否必填 -->
+              <template #required="{ row }">
+                <el-checkbox
+                  :true-label="0"
+                  :false-label="1"
+                  v-model="row.required"
+                  @change="handleRequireFieldChange($event, row)"
+                ></el-checkbox
+              ></template>
+
+              <!--  空数据 -->
+              <div
+                class="custom-table-empty"
+                slot="empty"
+                @click="handleAddParamRowClick('Request')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
                 <span class="add-label">新增参数</span>
+              </div>
+
+              <!-- append -->
+              <div
+                v-if="form.registerRequestParamSaveRequestList.length"
+                class="custom-table-empty custom-table-append"
+                slot="append"
+                @click="handleAddParamRowClick('Request')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
+                <span class="add-label">新增一行</span>
               </div>
             </JTable>
           </el-row>
@@ -232,9 +258,29 @@
             <JTable
               ref="selectParamTable"
               :table-loading="tableLoading"
-              :table-data="form.apiParamSaveRequestList"
+              :table-data="form.registerResponseParamSaveRequestList"
               :table-configuration="tableResponseConfiguration"
             >
+              <!--  空数据 -->
+              <div
+                class="custom-table-empty"
+                slot="empty"
+                @click="handleAddParamRowClick('Response')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
+                <span class="add-label">新增参数</span>
+              </div>
+
+              <!-- append -->
+              <div
+                v-if="form.registerResponseParamSaveRequestList.length"
+                class="custom-table-empty custom-table-append"
+                slot="append"
+                @click="handleAddParamRowClick('Response')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
+                <span class="add-label">新增一行</span>
+              </div>
             </JTable>
           </el-row>
         </template>
@@ -498,7 +544,7 @@ export default {
       cascaderOptions: [],
       form: {
         id: '',
-        type: 1,
+        type: 0,
         path: '',
         name: '',
         databaseTye: 1,
@@ -513,7 +559,9 @@ export default {
           tableName: '',
           sql: ''
         },
-        apiParamSaveRequestList: []
+        apiParamSaveRequestList: [],
+        registerRequestParamSaveRequestList: [],
+        registerResponseParamSaveRequestList: []
       },
       formRules: {
         type: [
@@ -727,6 +775,25 @@ export default {
       }, 300)
     },
 
+    // 点击-新增参数
+    handleAddParamRowClick(key) {
+      const commonParam = {
+        fieldName: '',
+        fieldType: '',
+        defaultValue: '',
+        desc: ''
+      }
+
+      this.form[`register${key}ParamSaveRequestList`].push(
+        key === 'Response' ? commonParam : { ...commonParam, required: 1 }
+      )
+    },
+
+    // 点击-删除当前行
+    handleDeleteRowClick(options, key) {
+      this.form[`register${key}ParamSaveRequestList`].splice(options.$index, 1)
+    },
+
     // 获取-新增数据源生成时的APIPath
     fetchDataApiPath() {
       API.getDataApiPath()
@@ -920,12 +987,9 @@ export default {
         .add-icon {
           @include flex(center, center, row, inline-flex);
           @include hover-scale;
-          width: 14px;
-          height: 14px;
-          border-radius: 4px;
-          border: 1px solid #1890ff;
+          width: 15px;
+          height: 15px;
           cursor: pointer;
-          color: #1890ff;
         }
 
         .add-label {
@@ -934,9 +998,13 @@ export default {
           font-weight: 500;
           text-align: center;
           color: #1890ff;
-          margin-left: 5px;
+          margin-left: 8px;
           cursor: pointer;
         }
+      }
+
+      .custom-table-append {
+        height: 44px;
       }
     }
 

@@ -48,7 +48,7 @@
         v-if="tableConfiguration.append || tableConfiguration.appendSlot"
         slot="append"
       >
-        <slot v-if="tableConfiguration.appendSlot"></slot>
+        <slot v-if="tableConfiguration.appendSlot" name="append"></slot>
         <div v-else class="icredit-table-append">
           <span class="text" v-if="tableConfiguration.isMore">加载中</span>
           <span class="text" v-else>没有更多了</span>
@@ -191,6 +191,12 @@
             <el-input
               v-model="scope.row[item.prop]"
               :disabled="item.disabled"
+              :placeholder="item.placeholder || '请输入'"
+              :maxlength="item.maxlength"
+              :show-word-limit="item.showWordLimit"
+              :type="item.inputType"
+              :resize="item.resize"
+              :clearable="item.clearable"
               @clear="
                 value => handleFunc({ value, scope, config: item }, item.clear)
               "
@@ -521,7 +527,7 @@
           <template #default="scope">
             <el-select
               v-model="scope.row[item.prop]"
-              :placeholder="item.placeholder || `请选择${item.label}`"
+              :placeholder="item.placeholder || '请选择'"
               :name="item.name"
               :multiple="item.multiple"
               :multiple-limit="item.multipleLimit || 0"
