@@ -49,7 +49,7 @@ public class KafkaConsumer {
                     BeanUtils.copyProperties(logInfo, apiLogEntity);
                     apiLogMapper.insert(apiLogEntity);
                 }else{
-                    if (!CallStatusEnum.CALL_ON.getCode().equals(logApiLogEntity.getCallStatus())){
+                    if (!CallStatusEnum.CALL_ON.getCode().equals(logInfo.getCallStatus())){
                         String logId = logApiLogEntity.getId();
                         Date createTime = logApiLogEntity.getCreateTime();
                         String createBy = logApiLogEntity.getCreateBy();
