@@ -63,6 +63,9 @@ const editProcessName = params => postAction('/workFlow/rename', params)
 // 更改Api分组名称
 const editApiGroupName = params => postAction('/apiGroup/rename', params)
 
+// 获取Api版本列表
+const getApiHistoryVersion = params => postAction('/apiHistory/list', params)
+
 export default {
   addBusinessProcess,
   addApiInfo,
@@ -75,6 +78,7 @@ export default {
   getDataTableFields,
   getDataApiPath,
   getDataApiDetail,
+  getApiHistoryVersion,
   searchProcessOrGroup,
   updateDataApiStatus,
   checkSqlCorrectness,

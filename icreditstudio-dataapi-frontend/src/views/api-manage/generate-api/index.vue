@@ -624,8 +624,15 @@ export default {
     }
   },
 
+  props: {
+    opType: {
+      type: String
+    }
+  },
+
   methods: {
     open(options) {
+      console.log(options, 'ssdsds')
       const { opType, cascaderOptions } = options
       this.options = options
       this.pageLoading = true
@@ -715,7 +722,7 @@ export default {
     },
 
     handleJumpBackClick() {
-      this.$emit('on-jump')
+      this.$emit('on-jump', this.opType)
     },
 
     // 点击-打开SQL编写提示弹窗
