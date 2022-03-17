@@ -27,10 +27,26 @@ export const CERTIFICATION_TYPE = { 0: '密钥认证', 1: '证书认证' }
 // API: Token有效期
 export const TOEKN_PERIOD = { 0: '长期', 1: '8小时', 2: '自定义' }
 
+// API: 参数类型
+export const REGISTER_API_TYPR = [
+  { label: 'STRING', value: 'STRING' },
+  { label: 'INT', value: 'INT' },
+  { label: 'LONG', value: 'LONG' },
+  { label: 'FLOAT', value: 'FLOAT' },
+  { label: 'DOUBLE', value: 'DOUBLE' },
+  { label: 'BOOLEAN', value: 'BOOLEAN' }
+]
+
 // 应用：状态是否启用
 export const ENABLED_STATUS = {
   0: { name: '停用', color: '#ff4d4f' },
   1: { name: '启用', color: '#52c41a' }
+}
+
+// 应用：可调用次数
+export const CALL_TYPE = {
+  0: '有限次',
+  1: '无限次'
 }
 
 // 日志：请求或调用状态是否启用
@@ -38,12 +54,6 @@ export const REQUEST_STATUS = {
   0: { name: '请求中', color: '#faad14' },
   1: { name: '成功', color: '#52c41a' },
   2: { name: '失败', color: '#ff4d4f' }
-}
-
-// 应用-可调用次数
-export const CALL_TYPE = {
-  0: '有限次',
-  1: '无限次'
 }
 
 export default {
