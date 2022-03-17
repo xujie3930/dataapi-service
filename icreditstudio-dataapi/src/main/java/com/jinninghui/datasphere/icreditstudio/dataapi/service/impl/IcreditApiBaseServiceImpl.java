@@ -30,6 +30,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResu
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.Query;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -190,7 +191,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             BeanUtils.copyProperties(createApiInfoBO.getApiParamEntityList(), registerApiParamInfos);
         }
 
-        apiParamService.saveOrUpdateBatch(createApiInfoBO.getApiParamEntityList());
+        if(!CollectionUtils.isEmpty(createApiInfoBO.getApiParamEntityList())) {
+            apiParamService.saveOrUpdateBatch(createApiInfoBO.getApiParamEntityList());
+        }
 
         //发布操作 存放信息到redis
         if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
