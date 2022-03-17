@@ -69,6 +69,15 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
 
         List<IcreditAuthEntity> authList = authMapper.findByAppId(request.getAppId());
+
+        List<String> cancelSelectedList = new ArrayList<>();
+        for (IcreditAuthEntity authEntity : authList) {
+            if(!request.getApiId().contains(authEntity.getApiId())) {
+                cancelSelectedList.add(String.valueOf(new StringBuilder(authEntity.getApiId()).append(appEntity.getGenerateId())));
+            }
+        }
+        redisTemplate.delete(cancelSelectedList);
+
         if(!CollectionUtils.isEmpty(authList)) {
             //删除旧的auth信息
             authConfigService.removeById(authList.get(0).getAuthConfigId());
