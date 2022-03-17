@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
 /**
  * @author Peng
@@ -14,7 +15,11 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableFeignClients
 @EnableDiscoveryClient
 @SpringBootApplication
-@ComponentScan("com.jinninghui")
+@ComponentScan(value = "com.jinninghui", excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = {
+                "com.jinninghui.datasphere.icreditstudio.framework.result.FilterConfig"
+        })
+})
 public class DataApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(DataApiApplication.class, args);
