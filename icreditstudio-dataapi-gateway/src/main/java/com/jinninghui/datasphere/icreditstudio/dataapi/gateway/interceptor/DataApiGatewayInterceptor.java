@@ -40,12 +40,8 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
     private KafkaProducer kafkaProducer;
     protected static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
     protected static final String TOKEN_MARK = "token";
-    protected static final String PAGENUM_MARK = "pageNum";
-    protected static final String PAGESIZE_MARK = "pageSize";
     protected static final Long NOT_LIMIT = -1L;
     protected static final Long SECOND_OF_HOUR = 60 * 60 * 1000L;
-    protected static final Integer PAGENUM_DEFALUT = 1;
-    protected static final Integer PAGESIZE_DEFALUT = 500;
     protected static final List<String> EXTRA_STR = Arrays.asList("v", "V");
     protected static final String ALL_NETWORK = "0.0.0.0";
 
