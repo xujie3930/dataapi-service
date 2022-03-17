@@ -38,7 +38,7 @@
         <el-input
           type="textarea"
           v-model="processForm.desc"
-          maxlength="200"
+          maxlength="250"
           show-word-limit
           placeholder="请输入业务描述"
         ></el-input>
