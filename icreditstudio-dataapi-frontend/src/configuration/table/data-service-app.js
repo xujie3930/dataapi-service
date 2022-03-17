@@ -82,11 +82,11 @@ export default that => ({
       width: 250,
       operationList: [
         // 停用状态
-        {
-          func: that.handleAuthorizeClick,
-          label: '启用',
-          visible: ({ row }) => row.isEnable === 0
-        },
+        // {
+        //   func: that.handleAuthorizeClick,
+        //   label: '启用',
+        //   visible: ({ row }) => row.isEnable === 0
+        // },
         // {
         //   func: that.handleAuthorizeClick,
         //   label: '编辑',
@@ -99,11 +99,11 @@ export default that => ({
         // },
 
         // 启用状态
-        {
-          func: that.handleAuthorizeClick,
-          label: '停用',
-          visible: ({ row }) => row.isEnable
-        },
+        // {
+        //   func: that.handleAuthorizeClick,
+        //   label: '停用',
+        //   visible: ({ row }) => row.isEnable
+        // },
         {
           func: that.handleAuthorizeClick,
           label: '授权',
