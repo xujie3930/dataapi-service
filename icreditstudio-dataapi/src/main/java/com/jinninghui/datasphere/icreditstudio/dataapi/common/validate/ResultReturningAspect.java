@@ -86,6 +86,12 @@ public class ResultReturningAspect {
 
     private void setNewValue(Object obj, Map<String, String> map, Field field) throws IllegalAccessException {
         field.setAccessible(true);
+        if (field.get(obj) instanceof Collection){
+            Collection collection = (Collection) field.get(obj);
+            for (Object junior : collection) {
+                setNewValue(junior, map, field);
+            }
+        }
         String fieldValue = (String) field.get(obj);
         field.set(obj, map.get(fieldValue));
     }
@@ -93,12 +99,26 @@ public class ResultReturningAspect {
     private void process(Object obj, Map map) throws IllegalAccessException {
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
+            field.setAccessible(true);
+            if (field.get(obj) instanceof Collection){
+                Collection collection = (Collection) field.get(obj);
+                for (Object junior : collection) {
+                    process(junior, map);
+                }
+            }
             if (returnSet.contains(field.getName())){
                 setNewValue(obj, map, field);
             }
         }
         Field[] superFields = obj.getClass().getSuperclass().getDeclaredFields();
         for (Field superField : superFields) {
+            superField.setAccessible(true);
+            if (superField.get(obj) instanceof Collection){
+                Collection collection = (Collection) superField.get(obj);
+                for (Object junior : collection) {
+                    process(junior, map);
+                }
+            }
             if (returnSet.contains(superField.getName())){
                 setNewValue(obj, map, superField);
             }
