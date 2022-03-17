@@ -1,13 +1,11 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.web;
 
-
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.OpenApiService;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,14 +19,14 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/openapi")
-public class ApiOpenController {
+public class OpenApiController {
 
     @Autowired
-    private AuthService authService;
+    private OpenApiService openApiService;
 
     @GetMapping("/{version}/{path}")
     public BusinessResult<Object> getData(@PathVariable("version") String version, @PathVariable("path") String path, @RequestParam(required = false) Map<String, Object> params) {
-        return authService.getData(version, path, params);
+        return openApiService.getData(version, path, params);
     }
 }
 
