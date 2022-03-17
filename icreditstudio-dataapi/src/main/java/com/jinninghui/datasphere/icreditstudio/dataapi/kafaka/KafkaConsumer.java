@@ -8,6 +8,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMappe
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -36,37 +37,42 @@ public class KafkaConsumer {
 
     @KafkaListener(groupId = "test", topics = {TOPIC})
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        Optional message = Optional.ofNullable(record.value());
-        if (message.isPresent()) {
-            Object msg = message.get();
-            ApiLogInfo logInfo = JSON.parseObject(String.valueOf(msg), ApiLogInfo.class);
-            IcreditApiLogEntity logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
-            if (!CallStatusEnum.CALL_ON.getCode().equals(logInfo.getCallStatus())) {
-                while (null == logApiLogEntity){
-                    logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
-                    if (logApiLogEntity != null){
-                        break;
+        try {
+            Optional message = Optional.ofNullable(record.value());
+            if (message.isPresent()) {
+                Object msg = message.get();
+                ApiLogInfo logInfo = JSON.parseObject(String.valueOf(msg), ApiLogInfo.class);
+                IcreditApiLogEntity logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
+                if (!CallStatusEnum.CALL_ON.getCode().equals(logInfo.getCallStatus())) {
+                    while (null == logApiLogEntity){
+                        logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
+                        if (logApiLogEntity != null){
+                            break;
+                        }
+                        try {
+                            Thread.sleep(20);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    String logId = logApiLogEntity.getId();
+                    Date createTime = logApiLogEntity.getCreateTime();
+                    String createBy = logApiLogEntity.getCreateBy();
+                    BeanUtils.copyProperties(logInfo, logApiLogEntity);
+                    logApiLogEntity.setId(logId);
+                    logApiLogEntity.setCreateTime(createTime);
+                    logApiLogEntity.setCreateBy(createBy);
+                    apiLogMapper.updateById(logApiLogEntity);
+                } else {
+                    IcreditApiLogEntity apiLogEntity = new IcreditApiLogEntity();
+                    BeanUtils.copyProperties(logInfo, apiLogEntity);
+                    apiLogMapper.insert(apiLogEntity);
                 }
-                String logId = logApiLogEntity.getId();
-                Date createTime = logApiLogEntity.getCreateTime();
-                String createBy = logApiLogEntity.getCreateBy();
-                BeanUtils.copyProperties(logInfo, logApiLogEntity);
-                logApiLogEntity.setId(logId);
-                logApiLogEntity.setCreateTime(createTime);
-                logApiLogEntity.setCreateBy(createBy);
-                apiLogMapper.updateById(logApiLogEntity);
-            } else {
-                IcreditApiLogEntity apiLogEntity = new IcreditApiLogEntity();
-                BeanUtils.copyProperties(logInfo, apiLogEntity);
-                apiLogMapper.insert(apiLogEntity);
+                log.info("topic_test 消费了： Topic:" + topic + ",Message:" + msg);
             }
-            log.info("topic_test 消费了： Topic:" + topic + ",Message:" + msg);
+        } catch (BeansException e) {
+            e.printStackTrace();
+        } finally {
             ack.acknowledge();
         }
     }
