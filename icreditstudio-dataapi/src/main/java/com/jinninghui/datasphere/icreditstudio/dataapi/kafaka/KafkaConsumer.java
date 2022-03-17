@@ -37,6 +37,7 @@ public class KafkaConsumer {
 
     @KafkaListener(groupId = "test", topics = {TOPIC})
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        log.info("topic_test 获取 topic:{}消息进行消费", TOPIC);
         try {
             Optional message = Optional.ofNullable(record.value());
             if (message.isPresent()) {
