@@ -1,8 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.configuration;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.interceptor.ApiInterceptor;
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.interceptor.AppInterceptor;
-import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.interceptor.ParamInterceptor;
+import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.interceptor.DataApiGatewayInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -21,18 +19,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class InterceptorConfiguration implements WebMvcConfigurer {
 
     @Autowired
-    private ApiInterceptor apiInterceptor;
-
-    @Autowired
-    private AppInterceptor appInterceptor;
-
-    @Autowired
-    private ParamInterceptor paramInterceptor;
+    private DataApiGatewayInterceptor dataApiGatewayInterceptor;
 
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(appInterceptor).addPathPatterns("/openapi");
-        registry.addInterceptor(apiInterceptor).addPathPatterns("/openapi");
-        registry.addInterceptor(paramInterceptor).addPathPatterns("/openapi");
+        registry.addInterceptor(dataApiGatewayInterceptor).addPathPatterns("/openapi/**");
 
     }
 }
