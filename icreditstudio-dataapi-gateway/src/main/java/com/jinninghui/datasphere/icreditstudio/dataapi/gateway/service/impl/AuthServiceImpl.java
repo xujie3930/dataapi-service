@@ -94,11 +94,11 @@ public class AuthServiceImpl implements AuthService {
             //kafka推送消息
             kafkaProducer.send(apiLogInfo);
             //1：根据token,鉴权应用信息
-//            checkApp(appAuthInfo, request, token);
+            checkApp(appAuthInfo, request, token);
             //2：根据path和version,鉴权API信息
-//            checkApi(apiInfo, appAuthInfo);
+            checkApi(apiInfo, appAuthInfo);
             //3:对入参做校验
-//            checkParam(map, apiInfo);
+            checkParam(map, apiInfo);
             //处理sql，替换其中参数为入参
             querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), map);
             //连接数据源，执行SQL
