@@ -87,16 +87,16 @@ export default that => ({
           label: '启用',
           visible: ({ row }) => row.isEnable === 0
         },
-        {
-          func: that.handleAuthorizeClick,
-          label: '编辑',
-          visible: ({ row }) => row.isEnable === 0
-        },
-        {
-          func: that.handleAuthorizeClick,
-          label: '删除',
-          visible: ({ row }) => row.isEnable === 0
-        },
+        // {
+        //   func: that.handleAuthorizeClick,
+        //   label: '编辑',
+        //   visible: ({ row }) => row.isEnable === 0
+        // },
+        // {
+        //   func: that.handleAuthorizeClick,
+        //   label: '删除',
+        //   visible: ({ row }) => row.isEnable === 0
+        // },
 
         // 启用状态
         {
@@ -120,17 +120,17 @@ export default that => ({
           func: that.handleAddAppClick,
           label: '新增应用',
           visible: ({ row }) => 'children' in row
-        },
-        {
-          func: that.handleAddAppClick,
-          label: '编辑分组',
-          visible: ({ row }) => 'children' in row
-        },
-        {
-          func: that.handleAddAppClick,
-          label: '删除分组',
-          visible: ({ row }) => 'children' in row
         }
+        // {
+        //   func: that.handleAddAppClick,
+        //   label: '编辑分组',
+        //   visible: ({ row }) => 'children' in row
+        // },
+        // {
+        //   func: that.handleAddAppClick,
+        //   label: '删除分组',
+        //   visible: ({ row }) => 'children' in row
+        // }
       ]
     }
   ]
