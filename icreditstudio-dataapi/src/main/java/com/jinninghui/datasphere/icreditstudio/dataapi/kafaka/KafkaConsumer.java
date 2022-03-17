@@ -44,30 +44,21 @@ public class KafkaConsumer {
                 Object msg = message.get();
                 ApiLogInfo logInfo = JSON.parseObject(String.valueOf(msg), ApiLogInfo.class);
                 IcreditApiLogEntity logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
-                if (!CallStatusEnum.CALL_ON.getCode().equals(logInfo.getCallStatus())) {
-                    while (null == logApiLogEntity){
-                        logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
-                        if (logApiLogEntity != null){
-                            break;
-                        }
-                        try {
-                            Thread.sleep(20);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    String logId = logApiLogEntity.getId();
-                    Date createTime = logApiLogEntity.getCreateTime();
-                    String createBy = logApiLogEntity.getCreateBy();
-                    BeanUtils.copyProperties(logInfo, logApiLogEntity);
-                    logApiLogEntity.setId(logId);
-                    logApiLogEntity.setCreateTime(createTime);
-                    logApiLogEntity.setCreateBy(createBy);
-                    apiLogMapper.updateById(logApiLogEntity);
-                } else {
+                if(null == logApiLogEntity){
                     IcreditApiLogEntity apiLogEntity = new IcreditApiLogEntity();
                     BeanUtils.copyProperties(logInfo, apiLogEntity);
                     apiLogMapper.insert(apiLogEntity);
+                }else{
+                    if (!CallStatusEnum.CALL_ON.getCode().equals(logApiLogEntity.getCallStatus())){
+                        String logId = logApiLogEntity.getId();
+                        Date createTime = logApiLogEntity.getCreateTime();
+                        String createBy = logApiLogEntity.getCreateBy();
+                        BeanUtils.copyProperties(logInfo, logApiLogEntity);
+                        logApiLogEntity.setId(logId);
+                        logApiLogEntity.setCreateTime(createTime);
+                        logApiLogEntity.setCreateBy(createBy);
+                        apiLogMapper.updateById(logApiLogEntity);
+                    }
                 }
                 log.info("topic_test 消费了： Topic:" + topic + ",Message:" + msg);
             }
