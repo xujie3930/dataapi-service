@@ -174,9 +174,10 @@
             <el-col :span="11">
               <el-form-item label="后台服务Host" prop="reqHost">
                 <el-input
+                  clearable
                   style="width: 100%"
-                  v-model="form.reqHost"
-                  placeholder="请选择数据库类型"
+                  v-model.trim="form.reqHost"
+                  placeholder="请输入后台服务Host"
                 >
                 </el-input>
                 <p class="form-row-item--tip">
@@ -188,9 +189,9 @@
             <el-col :span="11">
               <el-form-item label="后台Path" prop="reqPath">
                 <el-input
-                  filterable
+                  clearable
                   style="width: 100%"
-                  v-model="form.reqPath"
+                  v-model.trim="form.reqPath"
                   placeholder="请输入后台Path"
                 >
                 </el-input>
@@ -497,7 +498,9 @@ import GenerateApiTips from './generate-api-tips'
 import {
   verifySpecialString,
   verifyOnlyEnString,
-  strExcludeBlank
+  strExcludeBlank,
+  validIpAddress,
+  verifyIncludeCnString
 } from '@/utils/validate'
 import API from '@/api/api'
 import {
@@ -587,10 +590,12 @@ export default {
           { required: true, message: '必填项不能为空', trigger: 'blur' }
         ],
         reqHost: [
-          { required: true, message: '后台服务Host不能为空', trigger: 'blur' }
+          { required: true, message: '后台服务Host不能为空', trigger: 'blur' },
+          { validator: this.verifyHost, trigger: 'blur' }
         ],
         reqPath: [
-          { required: true, message: '后台Path不能为空', trigger: 'blur' }
+          { required: true, message: '后台Path不能为空', trigger: 'blur' },
+          { validator: this.verifyReqPath, trigger: 'blur' }
         ],
         responseType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
@@ -646,6 +651,37 @@ export default {
           ? cb(new Error('该名称中包含不规范字符，请重新输入'))
           : value.startsWith('_')
           ? cb(new Error('不能以下划线开头，请重新输入'))
+          : cb()
+      }
+    },
+
+    // 校验-后台Host
+    verifyHost(rule, value, cb) {
+      this.form.reqHost = strExcludeBlank(value)
+      const ipStr = value.replaceAll('http://', '')
+      console.log(ipStr, validIpAddress(ipStr), 'kkoo')
+
+      if (cb) {
+        !value.startsWith('http://')
+          ? cb(new Error('IP地址要以http://开头，请重新输入'))
+          : validIpAddress(ipStr)
+          ? cb()
+          : cb(new Error('非法IP地址，请重新输入'))
+      }
+    },
+
+    // 校验-后台Path
+    verifyReqPath(rule, value, cb) {
+      this.form.reqPath = strExcludeBlank(value)
+
+      if (cb) {
+        const str = value.replaceAll('_', '')
+        const excludeStr = str.replaceAll('-', '')
+        console.log(verifyIncludeCnString(excludeStr), 'llpp')
+        verifySpecialString(excludeStr)
+          ? cb(new Error('Path中包含不规范字符，请重新输入'))
+          : verifyIncludeCnString(excludeStr)
+          ? cb(new Error('Path中包含中文字符，请重新输入'))
           : cb()
       }
     },
