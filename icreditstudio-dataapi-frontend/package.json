@@ -11,6 +11,7 @@
     "build:test": "vue-cli-service build --mode test",
     "build:alpha": "vue-cli-service build --mode alpha",
     "build:release": "vue-cli-service build --mode release",
+    "build:rel": "vue-cli-service build --mode rel",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
