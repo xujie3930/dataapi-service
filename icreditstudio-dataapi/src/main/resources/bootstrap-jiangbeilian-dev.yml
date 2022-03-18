@@ -31,7 +31,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     listener:
       # 在侦听器容器中运行的线程数。
-      concurrency: 1
+      concurrency: 5
       #listner负责ack，每调用一次，就立即commit
       ack-mode: manual_immediate
       missing-topics-fatal: false
@@ -77,7 +77,7 @@ logging:
     com.hashtech: debug
 
 host:
-  addr: 192.168.0.125:8108/openapi
+  addr: http://192.168.0.125:8108/openapi
 
 kafkaProducer:
   topic: apiInvoke
