@@ -12,6 +12,7 @@
     "build:alpha": "vue-cli-service build --mode alpha",
     "build:release": "vue-cli-service build --mode release",
     "build:rel": "vue-cli-service build --mode rel",
+    "build:prod": "vue-cli-service build --mode prod",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
