@@ -59,7 +59,7 @@ spring.redis.lettuce:
 #    password: 123456
 
 host:
-  addr: https://nanjing.opendata.cn/data-pf/openapi
+  addr: https://njnaopen.nanjingdata.cn/data-pf/openapi
 
 kafkaProducer:
   topic: apiInvoke
