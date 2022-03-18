@@ -17,7 +17,7 @@ import org.springframework.context.annotation.FilterType;
 @SpringBootApplication
 @ComponentScan(value = "com.jinninghui", excludeFilters = {
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = {
-                "com.jinninghui.datasphere.icreditstudio.framework.result.FilterConfig"
+                "com.jinninghui.datasphere.icreditstudio.framework.result.FilterConfig","com.jinninghui.datasphere.icreditstudio.framework.result.XssFilter"
         })
 })
 public class DataApiApplication {
