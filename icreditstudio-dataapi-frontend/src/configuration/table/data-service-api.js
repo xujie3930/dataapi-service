@@ -62,7 +62,7 @@ export default that => ({
       label: '接口来源',
       prop: 'interfaceSource',
       width: 160,
-      formatter: ({ type }) => interfaceSource_TYPE[type]
+      formatter: ({ interfaceSource }) => interfaceSource_TYPE[interfaceSource]
     },
     {
       type: 'statusText',
