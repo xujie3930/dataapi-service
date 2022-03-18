@@ -64,6 +64,13 @@ public class ResultReturningAspect {
     private Set<String> getUserIds(Object obj, Set<String> set) throws IllegalAccessException {
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
+            field.setAccessible(true);
+            if (field.get(obj) instanceof Collection){
+                Collection collection = (Collection) field.get(obj);
+                for (Object junior : collection) {
+                    getUserIds(junior, set);
+                }
+            }
             if (returnSet.contains(field.getName())){
                 //丢到统一的List中
                 addToList(obj, field, set);

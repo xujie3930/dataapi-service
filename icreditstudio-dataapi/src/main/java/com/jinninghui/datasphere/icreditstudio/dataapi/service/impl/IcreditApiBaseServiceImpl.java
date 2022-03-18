@@ -770,15 +770,19 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         }
         log.info("发布耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //返回参数
-        startTime = System.currentTimeMillis();
         ApiSaveResult apiSaveResult = new ApiSaveResult();
         apiSaveResult.setId(apiBaseEntity.getId());
         ApiGenerateSaveResult generateApiSaveResult = new ApiGenerateSaveResult();
         BeanUtils.copyProperties(generateApiEntity, generateApiSaveResult);
         apiSaveResult.setApiGenerateSaveRequest(generateApiSaveResult);
+        startTime = System.currentTimeMillis();
         List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(apiParamEntityList, ApiParamSaveResult.class);
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
         publish(userId, new ApiPublishRequest(apiBaseEntity.getId(), ApiPublishStatusEnum.PUBLISHED.getCode()));
+        //只对入参做筛选
+        apiParamEntityList = apiParamEntityList.stream()
+                .filter((IcreditApiParamEntity a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
+                .collect(Collectors.toList());
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         apiSaveResult.setDesc(getInterfaceAddress(apiBaseEntity, apiParamList));
         log.info("组合返回参数耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
@@ -786,6 +790,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     public BusinessResult<Boolean> publish(String userId, ApiPublishRequest request) {
+        long startTime = System.currentTimeMillis();
         apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus());
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getId());
         if(ApiPublishStatusEnum.NO_PUBLISHED.getCode().equals(request.getPublishStatus())){//停止发布
@@ -817,6 +822,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseEntity.setPublishTime(new Date());
             saveOrUpdate(apiBaseEntity);
         }
+        log.info("发布耗时:{}毫秒", System.currentTimeMillis() - startTime);
         return BusinessResult.success(true);
     }
 
