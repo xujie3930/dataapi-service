@@ -58,14 +58,9 @@ spring.redis.lettuce:
     max-wait: -1
 #    password: 123456
 
-# swagger 登录认证
-knife4j:
-  basic:
-    enable: false
-    ## Basic认证用户名
-    username: admin
-    ## Basic认证密码
-    password: admin123456
-  production: false #默认是false ,屏蔽所有Swagger的相关资源
-  enable: true #是否开启swagger
+host:
+  addr: https://nanjing.opendata.cn/data-pf/openapi
+
+kafkaProducer:
+  topic: apiInvoke
 

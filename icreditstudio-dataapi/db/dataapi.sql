@@ -388,3 +388,4 @@ ALTER TABLE icredit_api_log ADD trace_id varchar(40) COMMENT 'kakafa幂等性ID'
 ALTER TABLE icredit_api_base ADD interface_source tinyint(1) COMMENT 'API来源：0-内部，1-外部';
 alter table icredit_app_group change `desc` `desc` varchar(255) COMMENT '分组描述';
 alter table icredit_work_flow change `desc` `desc` varchar(255) COMMENT '业务流程描述';
+alter table icredit_api_base change `desc` `desc` varchar(2000) COMMENT 'sql描述';

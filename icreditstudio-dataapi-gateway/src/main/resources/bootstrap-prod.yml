@@ -1,6 +1,6 @@
 spring:
   kafka:
-    bootstrap-servers: "192.168.0.120:9091,192.168.0.120:9092,192.168.0.120:9093"
+    bootstrap-servers: "192.168.211.10:9092,192.168.211.5:9092,192.168.211.6:9092"
     producer:
       # 发生错误后，消息重发的次数。
       retries: 0
@@ -35,33 +35,19 @@ spring:
       #listner负责ack，每调用一次，就立即commit
       ack-mode: manual_immediate
       missing-topics-fatal: false
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 192.168.0.234:8848
-        group: RELEASE
-  datasource:
-    url: "jdbc:mysql://192.168.0.112:3306/daas?useSSL=false&useUnicode=true&characterEncoding=utf8"
-    username: 'jodp'
-    password: 'jodp@2018'
 
   redis:
-    host: 192.168.0.125
-    port: 6379
-    timeout: 20000
-  #    cluster:
-  #      nodes: 192.168.0.32:7001,192.168.0.32:7002,192.168.0.32:7003,192.168.0.32:7004,192.168.0.32:7005
-#      maxRedirects: 6
-    lettuce:
-      pool:
-        max-active: 8
-        min-idle: 0
-        max-idle: 8
-        max-wait: -1
-#    password: 123456
+    host: 192.168.211.2 # Redis服务器地址
+    database: 0 # Redis数据库索引（默认为0）
+    port: 6379 # Redis服务器连接端口
+    timeout: 3000ms # 连接超时时间（毫秒）
+    password: VQ1eWwR3
 
-host:
-  addr: http://192.168.0.234:8108/openapi
+logging:
+    #  file: ../logs/api-gateway/api-gateway.log
+    #  level:
+    #    root: info
+  config: classpath:log4j2.xml
+  level:
+    com.hashtech: info
 
-kafkaProducer:
-  topic: apiInvoke

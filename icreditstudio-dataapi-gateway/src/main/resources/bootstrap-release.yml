@@ -35,15 +35,6 @@ spring:
       #listner负责ack，每调用一次，就立即commit
       ack-mode: manual_immediate
       missing-topics-fatal: false
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 192.168.0.234:8848
-        group: RELEASE
-  datasource:
-    url: "jdbc:mysql://192.168.0.112:3306/daas?useSSL=false&useUnicode=true&characterEncoding=utf8"
-    username: 'jodp'
-    password: 'jodp@2018'
 
   redis:
     host: 192.168.0.125
@@ -60,8 +51,11 @@ spring:
         max-wait: -1
 #    password: 123456
 
-host:
-  addr: http://192.168.0.234:8108/openapi
+logging:
+  #  file: ../logs/api-gateway/api-gateway.log
+  #  level:
+  #    root: info
+  config: classpath:log4j2.xml
+  level:
+    com.hashtech: info
 
-kafkaProducer:
-  topic: apiInvoke
