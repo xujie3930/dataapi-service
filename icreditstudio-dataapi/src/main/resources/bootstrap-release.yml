@@ -41,9 +41,9 @@ spring:
         server-addr: 192.168.0.234:8848
         group: RELEASE
   datasource:
-    url: "jdbc:mysql://192.168.0.112:3306/daas?useSSL=false&useUnicode=true&characterEncoding=utf8"
-    username: 'jodp'
-    password: 'jodp@2018'
+    url: "jdbc:mysql://192.168.0.112:3306/dataapi?useSSL=false&useUnicode=true&characterEncoding=utf8"
+    username: 'dataapi'
+    password: 'dataapi@20220318'
 
   redis:
     host: 192.168.0.125
