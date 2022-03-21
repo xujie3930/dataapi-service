@@ -11,6 +11,7 @@ public class ApiSaveResult {
 
     private String id;
     private String apiHiId;
+    private String desc;
     private ApiGenerateSaveResult apiGenerateSaveRequest;
     private List<ApiParamSaveResult> apiParamSaveRequestList;
     private List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList;

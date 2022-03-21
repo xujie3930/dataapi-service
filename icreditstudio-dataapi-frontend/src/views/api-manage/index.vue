@@ -139,6 +139,7 @@
       <GenerateApi
         v-else
         ref="datasourceGenerate"
+        :op-type="opType"
         @on-jump="jumpCallback"
         @on-save="saveCallback"
       />
@@ -153,7 +154,8 @@
     <!-- 新增API分组 -->
     <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
 
-    <VersionLists ref="versionLists" />
+    <!-- 历史版本列表 -->
+    <VersionLists ref="versionLists" @edit-api="editApiCallback" />
 
     <Detail ref="apiDetail" />
 
@@ -284,9 +286,11 @@ export default {
   methods: {
     handleAuthorizeClick() {},
 
-    handleVersionClick({ row }) {
+    // 点击-历史版本
+    handleVersionClick(options) {
       console.log(row, 'rowrow')
-      this.$refs.versionLists.open()
+      const { row } = options ?? {}
+      this.$refs.versionLists.open(row)
     },
 
     // 点击-发布或停止发布确认
@@ -584,9 +588,13 @@ export default {
     },
 
     // 回调-新增数据源生成页面切换
-    jumpCallback() {
+    jumpCallback(opType) {
       this.opType = ''
       this.mixinRetrieveTableData()
+      console.log(opType, 'deee')
+      if (opType === 'edit') {
+        this.handleVersionClick()
+      }
     },
 
     // 回调-新增API
@@ -595,6 +603,16 @@ export default {
         this.opType = ''
         saveType === 1 && this.mixinRetrieveTableData()
       }
+    },
+
+    // 回调-版本历史列表
+    editApiCallback(options) {
+      console.log(options, 'dejji')
+      this.opType = 'edit'
+      this.$refs.versionLists.close()
+      this.$nextTick(() =>
+        this.$refs.datasourceGenerate.open({ ...options, opType: this.opType })
+      )
     },
 
     // 回调-新增业务流程或API分组
@@ -614,7 +632,7 @@ export default {
       }
     },
 
-    // 获取某个分组下的api列表
+    // 获取-某个分组下的api列表
     fetchApiGroupList() {
       const params = {}
       this.isTreeLoading = true

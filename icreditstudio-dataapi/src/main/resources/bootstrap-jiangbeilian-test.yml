@@ -1,6 +1,6 @@
 spring:
   kafka:
-    bootstrap-servers: "192.168.0.94:9091,192.168.0.94:9092,192.168.0.94:9093"
+    bootstrap-servers: "192.168.0.120:9091,192.168.0.120:9092,192.168.0.120:9093"
     producer:
       # 发生错误后，消息重发的次数。
       retries: 0
@@ -31,7 +31,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     listener:
       # 在侦听器容器中运行的线程数。
-      concurrency: 1
+      concurrency: 5
       #listner负责ack，每调用一次，就立即commit
       ack-mode: manual_immediate
       missing-topics-fatal: false
@@ -39,7 +39,7 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.0.107:8848
-        group: JIANGBEILIANTEST
+        group: jodptest
   datasource:
     url: "jdbc:mysql://192.168.0.193:3306/dataapi?useSSL=false&useUnicode=true&characterEncoding=utf8"
     username: 'root'
@@ -77,8 +77,8 @@ logging:
     com.hashtech: debug
 
 host:
-  addr: 192.168.0.201:8108/openapi
+  addr: http://192.168.0.107:8108/openapi
 
 kafkaProducer:
-  topic: apiInvoke_test
+  topic: apiInvoke
 

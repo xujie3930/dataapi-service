@@ -15,4 +15,8 @@
         </if>
         limit 1
     </select>
+
+    <delete id="removeByApiId">
+        delete from icredit_generate_api where api_base_id = #{apiId}
+    </delete>
 </mapper>

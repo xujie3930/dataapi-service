@@ -376,15 +376,22 @@ ALTER TABLE `dataapi`.icredit_app ADD generateId varchar(30) COMMENT '应用id';
 
 ALTER TABLE `dataapi`.icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
 
-ALTER TABLE `dataapi`.icredit_app_group ADD generate_id varchar(30) COMMENT '分组id';
+ALTER TABLE icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
 
-ALTER TABLE `dataapi`.icredit_app DROP app_flag;
+ALTER TABLE icredit_app_group ADD generate_id varchar(30) COMMENT '分组id';
+ALTER TABLE icredit_app ADD generate_id varchar(30) COMMENT '应用id';
 
-ALTER TABLE `dataapi`.icredit_api_log ADD api_type tinyint(1) COMMENT 'api类型';
-ALTER TABLE `dataapi`.icredit_api_log ADD exception_detail text COMMENT '异常详情';
-ALTER TABLE `dataapi`.icredit_api_log ADD execute_sql text COMMENT '执行sql';
-ALTER TABLE `dataapi`.icredit_api_log ADD trace_id varchar(40) COMMENT 'kakafa幂等性ID';
+ALTER TABLE icredit_app DROP app_flag;
 
+ALTER TABLE icredit_api_log ADD api_type tinyint(1) COMMENT 'api类型';
+ALTER TABLE icredit_api_log ADD exception_detail text COMMENT '异常详情';
+ALTER TABLE icredit_api_log ADD execute_sql text COMMENT '执行sql';
+ALTER TABLE icredit_api_log ADD trace_id varchar(40) COMMENT 'kakafa幂等性ID';
+
+ALTER TABLE icredit_api_base ADD interface_source tinyint(1) COMMENT 'API来源：0-内部，1-外部';
+alter table icredit_app_group change `desc` `desc` varchar(255) COMMENT '分组描述';
+alter table icredit_work_flow change `desc` `desc` varchar(255) COMMENT '业务流程描述';
+alter table icredit_api_base change `desc` `desc` text COMMENT 'sql描述';
 ALTER TABLE `dataapi`.icredit_api_base ADD req_host varchar(30) COMMENT '后台服务Host';
 ALTER TABLE `dataapi`.icredit_api_base ADD req_path varchar(255) COMMENT '后台path';
 
