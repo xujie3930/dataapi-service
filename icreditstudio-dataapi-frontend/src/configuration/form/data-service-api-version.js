@@ -3,27 +3,23 @@
  * @Date: 2022-02-18
  */
 
-export default [
+export default that => [
   {
     type: 'text',
     label: '发布人',
     model: '',
-    ruleProp: 'name',
+    ruleProp: 'publishUser',
     isSearch: true
   },
 
   {
     type: 'select',
     label: '版本号',
-    ruleProp: 'publishStatus',
+    ruleProp: 'apiVersion',
     model: '',
     inline: true,
     isSearch: true,
-    options: [
-      { value: '', label: '全部' },
-      { value: 2, label: '已发布' },
-      { value: 1, label: '未发布' },
-      { value: 0, label: '待发布' }
-    ]
+    filterable: true,
+    options: that.versionOptions
   }
 ]

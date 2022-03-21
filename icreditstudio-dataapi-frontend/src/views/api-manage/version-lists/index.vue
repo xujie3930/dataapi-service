@@ -57,11 +57,8 @@ export default {
     return {
       selection: [],
       currentRow: {},
-      mixinTableData: [
-        { name: 11, publishStatus: 2 },
-        { name: 2323, publishStatus: 1 }
-      ],
-      formOption: dataServiceApiVersionForm,
+      versionOptions: [],
+      formOption: dataServiceApiVersionForm(this),
       tableConfiguration: tableServiceApiVersionTableConfig(this),
       mixinSearchFormConfig: { models: { apiVersion: '', publishUser: '' } },
       fetchConfig: { retrieve: { url: '/apiHistory/list', method: 'post' } }
@@ -73,9 +70,11 @@ export default {
       row && (this.currentRow = row)
       this.$refs.baseDialog.open()
       this.mixinRetrieveTableData()
+      this.fetchApiVersionOptions()
     },
 
     close() {
+      this.mixinHandleReset(false)
       this.$refs.baseDialog.close()
     },
 
@@ -83,7 +82,6 @@ export default {
 
     // 点击-查看详情
     handleApiDetailClick({ row }) {
-      console.log(row, '123123')
       this.$refs.versionDetail.open(row)
     },
 
@@ -166,11 +164,24 @@ export default {
       )
     },
 
-    // 接口-获取Api版本列表
-    fetchVersionList() {
-      API.getApiHistoryVersion()
-        .then(() => {})
-        .finally(() => {})
+    // 接口-获取版本号Options
+    fetchApiVersionOptions() {
+      API.getHistoryApiVesionOptions({ apiId: this.currentRow.id }).then(
+        ({ success, data }) => {
+          if (success && data) {
+            this.versionOptions = data.apiVersions.reverse().map(item => ({
+              label: `v${item}`,
+              value: item
+            }))
+
+            const versionObj = this.mixinSearchFormItems[1]
+            this.mixinSearchFormItems.splice(
+              1,
+              Object.assign(versionObj, { options: this.versionOptions })
+            )
+          }
+        }
+      )
     },
 
     interceptorsRequestRetrieve(param) {

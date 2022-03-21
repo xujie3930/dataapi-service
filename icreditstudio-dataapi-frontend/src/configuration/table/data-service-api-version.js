@@ -35,6 +35,7 @@ export default that => ({
       type: 'text',
       label: '版本',
       prop: 'apiVersion',
+      width: 100,
       formatter: ({ apiVersion }) => `v${apiVersion}`
     },
     {
@@ -46,7 +47,7 @@ export default that => ({
       type: 'text',
       label: '发布人',
       prop: 'publishUser',
-      width: 80
+      width: 100
     },
     {
       type: 'date',
