@@ -13,6 +13,7 @@ public class GenerateApiResult {
     private Integer model;
     //数据源名称，数据源生成API方式独有字段
     private String databaseName;
+    private String datasourceId;
     //数据表名称，数据源生成API方式独有字段
     private String tableName;
 }

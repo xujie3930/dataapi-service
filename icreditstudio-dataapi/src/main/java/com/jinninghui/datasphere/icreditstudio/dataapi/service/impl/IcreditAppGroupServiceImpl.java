@@ -118,11 +118,11 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     @Override
     public BusinessResult<Boolean> renameById(AppGroupRenameRequest request) {
         StringLegalUtils.checkId(request.getId());
-        BusinessResult<Boolean> checkResult = checkAppGroupName(new CheckAppGroupNameRequest(request.getId(), request.getNewName()));
+        BusinessResult<Boolean> checkResult = checkAppGroupName(new CheckAppGroupNameRequest(request.getId(), request.getName()));
         if(checkResult.getData()){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000047.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000047.getMessage());
         }
-        appGroupMapper.renameById(request.getId(), request.getNewName());
+        appGroupMapper.renameById(request.getId(), request.getName(), request.getDesc());
         return BusinessResult.success(true);
     }
 
