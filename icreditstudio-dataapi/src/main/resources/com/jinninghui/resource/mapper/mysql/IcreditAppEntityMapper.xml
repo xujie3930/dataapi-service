@@ -52,4 +52,26 @@
         </where>
         limit 1
     </select>
+
+    <select id="findEnableAppIdByAppGroupIds" resultType="java.lang.String">
+        select id
+        from icredit_app
+        where del_flag = 0
+        and is_enable = 1
+        and app_group_id in
+        <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
+            #{appGroupId}
+        </foreach>
+        limit 1
+    </select>
+
+    <select id="getIdsByAppGroupIds" resultType="java.lang.String">
+        select id
+        from icredit_app
+        where del_flag = 0
+        and app_group_id in
+        <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
+            #{appGroupId}
+        </foreach>
+    </select>
 </mapper>
