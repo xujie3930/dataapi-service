@@ -135,7 +135,9 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getMessage());
         }
         List<String> ids = appService.getIdsByAppGroupIds(request.getIds());
-        appService.removeByIds(ids);
+        if(!CollectionUtils.isEmpty(ids)) {
+            appService.removeByIds(ids);
+        }
         return BusinessResult.success(removeByIds(request.getIds()));
     }
 }
