@@ -19,9 +19,9 @@ export default that => ({
   expandRowKeys: that.expandRowKeys,
   group: [
     {
-      type: 'index',
-      width: '80px',
-      label: '序号'
+      type: 'selection',
+      width: '80px'
+      // label: '序号'
     },
     {
       type: 'text',
@@ -82,28 +82,28 @@ export default that => ({
       width: 250,
       operationList: [
         // 停用状态
-        // {
-        //   func: that.handleAuthorizeClick,
-        //   label: '启用',
-        //   visible: ({ row }) => row.isEnable === 0
-        // },
-        // {
-        //   func: that.handleAuthorizeClick,
-        //   label: '编辑',
-        //   visible: ({ row }) => row.isEnable === 0
-        // },
-        // {
-        //   func: that.handleAuthorizeClick,
-        //   label: '删除',
-        //   visible: ({ row }) => row.isEnable === 0
-        // },
+        {
+          func: that.handleAuthorizeClick,
+          label: '启用',
+          visible: ({ row }) => row.isEnable === 0
+        },
+        {
+          func: that.handleAuthorizeClick,
+          label: '编辑',
+          visible: ({ row }) => row.isEnable === 0
+        },
+        {
+          func: that.handleAuthorizeClick,
+          label: '删除',
+          visible: ({ row }) => row.isEnable === 0
+        },
 
         // 启用状态
-        // {
-        //   func: that.handleAuthorizeClick,
-        //   label: '停用',
-        //   visible: ({ row }) => row.isEnable
-        // },
+        {
+          func: that.handleAuthorizeClick,
+          label: '停用',
+          visible: ({ row }) => row.isEnable
+        },
         {
           func: that.handleAuthorizeClick,
           label: '授权',
@@ -120,17 +120,17 @@ export default that => ({
           func: that.handleAddAppClick,
           label: '新增应用',
           visible: ({ row }) => 'children' in row
+        },
+        {
+          func: that.handleEditGroupClick,
+          label: '编辑分组',
+          visible: ({ row }) => 'children' in row
+        },
+        {
+          func: that.handleAddAppClick,
+          label: '删除分组',
+          visible: ({ row }) => 'children' in row
         }
-        // {
-        //   func: that.handleAddAppClick,
-        //   label: '编辑分组',
-        //   visible: ({ row }) => 'children' in row
-        // },
-        // {
-        //   func: that.handleAddAppClick,
-        //   label: '删除分组',
-        //   visible: ({ row }) => 'children' in row
-        // }
       ]
     }
   ]

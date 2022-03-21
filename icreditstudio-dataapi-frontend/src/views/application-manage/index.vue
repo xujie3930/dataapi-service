@@ -145,6 +145,20 @@ export default {
       this.$refs.addApp.open({ row, title: '新增应用', opType: 'add' })
     },
 
+    // 点击-编辑应用分组
+    handleEditGroupClick({ row }) {
+      this.$refs.addAppGroup.open({
+        title: '编辑应用分组',
+        opType: 'edit',
+        row
+      })
+    },
+
+    // 点击-删除应用删除
+    handleDeleteGroupClick({ row }) {
+      console.log(row, 'row')
+    },
+
     // 点击-详情
     handleDetailClick({ row }) {
       this.detailVisible = true
