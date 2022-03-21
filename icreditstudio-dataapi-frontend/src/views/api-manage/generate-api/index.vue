@@ -150,7 +150,7 @@
                 style="width: 100%"
                 :disabled="options.opType === 'add'"
                 v-model="form.apiGroupId"
-                :props="{ expandTrigger: 'hover' }"
+                :props="cascaderProps"
                 :options="cascaderOptions"
               ></el-cascader>
             </el-form-item>
@@ -544,8 +544,14 @@ export default {
       datasourceOptions: [],
       options: {},
       cascaderOptions: [],
+      cascaderProps: {
+        // expandTrigger: 'hover',
+        lazy: true,
+        lazyLoad: this.cascaderLazyLoader
+      },
       form: {
         id: '',
+        apiHiId: '',
         type: 0,
         path: '',
         name: '',
@@ -643,8 +649,11 @@ export default {
       this.pageLoading = true
 
       if (opType === 'add') {
-        this.cascaderOptions = cascaderOptions
-        this.form.apiGroupId = cascaderOptions[0].children[0].value
+        // this.cascaderOptions = cascaderOptions
+        this.form.apiGroupId = [
+          cascaderOptions[0].value,
+          cascaderOptions[0].children[0].value
+        ]
         this.fetchDataApiPath()
       }
 
@@ -747,15 +756,17 @@ export default {
       }
       this.$refs.form.validate(valid => {
         if (valid) {
-          // eslint-disable-next-line no-unused-vars
+          const { opType } = this.options
+          const { apiGroupId, ...restForm } = this.form
           const params = {
             saveType,
-            ...this.form
+            apiGroupId: apiGroupId[1],
+            ...restForm
           }
 
           this[messageMapping[saveType].loading] = true
 
-          API.addApiInfo(params)
+          API[opType === 'add' ? 'addApiInfo' : 'editApiInfo'](params)
             .then(({ success, data }) => {
               if (success) {
                 const {
@@ -848,6 +859,24 @@ export default {
       this.form[`register${key}ParamSaveRequestList`].splice(options.$index, 1)
     },
 
+    // 懒加载
+    cascaderLazyLoader(node, resolve) {
+      const { level, data } = node
+      console.log(level, node, 'llppp')
+      switch (level) {
+        case 0:
+          this.fetchBusinessProcessList(resolve)
+          break
+        case 1:
+          this.fetchApiGroup(data.value, resolve)
+          break
+
+        default:
+          resolve([])
+          break
+      }
+    },
+
     // 获取-新增数据源生成时的APIPath
     fetchDataApiPath() {
       API.getDataApiPath()
@@ -911,8 +940,9 @@ export default {
         .then(({ success, data }) => {
           if (success && data) {
             console.log(data, 'data')
-            const { apiPath } = data
+            const { apiPath, workFlowId, apiGroupId } = data
             const fieldArr = [
+              'apiHiId',
               'type',
               'name',
               'desc',
@@ -923,10 +953,47 @@ export default {
             ]
             fieldArr.forEach(item => (this.form[item] = data[item]))
             this.form.path = apiPath
+            this.form.apiGroupId = [workFlowId, apiGroupId]
           }
         })
         .finally(() => {
           this.pageLoading = false
+        })
+    },
+
+    // 获取-业务流程
+    fetchBusinessProcessList(resolve) {
+      API.getBusinessProcess()
+        .then(({ success, data }) => {
+          if (success && data) {
+            const treeData = data.map(({ id, name }) => ({
+              label: name,
+              value: id,
+              leaf: false
+            }))
+            resolve(treeData)
+          }
+        })
+        .catch(() => {
+          resolve([])
+        })
+    },
+
+    // 获取-某个业务流程下的API分组
+    fetchApiGroup(id, resolve) {
+      API.getBusinessProcessChild({ workId: id })
+        .then(({ success, data }) => {
+          if (success && data) {
+            const children = data.map(({ id, name }) => ({
+              label: name,
+              value: id,
+              leaf: true
+            }))
+            resolve(children)
+          }
+        })
+        .catch(() => {
+          resolve([])
         })
     }
   }
