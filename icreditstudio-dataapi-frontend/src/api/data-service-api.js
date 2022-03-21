@@ -66,11 +66,12 @@ const editApiGroupName = params => postAction('/apiGroup/rename', params)
 // 更改API信息
 const editApiInfo = params => postAction('/apiHistory/update', params)
 
-// 获取Api版本列表
-const getApiHistoryVersion = params => postAction('/apiHistory/list', params)
-
 // 获取版本历史的某个Api详情
 const getHistoryApiDetail = params => postAction('/apiHistory/info', params)
+
+// 获取版本历史的某个Api的版本号列表
+const getHistoryApiVesionOptions = params =>
+  postAction('/apiHistory/apiVersions', params)
 
 export default {
   addBusinessProcess,
@@ -85,7 +86,7 @@ export default {
   getDataApiPath,
   getDataApiDetail,
   getHistoryApiDetail,
-  getApiHistoryVersion,
+  getHistoryApiVesionOptions,
   searchProcessOrGroup,
   updateDataApiStatus,
   checkSqlCorrectness,
