@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditGenerateApiMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditGenerateApiService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -18,13 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class IcreditGenerateApiServiceImpl extends ServiceImpl<IcreditGenerateApiMapper, IcreditGenerateApiEntity> implements IcreditGenerateApiService {
 
-    @Autowired
+    @Resource
     private IcreditGenerateApiMapper generateApiMapper;
-
-    @Override
-    public IcreditGenerateApiEntity getByApiBaseId(String id) {
-        return generateApiMapper.getByApiBaseId(id);
-    }
 
     @Override
     public IcreditGenerateApiEntity getByApiIdAndVersion(String id, Integer apiVersion) {

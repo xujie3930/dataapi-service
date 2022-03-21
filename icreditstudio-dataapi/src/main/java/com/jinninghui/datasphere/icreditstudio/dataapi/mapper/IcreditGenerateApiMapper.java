@@ -14,7 +14,5 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface IcreditGenerateApiMapper extends BaseMapper<IcreditGenerateApiEntity> {
 
-    IcreditGenerateApiEntity getByApiBaseId(@Param("id") String id);
-
     IcreditGenerateApiEntity getByApiIdAndVersion(@Param("id") String id, @Param("apiVersion") Integer apiVersion);
 }

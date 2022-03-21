@@ -10,6 +10,7 @@ import java.util.List;
 public class ApiSaveResult {
 
     private String id;
+    private String apiHiId;
     private ApiGenerateSaveResult apiGenerateSaveRequest;
     private List<ApiParamSaveResult> apiParamSaveRequestList;
     private List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList;

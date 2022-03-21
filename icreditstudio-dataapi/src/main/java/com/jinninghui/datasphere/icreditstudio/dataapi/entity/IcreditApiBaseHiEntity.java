@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.jinninghui.datasphere.icreditstudio.framework.result.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -22,7 +23,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("icredit_api_base_hi")
-public class IcreditApiBaseHiEntity implements Serializable {
+public class IcreditApiBaseHiEntity extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -57,16 +58,5 @@ public class IcreditApiBaseHiEntity implements Serializable {
     private Date publishTime;
 
     private String apiBaseId;
-
-    private Date createTime;
-
-    private String createBy;
-
-    private Date updateTime;
-
-    private String updateBy;
-
-    private Integer delFlag;
-
 
 }
