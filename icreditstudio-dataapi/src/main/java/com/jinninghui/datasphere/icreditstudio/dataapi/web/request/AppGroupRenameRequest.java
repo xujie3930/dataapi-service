@@ -6,6 +6,7 @@ import lombok.Data;
 public class AppGroupRenameRequest {
 
     private String id;
-    private String newName;
+    private String name;
+    private String desc;
 
 }

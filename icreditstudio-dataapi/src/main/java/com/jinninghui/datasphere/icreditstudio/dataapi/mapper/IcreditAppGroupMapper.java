@@ -27,5 +27,5 @@ public interface IcreditAppGroupMapper extends BaseMapper<IcreditAppGroupEntity>
 
     String findNameById(@Param("id") String id);
 
-    void renameById(@Param("id") String id, @Param("name") String name);
+    void renameById(@Param("id") String id, @Param("name") String name, @Param("desc") String desc);
 }
