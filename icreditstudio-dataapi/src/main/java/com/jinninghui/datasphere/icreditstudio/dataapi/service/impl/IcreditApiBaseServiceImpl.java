@@ -65,6 +65,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Resource
     private IcreditGenerateApiService generateApiService;
     @Resource
+    private IcreditApiBaseHiService apiBaseHiService;
+    @Resource
     private IcreditApiParamService apiParamService;
     @Resource
     private IcreditApiGroupService apiGroupService;
@@ -154,14 +156,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     public BusinessResult<ApiSaveResult> createApi(String userId, DatasourceApiSaveParam param) {
         checkApiName(new CheckApiNameRequest(param.getId(), param.getName()));
         checkApiPath(new CheckApiPathRequest(param.getId(), param.getPath()));
-        if(ApiTypeEnum.API_REGISTER.getCode().equals(param.getType())) {
-            checkReqPath(param.getReqPath());
-            checkReqHost(param.getReqHost());
-        }
-        //保存api基础信息
+        param.setApiVersion(1);
+        //保存api基础信息、及api历史信息
         IcreditApiBaseEntity apiBaseEntity = new IcreditApiBaseEntity();
         BeanUtils.copyProperties(param, apiBaseEntity);
-        apiBaseEntity.setApiVersion(1);
         if (ApiSaveStatusEnum.API_SAVE.getCode().equals(param.getSaveType())) {//保存
             apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.WAIT_PUBLISH.getCode());
         } else {
@@ -169,10 +167,29 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
         }
+        IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiService.findByApiBaseId(apiBaseEntity.getId());
+        if(null == apiBaseHiEntity) {
+            apiBaseHiEntity = new IcreditApiBaseHiEntity();
+            BeanUtils.copyProperties(apiBaseEntity, apiBaseHiEntity);
+        }else{
+            String apiBaseHiId = apiBaseHiEntity.getId();
+            BeanUtils.copyProperties(apiBaseEntity, apiBaseHiEntity);
+            apiBaseHiEntity.setId(apiBaseHiId);
+        }
         apiBaseEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
         saveOrUpdate(apiBaseEntity);
-
+        apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
+        apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         apiParamService.removeByApiId(apiBaseEntity.getId());
+        return BusinessResult.success(saveApi(userId, param, apiBaseEntity));
+    }
+
+    @Override
+    public ApiSaveResult saveApi(String userId, DatasourceApiSaveParam param, IcreditApiBaseEntity apiBaseEntity) {
+        if(ApiTypeEnum.API_REGISTER.getCode().equals(param.getType())) {
+            checkReqPath(param.getReqPath());
+            checkReqHost(param.getReqHost());
+        }
         CreateApiInfoBO createApiInfoBO = null;
         List<RegisterApiParamInfo> registerApiParamInfos = new ArrayList<>();
         IcreditGenerateApiEntity generateApiEntity = new IcreditGenerateApiEntity();
@@ -223,7 +240,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
         apiSaveResult.setRegisterRequestParamSaveRequestList(registerRequestParamSaveRequestList);
         apiSaveResult.setRegisterResponseParamSaveRequestList(registerResponseParamSaveRequestList);
-        return BusinessResult.success(apiSaveResult);
+        return apiSaveResult;
     }
 
     private void checkReqPath(String reqPath) {
@@ -263,7 +280,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiParamEntity.setDesc(registerResponseParamSaveRequest.getDesc());
             apiParamEntity.setFieldName(registerResponseParamSaveRequest.getFieldName());
             apiParamEntity.setFieldType(registerResponseParamSaveRequest.getFieldType());
-            apiParamEntity.setIsRequest(registerResponseParamSaveRequest.getIsResponse());
+            apiParamEntity.setIsResponse(registerResponseParamSaveRequest.getIsResponse());
             apiParamEntity.setDefaultValue(registerResponseParamSaveRequest.getDefaultValue());
             apiParamEntityList.add(apiParamEntity);
         }
@@ -463,13 +480,25 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
         }
         //获取其param参数
-        List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiBaseId(id);
-        List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
+        List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiIdAndVersion(id, apiBaseEntity.getApiVersion());
+        List<APIParamResult> apiParamList = new ArrayList<>();
+        List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList = new ArrayList<>();
+        List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList = new ArrayList<>();
+        String address;
+        if(ApiTypeEnum.API_GENERATE.getCode().equals(apiBaseEntity.getType())) {
+            apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
+            List<APIParamResult> params = apiParamList.stream()
+                    .filter((APIParamResult a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
+                    .collect(Collectors.toList());
+            address = getDatasourceInterfaceAddress(apiBaseEntity, params);
+        }else{
+            handleRegisterApiParamInfo(registerRequestParamSaveRequestList, registerResponseParamSaveRequestList, apiParamEntityList);
+            address = getRegisterInterfaceAddress(apiBaseEntity, registerRequestParamSaveRequestList);
+        }
         result.setParamList(apiParamList);
-        List<APIParamResult> params = apiParamList.stream()
-                .filter((APIParamResult a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
-                .collect(Collectors.toList());
-        String address = getInterfaceAddress(apiBaseEntity, params);
+        result.setRegisterRequestParamSaveRequestList(registerRequestParamSaveRequestList);
+        result.setRegisterResponseParamSaveRequestList(registerResponseParamSaveRequestList);
+        result.setParamList(apiParamList);
         result.setInterfaceAddress(address);
         result.setProtocol("HTTP");
         result.setCreateTime(Optional.ofNullable(apiBaseEntity.getCreateTime()).orElse(new Date()).getTime());
@@ -477,7 +506,37 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(result);
     }
 
-    private String getInterfaceAddress(IcreditApiBaseEntity apiBaseEntity, List<APIParamResult> params) {
+    public void handleRegisterApiParamInfo(List<RegisterRequestParamSaveRequest> registerRequestList, List<RegisterResponseParamSaveRequest> registerResponseList, List<IcreditApiParamEntity> apiParamList) {
+        for (IcreditApiParamEntity apiParamEntity : apiParamList) {
+            if(null == apiParamEntity.getIsRequest()){//返回参数
+                RegisterResponseParamSaveRequest registerResponseParam = new RegisterResponseParamSaveRequest();
+                BeanUtils.copyProperties(apiParamEntity, registerResponseParam);
+                registerResponseList.add(registerResponseParam);
+            }
+            if(null == apiParamEntity.getIsResponse()){//请求参数
+                RegisterRequestParamSaveRequest registerRequestParam = new RegisterRequestParamSaveRequest();
+                BeanUtils.copyProperties(apiParamEntity, registerRequestParam);
+                registerRequestList.add(registerRequestParam);
+            }
+        }
+
+    }
+
+    private String getRegisterInterfaceAddress(IcreditApiBaseEntity apiBaseEntity, List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList){
+        StringBuilder address = new StringBuilder(apiBaseEntity.getReqHost()).append("/").append(apiBaseEntity.getReqPath());
+        int size = registerRequestParamSaveRequestList.size();
+        for (int i = 0; i < size; i++) {
+            if(i == 0){
+                address.append("?");
+            }else {
+                address.append("&");
+            }
+            address.append(registerRequestParamSaveRequestList.get(i).getFieldName()).append("=${").append(registerRequestParamSaveRequestList.get(i).getFieldName()).append("}");
+        }
+        return String.valueOf(address);
+    }
+
+    private String getDatasourceInterfaceAddress(IcreditApiBaseEntity apiBaseEntity, List<APIParamResult> params) {
         StringBuilder builder = new StringBuilder(host + "/v" + apiBaseEntity.getApiVersion() + "/" + apiBaseEntity.getPath() + "?");
         for (APIParamResult param : params) {
             //参数拼接like:ID=${ID}
@@ -772,7 +831,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         String querySql;
         String requiredFieldStr = null;
         String responseFieldStr = null;
-        SqlModelInfoBO sqlModelInfo = new SqlModelInfoBO();
+        CreateApiInfoBO sqlModelInfo = new CreateApiInfoBO();
         StringBuffer requiredFields = new StringBuffer();//请求参数
         StringBuffer responseFields = new StringBuffer();//返回参数
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
@@ -827,7 +886,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
         } else {
-            sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+            sqlModelInfo = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             apiParamEntityList = sqlModelInfo.getApiParamEntityList();
             querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
             String[] tableNames = null;
@@ -891,7 +950,11 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         //发布操作 存放信息到redis
         startTime = System.currentTimeMillis();
         if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr);
+            List<RegisterApiParamInfo> registerApiParamInfos = new ArrayList<>();
+            if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
+                BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
+            }
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
         }
         log.info("发布耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //返回参数
@@ -909,7 +972,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 .filter((IcreditApiParamEntity a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
                 .collect(Collectors.toList());
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
-        apiSaveResult.setDesc(getInterfaceAddress(apiBaseEntity, apiParamList));
+        apiSaveResult.setDesc(getDatasourceInterfaceAddress(apiBaseEntity, apiParamList));
         log.info("组合返回参数耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         return BusinessResult.success(apiSaveResult);
     }
@@ -942,7 +1005,11 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr);
+            List<RegisterApiParamInfo> registerApiParamInfos = new ArrayList<>();
+            if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
+                BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
+            }
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr, registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
             saveOrUpdate(apiBaseEntity);
@@ -965,5 +1032,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     public String findPublishedByApiGroupId(String apiGroupId) {
         return apiBaseMapper.findPublishedByApiGroupId(apiGroupId);
+    }
+
+    @Override
+    public void truthDelById(String id) {
+        apiBaseMapper.truthDelById(id);
     }
 }

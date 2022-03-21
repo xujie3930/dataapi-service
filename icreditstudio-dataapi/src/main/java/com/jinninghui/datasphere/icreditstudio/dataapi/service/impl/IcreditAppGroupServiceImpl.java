@@ -9,14 +9,14 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppGroupMap
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.AppQueryListParam;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.CheckAppGroupNameRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppGroupQueryListResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppQueryListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -46,7 +46,10 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
 
     @Override
     public BusinessResult<String> saveDef(String userId, AppGroupSaveRequest request) {
-        checkAppGroupName(new CheckAppGroupNameRequest(request.getId(), request.getName()));
+        BusinessResult<Boolean> checkResult = checkAppGroupName(new CheckAppGroupNameRequest(request.getId(), request.getName()));
+        if(checkResult.getData()){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000047.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000047.getMessage());
+        }
         if(BooleanUtils.isTrue(appGroupMapper.hasExitByGenerateId(request.getGenerateId(), request.getId()))
                 || BooleanUtils.isTrue(appService.hasExitByGenerateId(request.getGenerateId(), request.getId()))){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000013.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000013.getMessage());
@@ -110,5 +113,29 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     @Override
     public String findNameById(String appGroupId) {
         return appGroupMapper.findNameById(appGroupId);
+    }
+
+    @Override
+    public BusinessResult<Boolean> renameById(AppGroupRenameRequest request) {
+        StringLegalUtils.checkId(request.getId());
+        BusinessResult<Boolean> checkResult = checkAppGroupName(new CheckAppGroupNameRequest(request.getId(), request.getNewName()));
+        if(checkResult.getData()){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000047.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000047.getMessage());
+        }
+        appGroupMapper.renameById(request.getId(), request.getNewName());
+        return BusinessResult.success(true);
+    }
+
+    @Override
+    public BusinessResult<Boolean> delByIds(AppGroupDelRequest request) {
+        if(CollectionUtils.isEmpty(request.getIds())){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000048.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000048.getMessage());
+        }
+        if(StringUtils.isNotEmpty(appService.findEnableAppIdByAppGroupIds(request.getIds()))){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getMessage());
+        }
+        List<String> ids = appService.getIdsByAppGroupIds(request.getIds());
+        appService.removeByIds(ids);
+        return BusinessResult.success(removeByIds(request.getIds()));
     }
 }

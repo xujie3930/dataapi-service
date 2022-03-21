@@ -152,4 +152,13 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         return authResult;
     }
 
+    @Override
+    public String findEnableAppIdByAppGroupIds(List<String> ids) {
+        return appMapper.findEnableAppIdByAppGroupIds(ids);
+    }
+
+    @Override
+    public List<String> getIdsByAppGroupIds(List<String> ids) {
+        return appMapper.getIdsByAppGroupIds(ids);
+    }
 }

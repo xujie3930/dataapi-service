@@ -9,6 +9,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppDetailResul
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
+import java.util.List;
+
 /**
  * <p>
  * 应用 服务类
@@ -28,4 +30,8 @@ public interface IcreditAppService extends IService<IcreditAppEntity> {
     BusinessResult<AppDetailResult> detail(AppDetailRequest request);
 
     AuthResult generateAuthResultInfo(String authConfigId, Integer period);
+
+    String findEnableAppIdByAppGroupIds(List<String> ids);
+
+    List<String> getIdsByAppGroupIds(List<String> ids);
 }

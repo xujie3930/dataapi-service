@@ -41,8 +41,8 @@
         from icredit_api_base
         where del_flag = 0
         and api_group_id in
-        <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
-            #{appGroupId}
+        <foreach collection="list" index="index" item="apiGroupId" open="(" close=")" separator=",">
+            #{apiGroupId}
         </foreach>
     </select>
 
@@ -65,4 +65,9 @@
         </if>
         limit 1
     </select>
+
+    <delete id="truthDelById">
+        delete from icredit_api_base
+        where id = #{id}
+    </delete>
 </mapper>
