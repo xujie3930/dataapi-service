@@ -35,11 +35,6 @@ spring:
       #listner负责ack，每调用一次，就立即commit
       ack-mode: manual_immediate
       missing-topics-fatal: false
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 192.168.0.178:8848
-        group: JIANGBEILIANDEV
 
   redis:
     host: 192.168.0.125
@@ -75,7 +70,4 @@ logging:
 
 host:
   addr: 192.168.0.201:8108/openapi
-
-kafkaProducer:
-  topic: apiInvoke_dev
 

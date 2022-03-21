@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: jiangbeilian-dev
   servlet:
     multipart:
       max-file-size: 30MB
@@ -86,3 +86,6 @@ ribbon: # uaa调用os服务，进行超时设置，否则调试时报错，时�
   ConnectTimeout: 500000
 logging:
   config: classpath:log4j2.xml
+
+kafkaProducer:
+  topic: apiInvoke

@@ -1,14 +1,15 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.MicroOauth2ApiFeignClient;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.CommonResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.InternalUserInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.OauthApiService;
-import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -28,5 +29,12 @@ public class OauthApiServiceImpl implements OauthApiService {
             return null;
         }
         return result.getData();
+    }
+
+    @Override
+    public Map<String, String> getUserNameBatch(List<String> userIds) {
+        CommonResult<Map<String, String>> result = microOauth2ApiFeignClient.selUserBatch(userIds);
+        Map<String, String> map = result.getData();
+        return map;
     }
 }
