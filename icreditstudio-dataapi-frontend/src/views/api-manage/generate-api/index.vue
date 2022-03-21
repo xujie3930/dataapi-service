@@ -55,6 +55,7 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="API类型" prop="type">
               <el-select
+                :disabled="options.opType === 'edit'"
                 style="width: 100%"
                 v-model="form.type"
                 placeholder="选择API类型"
@@ -67,6 +68,7 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="API名称" prop="name">
               <el-input
+                :disabled="options.opType === 'edit'"
                 show-word-limit
                 maxlength="50"
                 style="width: 100%"
@@ -84,6 +86,7 @@
           <el-col :lg="{ span: 11 }" v-if="form.type">
             <el-form-item label="API模式" prop="apiGenerateSaveRequest.model">
               <el-select
+                :disabled="options.opType === 'edit'"
                 style="width: 100%"
                 v-model="form.apiGenerateSaveRequest.model"
                 placeholder="选择API类型"
@@ -97,6 +100,7 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="API Path" prop="path">
               <el-input
+                :disabled="options.opType === 'edit'"
                 :maxlength="16"
                 show-word-limit
                 style="width: 100%"
@@ -111,6 +115,7 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="请求方式" prop="requestType">
               <el-select
+                disabled
                 style="width: 100%"
                 v-model="form.requestType"
                 placeholder="请选择请求方式"
@@ -643,6 +648,10 @@ export default {
         this.fetchDataApiPath()
       }
 
+      if (opType === 'edit') {
+        this.fetchDataApiDetail()
+      }
+
       this.fetchSelectOptionsByKey({
         key: 'datasourceOptions',
         methodName: 'getDatasourceOptions'
@@ -887,6 +896,33 @@ export default {
         .then(({ success, data }) => {
           if (success && data) {
             this[key] = data
+          }
+        })
+        .finally(() => {
+          this.pageLoading = false
+        })
+    },
+
+    // 获取-API详情
+    fetchDataApiDetail() {
+      const { apiHiId } = this.options
+      this.pageLoading = true
+      API.getHistoryApiDetail({ apiHiId })
+        .then(({ success, data }) => {
+          if (success && data) {
+            console.log(data, 'data')
+            const { apiPath } = data
+            const fieldArr = [
+              'type',
+              'name',
+              'desc',
+              'reqHost',
+              'reqPath',
+              'registerRequestParamSaveRequestList',
+              'registerResponseParamSaveRequestList'
+            ]
+            fieldArr.forEach(item => (this.form[item] = data[item]))
+            this.form.path = apiPath
           }
         })
         .finally(() => {

@@ -51,7 +51,8 @@ export default that => ({
       type: 'text',
       label: '最新版本号',
       prop: 'apiVersion',
-      width: 100
+      width: 100,
+      formatter: ({ apiVersion }) => `v${apiVersion}`
     },
     {
       type: 'statusText',

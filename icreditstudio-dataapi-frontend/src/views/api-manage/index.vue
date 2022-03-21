@@ -610,6 +610,9 @@ export default {
       console.log(options, 'dejji')
       this.opType = 'edit'
       this.$refs.versionLists.close()
+      this.$nextTick(() =>
+        this.$refs.datasourceGenerate.open({ ...options, opType: this.opType })
+      )
     },
 
     // 回调-新增业务流程或API分组
