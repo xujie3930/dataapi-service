@@ -63,6 +63,9 @@ const editProcessName = params => postAction('/workFlow/rename', params)
 // 更改Api分组名称
 const editApiGroupName = params => postAction('/apiGroup/rename', params)
 
+// 更改API信息
+const editApiInfo = params => postAction('/apiHistory/update', params)
+
 // 获取Api版本列表
 const getApiHistoryVersion = params => postAction('/apiHistory/list', params)
 
@@ -89,5 +92,6 @@ export default {
   deleteProcessItem,
   deleteApiGroupItem,
   editProcessName,
-  editApiGroupName
+  editApiGroupName,
+  editApiInfo
 }
