@@ -82,9 +82,18 @@ export default {
 
   methods: {
     open(options) {
+      const { opType } = options
       this.options = options
       this.$refs.baseDialog.open()
-      this.fetchAppGroupId()
+      if (opType === 'edit') {
+        const { generateId, name, desc } = options.row
+        this.oldGroupName = name
+        this.appGroupForm.generateId = generateId
+        this.appGroupForm.name = name
+        this.appGroupForm.desc = desc
+      } else {
+        this.fetchAppGroupId()
+      }
     },
 
     close() {
@@ -116,10 +125,10 @@ export default {
     // 校验-分组名称是否唯一
     verifyGroupNameUnique(rule, value, cb) {
       this.timerId = null
-      const { id } = this.options
+      const { id, opType } = this.options
       const { name } = this.appGroupForm
 
-      if (id && this.oldGroupName === value) return cb()
+      if (opType === 'edit' && this.oldGroupName === value) return cb()
 
       this.veifyNameLoading = true
       API.checkNameUniqueness({ id, name })
@@ -149,15 +158,25 @@ export default {
 
     // 点击-新增或编辑分组表单
     addAppGroup() {
+      const { opType, row } = this.options
+      const { name, desc } = this.appGroupForm
+      const paramMapping = {
+        add: this.appGroupForm,
+        edit: { id: row?.id, name, desc }
+      }
       this.$refs?.appGroupForm.validate(valid => {
         !valid
           ? this.$refs.baseDialog.setButtonLoading(false)
-          : API.addAppGroup(this.appGroupForm)
+          : API[opType === 'add' ? 'addAppGroup' : 'editAppGroup'](
+              paramMapping[opType]
+            )
               .then(({ success, data }) => {
                 if ((success, data)) {
                   this.$notify.success({
                     title: '操作结果',
-                    message: '新增应用分组成功！',
+                    message: `${
+                      opType === 'add' ? '新增' : '编辑'
+                    }应用分组成功！`,
                     duration: 1500
                   })
                   this.close()
