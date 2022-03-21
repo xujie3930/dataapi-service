@@ -98,22 +98,22 @@ export default that => ({
         {
           func: that.handleVersionClick,
           label: '历史版本'
-        },
-
-        {
-          func: that.handleUpdateStatusClick,
-          label: '发布',
-          visible: ({ row: { publishStatus } }) => publishStatus !== 2
-        },
-        {
-          func: that.handleUpdateStatusClick,
-          label: '停止发布',
-          visible: ({ row: { publishStatus } }) => publishStatus === 2
-        },
-        {
-          func: that.handleDetailClick,
-          label: '详情'
         }
+
+        // {
+        //   func: that.handleUpdateStatusClick,
+        //   label: '发布',
+        //   visible: ({ row: { publishStatus } }) => publishStatus !== 2
+        // },
+        // {
+        //   func: that.handleUpdateStatusClick,
+        //   label: '停止发布',
+        //   visible: ({ row: { publishStatus } }) => publishStatus === 2
+        // },
+        // {
+        //   func: that.handleDetailClick,
+        //   label: '详情'
+        // }
       ]
     }
   ]

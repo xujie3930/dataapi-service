@@ -940,7 +940,14 @@ export default {
         .then(({ success, data }) => {
           if (success && data) {
             console.log(data, 'data')
-            const { apiPath, workFlowId, apiGroupId } = data
+            const {
+              type,
+              apiPath,
+              workFlowId,
+              apiGroupId,
+              paramList,
+              generateApi
+            } = data
             const fieldArr = [
               'apiHiId',
               'type',
@@ -954,6 +961,17 @@ export default {
             fieldArr.forEach(item => (this.form[item] = data[item]))
             this.form.path = apiPath
             this.form.apiGroupId = [workFlowId, apiGroupId]
+
+            if (type === 1) {
+              const { tableName, datasourceId } = generateApi
+              this.form.apiGenerateSaveRequest.tableName = tableName
+              this.form.apiGenerateSaveRequest.datasourceId = datasourceId
+              this.form.apiParamSaveRequestList = paramList
+              this.fetchSelectOptionsByKey({
+                key: 'dataNameOptions',
+                methodName: 'getDataTableOptions'
+              })
+            }
           }
         })
         .finally(() => {
