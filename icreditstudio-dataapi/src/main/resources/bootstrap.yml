@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: jiangbeilian-dev
+    active: dev
   servlet:
     multipart:
       max-file-size: 30MB

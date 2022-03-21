@@ -1,10 +1,12 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ApiPublishRequest {
 
     private String id;

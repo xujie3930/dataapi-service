@@ -14,6 +14,9 @@ export const STATUS_MAPPING = {
 // API类型
 export const API_TYPE = { 0: '注册API', 1: '数据源生成API' }
 
+// 接口来源
+export const interfaceSource_TYPE = { 0: '内部', 1: '外部' }
+
 // API模式
 export const API_MODE = {
   0: '单表模式生成API',

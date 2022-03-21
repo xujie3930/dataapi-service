@@ -3,7 +3,11 @@
  * @Date: 2022-02-18
  */
 
-import { API_TYPE, STATUS_MAPPING } from '@/config/constant'
+import {
+  API_TYPE,
+  STATUS_MAPPING,
+  interfaceSource_TYPE
+} from '@/config/constant'
 
 export default that => ({
   refName: 'dataServiceApi',
@@ -53,6 +57,13 @@ export default that => ({
       prop: 'apiVersion',
       width: 100,
       formatter: ({ apiVersion }) => `v${apiVersion}`
+    },
+    {
+      type: 'text',
+      label: '接口来源',
+      prop: 'interfaceSource',
+      width: 160,
+      formatter: ({ interfaceSource }) => interfaceSource_TYPE[interfaceSource]
     },
     {
       type: 'statusText',

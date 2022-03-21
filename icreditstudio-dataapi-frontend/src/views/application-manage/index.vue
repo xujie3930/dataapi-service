@@ -31,7 +31,7 @@
     >
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
-          <el-button class="jui-button--default" disabled>批量删除</el-button>
+          <!-- <el-button class="jui-button--default" disabled>批量删除</el-button> -->
         </div>
         <div class="header-operate-right">
           <el-button type="primary" @click="handleAddAppGroupClick">

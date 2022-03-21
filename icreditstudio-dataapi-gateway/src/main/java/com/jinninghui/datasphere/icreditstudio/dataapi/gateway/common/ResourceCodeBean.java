@@ -26,6 +26,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_10000013("10000013", "请求失败!"),
         RESOURCE_CODE_10000014("10000014", "授权时间未生效!"),
         RESOURCE_CODE_10000015("10000015", "授权时间已失效!"),
+        RESOURCE_CODE_10000016("10000016", "系统繁忙，请稍后再次尝试!"),
         ;
 
         public final String code;
