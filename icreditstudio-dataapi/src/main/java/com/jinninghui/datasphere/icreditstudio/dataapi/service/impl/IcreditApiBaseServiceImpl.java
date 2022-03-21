@@ -772,7 +772,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         String querySql;
         String requiredFieldStr = null;
         String responseFieldStr = null;
-        SqlModelInfoBO sqlModelInfo = new SqlModelInfoBO();
+        CreateApiInfoBO sqlModelInfo = new CreateApiInfoBO();
         StringBuffer requiredFields = new StringBuffer();//请求参数
         StringBuffer responseFields = new StringBuffer();//返回参数
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
@@ -827,7 +827,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
         } else {
-            sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+            sqlModelInfo = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             apiParamEntityList = sqlModelInfo.getApiParamEntityList();
             querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
             String[] tableNames = null;
@@ -891,7 +891,11 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         //发布操作 存放信息到redis
         startTime = System.currentTimeMillis();
         if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr);
+            List<RegisterApiParamInfo> registerApiParamInfos = new ArrayList<>();
+            if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
+                BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
+            }
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
         }
         log.info("发布耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //返回参数
@@ -942,7 +946,11 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr);
+            List<RegisterApiParamInfo> registerApiParamInfos = new ArrayList<>();
+            if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
+                BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
+            }
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr, registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
             saveOrUpdate(apiBaseEntity);
