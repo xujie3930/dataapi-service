@@ -972,7 +972,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 .filter((IcreditApiParamEntity a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
                 .collect(Collectors.toList());
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
-        apiSaveResult.setDesc(getInterfaceAddress(apiBaseEntity, apiParamList));
+        apiSaveResult.setDesc(getDatasourceInterfaceAddress(apiBaseEntity, apiParamList));
         log.info("组合返回参数耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         return BusinessResult.success(apiSaveResult);
     }
