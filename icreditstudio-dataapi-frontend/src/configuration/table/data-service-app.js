@@ -11,6 +11,7 @@ import {
 
 export default that => ({
   refName: 'dataServiceAppName',
+  id: 'dataServiceAppNameId',
   isBorder: true,
   isStripe: true,
   hasPage: false,
@@ -20,8 +21,8 @@ export default that => ({
   group: [
     {
       type: 'selection',
-      width: '80px'
-      // label: '序号'
+      width: '80px',
+      prop: 'selection'
     },
     {
       type: 'text',
@@ -127,7 +128,7 @@ export default that => ({
           visible: ({ row }) => 'children' in row
         },
         {
-          func: that.handleAddAppClick,
+          func: that.handleDeleteGroupClick,
           label: '删除分组',
           visible: ({ row }) => 'children' in row
         }
