@@ -771,6 +771,7 @@ export default {
               if (success) {
                 const {
                   id,
+                  apiHiId,
                   apiGenerateSaveRequest: gen,
                   apiParamSaveRequestList: param
                 } = data
@@ -782,6 +783,7 @@ export default {
                 })
 
                 this.form.id = id
+                this.form.apiHiId = apiHiId
                 this.form.apiGenerateSaveRequest = gen
                 this.form.apiParamSaveRequestList = param
                 this.oldTableData = param
