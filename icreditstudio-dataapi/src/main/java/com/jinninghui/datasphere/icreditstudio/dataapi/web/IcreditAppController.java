@@ -30,9 +30,9 @@ public class IcreditAppController {
         return appService.saveDef(userId, request);
     }
 
-    @PostMapping("/enableById")
-    BusinessResult<Boolean> enableById(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AppEnableRequest request) {
-        return appService.enableById(userId, request);
+    @PostMapping("/enableOrStop")
+    BusinessResult<Boolean> enableOrStop(@RequestBody AppEnableRequest request) {
+        return appService.enableOrStop(request);
     }
 
     @PostMapping("/detail")

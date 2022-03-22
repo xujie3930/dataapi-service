@@ -15,7 +15,10 @@
         </if>
     </select>
 
-    <delete id="removeByApiId">
+    <delete id="removeByApiIdAndApiVersion">
         delete from icredit_api_param where api_base_id = #{apiId}
+        <if test="apiVersion != null and apiVersion != ''">
+            and api_version = #{apiVersion}
+        </if>
     </delete>
 </mapper>

@@ -23,7 +23,7 @@ public interface IcreditAppService extends IService<IcreditAppEntity> {
 
     BusinessResult<String> saveDef(String userId, AppSaveRequest request);
 
-    BusinessResult<Boolean> enableById(String userId, AppEnableRequest request);
+    BusinessResult<Boolean> enableOrStop(AppEnableRequest request);
 
     Boolean hasExitByGenerateId(String generateId, String appGroupId);
 
