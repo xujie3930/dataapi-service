@@ -16,4 +16,5 @@ public class GenerateApiResult {
     private String datasourceId;
     //数据表名称，数据源生成API方式独有字段
     private String tableName;
+    private String sql;
 }

@@ -17,5 +17,5 @@ public interface IcreditApiParamService extends IService<IcreditApiParamEntity> 
 
     List<IcreditApiParamEntity> getByApiIdAndVersion(String id, Integer apiVersion);
 
-    void removeByApiId(String id);
+    void removeByApiIdAndApiVersion(String id, Integer apiVersion);
 }

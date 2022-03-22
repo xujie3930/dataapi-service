@@ -17,6 +17,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -79,7 +81,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         BeanCopyUtils.copyProperties(apiBaseHiEntity, result);
         result.setApiPath(apiBaseHiEntity.getPath());
         result.setApiHiId(apiBaseHiEntity.getId());
-        result.setId(null);
+        result.setId(apiBaseHiEntity.getApiBaseId());
         //根据不同API类型返回不同对象
         ApiBaseService apiService = apiBaseFactory.getApiService(apiBaseHiEntity.getType());
         apiService.setApiBaseResult(result);
@@ -157,12 +159,49 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         //todo 待发布的编辑，版本号不变
         if(ApiPublishStatusEnum.WAIT_PUBLISH.getCode().equals(apiBaseHiEntity.getPublishStatus())){
             param.setApiVersion(apiBaseHiEntity.getApiVersion());
+            ApiSaveResult apiSaveResult;
+            String apiId = apiBaseEntity.getId();
+            String apiBaseHiId = apiBaseHiEntity.getId();
             if(apiBaseHiEntity.getApiVersion().equals(apiBaseEntity.getApiVersion())){//编辑最新版本，需要更新apiEntity、apiHiEntity、generateApi、apiParam
-
+                BeanUtils.copyProperties(param, apiBaseEntity);
+                apiBaseEntity.setId(apiId);
+                if (ApiSaveStatusEnum.API_SAVE.getCode().equals(param.getSaveType())) {//保存
+                    apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.WAIT_PUBLISH.getCode());
+                    apiBaseEntity.setPublishUser("");
+                    apiBaseEntity.setPublishTime(null);
+                } else {
+                    apiBaseEntity.setPublishStatus(ApiPublishStatusEnum.PUBLISHED.getCode());
+                    apiBaseEntity.setPublishUser(userId);
+                    apiBaseEntity.setPublishTime(new Date());
+                }
+                apiParamService.removeByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
+                BeanUtils.copyProperties(apiBaseEntity, apiBaseHiEntity);
+                apiBaseHiEntity.setId(apiBaseHiId);
+                apiBaseHiEntity.setApiBaseId(apiId);
+                apiBaseService.saveOrUpdate(apiBaseEntity);
+                saveOrUpdate(apiBaseHiEntity);
+                apiSaveResult = apiBaseService.saveApi(userId, param, apiBaseEntity);
+                apiSaveResult.setApiHiId(apiBaseHiEntity.getId());
             }else{//编辑历史版本，需要更新apiHiEntity、generateApi、apiParam
-
+                BeanUtils.copyProperties(param, apiBaseHiEntity);
+                apiBaseHiEntity.setId(apiBaseHiId);
+                apiBaseHiEntity.setApiBaseId(apiId);
+                if (ApiSaveStatusEnum.API_SAVE.getCode().equals(param.getSaveType())) {//保存
+                    apiBaseHiEntity.setPublishStatus(ApiPublishStatusEnum.WAIT_PUBLISH.getCode());
+                } else {
+                    apiBaseHiEntity.setPublishStatus(ApiPublishStatusEnum.PUBLISHED.getCode());
+                    apiBaseHiEntity.setPublishUser(userId);
+                    apiBaseHiEntity.setPublishTime(new Date());
+                }
+                apiParamService.removeByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
+                saveOrUpdate(apiBaseHiEntity);
+                IcreditApiBaseEntity newApiBaseEntity = new IcreditApiBaseEntity();
+                BeanUtils.copyProperties(apiBaseHiEntity, newApiBaseEntity);
+                newApiBaseEntity.setId(apiBaseHiEntity.getApiBaseId());
+                apiSaveResult = apiBaseService.saveApi(userId, param, apiBaseEntity);
+                apiSaveResult.setApiHiId(apiBaseHiEntity.getId());
             }
-            return null;
+            return BusinessResult.success(apiSaveResult);
         }else {
             //未发布、已发布的编辑，版本号 为最新版本号+1
             param.setApiVersion(apiBaseEntity.getApiVersion() + 1);
@@ -177,6 +216,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                 newApiBaseEntity.setPublishUser(userId);
                 newApiBaseEntity.setPublishTime(new Date());
             }
+
             newApiBaseEntity.setId(apiBaseHiEntity.getApiBaseId());
             IcreditApiBaseHiEntity newApiBaseHiEntity = new IcreditApiBaseHiEntity();
             BeanUtils.copyProperties(newApiBaseEntity, newApiBaseHiEntity);

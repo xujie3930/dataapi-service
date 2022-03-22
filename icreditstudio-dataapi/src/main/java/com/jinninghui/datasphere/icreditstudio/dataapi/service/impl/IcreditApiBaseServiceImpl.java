@@ -180,7 +180,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         saveOrUpdate(apiBaseEntity);
         apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
         apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
-        apiParamService.removeByApiId(apiBaseEntity.getId());
+        apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
         return BusinessResult.success(saveApi(userId, param, apiBaseEntity));
     }
 
@@ -836,7 +836,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         StringBuffer responseFields = new StringBuffer();//返回参数
         List<IcreditApiParamEntity> apiParamEntityList = new ArrayList<>();
         startTime = System.currentTimeMillis();
-        apiParamService.removeByApiId(apiBaseEntity.getId());
+        apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
         log.info("移除apiParam耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {//表单生成模式
             boolean isHaveRespField = false;

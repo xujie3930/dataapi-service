@@ -29,7 +29,7 @@ public class IcreditApiParamServiceImpl extends ServiceImpl<IcreditApiParamMappe
     }
 
     @Override
-    public void removeByApiId(String apiId) {
-        apiParamMapper.removeByApiId(apiId);
+    public void removeByApiIdAndApiVersion(String apiId, Integer apiVersion) {
+        apiParamMapper.removeByApiIdAndApiVersion(apiId, apiVersion);
     }
 }
