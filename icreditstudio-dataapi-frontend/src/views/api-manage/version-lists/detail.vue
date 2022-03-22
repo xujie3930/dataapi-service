@@ -76,7 +76,7 @@ export default {
     fetchApiDetailData() {
       this.tableLoading = true
       this.renderParams = cloneDeep(detailConfig)
-      API.getDataApiDetail({ id: this.options.id })
+      API.getHistoryApiDetail({ apiHiId: this.options.apiHiId })
         .then(({ success, data }) => {
           if (success && data) {
             const { paramList, generateApi, ...restData } = data

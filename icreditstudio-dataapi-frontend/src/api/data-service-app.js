@@ -51,6 +51,9 @@ const editAppGroup = params => postAction('/appGroup/rename', params)
 // 删除或批量删除应用分组
 const deleteAppGroup = params => postAction('/appGroup/del', params)
 
+// 启用或停用应用
+const enableOrStopApp = params => postAction('/app/enableOrStop', params)
+
 export default {
   getAppGroupList,
   getAppUniqueId,
@@ -65,5 +68,6 @@ export default {
   updateApiAuthorization,
   getAppAuthDetail,
   editAppGroup,
-  deleteAppGroup
+  deleteAppGroup,
+  enableOrStopApp
 }

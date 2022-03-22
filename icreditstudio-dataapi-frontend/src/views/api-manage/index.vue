@@ -293,49 +293,10 @@ export default {
       this.$refs.versionLists.open(row)
     },
 
-    // 点击-发布或停止发布确认
-    handleUpdateStatusClick({ row }) {
-      const { id, publishStatus } = row
-      if (publishStatus === 2) {
-        this.$confirm(
-          '停止发布后，该版本API将不能授权给其他应用，并且已授权的应用也将全部失效，需重新发布该版本API后才能继续被授权的应用调用，请确认是否停止发布该版本API？',
-          '停止发布',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
-          .then(() => {
-            this.handlePublishDataApi(id, 1)
-          })
-          .catch(() => {})
-      } else {
-        this.handlePublishDataApi(id, 2)
-      }
-    },
-
-    // 点击-发布或停止发布
-    handlePublishDataApi(id, publishStatus) {
-      API.updateDataApiStatus({ id, publishStatus }).then(
-        ({ success, data }) => {
-          if (success && data) {
-            this.$notify.success({
-              title: '操作结果',
-              message: `${publishStatus === 2 ? '发布' : '停止发布'}成功！`,
-              duration: 1500
-            })
-
-            this.mixinRetrieveTableData()
-          }
-        }
-      )
-    },
-
     // 点击-详情
-    handleDetailClick({ row }) {
-      this.$refs.apiDetail.open(row)
-    },
+    // handleDetailClick({ row }) {
+    //   this.$refs.apiDetail.open(row)
+    // },
 
     // 点击-选中当前节点
     handleNodeClick(curData, curNode) {
@@ -624,7 +585,6 @@ export default {
     jumpCallback(opType) {
       this.opType = ''
       this.mixinRetrieveTableData()
-      console.log(opType, 'deee')
       if (opType === 'edit') {
         this.handleVersionClick()
       }
