@@ -21,4 +21,6 @@ public class ApiParamSaveResult {
 
     private Integer isResponse;
 
+    private String defaultValue;
+
 }

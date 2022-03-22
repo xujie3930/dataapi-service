@@ -68,11 +68,24 @@
         :expand-on-click-node="true"
         :default-expanded-keys="defalutExpandKey"
         @current-change="handleNodeChangeClick"
+        @node-contextmenu="handleNodeContextmenuClick"
+        @node-click="handleNodeExpandClick"
+        @node-expand="handleCloseContentMenuClick"
+        @node-collapse="handleCloseContentMenuClick"
       >
-        <!-- @node-click="handleNodeExpandClick" -->
         <div slot-scope="{ node, data }" :id="node.id" class="custom-tree-node">
           <JSvg class="jsvg-icon" :svg-name="data.icon"></JSvg>
+
+          <el-input
+            style="width: 100%"
+            size="mini"
+            v-if="data.isRename"
+            v-model.trim="data.name"
+            @blur="handleTreeNodeInputBlur(data, node)"
+          ></el-input>
+
           <el-tooltip
+            v-else
             effect="light"
             :disabled="isTooltipDisabled"
             :content="data.name"
@@ -126,6 +139,7 @@
       <GenerateApi
         v-else
         ref="datasourceGenerate"
+        :op-type="opType"
         @on-jump="jumpCallback"
         @on-save="saveCallback"
       />
@@ -140,9 +154,47 @@
     <!-- 新增API分组 -->
     <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
 
-    <VersionLists ref="versionLists" />
+    <!-- 历史版本列表 -->
+    <VersionLists ref="versionLists" @edit-api="editApiCallback" />
 
     <Detail ref="apiDetail" />
+
+    <!-- 右键菜单 -->
+    <div
+      class="contentmenu"
+      v-if="isShowContentmenu"
+      :style="contentMenuStyle"
+      @click="handleContentmenuCommandClick"
+    >
+      <p
+        v-if="!curNodeData.workId"
+        data-command="addGroup"
+        class="contentmenu-label"
+      >
+        新增API分组
+      </p>
+      <p
+        v-if="curNodeData.id !== '0'"
+        data-command="rename"
+        class="contentmenu-label"
+      >
+        重命名
+      </p>
+      <p
+        v-if="curNodeData.id !== '0' && curNodeData.workId"
+        data-command="view"
+        class="contentmenu-label"
+      >
+        查看
+      </p>
+      <p
+        v-if="curNodeData.id !== '0'"
+        data-command="delete"
+        class="contentmenu-label"
+      >
+        删除
+      </p>
+    </div>
   </div>
 </template>
 
@@ -182,6 +234,7 @@ export default {
       selectValue: '',
       searchLoading: false,
       addPopovervisible: false,
+      isShowContentmenu: false,
       isRefreshTreeData: false,
       isTreeLoading: false,
       isTooltipDisabled: false,
@@ -201,7 +254,15 @@ export default {
       treeData: [],
       treeProps: {
         isLeaf: 'leaf'
-      }
+      },
+      contentMenuStyle: {
+        top: 0,
+        left: '125px'
+      },
+      contentmenuCommand: '',
+      curEditName: '',
+      curNode: {},
+      curNodeData: {}
     }
   },
 
@@ -213,12 +274,23 @@ export default {
     }
   },
 
+  watch: {
+    isShowContentmenu(nVal) {
+      const { addEventListener, removeEventListener } = document.body
+      nVal
+        ? addEventListener('click', this.handleCloseContentMenuClick)
+        : removeEventListener('click', this.handleCloseContentMenuClick)
+    }
+  },
+
   methods: {
     handleAuthorizeClick() {},
 
-    handleVersionClick({ row }) {
+    // 点击-历史版本
+    handleVersionClick(options) {
       console.log(row, 'rowrow')
-      this.$refs.versionLists.open()
+      const { row } = options ?? {}
+      this.$refs.versionLists.open(row)
     },
 
     // 点击-发布或停止发布确认
@@ -270,7 +342,7 @@ export default {
       console.log('curData, curNode=', curData, curNode)
     },
 
-    // 点击-左侧树顶部按钮
+    // 点击-左侧树顶部按钮-新增流程或分组
     handleCommandClick(command) {
       this.currentTreeNodeId = this.$refs?.tree.getCurrentKey()
       const { workId } = this.$refs?.tree.getCurrentNode() || {}
@@ -310,6 +382,185 @@ export default {
           this.mixinRetrieveTableData()
         })
       }
+    },
+
+    handleNodeExpandClick() {
+      this.handleCloseContentMenuClick()
+    },
+
+    // 点击-右键
+    handleNodeContextmenuClick(evt, data, node) {
+      console.log(evt, data, node)
+      // 默认API分组无右键操作
+      if (data.id === '000') return
+      const { left, top } = this.getNextContextMenuPostion(evt)
+      this.contentMenuStyle.top = `${top}px`
+      this.contentMenuStyle.left = `${left}px`
+      this.isShowContentmenu = !this.isShowContentmenu
+      this.curNode = node
+      this.curNodeData = data
+    },
+
+    // 获取-右键菜单栏弹出位置
+    getNextContextMenuPostion(evt) {
+      const { clientX: x, clientY: y } = evt
+
+      let html = document.documentElement,
+        vx = html.clientWidth,
+        vy = html.clientHeight,
+        mw = 100,
+        mh = 100
+
+      return {
+        left: x + mw > vx ? vx - mw : x,
+        top: y + mh > vy ? vy - mh : y
+      }
+    },
+
+    // 点击-右键菜单选项选中
+    handleContentmenuCommandClick(evt) {
+      const { command } = evt.target?.dataset ?? {}
+      this.contentmenuCommand = command
+
+      switch (command) {
+        case 'rename':
+          this.handleTreeNodeInputFocus()
+          break
+
+        case 'delete':
+          this.handleTreeNodeDelete()
+          break
+
+        case 'addGroup':
+          this.$refs.addGroupDialog.open({
+            workId: this.curNodeData.id,
+            opType: 'addGroup'
+          })
+          break
+      }
+    },
+
+    // 点击-节点删除
+    handleTreeNodeDelete() {
+      const { level } = this.curNode
+      const { id, workId } = this.curNodeData
+      const paramsMapping = {
+        1: {
+          method: 'deleteProcessItem',
+          message: '业务流程删除成功！',
+          tip: '删除该业务流程后，其下所有分组以及API都将全部删除，请确认是否删除该业务流程？'
+        },
+        2: {
+          method: 'deleteApiGroupItem',
+          message: 'API分组删除成功！',
+          tip: '删除该分组后，其下API都将全部删除，请确认是否删除该分组？'
+        }
+      }
+
+      const { method, message, tip } = paramsMapping[level]
+      this.$confirm(tip, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          API[method]({ id }).then(({ success, data }) => {
+            if (success && data) {
+              const { apiGroupId, workId: wid } = data
+              this.$notify.success({
+                title: '操作结果',
+                message,
+                duration: 1500
+              })
+
+              this.$refs.tree.remove(this.curNodeData)
+              if (level === 2 && this.currentTreeNodeId === id) {
+                // 删除某个流程下的某个API分组以及回显相应的状态
+                apiGroupId
+                  ? this.setHighlightCurrentNode(apiGroupId, true)
+                  : this.setHighlightCurrentNode(workId)
+                this.isFirstNodeHasChild = apiGroupId
+              } else if (level === 1) {
+                // 删除某个业务流程节点
+                const { workId } = this.$refs.tree.getCurrentNode() ?? {}
+                const isSameHighlightNode =
+                  workId === id || this.currentTreeNodeId === id
+                isSameHighlightNode && this.setHighlightCurrentNode(wid)
+              }
+            }
+          })
+        })
+        .catch(() => {})
+    },
+
+    // 失焦-保存编辑名称
+    handleTreeNodeInputBlur(data, node) {
+      const { parent, level } = node
+      const { id, workId, name } = data
+      const { childNodes } = parent
+      console.log(level, data, node, ';ooo')
+      level === 2
+        ? this.setGroupNodeName({ id, newName: name, workId, childNodes })
+        : this.setProcessNodeName(id, name)
+    },
+
+    // 聚焦-分组名称或业务流程名称
+    handleTreeNodeInputFocus() {
+      const { level, parent } = this.curNode
+      const { id, workId } = this.curNodeData
+      const { childNodes } = parent
+      level === 2
+        ? this.setCurEditTreeData(id, workId, childNodes, true)
+        : Object.assign(this.curNode.data, { isRename: true })
+    },
+
+    // 右键-业务流程重命名
+    setProcessNodeName(id, newName) {
+      API.editProcessName({ id, newName })
+        .then(({ success, data }) => {
+          if (success && data) {
+            this.$notify.success({
+              title: '操作结果',
+              message: '修改成功！',
+              duration: 2000
+            })
+            Object.assign(this.curNode.data, { isRename: false })
+          }
+        })
+        .catch(() => {})
+    },
+
+    // 右键-API分组重命名
+    setGroupNodeName(options) {
+      const { id, newName, workId, childNodes } = options
+      API.editApiGroupName({ id, newName })
+        .then(({ success, data }) => {
+          if (success && data) {
+            this.$notify.success({
+              title: '操作结果',
+              message: '修改成功！',
+              duration: 2000
+            })
+            this.setCurEditTreeData(id, workId, childNodes, false)
+          }
+        })
+        .catch(() => {})
+    },
+
+    // 设置-重命名当前节点名称
+    setCurEditTreeData(id, workId, childNodes, isEdit) {
+      const children = childNodes.map(({ data }) => {
+        return {
+          ...data,
+          isRename: data.id === id && isEdit
+        }
+      })
+
+      this.$refs.tree.updateKeyChildren(workId, children)
+    },
+
+    handleCloseContentMenuClick() {
+      this.isShowContentmenu = false
     },
 
     // 鼠标-移入判断是否需要显示tootltip
@@ -370,9 +621,13 @@ export default {
     },
 
     // 回调-新增数据源生成页面切换
-    jumpCallback() {
+    jumpCallback(opType) {
       this.opType = ''
       this.mixinRetrieveTableData()
+      console.log(opType, 'deee')
+      if (opType === 'edit') {
+        this.handleVersionClick()
+      }
     },
 
     // 回调-新增API
@@ -381,6 +636,16 @@ export default {
         this.opType = ''
         saveType === 1 && this.mixinRetrieveTableData()
       }
+    },
+
+    // 回调-版本历史列表
+    editApiCallback(options) {
+      console.log(options, 'dejji')
+      this.opType = 'edit'
+      this.$refs.versionLists.close()
+      this.$nextTick(() =>
+        this.$refs.datasourceGenerate.open({ ...options, opType: this.opType })
+      )
     },
 
     // 回调-新增业务流程或API分组
@@ -400,7 +665,7 @@ export default {
       }
     },
 
-    // 获取某个分组下的api列表
+    // 获取-某个分组下的api列表
     fetchApiGroupList() {
       const params = {}
       this.isTreeLoading = true
@@ -469,7 +734,7 @@ export default {
       }
     },
 
-    // 获取-左侧树节点数据
+    // 获取-左侧树一级节点数据
     fetchBusinessProcessList(resolve) {
       this.isTreeLoading = true
       return API.getBusinessProcess()
@@ -479,7 +744,9 @@ export default {
               return {
                 ...item,
                 leaf: false,
-                icon: 'process'
+                icon: 'process',
+                isRename: false,
+                oldName: item.name
               }
             })
             this.oldTreeData = treeData
@@ -516,7 +783,9 @@ export default {
               return {
                 ...item,
                 leaf: true,
-                icon: 'group'
+                icon: 'group',
+                isRename: false,
+                oldName: item.name
               }
             })
 
@@ -562,6 +831,7 @@ export default {
 .data-service {
   @include flex(center, flex-start);
   background: #fff;
+  // position: relative;
 
   &-aside {
     @include flex(flex-start, flex-start, column);
@@ -731,6 +1001,11 @@ export default {
         .el-tree-node__children .el-tree-node__expand-icon {
           visibility: hidden;
         }
+
+        .el-input--mini .el-input__inner {
+          border: none;
+          width: 100%;
+        }
       }
     }
   }
@@ -764,6 +1039,33 @@ export default {
       font-family: PingFangSC, PingFangSC-Medium;
       font-weight: 500;
       color: #333;
+    }
+  }
+
+  .contentmenu {
+    @include flex(center, center, column);
+    position: absolute;
+    width: 100px;
+    min-height: 50px;
+    max-height: 100px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0px 9px 28px 8px rgba(0, 0, 0, 0.05),
+      0px 6px 16px 0px rgba(0, 0, 0, 0.08), 0px 3px 6px -4px rgba(0, 0, 0, 0.12);
+
+    &-label {
+      width: 100%;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: PingFangSC, PingFangSC-Regular;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.65);
+      line-height: 34px;
+      text-align: center;
+      &:hover {
+        color: #1890ff;
+        background: #ecf5ff;
+      }
     }
   }
 }

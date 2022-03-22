@@ -5,6 +5,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequest;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * <p>
  * 应用 Mapper 接口
@@ -22,4 +24,8 @@ public interface IcreditAppMapper extends BaseMapper<IcreditAppEntity> {
     IcreditAppEntity getByAppFlag(@Param("appFlag") String appFlag);
 
     Boolean hasExitByGenerateId(@Param("generateId") String generateId, @Param("appGroupId") String appGroupId);
+
+    String findEnableAppIdByAppGroupIds(List<String> ids);
+
+    List<String> getIdsByAppGroupIds(List<String> ids);
 }

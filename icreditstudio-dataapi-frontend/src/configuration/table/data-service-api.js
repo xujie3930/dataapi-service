@@ -51,12 +51,13 @@ export default that => ({
       width: 160,
       formatter: ({ type }) => API_TYPE[type]
     },
-    // {
-    //   type: 'text',
-    //   label: '最新版本号',
-    //   prop: 'apiVersion',
-    //   width: 100
-    // },
+    {
+      type: 'text',
+      label: '最新版本号',
+      prop: 'apiVersion',
+      width: 100,
+      formatter: ({ apiVersion }) => `v${apiVersion}`
+    },
     {
       type: 'text',
       label: '接口来源',
@@ -88,31 +89,31 @@ export default that => ({
       type: 'operation',
       label: '操作',
       fixed: 'right',
-      width: 180,
+      width: 200,
       operationList: [
         // {
         //   func: that.handleAuthorizeClick,
         //   label: '授权'
         // },
-        // {
-        //   func: that.handleVersionClick,
-        //   label: '版本列表'
-        // }
-
         {
-          func: that.handleUpdateStatusClick,
-          label: '发布',
-          visible: ({ row: { publishStatus } }) => publishStatus !== 2
-        },
-        {
-          func: that.handleUpdateStatusClick,
-          label: '停止发布',
-          visible: ({ row: { publishStatus } }) => publishStatus === 2
-        },
-        {
-          func: that.handleDetailClick,
-          label: '详情'
+          func: that.handleVersionClick,
+          label: '历史版本'
         }
+
+        // {
+        //   func: that.handleUpdateStatusClick,
+        //   label: '发布',
+        //   visible: ({ row: { publishStatus } }) => publishStatus !== 2
+        // },
+        // {
+        //   func: that.handleUpdateStatusClick,
+        //   label: '停止发布',
+        //   visible: ({ row: { publishStatus } }) => publishStatus === 2
+        // },
+        // {
+        //   func: that.handleDetailClick,
+        //   label: '详情'
+        // }
       ]
     }
   ]

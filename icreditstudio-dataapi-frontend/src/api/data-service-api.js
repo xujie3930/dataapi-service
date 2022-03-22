@@ -51,6 +51,28 @@ const updateDataApiStatus = params =>
 const checkSqlCorrectness = params =>
   postAction('/apiBase/checkQuerySql', params)
 
+// 删除业务流程
+const deleteProcessItem = params => postAction('/workFlow/delete', params)
+
+// 删除Api分组
+const deleteApiGroupItem = params => postAction('/apiGroup/delete', params)
+
+// 更改业务流程名称
+const editProcessName = params => postAction('/workFlow/rename', params)
+
+// 更改Api分组名称
+const editApiGroupName = params => postAction('/apiGroup/rename', params)
+
+// 更改API信息
+const editApiInfo = params => postAction('/apiHistory/update', params)
+
+// 获取版本历史的某个Api详情
+const getHistoryApiDetail = params => postAction('/apiHistory/info', params)
+
+// 获取版本历史的某个Api的版本号列表
+const getHistoryApiVesionOptions = params =>
+  postAction('/apiHistory/apiVersions', params)
+
 export default {
   addBusinessProcess,
   addApiInfo,
@@ -63,7 +85,14 @@ export default {
   getDataTableFields,
   getDataApiPath,
   getDataApiDetail,
+  getHistoryApiDetail,
+  getHistoryApiVesionOptions,
   searchProcessOrGroup,
   updateDataApiStatus,
-  checkSqlCorrectness
+  checkSqlCorrectness,
+  deleteProcessItem,
+  deleteApiGroupItem,
+  editProcessName,
+  editApiGroupName,
+  editApiInfo
 }

@@ -55,11 +55,12 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="API类型" prop="type">
               <el-select
+                :disabled="options.opType === 'edit'"
                 style="width: 100%"
                 v-model="form.type"
                 placeholder="选择API类型"
               >
-                <!-- <el-option label="注册API" :value="0"></el-option> -->
+                <el-option label="注册API" :value="0"></el-option>
                 <el-option label="数据源生成API" :value="1"></el-option>
               </el-select>
             </el-form-item>
@@ -67,6 +68,7 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="API名称" prop="name">
               <el-input
+                :disabled="options.opType === 'edit'"
                 show-word-limit
                 maxlength="50"
                 style="width: 100%"
@@ -81,9 +83,10 @@
         </el-row>
 
         <el-row type="flex" class="form-row-item" justify="space-between">
-          <el-col :lg="{ span: 11 }">
+          <el-col :lg="{ span: 11 }" v-if="form.type">
             <el-form-item label="API模式" prop="apiGenerateSaveRequest.model">
               <el-select
+                :disabled="options.opType === 'edit'"
                 style="width: 100%"
                 v-model="form.apiGenerateSaveRequest.model"
                 placeholder="选择API类型"
@@ -97,6 +100,7 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="API Path" prop="path">
               <el-input
+                :disabled="options.opType === 'edit'"
                 :maxlength="16"
                 show-word-limit
                 style="width: 100%"
@@ -111,6 +115,7 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="请求方式" prop="requestType">
               <el-select
+                disabled
                 style="width: 100%"
                 v-model="form.requestType"
                 placeholder="请选择请求方式"
@@ -145,7 +150,7 @@
                 style="width: 100%"
                 :disabled="options.opType === 'add'"
                 v-model="form.apiGroupId"
-                :props="{ expandTrigger: 'hover' }"
+                :props="cascaderProps"
                 :options="cascaderOptions"
               ></el-cascader>
             </el-form-item>
@@ -172,12 +177,12 @@
 
           <el-row type="flex" class="form-row-item" justify="space-between">
             <el-col :span="11">
-              <el-form-item label="后端服务Host" prop="databaseTye">
+              <el-form-item label="后台服务Host" prop="reqHost">
                 <el-input
-                  readonly
+                  clearable
                   style="width: 100%"
-                  v-model="form.databaseTye"
-                  placeholder="请选择数据库类型"
+                  v-model.trim="form.reqHost"
+                  placeholder="请输入后台服务Host"
                 >
                 </el-input>
                 <p class="form-row-item--tip">
@@ -187,16 +192,12 @@
             </el-col>
 
             <el-col :span="11">
-              <el-form-item
-                label="后端Path"
-                prop="apiGenerateSaveRequest.datasourceId"
-              >
+              <el-form-item label="后台Path" prop="reqPath">
                 <el-input
-                  filterable
+                  clearable
                   style="width: 100%"
-                  v-model="form.apiGenerateSaveRequest.datasourceId"
-                  placeholder="请选择数据源名称"
-                  @change="handleDatasourceNameChange"
+                  v-model.trim="form.reqPath"
+                  placeholder="请输入后台Path"
                 >
                 </el-input>
                 <p class="form-row-item--tip">
@@ -214,12 +215,37 @@
             <JTable
               ref="selectParamTable"
               :table-loading="tableLoading"
-              :table-data="form.apiParamSaveRequestList"
+              :table-data="form.registerRequestParamSaveRequestList"
               :table-configuration="tableRequestConfiguration"
             >
-              <div class="custom-table-empty" slot="empty">
-                <span class="add-icon">+</span>
+              <!-- 是否必填 -->
+              <template #required="{ row }">
+                <el-checkbox
+                  :true-label="0"
+                  :false-label="1"
+                  v-model="row.required"
+                ></el-checkbox
+              ></template>
+
+              <!--  空数据 -->
+              <div
+                class="custom-table-empty"
+                slot="empty"
+                @click="handleAddParamRowClick('Request')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
                 <span class="add-label">新增参数</span>
+              </div>
+
+              <!-- append -->
+              <div
+                v-if="form.registerRequestParamSaveRequestList.length"
+                class="custom-table-empty custom-table-append"
+                slot="append"
+                @click="handleAddParamRowClick('Request')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
+                <span class="add-label">新增一行</span>
               </div>
             </JTable>
           </el-row>
@@ -232,9 +258,29 @@
             <JTable
               ref="selectParamTable"
               :table-loading="tableLoading"
-              :table-data="form.apiParamSaveRequestList"
+              :table-data="form.registerResponseParamSaveRequestList"
               :table-configuration="tableResponseConfiguration"
             >
+              <!--  空数据 -->
+              <div
+                class="custom-table-empty"
+                slot="empty"
+                @click="handleAddParamRowClick('Response')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
+                <span class="add-label">新增参数</span>
+              </div>
+
+              <!-- append -->
+              <div
+                v-if="form.registerResponseParamSaveRequestList.length"
+                class="custom-table-empty custom-table-append"
+                slot="append"
+                @click="handleAddParamRowClick('Response')"
+              >
+                <JSvg class="add-icon" svg-name="add" />
+                <span class="add-label">新增一行</span>
+              </div>
             </JTable>
           </el-row>
         </template>
@@ -457,7 +503,9 @@ import GenerateApiTips from './generate-api-tips'
 import {
   verifySpecialString,
   verifyOnlyEnString,
-  strExcludeBlank
+  strExcludeBlank,
+  validIpAddress,
+  verifyIncludeCnString
 } from '@/utils/validate'
 import API from '@/api/api'
 import {
@@ -496,11 +544,19 @@ export default {
       datasourceOptions: [],
       options: {},
       cascaderOptions: [],
+      cascaderProps: {
+        // expandTrigger: 'hover',
+        lazy: true,
+        lazyLoad: this.cascaderLazyLoader
+      },
       form: {
         id: '',
-        type: 1,
+        apiHiId: '',
+        type: 0,
         path: '',
         name: '',
+        reqPath: '',
+        reqHost: '',
         databaseTye: 1,
         apiGroupId: null,
         requestType: 'GET',
@@ -513,7 +569,9 @@ export default {
           tableName: '',
           sql: ''
         },
-        apiParamSaveRequestList: []
+        apiParamSaveRequestList: [],
+        registerRequestParamSaveRequestList: [],
+        registerResponseParamSaveRequestList: []
       },
       formRules: {
         type: [
@@ -542,6 +600,14 @@ export default {
         requestType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
         ],
+        reqHost: [
+          { required: true, message: '后台服务Host不能为空', trigger: 'blur' },
+          { validator: this.verifyHost, trigger: 'blur' }
+        ],
+        reqPath: [
+          { required: true, message: '后台Path不能为空', trigger: 'blur' },
+          { validator: this.verifyReqPath, trigger: 'blur' }
+        ],
         responseType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
         ],
@@ -569,16 +635,30 @@ export default {
     }
   },
 
+  props: {
+    opType: {
+      type: String
+    }
+  },
+
   methods: {
     open(options) {
+      console.log(options, 'ssdsds')
       const { opType, cascaderOptions } = options
       this.options = options
       this.pageLoading = true
 
       if (opType === 'add') {
-        this.cascaderOptions = cascaderOptions
-        this.form.apiGroupId = cascaderOptions[0].children[0].value
+        // this.cascaderOptions = cascaderOptions
+        this.form.apiGroupId = [
+          cascaderOptions[0].value,
+          cascaderOptions[0].children[0].value
+        ]
         this.fetchDataApiPath()
+      }
+
+      if (opType === 'edit') {
+        this.fetchDataApiDetail()
       }
 
       this.fetchSelectOptionsByKey({
@@ -596,6 +676,37 @@ export default {
           ? cb(new Error('该名称中包含不规范字符，请重新输入'))
           : value.startsWith('_')
           ? cb(new Error('不能以下划线开头，请重新输入'))
+          : cb()
+      }
+    },
+
+    // 校验-后台Host
+    verifyHost(rule, value, cb) {
+      this.form.reqHost = strExcludeBlank(value)
+      const ipStr = value.replaceAll('http://', '')
+      console.log(ipStr, validIpAddress(ipStr), 'kkoo')
+
+      if (cb) {
+        !value.startsWith('http://')
+          ? cb(new Error('IP地址要以http://开头，请重新输入'))
+          : validIpAddress(ipStr)
+          ? cb()
+          : cb(new Error('非法IP地址，请重新输入'))
+      }
+    },
+
+    // 校验-后台Path
+    verifyReqPath(rule, value, cb) {
+      this.form.reqPath = strExcludeBlank(value)
+
+      if (cb) {
+        const str = value.replaceAll('_', '')
+        const excludeStr = str.replaceAll('-', '')
+        console.log(verifyIncludeCnString(excludeStr), 'llpp')
+        verifySpecialString(excludeStr)
+          ? cb(new Error('Path中包含不规范字符，请重新输入'))
+          : verifyIncludeCnString(excludeStr)
+          ? cb(new Error('Path中包含中文字符，请重新输入'))
           : cb()
       }
     },
@@ -629,7 +740,7 @@ export default {
     },
 
     handleJumpBackClick() {
-      this.$emit('on-jump')
+      this.$emit('on-jump', this.opType)
     },
 
     // 点击-打开SQL编写提示弹窗
@@ -645,19 +756,22 @@ export default {
       }
       this.$refs.form.validate(valid => {
         if (valid) {
-          // eslint-disable-next-line no-unused-vars
+          const { opType } = this.options
+          const { apiGroupId, ...restForm } = this.form
           const params = {
             saveType,
-            ...this.form
+            apiGroupId: apiGroupId[1],
+            ...restForm
           }
 
           this[messageMapping[saveType].loading] = true
 
-          API.addApiInfo(params)
+          API[opType === 'add' ? 'addApiInfo' : 'editApiInfo'](params)
             .then(({ success, data }) => {
               if (success) {
                 const {
                   id,
+                  apiHiId,
                   apiGenerateSaveRequest: gen,
                   apiParamSaveRequestList: param
                 } = data
@@ -669,6 +783,7 @@ export default {
                 })
 
                 this.form.id = id
+                this.form.apiHiId = apiHiId
                 this.form.apiGenerateSaveRequest = gen
                 this.form.apiParamSaveRequestList = param
                 this.oldTableData = param
@@ -727,6 +842,43 @@ export default {
       }, 300)
     },
 
+    // 点击-新增参数
+    handleAddParamRowClick(key) {
+      const commonParam = {
+        fieldName: '',
+        fieldType: 'STRING',
+        defaultValue: '',
+        desc: ''
+      }
+
+      this.form[`register${key}ParamSaveRequestList`].push(
+        key === 'Response' ? commonParam : { ...commonParam, required: 1 }
+      )
+    },
+
+    // 点击-删除当前行
+    handleDeleteRowClick(options, key) {
+      this.form[`register${key}ParamSaveRequestList`].splice(options.$index, 1)
+    },
+
+    // 懒加载
+    cascaderLazyLoader(node, resolve) {
+      const { level, data } = node
+      console.log(level, node, 'llppp')
+      switch (level) {
+        case 0:
+          this.fetchBusinessProcessList(resolve)
+          break
+        case 1:
+          this.fetchApiGroup(data.value, resolve)
+          break
+
+        default:
+          resolve([])
+          break
+      }
+    },
+
     // 获取-新增数据源生成时的APIPath
     fetchDataApiPath() {
       API.getDataApiPath()
@@ -779,6 +931,91 @@ export default {
         })
         .finally(() => {
           this.pageLoading = false
+        })
+    },
+
+    // 获取-API详情
+    fetchDataApiDetail() {
+      const { apiHiId } = this.options
+      this.pageLoading = true
+      API.getHistoryApiDetail({ apiHiId })
+        .then(({ success, data }) => {
+          if (success && data) {
+            console.log(data, 'data')
+            const {
+              type,
+              apiPath,
+              workFlowId,
+              apiGroupId,
+              paramList,
+              generateApi
+            } = data
+            const fieldArr = [
+              'apiHiId',
+              'type',
+              'name',
+              'desc',
+              'reqHost',
+              'reqPath',
+              'registerRequestParamSaveRequestList',
+              'registerResponseParamSaveRequestList'
+            ]
+            fieldArr.forEach(item => (this.form[item] = data[item]))
+            this.form.path = apiPath
+            this.form.apiGroupId = [workFlowId, apiGroupId]
+
+            if (type === 1) {
+              const fieldArr = ['tableName', 'datasourceId', 'model', 'sql']
+              fieldArr.forEach(
+                item =>
+                  (this.form.apiGenerateSaveRequest[item] = generateApi[item])
+              )
+              this.form.apiParamSaveRequestList = paramList
+              this.fetchSelectOptionsByKey({
+                key: 'dataNameOptions',
+                methodName: 'getDataTableOptions'
+              })
+            }
+          }
+        })
+        .finally(() => {
+          this.pageLoading = false
+        })
+    },
+
+    // 获取-业务流程
+    fetchBusinessProcessList(resolve) {
+      API.getBusinessProcess()
+        .then(({ success, data }) => {
+          if (success && data) {
+            const treeData = data.map(({ id, name }) => ({
+              label: name,
+              value: id,
+              leaf: false
+            }))
+            resolve(treeData)
+          }
+        })
+        .catch(() => {
+          resolve([])
+        })
+    },
+
+    // 获取-某个业务流程下的API分组
+    fetchApiGroup(id, resolve) {
+      API.getBusinessProcessChild({ workId: id })
+        .then(({ success, data }) => {
+          if (success && data) {
+            const children = data.map(({ id, name }) => ({
+              label: name,
+              value: id,
+              leaf: true
+            }))
+            resolve(children)
+          }
+        })
+        .catch(() => {
+          resolve([])
         })
     }
   }
@@ -920,12 +1157,9 @@ export default {
         .add-icon {
           @include flex(center, center, row, inline-flex);
           @include hover-scale;
-          width: 14px;
-          height: 14px;
-          border-radius: 4px;
-          border: 1px solid #1890ff;
+          width: 15px;
+          height: 15px;
           cursor: pointer;
-          color: #1890ff;
         }
 
         .add-label {
@@ -934,9 +1168,13 @@ export default {
           font-weight: 500;
           text-align: center;
           color: #1890ff;
-          margin-left: 5px;
+          margin-left: 8px;
           cursor: pointer;
         }
+      }
+
+      .custom-table-append {
+        height: 44px;
       }
     }
 

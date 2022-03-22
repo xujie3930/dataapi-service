@@ -65,4 +65,20 @@
     <update id="renameById">
         update icredit_work_flow SET `name` = #{name} WHERE id = #{id} AND del_flag = 0
     </update>
+
+    <select id="findNextWorkId" resultType="java.lang.String">
+        select id
+        from icredit_work_flow
+        where del_flag = 0 and sort &lt; #{sort}
+        order by sort desc
+        limit 1
+    </select>
+
+    <select id="getFirstWorkFlowId" resultType="java.lang.String">
+        select id
+        from icredit_work_flow
+        where del_flag = 0
+        order by sort desc
+        limit 1
+    </select>
 </mapper>

@@ -8,7 +8,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseListRe
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DataSourcesListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableFieldListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableNameListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
@@ -30,7 +29,9 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
 
     BusinessResult<BusinessPageResult> getList(ApiBaseListRequest request);
 
-    BusinessResult<ApiSaveResult> createDataSourceApi(String userId, DatasourceApiSaveParam param);
+    BusinessResult<ApiSaveResult> createApi(String userId, DatasourceApiSaveParam param);
+
+    ApiSaveResult saveApi(String userId, DatasourceApiSaveParam param, IcreditApiBaseEntity apiBaseEntity);
 
     BusinessResult<List<Map<String, Object>>> getDataSourcesList(DataSourcesListRequest request);
 
@@ -38,17 +39,23 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
 
     BusinessResult<List<FieldInfo>> getTableFieldList(TableFieldListRequest request);
 
-    BusinessResult<ApiDetailResult> detail(String id);
-
     BusinessResult<Boolean> checkApiPath(CheckApiPathRequest request);
 
     BusinessResult<Boolean> checkApiName(CheckApiNameRequest request);
 
     Object checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type);
 
-    BusinessResult<Boolean> publishOrStop(String userId, ApiPublishRequest request);
+    BusinessResult<Boolean> publishOrStop(String userId, HiApiPublishRequest request);
 
     BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request);
 
     BusinessResult<ApiSaveResult> createAndPublish(String userId, DatasourceApiSaveParam param);
+
+    String findPublishedByWorkFlowId(String id);
+
+    List<String> getIdsByApiGroupIds(List<String> apiGroupIdList);
+
+    String findPublishedByApiGroupId(String id);
+
+    void truthDelById(String id);
 }

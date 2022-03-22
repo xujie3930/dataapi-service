@@ -1,48 +1,52 @@
 /*
- * @Author: lizheng
  * @Description: 新增数据源-返回参数定义
  * @Date: 2022-02-25
  */
 
+import { REGISTER_API_TYPR } from '@/config/constant'
+
 export default that => ({
-  refName: 'dataServiceApiRequest',
+  refName: 'dataServiceApiResponse',
   isBorder: true,
   isStripe: true,
   hasPage: false,
+  emptySlot: true,
+  appendSlot: true,
   group: [
     {
-      type: 'text',
+      type: 'editInput',
       label: '参数名称',
-      prop: 'name'
+      prop: 'fieldName'
     },
     {
-      type: 'text',
+      type: 'select',
       label: '参数类型',
-      prop: 'path'
-    },
-    {
-      type: 'text',
-      label: '默认值'
+      prop: 'fieldType',
+      width: 150,
+      options: REGISTER_API_TYPR
     },
 
     {
-      type: 'text',
+      type: 'editInput',
+      label: '默认值',
+      prop: 'defaultValue'
+    },
+
+    {
+      type: 'editInput',
       label: '说明',
-      prop: 'publishUser'
+      prop: 'desc'
     },
 
     {
       type: 'operation',
       label: '操作',
       fixed: 'right',
+      width: 80,
       operationList: [
-        // {
-        //   func: that.mixinHandleDelete,
-        //   label: '历史版本'
-        // }
         {
-          func: that.mixinHandleDelete,
-          label: '详情'
+          func: params => that.handleDeleteRowClick(params, 'Response'),
+          label: '删除'
         }
       ]
     }

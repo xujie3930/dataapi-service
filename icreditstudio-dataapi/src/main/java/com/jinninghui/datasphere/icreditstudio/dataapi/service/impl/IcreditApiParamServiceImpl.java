@@ -1,13 +1,12 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiParamMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiParamService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -21,13 +20,8 @@ import java.util.List;
 @Service
 public class IcreditApiParamServiceImpl extends ServiceImpl<IcreditApiParamMapper, IcreditApiParamEntity> implements IcreditApiParamService {
 
-    @Autowired
+    @Resource
     private IcreditApiParamMapper apiParamMapper;
-
-    @Override
-    public List<IcreditApiParamEntity> getByApiBaseId(String id) {
-        return apiParamMapper.getByApiBaseId(id);
-    }
 
     @Override
     public List<IcreditApiParamEntity> getByApiIdAndVersion(String id, Integer apiVersion) {
@@ -35,7 +29,7 @@ public class IcreditApiParamServiceImpl extends ServiceImpl<IcreditApiParamMappe
     }
 
     @Override
-    public void removeByApiId(String apiId) {
-        apiParamMapper.removeByApiId(apiId);
+    public void removeByApiIdAndApiVersion(String apiId, Integer apiVersion) {
+        apiParamMapper.removeByApiIdAndApiVersion(apiId, apiVersion);
     }
 }

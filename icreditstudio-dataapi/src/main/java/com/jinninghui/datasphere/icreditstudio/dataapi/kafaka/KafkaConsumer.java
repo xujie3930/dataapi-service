@@ -26,7 +26,7 @@ import java.util.Optional;
  * @description kafka消费者
  * @create 2022-03-02 16:57
  **/
-@Component
+//@Component
 @Slf4j
 public class KafkaConsumer {
 

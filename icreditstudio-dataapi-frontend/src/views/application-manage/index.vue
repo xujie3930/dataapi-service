@@ -31,7 +31,7 @@
     >
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
-          <!-- <el-button class="jui-button--default" disabled>批量删除</el-button> -->
+          <el-button class="jui-button--default" disabled>批量删除</el-button>
         </div>
         <div class="header-operate-right">
           <el-button type="primary" @click="handleAddAppGroupClick">
@@ -100,6 +100,13 @@ export default {
       expandRowKeys: [],
       tableSelections: [],
       formOption: dataServiceAppForm,
+      mixinTableData: [
+        {
+          name: 'iiii',
+          id: '1',
+          children: [{ name: '2222', id: 2, children: [] }]
+        }
+      ],
 
       mixinSearchFormConfig: {
         models: {
@@ -125,7 +132,7 @@ export default {
   },
 
   created() {
-    this.mixinRetrieveTableData()
+    // this.mixinRetrieveTableData()
   },
 
   methods: {
@@ -143,6 +150,44 @@ export default {
     // 点击-新增应用
     handleAddAppClick({ row }) {
       this.$refs.addApp.open({ row, title: '新增应用', opType: 'add' })
+    },
+
+    // 点击-编辑应用分组
+    handleEditGroupClick({ row }) {
+      this.$refs.addAppGroup.open({
+        title: '编辑应用分组',
+        opType: 'edit',
+        row
+      })
+    },
+
+    // 点击-删除应用删除
+    handleDeleteGroupClick({ row }) {
+      console.log(row, 'row')
+      const { children, id } = row
+      const enableApiArr = children.filter(({ isEnable }) => isEnable)
+      enableApiArr.length
+        ? this.$alert(
+            '该分组下包含启用状态的应用，请停用后再进行删除！',
+            '提示',
+            {
+              confirmButtonText: '确定',
+              type: 'warning'
+            }
+          )
+        : this.$confirm(
+            '删除该分组后，分组下的所有应用都将全部被删除，请确认是否删除该分组？',
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          )
+            .then(() => {
+              this.deleteApiGroup([id])
+            })
+            .catch(() => {})
     },
 
     // 点击-详情
@@ -168,6 +213,21 @@ export default {
 
     // 回调-授权设置弹窗回调
     closeAuthorizeCallback() {},
+
+    // 删除分组
+    deleteApiGroup(ids) {
+      API.deleteAppGroup({ ids }).then(({ success, data }) => {
+        if (success && data) {
+          this.$notify.success({
+            title: '操作结果',
+            message: '删除成功！',
+            duration: 1500
+          })
+
+          this.mixinRetrieveTableData()
+        }
+      })
+    },
 
     // 获取-详情接口
     fetchDetailData({ id }) {

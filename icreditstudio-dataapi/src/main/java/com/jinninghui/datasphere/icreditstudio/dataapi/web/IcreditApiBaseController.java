@@ -41,21 +41,15 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/datasourceApi/create")
-    public BusinessResult<ApiSaveResult> createDataSourceApi(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
+    public BusinessResult<ApiSaveResult> createApi(@RequestHeader(value = "userId") String userId, @RequestBody DatasourceApiSaveRequest apiSaveRequest){
         DatasourceApiSaveParam param = new DatasourceApiSaveParam();
         BeanUtils.copyProperties(apiSaveRequest, param);
-        return apiBaseService.createDataSourceApi(userId, param);
+        return apiBaseService.createApi(userId, param);
     }
 
     @PostMapping("/generate/apiPath")
     public BusinessResult<String> generateApiPath(){
         return BusinessResult.success(RandomStringUtils.randomAlphabetic(16));
-    }
-
-    @PostMapping("/detail")
-    @ResultReturning
-    public BusinessResult<ApiDetailResult> detail(@RequestBody ApiBaseDetailRequest request) {
-        return apiBaseService.detail(request.getId());
     }
 
     @PostMapping("/getDatasourceListByType")
@@ -94,7 +88,7 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/publishOrStop")
-    public BusinessResult<Boolean> publishOrStop(@RequestHeader(value = "userId") String userId, @RequestBody ApiPublishRequest request){
+    public BusinessResult<Boolean> publishOrStop(@RequestHeader(value = "userId") String userId, @RequestBody HiApiPublishRequest request){
         return apiBaseService.publishOrStop(userId, request);
     }
 

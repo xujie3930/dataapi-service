@@ -2,6 +2,11 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseHiEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiHistoryListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiHistoryListResult;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface IcreditApiBaseHiMapper extends BaseMapper<IcreditApiBaseHiEntity> {
 
+    IcreditApiBaseHiEntity findByApiBaseId(@Param("apiId") String apiId);
+
+    List<ApiHistoryListResult> getList(ApiHistoryListRequest request);
+
+    Long countApiBaseHi(ApiHistoryListRequest request);
 }

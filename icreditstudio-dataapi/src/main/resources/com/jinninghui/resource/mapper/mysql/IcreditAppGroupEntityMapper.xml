@@ -91,4 +91,8 @@
             and id = #{id}
         </if>
     </select>
+
+    <update id="renameById">
+        update icredit_app_group SET `name` = #{name},`desc` = #{desc} WHERE id = #{id} AND del_flag = 0
+    </update>
 </mapper>

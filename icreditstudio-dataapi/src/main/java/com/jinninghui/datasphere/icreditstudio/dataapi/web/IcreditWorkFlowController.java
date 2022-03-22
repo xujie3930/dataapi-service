@@ -1,10 +1,12 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
-
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowDelRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowRenameRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowDelResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,16 @@ public class IcreditWorkFlowController {
     @PostMapping("/getBusinessProcessList")
     BusinessResult<List<WorkFlowIdAndNameResult>> getWorkFlowList() {
         return workFlowService.getWorkFlowList();
+    }
+
+    @PostMapping("/delete")
+    BusinessResult<WorkFlowDelResult> deleteById(@RequestBody WorkFlowDelRequest request) {
+        return workFlowService.delById(request);
+    }
+
+    @PostMapping("/rename")
+    BusinessResult<Boolean> renameById(@RequestBody WorkFlowRenameRequest request) {
+        return workFlowService.renameById(request);
     }
 
 }

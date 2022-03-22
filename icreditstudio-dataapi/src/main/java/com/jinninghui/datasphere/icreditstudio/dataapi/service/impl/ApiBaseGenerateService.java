@@ -32,7 +32,7 @@ public class ApiBaseGenerateService implements ApiBaseService {
 
     @Override
     public void setApiBaseResult(ApiDetailResult result) {
-        IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiBaseId(result.getId());
+        IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiIdAndVersion(result.getId(), result.getApiVersion());
         if (Objects.isNull(generateApiEntity)) {
             return;
         }

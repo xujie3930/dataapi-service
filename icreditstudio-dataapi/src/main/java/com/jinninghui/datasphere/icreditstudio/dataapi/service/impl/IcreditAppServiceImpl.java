@@ -3,7 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
@@ -78,10 +78,17 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     }
 
     @Override
-    public BusinessResult<Boolean> enableById(String userId, AppEnableRequest request) {
+    public BusinessResult<Boolean> enableOrStop(AppEnableRequest request) {
         IcreditAppEntity appEntity = getById(request.getId());
         appEntity.setIsEnable(request.getIsEnable());
         boolean update = updateById(appEntity);
+        AppAuthInfo appAuthInfo = BeanCopyUtils.copyProperties(appEntity, new AppAuthInfo());
+        //启用时，保存应用信息至redis
+        if(AppEnableEnum.ENABLE.getCode().equals(request.getIsEnable())) {
+            redisTemplate.opsForValue().set(appEntity.getGenerateId(), JSON.toJSONString(appAuthInfo));
+        }else{
+            redisTemplate.delete(appEntity.getGenerateId());
+        }
         return BusinessResult.success(update);
     }
 
@@ -152,4 +159,13 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         return authResult;
     }
 
+    @Override
+    public String findEnableAppIdByAppGroupIds(List<String> ids) {
+        return appMapper.findEnableAppIdByAppGroupIds(ids);
+    }
+
+    @Override
+    public List<String> getIdsByAppGroupIds(List<String> ids) {
+        return appMapper.getIdsByAppGroupIds(ids);
+    }
 }

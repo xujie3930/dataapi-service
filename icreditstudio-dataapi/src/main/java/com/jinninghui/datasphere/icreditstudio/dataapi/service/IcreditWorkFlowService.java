@@ -3,7 +3,12 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditWorkFlowEntity;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowDelRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowRenameRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowDelResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -34,4 +39,8 @@ public interface IcreditWorkFlowService extends IService<IcreditWorkFlowEntity> 
     BusinessResult<List<WorkFlowIdAndNameResult>> getWorkFlowList();
 
     List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds);
+
+    BusinessResult<WorkFlowDelResult> delById(WorkFlowDelRequest request);
+
+    BusinessResult<Boolean> renameById(WorkFlowRenameRequest request);
 }

@@ -1,5 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web.result;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.RegisterRequestParamSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.RegisterResponseParamSaveRequest;
 import lombok.Data;
 
 import java.util.LinkedList;
@@ -20,6 +22,10 @@ public class ApiDetailResult {
     private String name;
     //API PATH
     private String apiPath;
+    //API名称
+    private String reqPath;
+    //API PATH
+    private String reqHost;
     //接口地址
     private String interfaceAddress;
     //协议
@@ -46,8 +52,18 @@ public class ApiDetailResult {
     private String desc;
     //选择参数列表
     private List<APIParamResult> paramList = new LinkedList<>();
+    //注册api的请求参数
+    private List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList;
+    //注册api的返回参数
+    private List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList;
     //注册API参数
     private RegisterApiResult registerApi;
     //数据源生成API,sql生成模式
     private GenerateApiResult generateApi;
+
+    private String apiHiId;//历史版本api主键id（历史列表编辑用）
+    private String workFlowName;//业务流程名称（历史列表编辑用）
+    private String workFlowId;//业务流程id（历史列表编辑用）
+    private String apiGroupName;//api分组名称（历史列表编辑用）
+    private String apiGroupId;//api分组id（历史列表编辑用）
 }

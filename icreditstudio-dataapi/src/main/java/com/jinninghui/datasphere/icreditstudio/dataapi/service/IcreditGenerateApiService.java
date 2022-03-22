@@ -13,8 +13,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApi
  */
 public interface IcreditGenerateApiService extends IService<IcreditGenerateApiEntity> {
 
-    IcreditGenerateApiEntity getByApiBaseId(String id);
-
     IcreditGenerateApiEntity getByApiIdAndVersion(String id, Integer apiVersion);
 
     void removeByApiId(String id);

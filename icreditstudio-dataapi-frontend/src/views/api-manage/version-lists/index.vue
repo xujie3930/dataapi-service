@@ -34,6 +34,7 @@
         :handleExport="mixinHandleExport"
         :handleUpdate="mixinHandleCreateOrUpdate"
         :handleCancel="mixinHandleCancel"
+        :handleSelectChange="handleSelectChange"
         @handleBatchDelete="handleBatchDelete"
       />
     </Dialog>
@@ -42,6 +43,7 @@
 </template>
 
 <script>
+import API from '@/api/api'
 import crud from '@/mixins/crud'
 import { dataServiceApiVersionForm } from '@/configuration/form/index'
 import { tableServiceApiVersionTableConfig } from '@/configuration/table'
@@ -53,29 +55,140 @@ export default {
 
   data() {
     return {
-      mixinTableData: [
-        { name: 11, publishStatus: 2 },
-        { name: 2323, publishStatus: 1 }
-      ],
-      formOption: dataServiceApiVersionForm,
+      selection: [],
+      currentRow: {},
+      versionOptions: [],
+      formOption: dataServiceApiVersionForm(this),
       tableConfiguration: tableServiceApiVersionTableConfig(this),
-      mixinSearchFormConfig: { models: { name: '', publishStatus: '' } },
-      fetchConfig: { retrieve: { url: '/apiBase/list', method: 'post' } }
+      mixinSearchFormConfig: { models: { apiVersion: '', publishUser: '' } },
+      fetchConfig: { retrieve: { url: '/apiHistory/list', method: 'post' } }
     }
   },
 
   methods: {
-    open() {
+    open(row) {
+      row && (this.currentRow = row)
       this.$refs.baseDialog.open()
+      this.mixinRetrieveTableData()
+      this.fetchApiVersionOptions()
     },
 
-    handleBatchDelete() {},
+    close() {
+      this.mixinHandleReset(false)
+      this.$refs.baseDialog.close()
+    },
 
     handleAuthorizeClick() {},
 
-    handleVersionDetailClick({ row }) {
-      console.log(row, 'rowrow')
-      this.$refs.versionDetail.open()
+    // 点击-查看详情
+    handleApiDetailClick({ row }) {
+      this.$refs.versionDetail.open(row)
+    },
+
+    // 点击-编辑API
+    handleEditApiClick({ row }) {
+      this.$emit('edit-api', row)
+    },
+
+    // 点击-发布API
+    handlePublishApiClick() {},
+
+    // 点击-停止发布
+    handleStopApiClick({ row }) {
+      const { publishStatus } = row
+      publishStatus === 2
+        ? this.$confirm(
+            '停止发布后，该版本API将不能授权给其他应用，并且已授权的应用也将全部失效，需重新发布该版本API后才能继续被授权的应用调用，请确认是否停止发布该版本API？',
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          )
+            .then(() => {
+              this.$message({ type: 'success', message: '删除成功!' })
+            })
+            .catch(() => {})
+        : this.stopOrPublishApi()
+    },
+
+    handleSelectChange(selection) {
+      console.log(selection, this.selection, 'ddsds')
+      this.selection = selection
+
+      // 批量删除
+    },
+
+    // 点击-批量删除
+    handleBatchDelete() {
+      if (!this.selection.length) {
+        this.$message.error('请先勾选一条数据！')
+        return
+      }
+    },
+
+    //  点击-删除或批量删除API
+    handleDeleteApiClick({ row }) {
+      const { publishStatus } = row
+      publishStatus === 2
+        ? this.$alert('该API已发布，请先停止发布', '提示', {
+            confirmButtonText: '确定',
+            type: 'warning'
+          })
+        : this.$confirm('请确认是否删除该API？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+            .then(() => {
+              this.$message({ type: 'success', message: '删除成功!' })
+            })
+            .catch(() => {})
+    },
+
+    // 接口-发布或停止发布
+    stopOrPublishApi(id, publishStatus) {
+      API.updateDataApiStatus({ id, publishStatus }).then(
+        ({ success, data }) => {
+          if (success && data) {
+            this.$notify.success({
+              title: '操作结果',
+              message: `${publishStatus === 2 ? '发布' : '停止发布'}成功！`,
+              duration: 1500
+            })
+
+            this.mixinRetrieveTableData()
+          }
+        }
+      )
+    },
+
+    // 接口-获取版本号Options
+    fetchApiVersionOptions() {
+      API.getHistoryApiVesionOptions({ apiId: this.currentRow.id }).then(
+        ({ success, data }) => {
+          if (success && data) {
+            this.versionOptions = data.apiVersions.reverse().map(item => ({
+              label: `v${item}`,
+              value: item
+            }))
+
+            const versionObj = this.mixinSearchFormItems[1]
+            this.mixinSearchFormItems.splice(
+              1,
+              Object.assign(versionObj, { options: this.versionOptions })
+            )
+          }
+        }
+      )
+    },
+
+    interceptorsRequestRetrieve(param) {
+      return {
+        apiId: this.currentRow.id,
+        ...param
+      }
     }
   }
 }

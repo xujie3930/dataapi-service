@@ -45,6 +45,12 @@ const getApiInfoList = params => postAction('/apiBase/getApiList', params)
 // 获取授权详情
 const getAppAuthDetail = params => postAction('/auth/info', params)
 
+// 编辑应用分组
+const editAppGroup = params => postAction('/appGroup/rename', params)
+
+// 删除或批量删除应用分组
+const deleteAppGroup = params => postAction('/appGroup/del', params)
+
 export default {
   getAppGroupList,
   getAppUniqueId,
@@ -57,5 +63,7 @@ export default {
   addApp,
   checkNameUniqueness,
   updateApiAuthorization,
-  getAppAuthDetail
+  getAppAuthDetail,
+  editAppGroup,
+  deleteAppGroup
 }

@@ -11,8 +11,8 @@ import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
  **/
 public class StringLegalUtils {
 
-    public static void checkId(String id) {
-        if(org.apache.commons.lang.StringUtils.isEmpty(id)){
+    public static void checkId(String id){
+        if(StringUtils.isEmpty(id)){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_00000001.getCode());
         }
     }

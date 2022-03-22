@@ -4,6 +4,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultRet
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiGroupEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiGroupService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiGroupDelResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.GroupIdAndNameResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,16 @@ public class IcreditApiGroupController {
     @PostMapping("/getGroupListByWorkFlowId")
     BusinessResult<List<GroupIdAndNameResult>> getGroupListByWorkFlowId(@RequestBody ApiGroupIdAndNameListRequest request) {
         return apiGroupService.getGroupListByWorkFlowId(request);
+    }
+
+    @PostMapping("/rename")
+    BusinessResult<Boolean> renameById(@RequestBody ApiGroupRenameRequest request) {
+        return apiGroupService.renameById(request);
+    }
+
+    @PostMapping("/delete")
+    BusinessResult<ApiGroupDelResult> deleteById(@RequestBody ApiGroupDelRequest request) {
+        return apiGroupService.delById(request);
     }
 
 }

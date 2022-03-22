@@ -19,6 +19,7 @@
       :model="apiGroupForm"
       :rules="rules"
       label-width="120px"
+      v-loading="pageLoading"
     >
       <el-form-item label="业务流程" prop="workId">
         <el-select
@@ -72,9 +73,10 @@ export default {
   data() {
     return {
       opType: '',
+      pageLoading: false,
       options: {},
       processOptions: [],
-      apiGroupForm: { workId: '', name: '', desc: '' },
+      apiGroupForm: { workId: '0', name: '', desc: '' },
       rules: {
         workId: [
           { required: true, message: '必填项不能为空', trigger: 'change' }
@@ -98,6 +100,9 @@ export default {
       this.options = options
       this.$refs.baseDialog.open()
       this.fetchBusinessProcessList()
+      if (options.opType === 'addGroup') {
+        this.apiGroupForm.workId = options.workId
+      }
     },
 
     close(opType) {
@@ -130,7 +135,7 @@ export default {
 
     //获取-业务流程
     fetchBusinessProcessList() {
-      this.isTreeLoading = true
+      this.pageLoading = true
       API.getBusinessProcess()
         .then(({ success, data }) => {
           if (success) {
@@ -138,7 +143,7 @@ export default {
           }
         })
         .finally(() => {
-          this.isTreeLoading = false
+          this.pageLoading = false
         })
     },
 

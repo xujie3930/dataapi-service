@@ -34,7 +34,9 @@ export default that => ({
     {
       type: 'text',
       label: '版本',
-      prop: 'name'
+      prop: 'apiVersion',
+      width: 100,
+      formatter: ({ apiVersion }) => `v${apiVersion}`
     },
     {
       type: 'text',
@@ -45,17 +47,17 @@ export default that => ({
       type: 'text',
       label: '发布人',
       prop: 'publishUser',
-      width: 80
+      width: 100
     },
     {
       type: 'date',
-      label: '发布时间',
+      label: '发布日期',
       prop: 'publishTime',
       width: 180
     },
     {
       type: 'statusText',
-      label: '发布状态',
+      label: '状态',
       prop: 'publishStatus',
       width: 100,
       color: ({ row: { publishStatus: s } }) => statusMapping[s].color,
@@ -70,24 +72,24 @@ export default that => ({
       width: 200,
       operationList: [
         {
-          func: that.mixinHandleDelete,
+          func: that.handleEditApiClick,
           label: '编辑'
         },
         {
-          func: that.mixinHandleDelete,
+          func: that.handleDeleteApiClick,
           label: '删除'
         },
         {
-          func: that.handleVersionDetailClick,
+          func: that.handleApiDetailClick,
           label: '详情'
         },
         {
-          func: that.mixinHandleDelete,
+          func: that.handleStopApiClick,
           label: '停止发布',
           visible: ({ row }) => row.publishStatus === 2
         },
         {
-          func: that.mixinHandleDelete,
+          func: that.handlePublishApiClick,
           label: '发布',
           visible: ({ row }) => row.publishStatus !== 2
         }

@@ -2,6 +2,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.common;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class RedisApiInfo {
 
@@ -14,4 +16,7 @@ public class RedisApiInfo {
     private String requiredFields;
     private String responseFields;
     private String querySql;
+    private List<RegisterApiParamInfo> registerApiParamInfoList;
+    private String reqHost;
+    private String reqPath;
 }

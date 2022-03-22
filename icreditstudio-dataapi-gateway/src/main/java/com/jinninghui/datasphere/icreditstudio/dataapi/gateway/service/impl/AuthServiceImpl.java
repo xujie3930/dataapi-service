@@ -32,11 +32,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public BusinessResult<String> getToken(String generateId, String secretContent) {
         Object value = redisTemplate.opsForValue().get(generateId);
-        if (Objects.isNull(value)) {
+        if (Objects.isNull(value)){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000000.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000000.getMessage());
         }
         AppAuthInfo appAuthInfo = JSON.parseObject(value.toString(), AppAuthInfo.class);
-        if (!secretContent.equals(appAuthInfo.getSecretContent())) {
+        if (!secretContent.equals(appAuthInfo.getSecretContent())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000001.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000001.getMessage());
         }
         String token = UUID.randomUUID().toString().replaceAll("-", "");

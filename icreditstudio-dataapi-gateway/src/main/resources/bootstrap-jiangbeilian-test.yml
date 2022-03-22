@@ -35,6 +35,11 @@ spring:
       #listner负责ack，每调用一次，就立即commit
       ack-mode: manual_immediate
       missing-topics-fatal: false
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.0.107:8848
+        group: JIANGBEILIANTEST
 
   redis:
     host: 192.168.0.125

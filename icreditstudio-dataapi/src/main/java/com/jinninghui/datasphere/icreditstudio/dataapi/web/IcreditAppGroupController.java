@@ -2,9 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppGroupService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppQueryListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppGroupSaveRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.CheckAppGroupNameRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppGroupQueryListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +44,15 @@ public class IcreditAppGroupController {
     @PostMapping("/checkAppGroupName")
     public BusinessResult<Boolean> checkAppGroupName(@RequestBody CheckAppGroupNameRequest request) {
         return appGroupService.checkAppGroupName(request);
+    }
+
+    @PostMapping("/rename")
+    BusinessResult<Boolean> renameById(@RequestBody AppGroupRenameRequest request) {
+        return appGroupService.renameById(request);
+    }
+
+    @PostMapping("/del")
+    BusinessResult<Boolean> delByIds(@RequestBody AppGroupDelRequest request) {
+        return appGroupService.delByIds(request);
     }
 }
