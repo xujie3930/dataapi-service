@@ -23,6 +23,4 @@ public interface IcreditApiBaseHiMapper extends BaseMapper<IcreditApiBaseHiEntit
     List<ApiHistoryListResult> getList(ApiHistoryListRequest request);
 
     Long countApiBaseHi(ApiHistoryListRequest request);
-
-    List<Integer> getApiVersionsByApiId(@Param("apiId") String apiId);
 }

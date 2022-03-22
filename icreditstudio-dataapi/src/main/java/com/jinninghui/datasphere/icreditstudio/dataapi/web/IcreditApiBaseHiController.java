@@ -5,12 +5,10 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseHiS
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseHiDetailRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiHistoryListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiVersionsRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DatasourceApiSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiHistoryListResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiVersionsResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.BeanUtils;
@@ -48,11 +46,6 @@ public class IcreditApiBaseHiController {
         DatasourceApiSaveParam param = new DatasourceApiSaveParam();
         BeanUtils.copyProperties(request, param);
         return apiBaseHiService.updateApi(userId, param);
-    }
-
-    @PostMapping("/apiVersions")
-    public BusinessResult<ApiVersionsResult> apiVersions(@RequestBody ApiVersionsRequest request){
-        return apiBaseHiService.apiVersions(request);
     }
 
 }

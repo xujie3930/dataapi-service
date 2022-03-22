@@ -3,14 +3,11 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiParamEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DataSourcesListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableFieldListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableNameListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.APIParamResult;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
@@ -42,17 +39,13 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
 
     BusinessResult<List<FieldInfo>> getTableFieldList(TableFieldListRequest request);
 
-    BusinessResult<ApiDetailResult> detail(String id);
-
-    void handleRegisterApiParamInfo(List<RegisterRequestParamSaveRequest> registerRequestList, List<RegisterResponseParamSaveRequest> registerResponseList, List<IcreditApiParamEntity> apiParamList);
-
     BusinessResult<Boolean> checkApiPath(CheckApiPathRequest request);
 
     BusinessResult<Boolean> checkApiName(CheckApiNameRequest request);
 
     Object checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type);
 
-    BusinessResult<Boolean> publishOrStop(String userId, ApiPublishRequest request);
+    BusinessResult<Boolean> publishOrStop(String userId, HiApiPublishRequest request);
 
     BusinessResult<List<ApiNameAndIdListResult>> getApiByApiGroupId(ApiNameAndIdListRequest request);
 

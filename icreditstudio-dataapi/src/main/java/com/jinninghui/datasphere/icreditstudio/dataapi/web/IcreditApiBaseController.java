@@ -52,12 +52,6 @@ public class IcreditApiBaseController {
         return BusinessResult.success(RandomStringUtils.randomAlphabetic(16));
     }
 
-    @PostMapping("/detail")
-    @ResultReturning
-    public BusinessResult<ApiDetailResult> detail(@RequestBody ApiBaseDetailRequest request) {
-        return apiBaseService.detail(request.getId());
-    }
-
     @PostMapping("/getDatasourceListByType")
     BusinessResult<List<Map<String, Object>>> getDataSourcesList(@RequestBody DataSourcesListRequest request) {
         return apiBaseService.getDataSourcesList(request);
@@ -94,7 +88,7 @@ public class IcreditApiBaseController {
     }
 
     @PostMapping("/publishOrStop")
-    public BusinessResult<Boolean> publishOrStop(@RequestHeader(value = "userId") String userId, @RequestBody ApiPublishRequest request){
+    public BusinessResult<Boolean> publishOrStop(@RequestHeader(value = "userId") String userId, @RequestBody HiApiPublishRequest request){
         return apiBaseService.publishOrStop(userId, request);
     }
 
