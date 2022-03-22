@@ -223,9 +223,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
         } else {
             sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
             if(null != sqlModelInfo) {
                 apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-                querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
                 String[] tableNames = null;
                 String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
                 String[] requiredFieldArr;
@@ -263,6 +263,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                     responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
                 }
                 handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
+            }else{
+                String sqlCount = querySql.substring(querySql.indexOf(SQL_START) + SQL_START.length(), querySql.indexOf(SQL_FROM));
+                responseFieldStr = sqlCount.contains(SQL_AS) ? sqlCount.substring(sqlCount.indexOf(SQL_AS) + SQL_AS.length()) : sqlCount.contains(EMPTY_CHAR) ? sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
             }
         }
         if(!CollectionUtils.isEmpty(apiParamEntityList)) {
@@ -508,7 +511,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             conn = getConnectionByUri(uri);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
-            String sqlCount = sql.substring(sql.indexOf(SQL_START) + 1, sql.indexOf(SQL_FROM)).replaceAll(" ", "");
+            String sqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM)).replaceAll(" ", "");
             if(!sqlCount.contains("count(1)") && !sqlCount.contains("count(*)") && QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
                 apiParamEntityList = new ArrayList<>();
                 if(sql.contains(SQL_WHERE)) {
@@ -709,9 +712,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
         } else {
             sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
             if(null != sqlModelInfo) {
                 apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-                querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
                 String[] tableNames = null;
                 String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
                 String[] requiredFieldArr;
@@ -749,6 +752,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                     responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
                 }
                 handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
+            }else{
+                String sqlCount = querySql.substring(querySql.indexOf(SQL_START) + SQL_START.length(), querySql.indexOf(SQL_FROM));
+                responseFieldStr = sqlCount.contains(SQL_AS) ? sqlCount.substring(sqlCount.indexOf(SQL_AS) + SQL_AS.length()) : sqlCount.contains(EMPTY_CHAR) ? sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
             }
         }
         if(!CollectionUtils.isEmpty(apiParamEntityList)) {
