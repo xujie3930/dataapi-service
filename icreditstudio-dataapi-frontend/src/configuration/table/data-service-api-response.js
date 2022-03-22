@@ -29,7 +29,7 @@ export default that => ({
     {
       type: 'editInput',
       label: '默认值',
-      prop: 'defalutValue'
+      prop: 'defaultValue'
     },
 
     {
