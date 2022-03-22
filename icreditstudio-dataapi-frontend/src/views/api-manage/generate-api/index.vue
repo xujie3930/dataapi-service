@@ -965,9 +965,11 @@ export default {
             this.form.apiGroupId = [workFlowId, apiGroupId]
 
             if (type === 1) {
-              const { tableName, datasourceId } = generateApi
-              this.form.apiGenerateSaveRequest.tableName = tableName
-              this.form.apiGenerateSaveRequest.datasourceId = datasourceId
+              const fieldArr = ['tableName', 'datasourceId', 'model', 'sql']
+              fieldArr.forEach(
+                item =>
+                  (this.form.apiGenerateSaveRequest[item] = generateApi[item])
+              )
               this.form.apiParamSaveRequestList = paramList
               this.fetchSelectOptionsByKey({
                 key: 'dataNameOptions',

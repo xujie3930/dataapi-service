@@ -496,11 +496,12 @@ export default {
     // 失焦-保存编辑名称
     handleTreeNodeInputBlur(data, node) {
       const { parent, level } = node
-      const { id, workId } = data
+      const { id, workId, name } = data
       const { childNodes } = parent
+      console.log(level, data, node, ';ooo')
       level === 2
-        ? this.setCurEditTreeData(id, workId, childNodes, false)
-        : Object.assign(this.curNode.data, { isRename: false })
+        ? this.setGroupNodeName({ id, newName: name, workId, childNodes })
+        : this.setProcessNodeName(id, name)
     },
 
     // 聚焦-分组名称或业务流程名称
@@ -513,6 +514,39 @@ export default {
         : Object.assign(this.curNode.data, { isRename: true })
     },
 
+    // 右键-业务流程重命名
+    setProcessNodeName(id, newName) {
+      API.editProcessName({ id, newName })
+        .then(({ success, data }) => {
+          if (success && data) {
+            this.$notify.success({
+              title: '操作结果',
+              message: '修改成功！',
+              duration: 2000
+            })
+            Object.assign(this.curNode.data, { isRename: false })
+          }
+        })
+        .catch(() => {})
+    },
+
+    // 右键-API分组重命名
+    setGroupNodeName(options) {
+      const { id, newName, workId, childNodes } = options
+      API.editApiGroupName({ id, newName })
+        .then(({ success, data }) => {
+          if (success && data) {
+            this.$notify.success({
+              title: '操作结果',
+              message: '修改成功！',
+              duration: 2000
+            })
+            this.setCurEditTreeData(id, workId, childNodes, false)
+          }
+        })
+        .catch(() => {})
+    },
+
     // 设置-重命名当前节点名称
     setCurEditTreeData(id, workId, childNodes, isEdit) {
       const children = childNodes.map(({ data }) => {
@@ -522,7 +556,6 @@ export default {
         }
       })
 
-      console.log(workId, children, 'kkoo')
       this.$refs.tree.updateKeyChildren(workId, children)
     },
 
@@ -713,7 +746,7 @@ export default {
                 leaf: false,
                 icon: 'process',
                 isRename: false,
-                newName: item.name
+                oldName: item.name
               }
             })
             this.oldTreeData = treeData
@@ -752,7 +785,7 @@ export default {
                 leaf: true,
                 icon: 'group',
                 isRename: false,
-                newName: item.name
+                oldName: item.name
               }
             })
 
