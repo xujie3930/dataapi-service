@@ -29,6 +29,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResu
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.Query;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -165,7 +166,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         apiBaseEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
         saveOrUpdate(apiBaseEntity);
 
-        String querySql;
+        String querySql = null;
         String requiredFieldStr = null;
         String responseFieldStr = null;
         SqlModelInfoBO sqlModelInfo = new SqlModelInfoBO();
@@ -222,47 +223,51 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
         } else {
             sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
-            apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
-            String[] tableNames = null;
-            String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
-            String[] requiredFieldArr;
-            if(querySql.contains(SQL_WHERE)) {
-                requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
-                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-            }else{
-                requiredFieldArr = new String[]{};
-                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-            }
-            for (String requiredField : requiredFieldArr) {
-                if(requiredField.contains("${")) {
-                    requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+            if(null != sqlModelInfo) {
+                apiParamEntityList = sqlModelInfo.getApiParamEntityList();
+                querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
+                String[] tableNames = null;
+                String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
+                String[] requiredFieldArr;
+                if (querySql.contains(SQL_WHERE)) {
+                    requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
+                } else {
+                    requiredFieldArr = new String[]{};
+                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
                 }
+                for (String requiredField : requiredFieldArr) {
+                    if (requiredField.contains("${")) {
+                        requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+                    }
+                }
+                List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
+                for (String tableName : tableNames) {
+                    TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
+                    tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
+                    tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
+                    String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
+                    tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
+                    tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
+                    tableNameInfoBOList.add(tableNameInfoBO);
+                }
+                for (String responseField : responseFieldArr) {
+                    responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
+                    responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
+                    responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
+                }
+                if (requiredFields.length() >= 1) {
+                    requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+                }
+                if (responseFields.length() >= 1) {
+                    responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+                }
+                handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
             }
-            List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
-            for (String tableName : tableNames) {
-                TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
-                tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
-                tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
-                String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
-                tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
-                tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
-                tableNameInfoBOList.add(tableNameInfoBO);
-            }
-            for (String responseField : responseFieldArr) {
-                responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
-                responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
-                responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
-            }
-            if (requiredFields.length() >= 1) {
-                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-            }
-            if (responseFields.length() >= 1) {
-                responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-            }
-            handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
         }
-        apiParamService.saveOrUpdateBatch(apiParamEntityList);
+        if(!CollectionUtils.isEmpty(apiParamEntityList)) {
+            apiParamService.saveOrUpdateBatch(apiParamEntityList);
+        }
 
         //保存 generate api
         IcreditGenerateApiEntity generateApiEntity = new IcreditGenerateApiEntity();
@@ -273,7 +278,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
             generateApiEntity.setSql(querySql);
         }
-        if (ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
+        if (null != sqlModelInfo && ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
             generateApiEntity.setTableName(sqlModelInfo.getTableNames());
         }
         generateApiService.saveOrUpdate(generateApiEntity);
@@ -478,7 +483,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
             }
-            if(m.find()){
+            if(sql.contains(SQL_WHERE) && m.find()){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage());
             }
         }else{
@@ -488,7 +493,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
             }
-            if(m.find()){
+            if(sql.contains(SQL_WHERE) && m.find()){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
             }
         }
@@ -503,7 +508,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             conn = getConnectionByUri(uri);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
-            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
+            String sqlCount = sql.substring(sql.indexOf(SQL_START) + 1, sql.indexOf(SQL_FROM)).replaceAll(" ", "");
+            if(!sqlCount.contains("count(1)") && !sqlCount.contains("count(*)") && QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
                 apiParamEntityList = new ArrayList<>();
                 if(sql.contains(SQL_WHERE)) {
                     sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(SQL_LIMIT));
@@ -644,7 +650,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         saveOrUpdate(apiBaseEntity);
         log.info("保存api耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         startTime = System.currentTimeMillis();
-        String querySql;
+        String querySql = null;
         String requiredFieldStr = null;
         String responseFieldStr = null;
         SqlModelInfoBO sqlModelInfo = new SqlModelInfoBO();
@@ -703,47 +709,51 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
         } else {
             sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
-            apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
-            String[] tableNames = null;
-            String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
-            String[] requiredFieldArr;
-            if(querySql.contains(SQL_WHERE)) {
-                requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
-                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-            }else{
-                requiredFieldArr = new String[]{};
-                tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-            }
-            for (String requiredField : requiredFieldArr) {
-                if(requiredField.contains("${")) {
-                    requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+            if(null != sqlModelInfo) {
+                apiParamEntityList = sqlModelInfo.getApiParamEntityList();
+                querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
+                String[] tableNames = null;
+                String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
+                String[] requiredFieldArr;
+                if (querySql.contains(SQL_WHERE)) {
+                    requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
+                } else {
+                    requiredFieldArr = new String[]{};
+                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
                 }
+                for (String requiredField : requiredFieldArr) {
+                    if (requiredField.contains("${")) {
+                        requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+                    }
+                }
+                List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
+                for (String tableName : tableNames) {
+                    TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
+                    tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
+                    tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
+                    String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
+                    tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
+                    tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
+                    tableNameInfoBOList.add(tableNameInfoBO);
+                }
+                for (String responseField : responseFieldArr) {
+                    responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
+                    responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
+                    responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
+                }
+                if (requiredFields.length() >= 1) {
+                    requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+                }
+                if (responseFields.length() >= 1) {
+                    responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+                }
+                handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
             }
-            List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
-            for (String tableName : tableNames) {
-                TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
-                tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
-                tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
-                String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
-                tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
-                tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
-                tableNameInfoBOList.add(tableNameInfoBO);
-            }
-            for (String responseField : responseFieldArr) {
-                responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
-                responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
-                responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
-            }
-            if (requiredFields.length() >= 1) {
-                requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-            }
-            if (responseFields.length() >= 1) {
-                responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-            }
-            handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
         }
-        apiParamService.saveOrUpdateBatch(apiParamEntityList);
+        if(!CollectionUtils.isEmpty(apiParamEntityList)) {
+            apiParamService.saveOrUpdateBatch(apiParamEntityList);
+        }
 
         log.info("保存apiParam耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //保存 generate api
@@ -757,7 +767,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
             generateApiEntity.setSql(querySql);
         }
-        if (ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
+        if (null != sqlModelInfo && ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {
             generateApiEntity.setTableName(sqlModelInfo.getTableNames());
         }
         generateApiService.saveOrUpdate(generateApiEntity);
