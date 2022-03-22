@@ -16,11 +16,14 @@
         select id as apiHiId,api_version as apiVersion,publish_user as publishUser,name,publish_status as publishStatus,publish_time as publishTime
         from icredit_api_base_hi
         where del_flag = 0 and api_base_id = #{apiId}
-        <if test="apiVersion != null">
-            and api_version = #{apiVersion}
+        <if test="publishStatus != null">
+            and publish_status = #{publishStatus}
         </if>
-        <if test="publishUser != null and publishUser != ''">
-            and publish_user = #{publishUser}
+        <if test="publishDateStart != null and publishDateStart != ''">
+            and publish_time &gt;= #{publishDateStart}
+        </if>
+        <if test="publishDateEnd != null and publishDateEnd != ''">
+            and publish_time &lt;= #{publishDateEnd}
         </if>
         order by api_version desc
         limit #{pageStartNum},#{pageSize}
@@ -30,11 +33,14 @@
         select count(1)
         from icredit_api_base_hi
         where del_flag = 0 and api_base_id = #{apiId}
-        <if test="apiVersion != null">
-            and api_version = #{apiVersion}
+        <if test="publishStatus != null">
+            and publish_status = #{publishStatus}
         </if>
-        <if test="publishUser != null and publishUser != ''">
-            and publish_user = #{publishUser}
+        <if test="publishDateStart != null and publishDateStart != ''">
+            and publish_time &gt;= #{publishDateStart}
+        </if>
+        <if test="publishDateEnd != null and publishDateEnd != ''">
+            and publish_time &lt;= #{publishDateEnd}
         </if>
     </select>
 

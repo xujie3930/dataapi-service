@@ -7,8 +7,9 @@ import lombok.Data;
 public class ApiHistoryListRequest extends BusinessBasePageForm {
 
     private String apiId;
-    private String publishUser;
-    private Integer apiVersion;
+    private Integer publishStatus;
+    private String publishDateStart;
+    private String publishDateEnd;
     private Integer pageStartNum;
 
 }

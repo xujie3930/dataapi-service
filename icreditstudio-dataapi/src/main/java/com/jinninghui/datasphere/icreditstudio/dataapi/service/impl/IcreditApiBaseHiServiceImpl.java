@@ -17,8 +17,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
-import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,6 +62,12 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     @ResultReturning
     public BusinessResult<BusinessPageResult<ApiHistoryListResult>> getList(ApiHistoryListRequest request) {
         StringLegalUtils.checkId(request.getApiId());
+        if(!StringUtils.isEmpty(request.getPublishDateStart())) {
+            request.setPublishDateStart(String.valueOf(new StringBuffer(request.getPublishDateStart()).append(" 00:00:00")));
+        }
+        if(!StringUtils.isEmpty(request.getPublishDateEnd())) {
+            request.setPublishDateEnd(String.valueOf(new StringBuffer(request.getPublishDateEnd()).append(" 59:59:59")));
+        }
         request.setPageStartNum((request.getPageNum() - 1) * request.getPageSize());
         List<ApiHistoryListResult> apiHistoryListResultList = apiBaseHiMapper.getList(request);
         Long apiBaseHiCount = apiBaseHiMapper.countApiBaseHi(request);
