@@ -209,7 +209,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             generateApiService.saveOrUpdate(generateApiEntity);
         }else{//注册api
             createApiInfoBO = createRegisterApi(param, apiBaseEntity.getApiVersion(), apiBaseEntity.getId());
-            BeanUtils.copyProperties(createApiInfoBO.getApiParamEntityList(), registerApiParamInfos);
+            registerApiParamInfos = BeanCopyUtils.copy(createApiInfoBO.getApiParamEntityList(), RegisterApiParamInfo.class);
         }
 
         if(!CollectionUtils.isEmpty(createApiInfoBO.getApiParamEntityList())) {
