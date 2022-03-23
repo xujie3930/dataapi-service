@@ -28,4 +28,8 @@ public interface IcreditApiBaseHiService extends IService<IcreditApiBaseHiEntity
     BusinessResult<ApiDetailResult> info(ApiBaseHiDetailRequest request);
 
     BusinessResult<ApiSaveResult> updateApi(String userId, DatasourceApiSaveParam param);
+
+    BusinessResult<Boolean> deleteBatch(String userId, String[] apiHiIdsArry);
+
+    BusinessResult<Boolean> deleteById(String userId, String apiHiId);
 }

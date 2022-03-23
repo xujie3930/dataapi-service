@@ -4,6 +4,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseHiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseHiDetailRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiHisDelRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiHistoryListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.DatasourceApiSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiDetailResult;
@@ -15,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -48,5 +50,14 @@ public class IcreditApiBaseHiController {
         return apiBaseHiService.updateApi(userId, param);
     }
 
+    @PostMapping("/deleteBatch")
+    BusinessResult<Boolean> deleteBatch(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody String[] apiHiIdsArry) {
+        return apiBaseHiService.deleteBatch(userId, apiHiIdsArry);
+    }
+
+    @PostMapping("/delete")
+    BusinessResult<Boolean> deleteBatch(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody ApiHisDelRequest request) {
+        return apiBaseHiService.deleteById(userId, request.getId());
+    }
 }
 
