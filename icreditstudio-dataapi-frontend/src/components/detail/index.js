@@ -5,6 +5,6 @@
  */
 
 import Vue from 'vue'
-import Detail from './src/detail'
+import JDetail from './src/detail'
 
-Vue.component(Detail.name, Detail)
+Vue.component(JDetail.name, JDetail)

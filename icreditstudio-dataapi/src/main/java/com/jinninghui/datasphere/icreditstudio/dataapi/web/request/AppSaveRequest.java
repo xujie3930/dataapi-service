@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
  **/
 @Data
 public class AppSaveRequest {
+    private String id;
     //认证方式(0-密钥,1-证书认证)，默认0
     private Integer certificationType;
     //是否启用(0-未启用,1-启用),默认1

@@ -4,6 +4,8 @@ import tableServiceApiDetailTableConfig from './data-service-api-detail'
 import tableServiceApiVersionTableConfig from './data-service-api-version'
 import tableRequestConfiguration from './data-service-api-request'
 import tableResponseConfiguration from './data-service-api-response'
+import tableRequestConfigurationDetail from './data-service-api-request-detail'
+import tableResponseConfigurationDetail from './data-service-api-response-detail'
 import dataServiceAppTableConfig from './data-service-app'
 import logManageTableConfig from './data-service-log'
 
@@ -14,6 +16,8 @@ export {
   tableServiceApiVersionTableConfig,
   tableRequestConfiguration,
   tableResponseConfiguration,
+  tableRequestConfigurationDetail,
+  tableResponseConfigurationDetail,
   dataServiceAppTableConfig,
   logManageTableConfig
 }

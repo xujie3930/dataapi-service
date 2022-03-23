@@ -81,7 +81,8 @@ export default that => ({
         },
         {
           func: that.handleApiDetailClick,
-          label: '详情'
+          label: '详情',
+          visible: ({ row }) => row.publishStatus !== 0
         },
         {
           func: that.handleUpdateStatusClick,
