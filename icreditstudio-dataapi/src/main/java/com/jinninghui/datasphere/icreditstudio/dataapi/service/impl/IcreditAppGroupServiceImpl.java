@@ -133,15 +133,29 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
         if(CollectionUtils.isEmpty(request.getAppGroupIds()) && CollectionUtils.isEmpty(request.getAppIds())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000048.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000048.getMessage());
         }
-        if(StringUtils.isNotEmpty(appService.findEnableAppIdByAppGroupIds(request.getAppGroupIds())) ||
-                StringUtils.isNotEmpty(appService.findEnableAppIdByIds(request.getAppIds()))){
+        List<String> appIdList = new ArrayList<>();
+        String appId = null;
+        if(!CollectionUtils.isEmpty(request.getAppIds())){
+            appId = appService.findEnableAppIdByIds(request.getAppIds());
+            appIdList.addAll(request.getAppIds());
+        }
+        if(StringUtils.isNotEmpty(appId)){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getMessage());
         }
-        List<String> appIds = appService.getIdsByAppGroupIds(request.getAppGroupIds());
-        if(!CollectionUtils.isEmpty(appIds)) {
-            appIds.addAll(request.getAppIds());
-            appService.removeByIds(appIds);
+        if(!CollectionUtils.isEmpty(request.getAppGroupIds())){
+            appId = appService.findEnableAppIdByAppGroupIds(request.getAppGroupIds());
+            List<String> appIds = appService.getIdsByAppGroupIds(request.getAppGroupIds());
+            appIdList.addAll(appIds);
         }
-        return BusinessResult.success(removeByIds(request.getAppGroupIds()));
+        if(StringUtils.isNotEmpty(appId)){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getMessage());
+        }
+        if(!CollectionUtils.isEmpty(appIdList)) {
+            appService.removeByIds(appIdList);
+        }
+        if(!CollectionUtils.isEmpty(request.getAppGroupIds())){
+            removeByIds(request.getAppGroupIds());
+        }
+        return BusinessResult.success(true);
     }
 }

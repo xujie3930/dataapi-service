@@ -58,12 +58,10 @@
         from icredit_app
         where del_flag = 0
         and is_enable = 1
-        <if test="list != null">
-            and app_group_id in
-            <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
-                #{appGroupId}
-            </foreach>
-        </if>
+        and app_group_id in
+        <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
+            #{appGroupId}
+        </foreach>
         limit 1
     </select>
 
@@ -82,12 +80,10 @@
         from icredit_app
         where del_flag = 0
         and is_enable = 1
-        <if test="list != null">
-            and id in
-            <foreach collection="list" index="index" item="appId" open="(" close=")" separator=",">
-                #{appId}
-            </foreach>
-        </if>
+        and id in
+        <foreach collection="list" index="index" item="appId" open="(" close=")" separator=",">
+            #{appId}
+        </foreach>
         limit 1
     </select>
 </mapper>
