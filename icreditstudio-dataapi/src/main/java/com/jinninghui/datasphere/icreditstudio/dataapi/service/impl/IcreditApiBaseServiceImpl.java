@@ -672,12 +672,15 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         if(apiBaseHiEntity.getApiVersion().equals(apiBaseEntity.getApiVersion())){//最新版本
             apiBaseMapper.updatePublishStatusById(apiBaseEntity.getId(), request.getPublishStatus());
         }
-
+        apiBaseHiEntity.setPublishStatus(request.getPublishStatus());
         if(ApiPublishStatusEnum.NO_PUBLISHED.getCode().equals(request.getPublishStatus())){//停止发布
             redisTemplate.delete(String.valueOf(new StringBuilder(apiBaseHiEntity.getPath()).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiBaseHiEntity.getApiVersion())));
             apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         }else if(ApiPublishStatusEnum.PUBLISHED.getCode().equals(request.getPublishStatus())){//发布
             IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiIdAndVersion(apiBaseEntity.getId(), apiBaseHiEntity.getApiVersion());
+            if(null == generateApiEntity){//注册api的情况下才会为null
+                generateApiEntity = new IcreditGenerateApiEntity();
+            }
 
             String requiredFieldStr = null;
             String responseFieldStr = null;
@@ -719,7 +722,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
             apiBaseHiEntity.setPublishUser(userId);
             apiBaseHiEntity.setPublishTime(new Date());
-            apiBaseHiEntity.setPublishStatus(request.getPublishStatus());
             apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         }
         return BusinessResult.success(true);
@@ -845,7 +847,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         } else {
             sqlModelInfo = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-            sqlModelInfo = (SqlModelInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+            sqlModelInfo = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
             querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
             if(null != sqlModelInfo) {
                 apiParamEntityList = sqlModelInfo.getApiParamEntityList();
