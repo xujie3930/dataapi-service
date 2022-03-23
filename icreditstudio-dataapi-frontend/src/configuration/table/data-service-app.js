@@ -94,7 +94,7 @@ export default that => ({
           visible: ({ row }) => row.isEnable === 0
         },
         {
-          func: that.handleAuthorizeClick,
+          func: that.handleDeleteAppClick,
           label: '删除',
           visible: ({ row }) => row.isEnable === 0
         },
