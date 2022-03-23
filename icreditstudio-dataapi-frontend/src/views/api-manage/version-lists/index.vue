@@ -38,6 +38,7 @@
         @handleBatchDelete="handleBatchDelete"
       />
     </Dialog>
+
     <!-- 详情 -->
     <JDetail
       ref="versionDetail"
@@ -138,23 +139,50 @@ export default {
     },
 
     handleSelectChange(selection) {
-      console.log(selection, this.selection, 'ddsds')
       this.selection = selection
-
-      // 批量删除
     },
 
-    // 点击-批量删除
+    // 点击-批量删除API
     handleBatchDelete() {
       if (!this.selection.length) {
         this.$message.error('请先勾选一条数据！')
         return
       }
+
+      const { length } = this.selection.filter(
+        ({ publishStatus }) => publishStatus === 2
+      )
+
+      length
+        ? this.$alert('所选中的API中包含已发布的API，请重新选择！', '提示', {
+            confirmButtonText: '确定',
+            type: 'warning'
+          })
+        : this.$confirm('请确认是否批量删除所选中的全部版本API？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+            .then(() => {
+              const ids = this.selection.map(({ apiHiId }) => apiHiId)
+              API.deleteHistoryApiBatch(ids).then(({ success, data }) => {
+                if (success && data) {
+                  this.$notify.success({
+                    title: '操作结果',
+                    message: '删除成功！',
+                    duration: 1500
+                  })
+
+                  this.mixinRetrieveTableData()
+                }
+              })
+            })
+            .catch(() => {})
     },
 
-    //  点击-删除或批量删除API
+    //  点击-删除删除API
     handleDeleteApiClick({ row }) {
-      const { publishStatus } = row
+      const { publishStatus, apiHiId: id } = row
       publishStatus === 2
         ? this.$alert('该API已发布，请先停止发布', '提示', {
             confirmButtonText: '确定',
@@ -166,7 +194,17 @@ export default {
             type: 'warning'
           })
             .then(() => {
-              this.$message({ type: 'success', message: '删除成功!' })
+              API.deleteHistoryApiItem({ id }).then(({ success, data }) => {
+                if (success && data) {
+                  this.$notify.success({
+                    title: '操作结果',
+                    message: '删除成功！',
+                    duration: 1500
+                  })
+
+                  this.mixinRetrieveTableData()
+                }
+              })
             })
             .catch(() => {})
     },

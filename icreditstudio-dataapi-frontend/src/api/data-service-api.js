@@ -73,6 +73,13 @@ const getHistoryApiDetail = params => postAction('/apiHistory/info', params)
 const getHistoryApiVesionOptions = params =>
   postAction('/apiHistory/apiVersions', params)
 
+// 删除历史版本API
+const deleteHistoryApiItem = params => postAction('/apiHistory/delete', params)
+
+// 批量删除历史版本API
+const deleteHistoryApiBatch = params =>
+  postAction('/apiHistory/deleteBatch', params)
+
 export default {
   addBusinessProcess,
   addApiInfo,
@@ -94,5 +101,7 @@ export default {
   deleteApiGroupItem,
   editProcessName,
   editApiGroupName,
-  editApiInfo
+  editApiInfo,
+  deleteHistoryApiItem,
+  deleteHistoryApiBatch
 }
