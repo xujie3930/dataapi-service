@@ -10,7 +10,9 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.utils.HttpUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -49,7 +51,9 @@ public class RegisterService implements ApiBaseService {
             requestParamStr = requestParamStr.substring(0, requestParamStr.length() - 1);
         }
         String requestHttpPre = apiInfo.getReqHost() + apiInfo.getReqPath();
-        String response = HttpUtils.sendGet(requestHttpPre, requestParamStr);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> restResult = restTemplate.getForEntity(StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr, String.class);
+        String response = restResult.getBody();
         //返回分别对bean类型和array类型做处理
         JSONObject newJsonObj = new JSONObject();
         if (response.startsWith("[") && response.endsWith("]")){

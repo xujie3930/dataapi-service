@@ -273,20 +273,26 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             entity.setUpdateBy(userId);
             entity.setUpdateTime(new Date());
             entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
-            updateById(entity);
+            saveOrUpdate(entity);
         }
         return BusinessResult.success(true);
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public BusinessResult<Boolean> deleteById(String userId, String apiHiId) {
         if (StringUtils.isBlank(apiHiId)){
             return BusinessResult.success(true);
         }
 
         IcreditApiBaseHiEntity entity = getById(apiHiId);
+        if (Objects.isNull(entity)){
+            return BusinessResult.success(true);
+        }
         IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(entity.getApiBaseId());
+        if (Objects.isNull(apiBaseEntity)){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000054.getCode());
+        }
         if (InterfaceSourceEnum.OUT_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000052.getCode());
         }
