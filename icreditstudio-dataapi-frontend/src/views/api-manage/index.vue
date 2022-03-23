@@ -157,8 +157,6 @@
     <!-- 历史版本列表 -->
     <VersionLists ref="versionLists" @edit-api="editApiCallback" />
 
-    <Detail ref="apiDetail" />
-
     <!-- 右键菜单 -->
     <div
       class="contentmenu"
@@ -204,8 +202,6 @@ import GenerateApi from './generate-api'
 import AddBusinessPorcess from './add-business-porcess'
 import AddApiGroup from './add-api-group'
 import VersionLists from './version-lists'
-import Detail from './version-lists/detail'
-
 import tableConfiguration from '@/configuration/table/data-service-api'
 
 import formOption from '@/configuration/form/data-service-api'
@@ -221,8 +217,7 @@ export default {
     GenerateApi,
     AddApiGroup,
     AddBusinessPorcess,
-    VersionLists,
-    Detail
+    VersionLists
   },
 
   data() {

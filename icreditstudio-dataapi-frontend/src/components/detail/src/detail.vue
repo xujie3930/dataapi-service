@@ -44,12 +44,31 @@
         </el-row>
       </div>
     </div>
+
+    <template v-if="showDetailTable && detailTableConfiguration">
+      <div
+        class="detail-table"
+        :key="key"
+        v-for="(table, key) in tableConfiguration"
+      >
+        <div class="banner-title">
+          <div class="text">{{ detailTableTitleKeyMapping[key].label }}</div>
+        </div>
+
+        <JTable
+          ref="editTable"
+          v-loading="table.tableLoading"
+          :table-data="table.tableData"
+          :table-configuration="table.tableConfig"
+        />
+      </div>
+    </template>
   </Dialog>
 </template>
 
 <script>
 export default {
-  name: 'Detail',
+  name: 'JDetail',
 
   model: {
     prop: 'visible',
@@ -58,6 +77,10 @@ export default {
 
   props: {
     visible: {
+      type: Boolean,
+      default: false
+    },
+    showDetailTable: {
       type: Boolean,
       default: false
     },
@@ -72,12 +95,21 @@ export default {
       default: '850px'
     },
 
+    detailTableConfiguration: {
+      type: Object
+    },
+
     detailConfiguration: {
       type: Object,
       default: () => ({})
     },
 
     detailTitleKeyMapping: {
+      type: Object,
+      default: () => ({})
+    },
+
+    detailTableTitleKeyMapping: {
       type: Object,
       default: () => ({})
     },
@@ -108,6 +140,16 @@ export default {
         }
       }
       return showDetailModule
+    },
+
+    tableConfiguration() {
+      const temp = {}
+      for (const key in this.detailTableConfiguration) {
+        if (this.detailTableConfiguration[key].visible)
+          temp[key] = this.detailTableConfiguration[key]
+      }
+
+      return temp
     }
   },
 
@@ -128,7 +170,7 @@ export default {
 .detail-dialog {
   ::v-deep {
     .el-dialog__body {
-      padding: 0 20px;
+      padding: 20px;
     }
   }
 }
