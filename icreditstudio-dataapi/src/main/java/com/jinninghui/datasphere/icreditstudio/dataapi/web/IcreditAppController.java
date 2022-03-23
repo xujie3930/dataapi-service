@@ -6,6 +6,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppDetailRequ
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppDetailResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppUpdatePageInfoResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,12 @@ public class IcreditAppController {
     @ResultReturning
     BusinessResult<AppDetailResult> detail(@RequestBody AppDetailRequest request) {
         return appService.detail(request);
+    }
+
+    @PostMapping("/updatePageInfo")
+    @ResultReturning
+    BusinessResult<AppUpdatePageInfoResult> updatePageInfo(@RequestBody AppDetailRequest request) {
+        return appService.updatePageInfo(request);
     }
 
 }

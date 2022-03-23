@@ -19,6 +19,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequ
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppDetailResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AppUpdatePageInfoResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
@@ -64,13 +65,12 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         StringLegalUtils.checkLegalDescForApp(request.getDesc());
         StringLegalUtils.checkLegalAllowIpForApp(request.getAllowIp());
         IcreditAppEntity appEntity = BeanCopyUtils.copyProperties(request, new IcreditAppEntity());
-        appEntity.setGenerateId(request.getGenerateId());
         if(TokenTypeEnum.LONG_TIME.getCode().equals(request.getTokenType())){//token有效期--长期
             appEntity.setPeriod(TokenTypeEnum.LONG_TIME.getDuration());
         }if(TokenTypeEnum.EIGHT_HOURS.getCode().equals(request.getTokenType())){//token有效期--8小时
             appEntity.setPeriod(TokenTypeEnum.EIGHT_HOURS.getDuration());
         }
-        save(appEntity);
+        saveOrUpdate(appEntity);
         AppAuthInfo appAuthInfo = BeanCopyUtils.copyProperties(appEntity, new AppAuthInfo());
         //新增应用时候，保存应用信息至redis
         redisTemplate.opsForValue().set(request.getGenerateId(), JSON.toJSONString(appAuthInfo));
@@ -99,6 +99,7 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
 
     @Override
     public BusinessResult<AppDetailResult> detail(AppDetailRequest request) {
+        StringLegalUtils.checkId(request.getId());
         IcreditAppEntity appEntity = appMapper.selectById(request.getId());
         AppDetailResult appDetailResult = new AppDetailResult();
         BeanUtils.copyProperties(appEntity, appDetailResult);
@@ -172,5 +173,20 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     @Override
     public String findEnableAppIdByIds(List<String> appIds) {
         return appMapper.findEnableAppIdByIds(appIds);
+    }
+
+    @Override
+    public BusinessResult<AppUpdatePageInfoResult> updatePageInfo(AppDetailRequest request) {
+        StringLegalUtils.checkId(request.getId());
+        IcreditAppEntity appEntity = appMapper.selectById(request.getId());
+        AppUpdatePageInfoResult updatePageInfoResult = new AppUpdatePageInfoResult();
+        BeanUtils.copyProperties(appEntity, updatePageInfoResult);
+        if(TokenTypeEnum.CUSTOM.getCode().equals(appEntity.getTokenType())){
+            updatePageInfoResult.setPeriod(String.valueOf(new StringBuilder().append(appEntity.getPeriod()).append("小时")));
+        }else {
+            updatePageInfoResult.setPeriod(null);
+        }
+        updatePageInfoResult.setAppGroupName(appGroupService.findNameById(appEntity.getAppGroupId()));
+        return BusinessResult.success(updatePageInfoResult);
     }
 }
