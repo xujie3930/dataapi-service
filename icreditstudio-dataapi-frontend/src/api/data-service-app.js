@@ -48,7 +48,7 @@ const getAppAuthDetail = params => postAction('/auth/info', params)
 // 编辑应用分组
 const editAppGroup = params => postAction('/appGroup/rename', params)
 
-// 删除或批量删除应用分组
+// 删除或批量删除应用、分组
 const deleteAppGroup = params => postAction('/appGroup/del', params)
 
 // 启用或停用应用

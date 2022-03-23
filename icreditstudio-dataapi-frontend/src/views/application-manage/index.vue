@@ -28,11 +28,14 @@
       :handleUpdate="mixinHandleCreateOrUpdate"
       :handleCancel="mixinHandleCancel"
       :handleSelectChange="handleSelectChange"
-      :handleSelect="handleRowSelect"
     >
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
-          <el-button class="jui-button--default" disabled>批量删除</el-button>
+          <el-button
+            class="jui-button--default"
+            @click="handleBatchDeleteAppGroup"
+            >批量删除</el-button
+          >
         </div>
         <div class="header-operate-right">
           <el-button type="primary" @click="handleAddAppGroupClick">
@@ -131,32 +134,7 @@ export default {
   methods: {
     // 点击-Table选择项发生变化时
     handleSelectChange(selection) {
-      // const { children } = selection
-      // const tableComponentDom =
-      //   this.$refs.crud.$refs?.table?.$refs[this.tableConfiguration.refName]
-      // console.log(selection, tableComponentDom, 'sectionsss')
-      // // 一级checkbox
-      // console.log(children)
-      // if (children) {
-      //   children.forEach(item =>
-      //     tableComponentDom.toggleRowSelection(item, true)
-      //   )
-      // }
       this.tableSelections = selection
-    },
-
-    // 点击-Table选择项发生变化时
-    handleRowSelect({ row }) {
-      // const { children } = row
-      // const tableComponentDom =
-      //   this.$refs.crud.$refs?.table?.$refs[this.tableConfiguration.refName]
-      console.log(row, 'sectionsss')
-      // 一级checkbox
-      // console.log(children)
-      // if (children) {
-      //   children.forEach(item => tableComponentDom.toggleRowSelection(item))
-      // }
-      // this.tableSelections = selection
     },
 
     // 点击-新增应用分组
@@ -178,9 +156,54 @@ export default {
       })
     },
 
-    // 点击-删除应用删除
+    // 点击-批量删除应用或分组
+    handleBatchDeleteAppGroup() {
+      const params = { appIds: [], appGroupIds: [] }
+      const enableArr = []
+
+      if (!this.tableSelections.length) {
+        this.$message.error('请先勾选一条数据！')
+        return
+      }
+
+      this.tableSelections.forEach(item => {
+        const { id, children, isEnable } = item
+        if ('children' in item) {
+          params.appGroupIds.push(id)
+          enableArr.push(...children.filter(({ isEnable }) => isEnable))
+        } else {
+          isEnable && enableArr.push(item)
+          params.appIds.push(id)
+        }
+      })
+
+      enableArr.length
+        ? this.$alert(
+            '勾选的分组或应用中包含启用状态的应用，请停用后再进行删除！！',
+            '提示',
+            {
+              showConfirmButton: false,
+              showCancelButton: true,
+              type: 'warning'
+            }
+          )
+        : this.$confirm(
+            '删除分组后，分组下的应用都将全部删除；删除所选中的应用后，与API之间的授权关系将全部解除，请确认是否批量删除所选中的全部应用？',
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          )
+            .then(() => {
+              this.deleteApiGroup(params)
+            })
+            .catch(() => {})
+    },
+
+    // 点击-删除应用分组
     handleDeleteGroupClick({ row }) {
-      console.log(row, 'row')
       const { children, id } = row
       const enableApiArr = children.filter(({ isEnable }) => isEnable)
       enableApiArr.length
@@ -188,7 +211,8 @@ export default {
             '该分组下包含启用状态的应用，请停用后再进行删除！',
             '提示',
             {
-              confirmButtonText: '确定',
+              showConfirmButton: false,
+              showCancelButton: true,
               type: 'warning'
             }
           )
@@ -202,9 +226,27 @@ export default {
             }
           )
             .then(() => {
-              this.deleteApiGroup([id])
+              this.deleteApiGroup({ appGroupIds: [id], appIds: [] })
             })
             .catch(() => {})
+    },
+
+    // 点击-删除应用
+    handleDeleteAppClick({ row }) {
+      const { id } = row
+      this.$confirm(
+        '删除该应用后，与API的授权关系将全部解除，需重新添加应用后再次授权才能重新调用API，请谨慎操作！所以确定要删除该应用吗？',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          this.deleteApiGroup({ appIds: [id], appGroupIds: [] })
+        })
+        .catch(() => {})
     },
 
     // 点击-详情
@@ -248,8 +290,8 @@ export default {
     closeAuthorizeCallback() {},
 
     // 删除分组
-    deleteApiGroup(ids) {
-      API.deleteAppGroup({ ids }).then(({ success, data }) => {
+    deleteApiGroup(params) {
+      API.deleteAppGroup(params).then(({ success, data }) => {
         if (success && data) {
           this.$notify.success({
             title: '操作结果',
