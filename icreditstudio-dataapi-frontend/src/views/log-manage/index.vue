@@ -30,7 +30,7 @@
     />
 
     <!-- 详情 -->
-    <Detail
+    <JDetail
       ref="logDetail"
       v-model="detailVisible"
       width="500px"

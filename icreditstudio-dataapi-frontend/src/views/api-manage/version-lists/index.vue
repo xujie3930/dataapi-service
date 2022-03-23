@@ -38,7 +38,18 @@
         @handleBatchDelete="handleBatchDelete"
       />
     </Dialog>
-    <VersionDetail ref="versionDetail" />
+    <!-- 详情 -->
+    <JDetail
+      ref="versionDetail"
+      v-model="detailVisible"
+      :loading="detailLoading"
+      :show-detail-table="true"
+      :detail-configuration="detailConfiguration"
+      :detail-title-key-mapping="detailTitleKeyMapping"
+      :detail-table-configuration="detailTableConfiguration"
+      :detail-table-title-key-mapping="detailTableTitleKeyMapping"
+      :fetch-detail-data="fetchApiDetailData"
+    />
   </div>
 </template>
 
@@ -47,14 +58,26 @@ import API from '@/api/api'
 import crud from '@/mixins/crud'
 import { dataServiceApiVersionForm } from '@/configuration/form/index'
 import { tableServiceApiVersionTableConfig } from '@/configuration/table'
-import VersionDetail from './detail'
+import { cloneDeep } from 'lodash'
+import { isPlainObject } from '@/utils'
+import {
+  detailConfiguration,
+  detailTableConfiguration,
+  detailTitleKeyMapping,
+  detailTableTitleKeyMapping
+} from './detail-config'
 
 export default {
   mixins: [crud],
-  components: { VersionDetail },
-
   data() {
     return {
+      detailLoading: false,
+      detailVisible: false,
+      detailConfiguration: cloneDeep(detailConfiguration),
+      detailTableConfiguration: cloneDeep(detailTableConfiguration),
+      detailTitleKeyMapping: cloneDeep(detailTitleKeyMapping),
+      detailTableTitleKeyMapping: cloneDeep(detailTableTitleKeyMapping),
+
       selection: [],
       currentRow: {},
       versionOptions: [],
@@ -82,7 +105,8 @@ export default {
 
     // 点击-查看详情
     handleApiDetailClick({ row }) {
-      this.$refs.versionDetail.open(row)
+      this.detailVisible = true
+      this.$refs.versionDetail.open({ ...row, title: '详情' })
     },
 
     // 点击-编辑API
@@ -187,28 +211,82 @@ export default {
       )
     },
 
-    // 接口-获取版本号Options
-    // fetchApiVersionOptions() {
-    //   API.getHistoryApiVesionOptions({ apiId: this.currentRow.id }).then(
-    //     ({ success, data }) => {
-    //       if (success && data) {
-    //         this.versionOptions = data.apiVersions.reverse().map(item => ({
-    //           label: `v${item}`,
-    //           value: item
-    //         }))
+    // 接口-获取详情数据
+    fetchApiDetailData({ apiHiId }) {
+      this.detailLoading = true
+      this.detailConfiguration = cloneDeep(detailConfiguration)
+      this.detailTitleKeyMapping = cloneDeep(detailTitleKeyMapping)
+      this.detailTableTitleKeyMapping = cloneDeep(detailTableTitleKeyMapping)
 
-    //         const versionObj = this.mixinSearchFormItems[1]
-    //         this.mixinSearchFormItems.splice(
-    //           1,
-    //           Object.assign(versionObj, { options: this.versionOptions })
-    //         )
-    //       }
-    //     }
-    //   )
-    // },
+      API.getHistoryApiDetail({ apiHiId })
+        .then(({ success, data }) => {
+          if (success && data) {
+            const {
+              paramList,
+              generateApi,
+              registerRequestParamSaveRequestList,
+              registerResponseParamSaveRequestList,
+              ...restData
+            } = data
+
+            cloneDeep(this.detailConfiguration.base).forEach((item, idx) => {
+              const { key, formatter, hide } = item
+              const val = key === 'model' ? generateApi?.model : restData[key]
+              this.detailConfiguration.base[idx].value = formatter
+                ? isPlainObject(formatter(val))
+                  ? formatter(val)?.name
+                  : formatter(val)
+                : val
+
+              if ('color' in item) {
+                this.detailConfiguration.base[idx].color = formatter(val)?.color
+              }
+
+              if ('hide' in item) {
+                this.detailConfiguration.base[idx].hide = hide(data)
+              }
+            })
+
+            // 选择表
+            cloneDeep(this.detailConfiguration.table).forEach(
+              ({ key, value }, idx) => {
+                this.detailConfiguration.table[idx].value =
+                  key in cloneDeep(generateApi ?? {}) ? generateApi[key] : value
+              }
+            )
+
+            // 后台服务
+            cloneDeep(this.detailConfiguration.service).forEach(
+              ({ key }, idx) => {
+                this.detailConfiguration.service[idx].value = data[key]
+              }
+            )
+
+            //选择参数
+            this.detailTableConfiguration.params.tableData = paramList ?? []
+
+            this.detailTitleKeyMapping.service.visible = !data.type
+            this.detailTitleKeyMapping.table.visible = !!data.type
+
+            Object.assign(this.detailTableConfiguration.params, {
+              visible: data.type === 1 ? true : false
+            })
+            Object.assign(this.detailTableConfiguration.request, {
+              visible: data.type === 0 ? true : false,
+              tableData: registerRequestParamSaveRequestList
+            })
+            Object.assign(this.detailTableConfiguration.response, {
+              visible: data.type === 0 ? true : false,
+              tableData: registerResponseParamSaveRequestList
+            })
+          }
+        })
+        .finally(() => {
+          this.detailLoading = false
+        })
+    },
 
     // 拦截-表格请求接口参数拦截
-
     interceptorsRequestRetrieve(params) {
       const { time, ...restParams } = params
       const publishDateStart = time?.length ? time[0] : ''

@@ -59,7 +59,7 @@
     <AppAuthorization ref="authorize" @on-close="closeAuthorizeCallback" />
 
     <!-- 详情 -->
-    <Detail
+    <JDetail
       ref="appDetail"
       v-model="detailVisible"
       :loading="detailLoading"
@@ -97,7 +97,6 @@ export default {
     return {
       detailVisible: false,
       detailLoading: false,
-      detailOptions: {},
       expandRowKeys: [],
       tableSelections: [],
       formOption: dataServiceAppForm,
@@ -211,7 +210,6 @@ export default {
     // 点击-详情
     handleDetailClick({ row }) {
       this.detailVisible = true
-      this.detailOptions = { title: '详情' }
       this.$refs.appDetail.open({ id: row.id, title: '详情' })
     },
 
