@@ -1,11 +1,10 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiPublishStatusEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiSaveStatusEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiTypeEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequestFiledEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseHiMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,11 +13,14 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceA
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
+import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -249,5 +251,52 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             apiSaveResult.setApiHiId(newApiBaseHiEntity.getId());
             return BusinessResult.success(apiSaveResult);
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BusinessResult<Boolean> deleteBatch(String userId, String[] apiHiIdsArry) {
+        List<String> apiHiIds = Arrays.asList(apiHiIdsArry);
+        if (CollectionUtils.isEmpty(apiHiIds)){
+            return BusinessResult.success(true);
+        }
+
+        for (String apiHiId : apiHiIds) {
+            IcreditApiBaseHiEntity entity = getById(apiHiId);
+            IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(entity.getApiBaseId());
+            if (InterfaceSourceEnum.OUT_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000052.getCode());
+            }
+            if (ApiPublishStatusEnum.PUBLISHED.getCode().equals(entity.getPublishStatus())){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000050.getCode());
+            }
+            entity.setUpdateBy(userId);
+            entity.setUpdateTime(new Date());
+            entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
+            updateById(entity);
+        }
+        return BusinessResult.success(true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BusinessResult<Boolean> deleteById(String userId, String apiHiId) {
+        if (StringUtils.isBlank(apiHiId)){
+            return BusinessResult.success(true);
+        }
+
+        IcreditApiBaseHiEntity entity = getById(apiHiId);
+        IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(entity.getApiBaseId());
+        if (InterfaceSourceEnum.OUT_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000052.getCode());
+        }
+        if (ApiPublishStatusEnum.PUBLISHED.getCode().equals(entity.getPublishStatus())){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000051.getCode());
+        }
+        entity.setUpdateBy(userId);
+        entity.setUpdateTime(new Date());
+        entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
+        updateById(entity);
+        return BusinessResult.success(true);
     }
 }

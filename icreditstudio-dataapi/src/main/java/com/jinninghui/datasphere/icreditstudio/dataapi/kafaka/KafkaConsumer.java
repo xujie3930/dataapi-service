@@ -9,14 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Optional;
@@ -26,7 +24,7 @@ import java.util.Optional;
  * @description kafka消费者
  * @create 2022-03-02 16:57
  **/
-//@Component
+@Component
 @Slf4j
 public class KafkaConsumer {
 

@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class AppGroupDelRequest {
 
-    private List<String> ids;
+    private List<String> appIds;
+    private List<String> appGroupIds;
 
 }
