@@ -9,5 +9,5 @@ import java.sql.SQLException;
 import java.util.Map;
 
 public interface ApiBaseService {
-    BusinessResult<Object> getData(String version, String path, Map map, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo, Connection conn, String querySql) throws SQLException;
+    BusinessResult<Object> getData(String version, String path, Map map, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo, Connection conn, String querySql) throws SQLException, IllegalAccessException;
 }
