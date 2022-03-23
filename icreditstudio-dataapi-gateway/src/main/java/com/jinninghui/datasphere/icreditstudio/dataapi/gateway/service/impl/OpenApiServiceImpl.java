@@ -55,7 +55,7 @@ public class OpenApiServiceImpl implements OpenApiService {
             //发送kafka失败信息
             ApiLogInfo failLog = generateFailLog(apiLogInfo, querySql, e);
             kafkaProducer.send(failLog);
-            log.info("发送kafka异常日志:{}", failLog);
+            log.error("发送kafka异常日志:{}", failLog);
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000013.getCode(), failLog.getExceptionDetail());
         } finally {
             DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
