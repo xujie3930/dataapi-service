@@ -75,5 +75,5 @@ public class BaseEntity extends BaseObject {
      */
     @TableField(value = "del_flag", fill = FieldFill.INSERT)
     @TableLogic
-    private Integer delFlag;
+    private Integer delFlag = 0;
 }

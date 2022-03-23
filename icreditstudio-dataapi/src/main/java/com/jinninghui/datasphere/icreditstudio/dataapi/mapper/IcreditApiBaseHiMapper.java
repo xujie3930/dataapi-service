@@ -23,4 +23,6 @@ public interface IcreditApiBaseHiMapper extends BaseMapper<IcreditApiBaseHiEntit
     List<ApiHistoryListResult> getList(ApiHistoryListRequest request);
 
     Long countApiBaseHi(ApiHistoryListRequest request);
+
+    void deleteByEntity(IcreditApiBaseHiEntity entity);
 }

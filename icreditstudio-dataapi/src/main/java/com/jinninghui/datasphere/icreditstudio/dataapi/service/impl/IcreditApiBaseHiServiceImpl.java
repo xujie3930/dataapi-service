@@ -273,7 +273,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             entity.setUpdateBy(userId);
             entity.setUpdateTime(new Date());
             entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
-            saveOrUpdate(entity);
+            apiBaseHiMapper.deleteByEntity(entity);
         }
         return BusinessResult.success(true);
     }
@@ -284,7 +284,6 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         if (StringUtils.isBlank(apiHiId)){
             return BusinessResult.success(true);
         }
-
         IcreditApiBaseHiEntity entity = getById(apiHiId);
         if (Objects.isNull(entity)){
             return BusinessResult.success(true);
@@ -302,7 +301,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         entity.setUpdateBy(userId);
         entity.setUpdateTime(new Date());
         entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
-        updateById(entity);
+        apiBaseHiMapper.deleteByEntity(entity);
         return BusinessResult.success(true);
     }
 }
