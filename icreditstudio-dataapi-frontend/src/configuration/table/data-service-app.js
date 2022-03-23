@@ -84,7 +84,7 @@ export default that => ({
       operationList: [
         // 停用状态
         {
-          func: that.handleAuthorizeClick,
+          func: that.handleChangeAppStatusClick,
           label: '启用',
           visible: ({ row }) => row.isEnable === 0
         },
@@ -101,7 +101,7 @@ export default that => ({
 
         // 启用状态
         {
-          func: that.handleAuthorizeClick,
+          func: that.handleChangeAppStatusClick,
           label: '停用',
           visible: ({ row }) => row.isEnable
         },

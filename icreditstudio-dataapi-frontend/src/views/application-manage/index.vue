@@ -28,6 +28,7 @@
       :handleUpdate="mixinHandleCreateOrUpdate"
       :handleCancel="mixinHandleCancel"
       :handleSelectChange="handleSelectChange"
+      :handleSelect="handleRowSelect"
     >
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
@@ -100,13 +101,6 @@ export default {
       expandRowKeys: [],
       tableSelections: [],
       formOption: dataServiceAppForm,
-      mixinTableData: [
-        {
-          name: 'iiii',
-          id: '1',
-          children: [{ name: '2222', id: 2, children: [] }]
-        }
-      ],
 
       mixinSearchFormConfig: {
         models: {
@@ -132,14 +126,38 @@ export default {
   },
 
   created() {
-    // this.mixinRetrieveTableData()
+    this.mixinRetrieveTableData()
   },
 
   methods: {
     // 点击-Table选择项发生变化时
     handleSelectChange(selection) {
-      console.log(selection, this.$refs.crud.$refs.table, 'sectionsss')
+      // const { children } = selection
+      // const tableComponentDom =
+      //   this.$refs.crud.$refs?.table?.$refs[this.tableConfiguration.refName]
+      // console.log(selection, tableComponentDom, 'sectionsss')
+      // // 一级checkbox
+      // console.log(children)
+      // if (children) {
+      //   children.forEach(item =>
+      //     tableComponentDom.toggleRowSelection(item, true)
+      //   )
+      // }
       this.tableSelections = selection
+    },
+
+    // 点击-Table选择项发生变化时
+    handleRowSelect({ row }) {
+      // const { children } = row
+      // const tableComponentDom =
+      //   this.$refs.crud.$refs?.table?.$refs[this.tableConfiguration.refName]
+      console.log(row, 'sectionsss')
+      // 一级checkbox
+      // console.log(children)
+      // if (children) {
+      //   children.forEach(item => tableComponentDom.toggleRowSelection(item))
+      // }
+      // this.tableSelections = selection
     },
 
     // 点击-新增应用分组
@@ -202,6 +220,23 @@ export default {
       this.$refs.authorize.open({ row, title: '授权', opType: 'add' })
     },
 
+    // 点击-停用或启用App状态
+    handleChangeAppStatusClick({ row }) {
+      this.$confirm(
+        '停用该应用后将不能进行API调用，请确认是否停用该应用？',
+        '停用提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          this.changeAppStatus(row)
+        })
+        .catch(() => {})
+    },
+
     closeAddAppGroupCallback(options) {
       console.log(options, 'options')
       this.mixinRetrieveTableData()
@@ -227,6 +262,23 @@ export default {
           this.mixinRetrieveTableData()
         }
       })
+    },
+
+    changeAppStatus(row) {
+      const { id, isEnable } = row
+      API.enableOrStopApp({ id, isEnable: isEnable ? 0 : 1 }).then(
+        ({ success, data }) => {
+          if (success && data) {
+            this.$notify.success({
+              title: '操作结果',
+              message: `${isEnable ? '停用' : '启用'}成功！`,
+              duration: 2000
+            })
+
+            this.mixinRetrieveTableData()
+          }
+        }
+      )
     },
 
     // 获取-详情接口

@@ -67,8 +67,8 @@ export default that => ({
     {
       type: 'operation',
       label: '操作',
-      fixed: 'right',
-      align: 'left',
+      // fixed: 'right',
+      // align: 'left',
       width: 200,
       operationList: [
         {
@@ -84,12 +84,12 @@ export default that => ({
           label: '详情'
         },
         {
-          func: that.handleStopApiClick,
+          func: that.handleUpdateStatusClick,
           label: '停止发布',
           visible: ({ row }) => row.publishStatus === 2
         },
         {
-          func: that.handlePublishApiClick,
+          func: that.handleUpdateStatusClick,
           label: '发布',
           visible: ({ row }) => row.publishStatus !== 2
         }

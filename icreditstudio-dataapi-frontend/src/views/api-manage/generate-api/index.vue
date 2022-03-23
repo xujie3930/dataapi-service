@@ -689,7 +689,7 @@ export default {
       if (cb) {
         !value.startsWith('http://')
           ? cb(new Error('IP地址要以http://开头，请重新输入'))
-          : validIpAddress(ipStr)
+          : validIpAddress(ipStr.split(':')[0])
           ? cb()
           : cb(new Error('非法IP地址，请重新输入'))
       }

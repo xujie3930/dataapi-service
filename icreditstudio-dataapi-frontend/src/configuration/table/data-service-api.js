@@ -89,7 +89,7 @@ export default that => ({
       type: 'operation',
       label: '操作',
       fixed: 'right',
-      width: 200,
+      width: 100,
       operationList: [
         // {
         //   func: that.handleAuthorizeClick,

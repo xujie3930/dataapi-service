@@ -44,6 +44,7 @@
             @handleSizeChange="handleSizeChange"
             @handleCurrentChange="handleCurrentChange"
             @selection-change="_handleCurrentChange"
+            @select="handleSelect"
           ></j-table>
         </slot>
       </template>
@@ -216,6 +217,12 @@ export default {
       type: Function
     },
     handleSelectChange: {
+      type: Function,
+      default() {
+        return () => {}
+      }
+    },
+    handleSelect: {
       type: Function,
       default() {
         return () => {}

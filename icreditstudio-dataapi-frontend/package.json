@@ -18,7 +18,7 @@
   "dependencies": {
     "axios": "^0.25.0",
     "core-js": "^3.6.5",
-    "element-ui": "^2.15.7",
+    "element-ui": "2.13.2",
     "gm-crypt": "^0.0.2",
     "js-cookie": "^3.0.1",
     "js-file-download": "^0.4.12",

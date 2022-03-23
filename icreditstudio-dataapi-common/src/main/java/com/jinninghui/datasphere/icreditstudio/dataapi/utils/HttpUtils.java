@@ -5,6 +5,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.utils;
  * @description http请求工具类
  * @create 2022-03-21 15:56
  **/
+import org.apache.commons.lang.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,6 +31,9 @@ public class HttpUtils {
         BufferedReader in = null;
         try {
             String urlNameString = url + "?" + param;
+            if (StringUtils.isBlank(param)){
+                urlNameString = url;
+            }
             URL realUrl = new URL(urlNameString);
             // 打开和URL之间的连接
             URLConnection connection = realUrl.openConnection();
