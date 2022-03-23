@@ -34,4 +34,6 @@ public interface IcreditAppService extends IService<IcreditAppEntity> {
     String findEnableAppIdByAppGroupIds(List<String> ids);
 
     List<String> getIdsByAppGroupIds(List<String> ids);
+
+    String findEnableAppIdByIds(List<String> appIds);
 }

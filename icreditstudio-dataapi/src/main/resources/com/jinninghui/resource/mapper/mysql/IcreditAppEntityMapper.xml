@@ -58,10 +58,12 @@
         from icredit_app
         where del_flag = 0
         and is_enable = 1
-        and app_group_id in
-        <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
-            #{appGroupId}
-        </foreach>
+        <if test="list != null">
+            and app_group_id in
+            <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
+                #{appGroupId}
+            </foreach>
+        </if>
         limit 1
     </select>
 
@@ -73,5 +75,19 @@
         <foreach collection="list" index="index" item="appGroupId" open="(" close=")" separator=",">
             #{appGroupId}
         </foreach>
+    </select>
+
+    <select id="findEnableAppIdByIds" resultType="java.lang.String">
+        select id
+        from icredit_app
+        where del_flag = 0
+        and is_enable = 1
+        <if test="list != null">
+            and id in
+            <foreach collection="list" index="index" item="appId" open="(" close=")" separator=",">
+                #{appId}
+            </foreach>
+        </if>
+        limit 1
     </select>
 </mapper>

@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -127,17 +128,20 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     }
 
     @Override
+    @Transactional
     public BusinessResult<Boolean> delByIds(AppGroupDelRequest request) {
-        if(CollectionUtils.isEmpty(request.getIds())){
+        if(CollectionUtils.isEmpty(request.getAppGroupIds()) && CollectionUtils.isEmpty(request.getAppIds())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000048.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000048.getMessage());
         }
-        if(StringUtils.isNotEmpty(appService.findEnableAppIdByAppGroupIds(request.getIds()))){
+        if(StringUtils.isNotEmpty(appService.findEnableAppIdByAppGroupIds(request.getAppGroupIds())) ||
+                StringUtils.isNotEmpty(appService.findEnableAppIdByIds(request.getAppIds()))){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getMessage());
         }
-        List<String> ids = appService.getIdsByAppGroupIds(request.getIds());
-        if(!CollectionUtils.isEmpty(ids)) {
-            appService.removeByIds(ids);
+        List<String> appIds = appService.getIdsByAppGroupIds(request.getAppGroupIds());
+        if(!CollectionUtils.isEmpty(appIds)) {
+            appIds.addAll(request.getAppIds());
+            appService.removeByIds(appIds);
         }
-        return BusinessResult.success(removeByIds(request.getIds()));
+        return BusinessResult.success(removeByIds(request.getAppGroupIds()));
     }
 }
