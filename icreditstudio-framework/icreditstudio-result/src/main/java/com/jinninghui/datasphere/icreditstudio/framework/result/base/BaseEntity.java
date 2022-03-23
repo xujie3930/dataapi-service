@@ -74,5 +74,6 @@ public class BaseEntity extends BaseObject {
      * 删除标识【0：未删除，1：已删除】
      */
     @TableField(value = "del_flag", fill = FieldFill.INSERT)
-    private Integer delFlag;
+    @TableLogic
+    private Integer delFlag = 0;
 }

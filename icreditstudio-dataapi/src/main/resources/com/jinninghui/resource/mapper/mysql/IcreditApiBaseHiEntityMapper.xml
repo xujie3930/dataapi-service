@@ -43,4 +43,16 @@
             and publish_time &lt;= #{publishDateEnd}
         </if>
     </select>
+
+    <update id="deleteByEntity" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseHiEntity">
+        update icredit_api_base_hi
+        <set>
+            update_by=#{updateBy},
+            update_time=#{updateTime},
+            del_flag=#{delFlag}
+        </set>
+        <where>
+            id=#{id}
+        </where>
+    </update>
 </mapper>
