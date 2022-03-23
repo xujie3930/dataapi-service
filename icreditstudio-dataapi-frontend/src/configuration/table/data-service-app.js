@@ -89,7 +89,7 @@ export default that => ({
           visible: ({ row }) => row.isEnable === 0
         },
         {
-          func: that.handleAuthorizeClick,
+          func: that.handleEditAppClick,
           label: '编辑',
           visible: ({ row }) => row.isEnable === 0
         },

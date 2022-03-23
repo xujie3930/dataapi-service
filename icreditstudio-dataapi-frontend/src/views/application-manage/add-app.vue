@@ -179,11 +179,11 @@ export default {
       loading: false,
       veifyNameLoading: false,
       isShowPassword: false,
-      oldGroupName: '',
       tokenOptions: objectConvertToArray(TOEKN_PERIOD),
       tokenCustomOptions: objectConvertToArray(customTokenOptions()),
       groupNameOptions: [],
       appForm: {
+        id: '',
         generateId: '',
         appGroupId: '',
         name: '',
@@ -269,6 +269,7 @@ export default {
       this.fetchAppId()
       this.fetchAppGroupNameOptions()
       opType === 'add' && this.generateSecretContent()
+      opType === 'edit' && this.fetchAppDetailInfo()
     },
 
     close() {
@@ -307,26 +308,6 @@ export default {
           ? cb(new Error('该名称中包含不规范字符，请重新输入'))
           : cb()
       }
-    },
-
-    // 校验-分组名称是否唯一
-    verifyGroupNameUnique(rule, value, cb) {
-      this.timerId = null
-      const { id } = this.options
-      const { name } = this.appForm
-
-      if (id && this.oldGroupName === value) return cb()
-
-      this.veifyNameLoading = true
-      API.checkNameUniqueness({ id, name })
-        .then(({ success, data }) => {
-          success && data ? cb(new Error('该名称已存在，请重新输入')) : cb()
-        })
-        .finally(() => {
-          this.timerId = setTimeout(() => {
-            this.veifyNameLoading = false
-          }, 300)
-        })
     },
 
     // 校验-应用密钥
@@ -383,6 +364,35 @@ export default {
           }
         })
         .finally(() => {})
+    },
+
+    // 获取-应用详情
+    fetchAppDetailInfo() {
+      const { id } = this.options.row
+      this.loading = true
+      API.getAppEditDetail({ id })
+        .then(({ success, data }) => {
+          if (success && data) {
+            const fieldArr = [
+              'id',
+              'generateId',
+              'certificationType',
+              'isEnable',
+              'name',
+              'secretContent',
+              'appGroupId',
+              'desc',
+              'tokenType',
+              'allowIp',
+              'period'
+            ]
+
+            fieldArr.forEach(item => (this.appForm[item] = data[item]))
+          }
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
 
     // 点击-新增或编辑应用
