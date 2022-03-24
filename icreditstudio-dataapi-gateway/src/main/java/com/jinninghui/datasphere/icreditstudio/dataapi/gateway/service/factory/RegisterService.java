@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.base.ApiBaseService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.utils.HttpUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,7 +29,7 @@ public class RegisterService implements ApiBaseService {
     private KafkaProducer kafkaProducer;
 
     @Override
-    public BusinessResult<Object> getData(String version, String path, Map map, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo, Connection conn, String querySql) throws SQLException, IllegalAccessException {
+    public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) {
         List<RegisterApiParamInfo> registerApiParamInfos = apiInfo.getRegisterApiParamInfoList();
         List<RegisterApiParamInfo> requestList = registerApiParamInfos.stream()
                 .filter((RegisterApiParamInfo r) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(r.getIsRequest()))
@@ -44,7 +42,7 @@ public class RegisterService implements ApiBaseService {
         //生成入参列表,参数格式:name1=value1&name2=value2
         StringBuilder builder = new StringBuilder();
         for (RegisterApiParamInfo requestParam : requestList) {
-            builder.append(requestParam.getFieldName()).append("=").append(StringUtils.isBlank((String) map.get(requestParam.getFieldName()))? requestParam.getDefaultValue() : (String) map.get(requestParam.getFieldName())).append("&");
+            builder.append(requestParam.getFieldName()).append("=").append(StringUtils.isBlank((String) params.get(requestParam.getFieldName()))? requestParam.getDefaultValue() : (String) params.get(requestParam.getFieldName())).append("&");
         }
         String requestParamStr = builder.toString();
         if (!StringUtils.isBlank(requestParamStr)){
