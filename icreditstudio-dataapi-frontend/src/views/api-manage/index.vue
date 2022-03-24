@@ -151,12 +151,6 @@
       @on-close="closeDialogCallback"
     />
 
-    <!-- 新增API分组 -->
-    <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
-
-    <!-- 历史版本列表 -->
-    <VersionLists ref="versionLists" @edit-api="editApiCallback" />
-
     <!-- 右键菜单 -->
     <div
       class="contentmenu"
@@ -193,6 +187,16 @@
         删除
       </p>
     </div>
+
+    <!-- 新增API分组 -->
+    <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
+
+    <!-- 历史版本列表 -->
+    <VersionLists
+      ref="versionLists"
+      @edit-api="editApiCallback"
+      @on-close="closeVersionDialogCallback"
+    />
   </div>
 </template>
 
@@ -601,6 +605,11 @@ export default {
       this.$nextTick(() =>
         this.$refs.datasourceGenerate.open({ ...options, opType: this.opType })
       )
+    },
+
+    // 回调-API历史版本弹窗关闭状态
+    closeVersionDialogCallback(visible) {
+      !visible && this.mixinRetrieveTableData()
     },
 
     // 回调-新增业务流程或API分组
