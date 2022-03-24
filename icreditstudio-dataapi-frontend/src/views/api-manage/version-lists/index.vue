@@ -86,7 +86,7 @@ export default {
       versionOptions: [],
       formOption: dataServiceApiVersionForm,
       tableConfiguration: tableServiceApiVersionTableConfig(this),
-      mixinSearchFormConfig: { models: { time: '', publishStatus: '' } },
+      mixinSearchFormConfig: { models: { time: [], publishStatus: '' } },
       fetchConfig: { retrieve: { url: '/apiHistory/list', method: 'post' } }
     }
   },
@@ -96,7 +96,6 @@ export default {
       row && (this.currentRow = row)
       this.$refs.baseDialog.open()
       this.mixinRetrieveTableData()
-      // this.fetchApiVersionOptions()
     },
 
     close() {
@@ -105,6 +104,7 @@ export default {
     },
 
     changeDialogVisible(visible) {
+      !visible && this.close()
       this.$emit('on-close', visible)
     },
 
