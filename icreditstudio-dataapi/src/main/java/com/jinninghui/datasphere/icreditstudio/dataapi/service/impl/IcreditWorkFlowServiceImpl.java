@@ -52,7 +52,6 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     @Resource
     private IcreditApiBaseService apiService;
     private static String DEFAULT_WORK_FLOW_ID = "0";
-    private static String DEFAULT_API_GROUP_ID = "0";
 
     @Override
     public Boolean hasExit(WorkFlowSaveRequest request) {
@@ -236,7 +235,7 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
         StringLegalUtils.checkId(request.getId());
         StringLegalUtils.checkLegalName(request.getNewName());
         checkRepetitionName(request.getNewName(), request.getId());
-        workFlowMapper.renameById(request.getNewName(), request.getId());
+        workFlowMapper.renameById(request.getNewName(), request.getDesc(), request.getId());
         return BusinessResult.success(true);
     }
 }
