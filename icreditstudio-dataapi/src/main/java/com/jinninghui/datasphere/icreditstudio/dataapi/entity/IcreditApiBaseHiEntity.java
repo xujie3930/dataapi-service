@@ -55,4 +55,7 @@ public class IcreditApiBaseHiEntity extends BaseEntity implements Serializable {
 
     private String apiBaseId;
 
+    //0-数据服务，1-资源管理
+    private Integer interfaceSource;
+
 }

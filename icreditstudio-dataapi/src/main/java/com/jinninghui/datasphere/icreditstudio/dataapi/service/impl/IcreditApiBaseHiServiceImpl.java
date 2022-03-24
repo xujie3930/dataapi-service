@@ -185,7 +185,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         StringLegalUtils.checkId(param.getApiHiId());
         IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiMapper.selectById(param.getApiHiId());
         IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(apiBaseHiEntity.getApiBaseId());
-        //todo 待发布的编辑，版本号不变
+        //待发布的编辑，版本号不变
         if(ApiPublishStatusEnum.WAIT_PUBLISH.getCode().equals(apiBaseHiEntity.getPublishStatus())){
             param.setApiVersion(apiBaseHiEntity.getApiVersion());
             ApiSaveResult apiSaveResult;
@@ -207,7 +207,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                 BeanUtils.copyProperties(apiBaseEntity, apiBaseHiEntity);
                 apiBaseHiEntity.setId(apiBaseHiId);
                 apiBaseHiEntity.setApiBaseId(apiId);
+                apiBaseEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
                 apiBaseService.saveOrUpdate(apiBaseEntity);
+                apiBaseHiEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
                 saveOrUpdate(apiBaseHiEntity);
                 apiSaveResult = apiBaseService.saveApi(userId, param, apiBaseEntity);
                 apiSaveResult.setApiHiId(apiBaseHiEntity.getId());
@@ -223,6 +225,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                     apiBaseHiEntity.setPublishTime(new Date());
                 }
                 apiParamService.removeByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
+                apiBaseHiEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
                 saveOrUpdate(apiBaseHiEntity);
                 IcreditApiBaseEntity newApiBaseEntity = new IcreditApiBaseEntity();
                 BeanUtils.copyProperties(apiBaseHiEntity, newApiBaseEntity);
@@ -249,9 +252,11 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             newApiBaseEntity.setId(apiBaseHiEntity.getApiBaseId());
             IcreditApiBaseHiEntity newApiBaseHiEntity = new IcreditApiBaseHiEntity();
             BeanUtils.copyProperties(newApiBaseEntity, newApiBaseHiEntity);
+            newApiBaseEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
             apiBaseService.updateById(newApiBaseEntity);
             newApiBaseHiEntity.setApiBaseId(newApiBaseHiEntity.getId());
             newApiBaseHiEntity.setId(null);
+            newApiBaseHiEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
             save(newApiBaseHiEntity);
             ApiSaveResult apiSaveResult = apiBaseService.saveApi(userId, param, newApiBaseEntity);
             apiSaveResult.setApiHiId(newApiBaseHiEntity.getId());

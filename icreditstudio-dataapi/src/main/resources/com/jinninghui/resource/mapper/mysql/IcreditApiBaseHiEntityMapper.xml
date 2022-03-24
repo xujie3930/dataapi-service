@@ -13,7 +13,7 @@
     </select>
 
     <select id="getList" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiHistoryListRequest" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiHistoryListResult">
-        select id as apiHiId,api_version as apiVersion,publish_user as publishUser,name,publish_status as publishStatus,publish_time as publishTime
+        select id as apiHiId,interface_source as interfaceSource,api_version as apiVersion,publish_user as publishUser,name,publish_status as publishStatus,publish_time as publishTime
         from icredit_api_base_hi
         where del_flag = 0 and api_base_id = #{apiId}
         <if test="publishStatus != null">
