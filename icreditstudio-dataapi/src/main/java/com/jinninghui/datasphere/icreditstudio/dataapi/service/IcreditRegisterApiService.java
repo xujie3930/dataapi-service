@@ -13,4 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IcreditRegisterApiService extends IService<IcreditRegisterApiEntity> {
 
+    IcreditRegisterApiEntity findByApiIdAndApiVersion(String apiBaseId, Integer apiVersion);
 }

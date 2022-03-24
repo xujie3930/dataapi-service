@@ -43,6 +43,8 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     @Resource
     private IcreditApiBaseHiMapper apiBaseHiMapper;
     @Resource
+    private IcreditRegisterApiService registerApiService;
+    @Resource
     private IcreditApiBaseService apiBaseService;
     @Resource
     private ApiBaseFactory apiBaseFactory;
@@ -117,6 +119,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         }else{
             handleRegisterApiParamInfo(registerRequestParamSaveRequestList, registerResponseParamSaveRequestList, apiParamEntityList);
             address = getRegisterInterfaceAddress(apiBaseHiEntity, registerRequestParamSaveRequestList);
+            IcreditRegisterApiEntity registerApiEntity = registerApiService.findByApiIdAndApiVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion());
+            result.setReqHost(registerApiEntity.getHost());
+            result.setReqPath(registerApiEntity.getPath());
         }
         result.setParamList(apiParamList);
         result.setRegisterRequestParamSaveRequestList(registerRequestParamSaveRequestList);
@@ -145,7 +150,8 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     }
 
     private String getRegisterInterfaceAddress(IcreditApiBaseHiEntity apiBaseHiEntity, List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList){
-        StringBuilder address = new StringBuilder(apiBaseHiEntity.getReqHost()).append("/").append(apiBaseHiEntity.getReqPath());
+        IcreditRegisterApiEntity registerApiEntity = registerApiService.findByApiIdAndApiVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion());
+        StringBuilder address = new StringBuilder(registerApiEntity.getHost()).append("/").append(registerApiEntity.getPath());
         int size = registerRequestParamSaveRequestList.size();
         for (int i = 0; i < size; i++) {
             if(i == 0){

@@ -65,6 +65,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Resource
     private IcreditGenerateApiService generateApiService;
     @Resource
+    private IcreditRegisterApiService registerApiService;
+    @Resource
     private IcreditApiBaseHiService apiBaseHiService;
     @Resource
     private IcreditApiParamService apiParamService;
@@ -205,6 +207,13 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         }else{//注册api
             createApiInfoBO = createRegisterApi(param, apiBaseEntity.getApiVersion(), apiBaseEntity.getId());
             registerApiParamInfos = BeanCopyUtils.copy(createApiInfoBO.getApiParamEntityList(), RegisterApiParamInfo.class);
+            IcreditRegisterApiEntity registerApiEntity = new IcreditRegisterApiEntity();
+            registerApiEntity.setHost(param.getReqHost());
+            registerApiEntity.setPath(param.getReqPath());
+            registerApiEntity.setId(param.getId());
+            registerApiEntity.setApiVersion(param.getApiVersion());
+            registerApiEntity.setApiBaseId(apiBaseEntity.getId());
+            registerApiService.saveOrUpdate(registerApiEntity);
         }
 
         if(null != createApiInfoBO && !CollectionUtils.isEmpty(createApiInfoBO.getApiParamEntityList())) {
@@ -220,12 +229,12 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                             sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
                     saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                             generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
-                            responseFields, registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
+                            responseFields, registerApiParamInfos, param.getReqHost(), param.getReqPath());
                 }
             }else{
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                         generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
-                        createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
+                        createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
             }
         }
         //返回参数
@@ -678,8 +687,12 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         }else if(ApiPublishStatusEnum.PUBLISHED.getCode().equals(request.getPublishStatus())){//发布
             IcreditGenerateApiEntity generateApiEntity = generateApiService.getByApiIdAndVersion(apiBaseEntity.getId(), apiBaseHiEntity.getApiVersion());
+            IcreditRegisterApiEntity registerApiEntity = registerApiService.findByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseHiEntity.getApiVersion());
             if(null == generateApiEntity){//注册api的情况下才会为null
                 generateApiEntity = new IcreditGenerateApiEntity();
+            }
+            if(null == generateApiEntity){//数据源api的情况下才会为null
+                registerApiEntity = new IcreditRegisterApiEntity();
             }
 
             String requiredFieldStr = null;
@@ -713,12 +726,12 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                             sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
                     saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
                             generateApiEntity.getModel(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr,
-                            responseField, registerApiParamInfos, apiBaseHiEntity.getReqHost(), apiBaseHiEntity.getReqPath());
+                            responseField, registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
                 }
             }else {
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
                         generateApiEntity.getModel(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
-                        registerApiParamInfos, apiBaseHiEntity.getReqHost(), apiBaseHiEntity.getReqPath());
+                        registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
             }
             apiBaseHiEntity.setPublishUser(userId);
             apiBaseHiEntity.setPublishTime(new Date());
@@ -922,7 +935,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+                    generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
+                    null, null);
         }
         log.info("发布耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //返回参数
@@ -977,7 +992,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(), generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr, registerApiParamInfos, apiBaseEntity.getReqHost(), apiBaseEntity.getReqPath());
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+                    generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
+                    registerApiParamInfos, null, null);
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
             saveOrUpdate(apiBaseEntity);
