@@ -97,7 +97,7 @@ export default that => ({
         // },
         {
           func: that.handleVersionClick,
-          label: '历史版本'
+          label: '管理'
         }
 
         // {
