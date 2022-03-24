@@ -388,12 +388,12 @@ ALTER TABLE icredit_api_log ADD exception_detail text COMMENT '异常详情';
 ALTER TABLE icredit_api_log ADD execute_sql text COMMENT '执行sql';
 ALTER TABLE icredit_api_log ADD trace_id varchar(40) COMMENT 'kakafa幂等性ID';
 
-ALTER TABLE icredit_api_base ADD interface_source tinyint(1) COMMENT 'API来源：0-内部，1-外部';
+ALTER TABLE icredit_api_base ADD interface_source tinyint(1) default 0 COMMENT 'API来源：0-内部，1-外部';
 alter table icredit_app_group change `desc` `desc` varchar(255) COMMENT '分组描述';
 alter table icredit_work_flow change `desc` `desc` varchar(255) COMMENT '业务流程描述';
 alter table icredit_api_base change `desc` `desc` text COMMENT 'sql描述';
-ALTER TABLE `dataapi`.icredit_api_base ADD req_host varchar(30) COMMENT '后台服务Host';
-ALTER TABLE `dataapi`.icredit_api_base ADD req_path varchar(255) COMMENT '后台path';
+ALTER TABLE icredit_api_base ADD req_host varchar(30) COMMENT '后台服务Host';
+ALTER TABLE icredit_api_base ADD req_path varchar(255) COMMENT '后台path';
 
-ALTER TABLE `dataapi`.icredit_api_base_hi ADD req_host varchar(30) COMMENT '后台服务Host';
-ALTER TABLE `dataapi`.icredit_api_base_hi ADD req_path varchar(255) COMMENT '后台path';
+ALTER TABLE icredit_api_base_hi ADD req_host varchar(30) COMMENT '后台服务Host';
+ALTER TABLE icredit_api_base_hi ADD req_path varchar(255) COMMENT '后台path';
