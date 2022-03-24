@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseHiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiBaseHiDetailRequest;
@@ -34,6 +35,7 @@ public class IcreditApiBaseHiController {
     private IcreditApiBaseHiService apiBaseHiService;
 
     @PostMapping("/list")
+    @ResultReturning
     public BusinessResult<BusinessPageResult<ApiHistoryListResult>> list(@RequestBody ApiHistoryListRequest request){
         return apiBaseHiService.getList(request);
     }
