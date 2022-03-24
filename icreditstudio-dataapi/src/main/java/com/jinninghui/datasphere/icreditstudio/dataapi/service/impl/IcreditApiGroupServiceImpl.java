@@ -119,7 +119,7 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
         StringLegalUtils.checkId(request.getId());
         StringLegalUtils.checkLegalName(request.getNewName());
         checkRepetitionName(request.getNewName(), request.getId());
-        apiGroupMapper.renameById(request.getNewName(), request.getId());
+        apiGroupMapper.renameById(request.getNewName(), request.getDesc(), request.getId());
         return BusinessResult.success(true);
     }
 

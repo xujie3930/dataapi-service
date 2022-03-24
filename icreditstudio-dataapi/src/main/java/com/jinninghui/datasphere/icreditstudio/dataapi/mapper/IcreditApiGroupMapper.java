@@ -28,7 +28,7 @@ public interface IcreditApiGroupMapper extends BaseMapper<IcreditApiGroupEntity>
 
     List<GroupIdAndNameResult> getGroupListByWorkFlowId(List<String> workFlowIds);
 
-    void renameById(@Param("name") String name, @Param("id") String id);
+    void renameById(@Param("name") String name, @Param("desc") String desc, @Param("id") String id);
 
     List<String> getIdsByWorkId(@Param("workFlowId") String workFlowId);
 
