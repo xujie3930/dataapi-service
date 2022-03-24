@@ -43,10 +43,6 @@ public class IcreditApiBaseHiEntity extends BaseEntity implements Serializable {
     @TableField("`desc`")
     private String desc;
 
-    private String reqPath;
-
-    private String reqHost;
-
     private String apiGroupId;
 
     private Integer apiVersion;
@@ -58,5 +54,8 @@ public class IcreditApiBaseHiEntity extends BaseEntity implements Serializable {
     private Date publishTime;
 
     private String apiBaseId;
+
+    //0-数据服务，1-资源管理
+    private Integer interfaceSource;
 
 }

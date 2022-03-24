@@ -6,6 +6,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditRegisterAp
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
  * <p>
  * 注册API 服务实现类
@@ -17,4 +19,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class IcreditRegisterApiServiceImpl extends ServiceImpl<IcreditRegisterApiMapper, IcreditRegisterApiEntity> implements IcreditRegisterApiService {
 
+    @Resource
+    private IcreditRegisterApiMapper registerApiMapper;
+
+    @Override
+    public IcreditRegisterApiEntity findByApiIdAndApiVersion(String apiBaseId, Integer apiVersion) {
+        return registerApiMapper.findByApiIdAndApiVersion(apiBaseId, apiVersion);
+    }
 }

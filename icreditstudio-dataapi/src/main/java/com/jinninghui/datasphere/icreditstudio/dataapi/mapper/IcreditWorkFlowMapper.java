@@ -34,7 +34,7 @@ public interface IcreditWorkFlowMapper extends BaseMapper<IcreditWorkFlowEntity>
 
     List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds);
 
-    void renameById(@Param("name") String name, @Param("desc") String desc, @Param("id") String id);
+    void renameById(@Param("name") String name, @Param("id") String id);
 
     String findNextWorkId(@Param("sort") Integer sort);
 

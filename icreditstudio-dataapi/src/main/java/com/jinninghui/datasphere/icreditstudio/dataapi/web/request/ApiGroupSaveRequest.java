@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
  **/
 @Data
 public class ApiGroupSaveRequest {
+    private String id;
     //业务流程id
     @NotBlank(message = "20000029")
     private String workId;

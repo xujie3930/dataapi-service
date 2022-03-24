@@ -13,5 +13,6 @@ public class ApiHistoryListResult {
     private Date publishTime;
     private Integer publishStatus;
     private String name;
+    private Integer interfaceSource;
 
 }

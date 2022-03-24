@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
  **/
 @Data
 public class WorkFlowSaveRequest extends BaseEntity {
+    private String id;
     //业务流程名称
     @NotBlank(message = "20000018")
     @Length(min = 2, max = 50, message = "20000015")

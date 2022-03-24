@@ -2,4 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditRegisterApiMapper">
 
+    <select id="findByApiIdAndApiVersion" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditRegisterApiEntity">
+        select *
+        from icredit_register_api
+        where del_flag = 0
+        <if test="apiBaseId != null and apiBaseId != ''">
+            and api_base_id = #{apiBaseId}
+        </if>
+        <if test="apiVersion != null and apiVersion != ''">
+            and api_version = #{apiVersion}
+        </if>
+    </select>
+
 </mapper>

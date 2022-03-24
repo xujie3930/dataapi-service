@@ -7,5 +7,7 @@ public class ApiGroupRenameRequest {
 
     private String id;
     private String newName;
+    private String desc;
+    private String workId;
 
 }

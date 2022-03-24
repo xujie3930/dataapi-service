@@ -20,6 +20,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUti
 import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -51,9 +52,17 @@ public class IcreditApiGroupServiceImpl extends ServiceImpl<IcreditApiGroupMappe
     @BusinessParamsValidate(argsIndexs = {1})
     public BusinessResult<Map<String, String>> saveDef(String userId, ApiGroupSaveRequest request) {
         StringLegalUtils.checkLegalName(request.getName());
-        checkRepetitionName(request.getName(), null);
-        IcreditApiGroupEntity entity = getApiGroupEntitySaveEntity(request);
-        save(entity);
+        checkRepetitionName(request.getName(), request.getId());
+        IcreditApiGroupEntity entity;
+        if(StringUtils.isEmpty(request.getId())) {
+            entity = getApiGroupEntitySaveEntity(request);
+        }else{
+            IcreditApiGroupEntity oldApiGroupEntity = apiGroupMapper.selectById(request.getId());
+            entity = new IcreditApiGroupEntity();
+            BeanUtils.copyProperties(request, entity);
+            entity.setSort(oldApiGroupEntity.getSort());
+        }
+        saveOrUpdate(entity);
         Map<String, String> map = new HashMap<>();
         map.put("workId", request.getWorkId());
         map.put("apiGroupId", entity.getId());

@@ -55,10 +55,6 @@ public class IcreditApiBaseEntity extends BaseEntity implements Serializable {
     @TableField("`desc`")
     private String desc;
 
-    private String reqPath;
-
-    private String reqHost;
-
     private String apiGroupId;
 
     private Integer apiVersion;

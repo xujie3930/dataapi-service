@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditRegisterApiEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface IcreditRegisterApiMapper extends BaseMapper<IcreditRegisterApiEntity> {
 
+    IcreditRegisterApiEntity findByApiIdAndApiVersion(@Param("apiBaseId") String apiBaseId, @Param("apiVersion") Integer apiVersion);
 }
