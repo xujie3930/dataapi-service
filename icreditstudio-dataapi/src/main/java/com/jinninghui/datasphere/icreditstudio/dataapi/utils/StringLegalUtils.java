@@ -19,12 +19,11 @@ public class StringLegalUtils {
 
     public static void checkLegalName(String name) {
         boolean legal = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isLegal(name);
-        if (!legal) {
+        if (!name.matches("[A-Za-z0-9\u4e00-\u9fa5_]{2,50}")) {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000014.getCode());
         }
-        boolean front = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isFrontWithEnglish(name) ||
-                com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.isFrontWithChinese(name);
-        if (!front) {
+        char firstChar = name.charAt(0);
+        if(!((firstChar >= 'A' && firstChar <= 'Z') || (firstChar >= 'a' && firstChar <= 'z') || (firstChar >= '\u4e00' && firstChar <= '\u9fa5'))){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000015.getCode());
         }
     }

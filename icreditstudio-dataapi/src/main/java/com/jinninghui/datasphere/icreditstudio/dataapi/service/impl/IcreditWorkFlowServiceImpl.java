@@ -27,6 +27,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUti
 import com.jinninghui.datasphere.icreditstudio.framework.validate.BusinessParamsValidate;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -62,9 +63,17 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     @BusinessParamsValidate(argsIndexs = {1})
     public BusinessResult<String> saveDef(String userId, WorkFlowSaveRequest request) {
         StringLegalUtils.checkLegalName(request.getName());
-        checkRepetitionName(request.getName(), null);
-        IcreditWorkFlowEntity entity = getWorkFlowEntitySaveEntity(request);
-        save(entity);
+        checkRepetitionName(request.getName(), request.getId());
+        IcreditWorkFlowEntity entity = null;
+        if(StringUtils.isEmpty(request.getId())){
+            entity = getWorkFlowEntitySaveEntity(request);
+        }else{
+            IcreditWorkFlowEntity oldWorkFlowEntity = workFlowMapper.selectById(request.getId());
+            entity = new IcreditWorkFlowEntity();
+            BeanUtils.copyProperties(request, entity);
+            entity.setSort(oldWorkFlowEntity.getSort());
+        }
+        saveOrUpdate(entity);
         return BusinessResult.success(entity.getId());
     }
 
@@ -235,7 +244,7 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
         StringLegalUtils.checkId(request.getId());
         StringLegalUtils.checkLegalName(request.getNewName());
         checkRepetitionName(request.getNewName(), request.getId());
-        workFlowMapper.renameById(request.getNewName(), request.getDesc(), request.getId());
+        workFlowMapper.renameById(request.getNewName(), request.getId());
         return BusinessResult.success(true);
     }
 }
