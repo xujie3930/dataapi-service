@@ -161,10 +161,10 @@
       </p>
       <p
         v-if="curNodeData.id !== '0'"
-        data-command="rename"
+        data-command="edit"
         class="contentmenu-label"
       >
-        重命名
+        编辑
       </p>
       <p
         v-if="curNodeData.id !== '0' && curNodeData.workId"
@@ -292,11 +292,6 @@ export default {
       this.$refs.versionLists.open(row)
     },
 
-    // 点击-详情
-    // handleDetailClick({ row }) {
-    //   this.$refs.apiDetail.open(row)
-    // },
-
     // 点击-选中当前节点
     handleNodeClick(curData, curNode) {
       console.log('curData, curNode=', curData, curNode)
@@ -383,8 +378,22 @@ export default {
       this.contentmenuCommand = command
 
       switch (command) {
-        case 'rename':
-          this.handleTreeNodeInputFocus()
+        case 'edit':
+          this.$refs[
+            this.curNodeData.workId ? 'addGroupDialog' : 'addProcessDialog'
+          ].open({
+            ...this.curNodeData,
+            opType: 'edit'
+          })
+          break
+
+        case 'view':
+          this.$refs[
+            this.curNodeData.workId ? 'addGroupDialog' : 'addProcessDialog'
+          ].open({
+            ...this.curNodeData,
+            opType: 'view'
+          })
           break
 
         case 'delete':

@@ -7,8 +7,8 @@
     ref="baseDialog"
     class="datasource-dialog"
     width="600px"
-    title="新建业务流程"
     footer-placement="center"
+    :title="title"
     :close-on-click-modal="false"
     @on-close="close"
     @on-change="change"
@@ -54,9 +54,9 @@ import { verifySpecialString, strExcludeBlank } from '@/utils/validate'
 export default {
   data() {
     return {
-      opType: '',
+      title: '',
       options: {},
-      processForm: { name: '', desc: '' },
+      processForm: { id: '', name: '', desc: '' },
       rules: {
         name: [
           { required: true, message: '请输入业务流程名称', trigger: 'blur' },
@@ -70,12 +70,22 @@ export default {
 
   methods: {
     open(options) {
+      const { opType } = options
       this.options = options
+      this.title = opType === 'edit' ? '编辑业务流程' : '新建业务流程'
       this.$refs.baseDialog.open()
+
+      // 编辑回显
+      if (opType === 'edit') {
+        const { id, name, desc } = options
+        this.processForm.id = id
+        this.processForm.name = name
+        this.processForm.desc = desc
+      }
     },
 
-    close(opType) {
-      const options = { opType, command: 'process', ...this.options }
+    close() {
+      const options = { command: 'process', ...this.options }
       this.$refs.processForm.resetFields()
       this.$refs.baseDialog.close()
       this.$emit('on-close', options)
@@ -104,6 +114,7 @@ export default {
 
     // 保存
     saveBusinessProcess() {
+      const { opType } = this.options
       this.$refs?.processForm.validate(valid => {
         !valid
           ? this.$refs?.baseDialog.setButtonLoading(false)
@@ -112,11 +123,14 @@ export default {
                 if ((success, data)) {
                   this.$notify.success({
                     title: '操作结果',
-                    message: '新增业务流程成功！',
+                    message:
+                      opType === 'edit'
+                        ? '编辑业务流程成功！'
+                        : '新增业务流程成功！',
                     duration: 1500
                   })
                   this.options.workId = data
-                  this.close('save')
+                  this.close()
                 }
               })
               .finally(() => {

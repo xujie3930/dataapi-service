@@ -7,7 +7,7 @@
   <div>
     <Dialog
       class="base-dialog"
-      title="管理列表"
+      title="版本列表"
       width="1000px"
       ref="baseDialog"
       hide-footer
@@ -86,7 +86,7 @@ export default {
       versionOptions: [],
       formOption: dataServiceApiVersionForm,
       tableConfiguration: tableServiceApiVersionTableConfig(this),
-      mixinSearchFormConfig: { models: { time: '', publishStatus: '' } },
+      mixinSearchFormConfig: { models: { time: [], publishStatus: '' } },
       fetchConfig: { retrieve: { url: '/apiHistory/list', method: 'post' } }
     }
   },
@@ -96,7 +96,6 @@ export default {
       row && (this.currentRow = row)
       this.$refs.baseDialog.open()
       this.mixinRetrieveTableData()
-      // this.fetchApiVersionOptions()
     },
 
     close() {
@@ -105,6 +104,7 @@ export default {
     },
 
     changeDialogVisible(visible) {
+      !visible && this.close()
       this.$emit('on-close', visible)
     },
 
@@ -161,7 +161,8 @@ export default {
 
       length
         ? this.$alert('所选中的API中包含已发布的API，请重新选择！', '提示', {
-            confirmButtonText: '确定',
+            showConfirmButton: false,
+            showCancelButton: true,
             type: 'warning'
           })
         : this.$confirm('请确认是否批量删除所选中的全部版本API？', '提示', {

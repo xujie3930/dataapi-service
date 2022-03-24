@@ -147,6 +147,7 @@
           <el-col :span="11">
             <el-form-item label="所属分组" prop="apiGroupId">
               <el-cascader
+                v-if="isShowCascader"
                 style="width: 100%"
                 :disabled="options.opType === 'add'"
                 v-model="form.apiGroupId"
@@ -170,7 +171,7 @@
         </el-row>
 
         <!-- API类型为注册API-->
-        <template v-if="form.type === API_TYPE_MAPPING.REGISTER">
+        <div v-if="form.type === API_TYPE_MAPPING.REGISTER" style="width: 100%">
           <el-form-item>
             <div slot="label" class="source-main-form--title">后端服务定义</div>
           </el-form-item>
@@ -283,7 +284,7 @@
               </div>
             </JTable>
           </el-row>
-        </template>
+        </div>
 
         <!-- API类型为数据源生成-->
         <template v-else>
@@ -534,6 +535,7 @@ export default {
       isSaveBtnLoading: false,
       isTestBtnLoading: false,
       isPublishBtnLoading: false,
+      isShowCascader: false,
       oldTableData: [],
       tableConfiguration: dataServiceParamTableConfig,
       tableRequestConfiguration: tableRequestConfiguration(this),
@@ -643,10 +645,10 @@ export default {
 
   methods: {
     open(options) {
-      console.log(options, 'ssdsds')
       const { opType, cascaderOptions } = options
       this.options = options
       this.pageLoading = true
+      this.isShowCascader = true
 
       if (opType === 'add') {
         // this.cascaderOptions = cascaderOptions
@@ -740,6 +742,7 @@ export default {
     },
 
     handleJumpBackClick() {
+      this.isShowCascader = false
       this.$emit('on-jump', this.opType)
     },
 
@@ -864,7 +867,6 @@ export default {
     // 懒加载
     cascaderLazyLoader(node, resolve) {
       const { level, data } = node
-      console.log(level, node, 'llppp')
       switch (level) {
         case 0:
           this.fetchBusinessProcessList(resolve)
@@ -964,6 +966,7 @@ export default {
             this.form.path = apiPath
             this.form.apiGroupId = [workFlowId, apiGroupId]
 
+            // 数据源生成API
             if (type === 1) {
               const fieldArr = ['tableName', 'datasourceId', 'model', 'sql']
               fieldArr.forEach(

@@ -7,9 +7,10 @@
     ref="baseDialog"
     class="datasource-dialog"
     width="600px"
-    title="新建API分组"
+    :title="title"
     footer-placement="center"
-    :close-on-click-modal="false"
+    :hide-footer="isHideFooter"
+    :close-on-click-modal="isHideFooter"
     @on-change="change"
     @on-confirm="saveApiGroup"
   >
@@ -17,9 +18,10 @@
       ref="apiGroupForm"
       class="group-form"
       :model="apiGroupForm"
-      :rules="rules"
+      :rules="options.opType === 'view' ? {} : rules"
       label-width="120px"
       v-loading="pageLoading"
+      :disabled="options.opType === 'view'"
     >
       <el-form-item label="业务流程" prop="workId">
         <el-select
@@ -73,10 +75,12 @@ export default {
   data() {
     return {
       opType: '',
+      title: '',
       pageLoading: false,
+      isHideFooter: false,
       options: {},
       processOptions: [],
-      apiGroupForm: { workId: '0', name: '', desc: '' },
+      apiGroupForm: { id: '', workId: '0', name: '', desc: '' },
       rules: {
         workId: [
           { required: true, message: '必填项不能为空', trigger: 'change' }
@@ -97,16 +101,35 @@ export default {
 
   methods: {
     open(options) {
+      const { opType, id, desc, name, workId } = options
+      this.title =
+        opType === 'edit'
+          ? '编辑API分组'
+          : opType === 'view'
+          ? '查看API分组'
+          : '新增API分组'
+      this.isHideFooter = opType === 'view'
       this.options = options
       this.$refs.baseDialog.open()
       this.fetchBusinessProcessList()
-      if (options.opType === 'addGroup') {
-        this.apiGroupForm.workId = options.workId
+      if (opType === 'addGroup') {
+        this.$nextTick(() => {
+          this.apiGroupForm.workId = workId
+        })
+      }
+
+      if (opType === 'edit' || opType === 'view') {
+        this.$nextTick(() => {
+          this.apiGroupForm.id = id
+          this.apiGroupForm.name = name
+          this.apiGroupForm.desc = desc
+          this.apiGroupForm.workId = workId
+        })
       }
     },
 
-    close(opType) {
-      const options = { opType, command: 'group', ...this.options }
+    close() {
+      const options = { command: 'group', ...this.options }
       this.$refs.apiGroupForm.resetFields()
       this.$refs.baseDialog.close()
       this.$emit('on-close', options)
@@ -158,12 +181,14 @@ export default {
                   const { apiGroupId, workId } = data
                   this.$notify.success({
                     title: '操作结果',
-                    message: '新增API分组成功！',
+                    message: `${
+                      this.options.opType === 'edit' ? '编辑' : '新增'
+                    }API分组成功！`,
                     duration: 1500
                   })
                   this.options.workId = workId
                   this.options.currentTreeNodeId = apiGroupId
-                  this.close('save')
+                  this.close()
                 }
               })
               .finally(() => {
