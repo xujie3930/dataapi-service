@@ -9,7 +9,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.interceptor.DataA
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.OpenApiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.ApiFactory;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.base.ApiBaseService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.util.Date;
 import java.util.Map;
 
@@ -43,13 +41,12 @@ public class OpenApiServiceImpl implements OpenApiService {
 
     @Override
     public BusinessResult<Object> getData(String version, String path, Map map) {
-        Connection conn = null;
         String querySql = null;
         RedisApiInfo apiInfo = DataApiGatewayContextHolder.get().getApiInfo();
         ApiLogInfo apiLogInfo = DataApiGatewayContextHolder.get().getApiLogInfo();
         try {
             ApiBaseService apiService = apiFactory.getApiService(apiInfo);
-            return apiService.getData(version, path, map, apiInfo, apiLogInfo, conn, querySql);
+            return apiService.getData(map, apiInfo, apiLogInfo);
         } catch (Exception e) {
             e.printStackTrace();
             //发送kafka失败信息
@@ -58,7 +55,6 @@ public class OpenApiServiceImpl implements OpenApiService {
             log.error("发送kafka异常日志:{}", failLog);
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000013.getCode(), failLog.getExceptionDetail());
         } finally {
-            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
             DataApiGatewayContextHolder.remove();
         }
     }

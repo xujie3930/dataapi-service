@@ -45,6 +45,9 @@ const getApiInfoList = params => postAction('/apiBase/getApiList', params)
 // 获取授权详情
 const getAppAuthDetail = params => postAction('/auth/info', params)
 
+// 获取App编辑信息详情
+const getAppEditDetail = params => postAction('/app/updatePageInfo', params)
+
 // 编辑应用分组
 const editAppGroup = params => postAction('/appGroup/rename', params)
 
@@ -62,6 +65,7 @@ export default {
   getBusinessPcoessList,
   getGroupList,
   getApiInfoList,
+  getAppEditDetail,
   addAppGroup,
   addApp,
   checkNameUniqueness,

@@ -156,6 +156,12 @@ export default {
       })
     },
 
+    // 点击-编辑应用
+    handleEditAppClick({ row }) {
+      console.log(row, 'rowow')
+      this.$refs.addApp.open({ row, title: '编辑应用', opType: 'edit' })
+    },
+
     // 点击-批量删除应用或分组
     handleBatchDeleteAppGroup() {
       const params = { appIds: [], appGroupIds: [] }
