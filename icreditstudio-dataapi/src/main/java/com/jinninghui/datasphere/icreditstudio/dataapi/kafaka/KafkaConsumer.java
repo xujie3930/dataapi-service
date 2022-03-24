@@ -31,13 +31,11 @@ public class KafkaConsumer {
     @Resource
     private IcreditApiLogMapper apiLogMapper;
 
-    private static final String TOPIC = "apiInvoke" ;
-
-    @KafkaListener(groupId = "test", topics = {TOPIC})
+    @KafkaListener(groupId = "test", topics = "#{'${kafkaConsumer.topic}'}")
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.info("topic_test 获取 topic:{}消息进行消费", TOPIC);
+        Optional message = Optional.ofNullable(record.value());
+        log.info("获取Topic:{}的消息:{}进行消费", topic, message);
         try {
-            Optional message = Optional.ofNullable(record.value());
             if (message.isPresent()) {
                 Object msg = message.get();
                 ApiLogInfo logInfo = JSON.parseObject(String.valueOf(msg), ApiLogInfo.class);
@@ -61,7 +59,7 @@ public class KafkaConsumer {
                 log.info("topic_test 消费了： Topic:" + topic + ",Message:" + msg);
             }
         } catch (BeansException e) {
-            e.printStackTrace();
+            log.error("消费异常:Topic:{},Message:{}", topic, record.value());
         } finally {
             ack.acknowledge();
         }
