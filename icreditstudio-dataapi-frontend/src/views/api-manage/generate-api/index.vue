@@ -170,7 +170,7 @@
         </el-row>
 
         <!-- API类型为注册API-->
-        <template v-if="form.type === API_TYPE_MAPPING.REGISTER">
+        <div v-if="form.type === API_TYPE_MAPPING.REGISTER" style="width: 100%">
           <el-form-item>
             <div slot="label" class="source-main-form--title">后端服务定义</div>
           </el-form-item>
@@ -283,7 +283,7 @@
               </div>
             </JTable>
           </el-row>
-        </template>
+        </div>
 
         <!-- API类型为数据源生成-->
         <template v-else>
