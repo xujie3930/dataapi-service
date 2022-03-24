@@ -43,23 +43,28 @@ public class GenerateService implements ApiBaseService {
     private KafkaProducer kafkaProducer;
 
     @Override
-    public BusinessResult<Object> getData(String version, String path, Map map, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo, Connection conn, String querySql) throws SQLException {
+    public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
         Long dataCount = 0L;
-        querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), map);
-        //连接数据源，执行SQL
-        conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
-        if (conn == null) {
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
-        }
-        Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
-        if (map.containsKey(PAGENUM_MARK) && map.containsKey(PAGESIZE_MARK)) {
-            DataApiGatewayPageResult<Object> build = getPageResult(map, querySql, dataCount, apiLogInfo, stmt);
-            return BusinessResult.success(build);
-        } else {
-            //如果不传分页最大查询500条，不需要用分页对象包装
-            List list = getListResult(querySql, apiLogInfo, stmt);
-            return BusinessResult.success(list);
+        String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), params);
+        Connection conn = null;
+        try {
+            //连接数据源，执行SQL
+            conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
+            if (conn == null) {
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
+            }
+            Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
+            if (params.containsKey(PAGENUM_MARK) && params.containsKey(PAGESIZE_MARK)) {
+                DataApiGatewayPageResult<Object> build = getPageResult(params, querySql, dataCount, apiLogInfo, stmt);
+                return BusinessResult.success(build);
+            } else {
+                //如果不传分页最大查询500条，不需要用分页对象包装
+                List list = getListResult(querySql, apiLogInfo, stmt);
+                return BusinessResult.success(list);
+            }
+        }finally {
+            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
         }
     }
 
