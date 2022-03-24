@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,6 +23,9 @@ import java.util.stream.Collectors;
  **/
 @Service
 public class RegisterService implements ApiBaseService {
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -49,7 +51,6 @@ public class RegisterService implements ApiBaseService {
             requestParamStr = requestParamStr.substring(0, requestParamStr.length() - 1);
         }
         String requestHttpPre = apiInfo.getReqHost() + apiInfo.getReqPath();
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> restResult = restTemplate.getForEntity(StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr, String.class);
         String response = restResult.getBody();
         //返回分别对bean类型和array类型做处理
