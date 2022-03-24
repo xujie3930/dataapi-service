@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web.result;
 
 import lombok.Data;
+import org.apache.htrace.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
@@ -13,6 +14,6 @@ public class ApiHistoryListResult {
     private Date publishTime;
     private Integer publishStatus;
     private String name;
+    //数据来源：0-内部，1-外部
     private Integer interfaceSource;
-
 }

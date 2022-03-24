@@ -63,7 +63,6 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     }
 
     @Override
-    @ResultReturning
     public BusinessResult<BusinessPageResult<ApiHistoryListResult>> getList(ApiHistoryListRequest request) {
         StringLegalUtils.checkId(request.getApiId());
         if(!StringUtils.isEmpty(request.getPublishDateStart())) {
