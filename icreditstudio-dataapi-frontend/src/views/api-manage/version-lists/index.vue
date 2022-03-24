@@ -161,7 +161,8 @@ export default {
 
       length
         ? this.$alert('所选中的API中包含已发布的API，请重新选择！', '提示', {
-            confirmButtonText: '确定',
+            showConfirmButton: false,
+            showCancelButton: true,
             type: 'warning'
           })
         : this.$confirm('请确认是否批量删除所选中的全部版本API？', '提示', {

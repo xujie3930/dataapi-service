@@ -18,7 +18,7 @@
       ref="apiGroupForm"
       class="group-form"
       :model="apiGroupForm"
-      :rules="rules"
+      :rules="options.opType === 'view' ? {} : rules"
       label-width="120px"
       v-loading="pageLoading"
       :disabled="options.opType === 'view'"
