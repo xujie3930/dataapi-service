@@ -15,13 +15,13 @@ Date: 2022-02-21 18:56:11
 
 SET
 FOREIGN_KEY_CHECKS=0;
-create
-database if not exists dataapi;
+-- create
+-- database if not exists dataapi;
 -- ----------------------------
 -- Table structure for icredit_api_base
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_api_base`;
-CREATE TABLE `dataapi`.`icredit_api_base`
+DROP TABLE IF EXISTS icredit_api_base;
+CREATE TABLE icredit_api_base
 (
     `id`             varchar(30) NOT NULL,
     `type`           tinyint(1) DEFAULT NULL,
@@ -51,8 +51,8 @@ CREATE TABLE `dataapi`.`icredit_api_base`
 -- ----------------------------
 -- Table structure for icredit_api_base_hi
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_api_base_hi`;
-CREATE TABLE `dataapi`.`icredit_api_base_hi`
+DROP TABLE IF EXISTS icredit_api_base_hi;
+CREATE TABLE icredit_api_base_hi
 (
     `id`             varchar(30) NOT NULL,
     `type`           tinyint(1) DEFAULT NULL,
@@ -83,8 +83,8 @@ CREATE TABLE `dataapi`.`icredit_api_base_hi`
 -- ----------------------------
 -- Table structure for icredit_api_group
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_api_group`;
-CREATE TABLE `dataapi`.`icredit_api_group`
+DROP TABLE IF EXISTS icredit_api_group;
+CREATE TABLE icredit_api_group
 (
     `id`          varchar(30) NOT NULL,
     `work_id`     varchar(30)  DEFAULT NULL,
@@ -104,8 +104,8 @@ CREATE TABLE `dataapi`.`icredit_api_group`
 -- ----------------------------
 -- Table structure for icredit_api_log
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_api_log`;
-CREATE TABLE `dataapi`.`icredit_api_log` (
+DROP TABLE IF EXISTS icredit_api_log;
+CREATE TABLE icredit_api_log (
   `id` varchar(30) NOT NULL,
   `api_name` varchar(50) DEFAULT NULL,
   `api_id` varchar(30) DEFAULT NULL,
@@ -135,12 +135,12 @@ CREATE TABLE `dataapi`.`icredit_api_log` (
 -- ----------------------------
 -- Records of icredit_api_log
 -- ----------------------------
-drop table if exists `dataapi`.`icredit_api_log_summary`;
+drop table if exists icredit_api_log_summary;
 
 /*==============================================================*/
 /* Table: icredit_api_log_summary                               */
 /*==============================================================*/
-create table `dataapi`.`icredit_api_log_summary`
+create table icredit_api_log_summary
 (
     id              varchar(30) not null,
     api_name        varchar(50),
@@ -166,8 +166,8 @@ create table `dataapi`.`icredit_api_log_summary`
 -- ----------------------------
 -- Table structure for icredit_api_param
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_api_param`;
-CREATE TABLE `dataapi`.`icredit_api_param`
+DROP TABLE IF EXISTS icredit_api_param;
+CREATE TABLE icredit_api_param
 (
     `id`            varchar(30) NOT NULL,
     `field_name`    varchar(50)  DEFAULT NULL,
@@ -195,8 +195,8 @@ CREATE TABLE `dataapi`.`icredit_api_param`
 -- ----------------------------
 -- Table structure for icredit_app
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_app`;
-CREATE TABLE `dataapi`.`icredit_app`
+DROP TABLE IF EXISTS icredit_app;
+CREATE TABLE icredit_app
 (
     `id`                 varchar(30) NOT NULL,
     `app_flag`           varchar(30)  DEFAULT NULL,
@@ -224,8 +224,8 @@ CREATE TABLE `dataapi`.`icredit_app`
 -- ----------------------------
 -- Table structure for icredit_app_group
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_app_group`;
-CREATE TABLE `dataapi`.`icredit_app_group`
+DROP TABLE IF EXISTS icredit_app_group;
+CREATE TABLE icredit_app_group
 (
     `id`          varchar(30) NOT NULL,
     `name`        varchar(50)  DEFAULT NULL,
@@ -246,8 +246,8 @@ CREATE TABLE `dataapi`.`icredit_app_group`
 -- ----------------------------
 -- Table structure for icredit_auth
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_auth`;
-CREATE TABLE `dataapi`.`icredit_auth`
+DROP TABLE IF EXISTS icredit_auth;
+CREATE TABLE `icredit_auth`
 (
     `id`             varchar(30) NOT NULL,
     `app_id`         varchar(30)  DEFAULT NULL,
@@ -269,8 +269,8 @@ CREATE TABLE `dataapi`.`icredit_auth`
 -- ----------------------------
 -- Table structure for icredit_auth_config
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_auth_config`;
-CREATE TABLE `dataapi`.`icredit_auth_config`
+DROP TABLE IF EXISTS icredit_auth_config;
+CREATE TABLE icredit_auth_config
 (
     `id`           varchar(30) NOT NULL,
     `period_begin` bigint(1) DEFAULT NULL,
@@ -292,8 +292,8 @@ CREATE TABLE `dataapi`.`icredit_auth_config`
 -- ----------------------------
 -- Table structure for icredit_generate_api
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_generate_api`;
-CREATE TABLE `dataapi`.`icredit_generate_api`
+DROP TABLE IF EXISTS icredit_generate_api;
+CREATE TABLE icredit_generate_api
 (
     `id`            varchar(30) NOT NULL,
     `model`         tinyint(1) DEFAULT NULL,
@@ -318,8 +318,8 @@ CREATE TABLE `dataapi`.`icredit_generate_api`
 -- ----------------------------
 -- Table structure for icredit_register_api
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_register_api`;
-CREATE TABLE `dataapi`.`icredit_register_api`
+DROP TABLE IF EXISTS icredit_register_api;
+CREATE TABLE icredit_register_api
 (
     `id`          varchar(30) NOT NULL,
     `host`        varchar(100) DEFAULT NULL,
@@ -342,8 +342,8 @@ CREATE TABLE `dataapi`.`icredit_register_api`
 -- ----------------------------
 -- Table structure for icredit_work_flow
 -- ----------------------------
-DROP TABLE IF EXISTS `dataapi`.`icredit_work_flow`;
-CREATE TABLE `dataapi`.`icredit_work_flow`
+DROP TABLE IF EXISTS icredit_work_flow;
+CREATE TABLE icredit_work_flow
 (
     `id`          varchar(30) NOT NULL,
     `name`        varchar(50)  DEFAULT NULL,
@@ -361,20 +361,20 @@ CREATE TABLE `dataapi`.`icredit_work_flow`
 -- ----------------------------
 -- Records of icredit_work_flow
 -- ----------------------------
-INSERT INTO `dataapi`.`icredit_work_flow`
+INSERT INTO icredit_work_flow
 VALUES ('0', '业务流程', '默认业务流程', null, '2022-02-21 17:56:17', 'admin', '2022-02-21 17:56:17', 'admin', '0', '2');
 
 -- ----------------------------
 -- Records of icredit_api_group
 -- ----------------------------
-INSERT INTO `dataapi`.`icredit_api_group`
+INSERT INTO icredit_api_group
 VALUES ('000', '0', '默认分组', '默认业务流程下的默认分组', null, '2022-02-21 17:58:06', 'admin', '2022-02-21 17:58:06', 'admin', '0',
         '2');
 
-ALTER TABLE `dataapi`.icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期，1-8小时，2-自定义';
-ALTER TABLE `dataapi`.icredit_app ADD generateId varchar(30) COMMENT '应用id';
+ALTER TABLE icredit_app ADD token_type int(11) COMMENT 'token类型：0-长期，1-8小时，2-自定义';
+ALTER TABLE icredit_app ADD generateId varchar(30) COMMENT '应用id';
 
-ALTER TABLE `dataapi`.icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
+ALTER TABLE icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
 
 ALTER TABLE icredit_api_param ADD table_name varchar(100) COMMENT '表名称';
 
