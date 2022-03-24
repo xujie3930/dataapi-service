@@ -7,7 +7,7 @@
   <div>
     <Dialog
       class="base-dialog"
-      title="管理列表"
+      title="版本列表"
       width="1000px"
       ref="baseDialog"
       hide-footer
