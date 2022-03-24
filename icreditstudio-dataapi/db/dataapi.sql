@@ -392,8 +392,3 @@ ALTER TABLE icredit_api_base ADD interface_source tinyint(1) default 0 COMMENT '
 alter table icredit_app_group change `desc` `desc` varchar(255) COMMENT '分组描述';
 alter table icredit_work_flow change `desc` `desc` varchar(255) COMMENT '业务流程描述';
 alter table icredit_api_base change `desc` `desc` text COMMENT 'sql描述';
-ALTER TABLE icredit_api_base ADD req_host varchar(30) COMMENT '后台服务Host';
-ALTER TABLE icredit_api_base ADD req_path varchar(255) COMMENT '后台path';
-
-ALTER TABLE icredit_api_base_hi ADD req_host varchar(30) COMMENT '后台服务Host';
-ALTER TABLE icredit_api_base_hi ADD req_path varchar(255) COMMENT '后台path';
