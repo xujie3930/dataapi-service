@@ -691,10 +691,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(null == generateApiEntity){//注册api的情况下才会为null
                 generateApiEntity = new IcreditGenerateApiEntity();
             }
-            if(null == generateApiEntity){//数据源api的情况下才会为null
+            if(null == registerApiEntity){//数据源api的情况下才会为null
                 registerApiEntity = new IcreditRegisterApiEntity();
             }
-
             String requiredFieldStr = null;
             String responseFieldStr = null;
             StringBuilder requiredFields = new StringBuilder();
