@@ -145,12 +145,6 @@
       />
     </transition>
 
-    <!-- 新增业务流程 -->
-    <AddBusinessPorcess
-      ref="addProcessDialog"
-      @on-close="closeDialogCallback"
-    />
-
     <!-- 右键菜单 -->
     <div
       class="contentmenu"
@@ -187,6 +181,12 @@
         删除
       </p>
     </div>
+
+    <!-- 新增业务流程 -->
+    <AddBusinessPorcess
+      ref="addProcessDialog"
+      @on-close="closeDialogCallback"
+    />
 
     <!-- 新增API分组 -->
     <AddApiGroup ref="addGroupDialog" @on-close="closeDialogCallback" />
