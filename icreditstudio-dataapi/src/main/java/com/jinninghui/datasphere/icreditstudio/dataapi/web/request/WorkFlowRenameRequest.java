@@ -10,5 +10,6 @@ public class WorkFlowRenameRequest {
     @NotBlank(message = "20000029")
     private String id;
     private String newName;
+    private String desc;
 
 }
