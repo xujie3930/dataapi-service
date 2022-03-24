@@ -35,7 +35,7 @@ export default that => ({
       type: 'text',
       label: '版本',
       prop: 'apiVersion',
-      width: 100,
+      width: 80,
       formatter: ({ apiVersion }) => `v${apiVersion}`
     },
     {
@@ -59,7 +59,7 @@ export default that => ({
       type: 'statusText',
       label: '状态',
       prop: 'publishStatus',
-      width: 100,
+      width: 80,
       color: ({ row: { publishStatus: s } }) => statusMapping[s].color,
       formatter: ({ publishStatus: s }) => statusMapping[s].name
     },
@@ -68,7 +68,7 @@ export default that => ({
       type: 'operation',
       label: '操作',
       // fixed: 'right',
-      // align: 'left',
+      align: 'left',
       width: 200,
       operationList: [
         {

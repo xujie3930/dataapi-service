@@ -10,6 +10,8 @@
       title="版本列表"
       width="1000px"
       ref="baseDialog"
+      hide-footer
+      @on-change="changeDialogVisible"
     >
       <Crud
         ref="crud"
@@ -100,6 +102,10 @@ export default {
     close() {
       this.mixinHandleReset(false)
       this.$refs.baseDialog.close()
+    },
+
+    changeDialogVisible(visible) {
+      this.$emit('on-close', visible)
     },
 
     handleAuthorizeClick() {},
