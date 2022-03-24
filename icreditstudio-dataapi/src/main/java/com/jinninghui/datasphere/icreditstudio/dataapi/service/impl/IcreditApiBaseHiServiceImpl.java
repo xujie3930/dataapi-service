@@ -262,36 +262,14 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         }
 
         for (String apiHiId : apiHiIds) {
-            IcreditApiBaseHiEntity entity = getById(apiHiId);
-            IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(entity.getApiBaseId());
-            if (InterfaceSourceEnum.OUT_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000052.getCode());
-            }
-            if (ApiPublishStatusEnum.PUBLISHED.getCode().equals(entity.getPublishStatus())){
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000050.getCode());
-            }
-            entity.setUpdateBy(userId);
-            entity.setUpdateTime(new Date());
-            entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
-            apiBaseHiMapper.deleteByEntity(entity);
+            deleteByUserIdAndId(userId, apiHiId);
         }
         return BusinessResult.success(true);
     }
 
-    @Override
-    @Transactional
-    public BusinessResult<Boolean> deleteById(String userId, String apiHiId) {
-        if (StringUtils.isBlank(apiHiId)){
-            return BusinessResult.success(true);
-        }
+    private void deleteByUserIdAndId(String userId, String apiHiId) {
         IcreditApiBaseHiEntity entity = getById(apiHiId);
-        if (Objects.isNull(entity)){
-            return BusinessResult.success(true);
-        }
         IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(entity.getApiBaseId());
-        if (Objects.isNull(apiBaseEntity)){
-            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000054.getCode());
-        }
         if (InterfaceSourceEnum.OUT_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000052.getCode());
         }
@@ -302,6 +280,15 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         entity.setUpdateTime(new Date());
         entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
         apiBaseHiMapper.deleteByEntity(entity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BusinessResult<Boolean> deleteById(String userId, String apiHiId) {
+        if (StringUtils.isBlank(apiHiId)){
+            return BusinessResult.success(true);
+        }
+        deleteByUserIdAndId(userId, apiHiId);
         return BusinessResult.success(true);
     }
 }
