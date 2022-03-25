@@ -230,6 +230,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                     saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                             generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                             responseFields, registerApiParamInfos, param.getReqHost(), param.getReqPath());
+                }else{
+                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+                            generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+                            createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
                 }
             }else{
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
