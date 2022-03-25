@@ -715,7 +715,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
             List<RegisterApiParamInfo> registerApiParamInfos = new ArrayList<>();
             if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseHiEntity.getType())){//注册api
-                BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
+                registerApiParamInfos = BeanCopyUtils.copy(apiParamEntityList, RegisterApiParamInfo.class);
             }
 
             if(ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(generateApiEntity.getModel())) {

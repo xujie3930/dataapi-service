@@ -15,7 +15,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_10000002("10000002", "API尚未发布!"),
         RESOURCE_CODE_10000003("10000003", "token失效，请重新获取!"),
         RESOURCE_CODE_10000004("10000004", "参数缺失!"),
-        RESOURCE_CODE_10000005("10000005", "该应用未授权!"),
+        RESOURCE_CODE_10000005("10000005", "该应用未启用！"),
         RESOURCE_CODE_10000006("10000006", "该API未授权该应用!"),
         RESOURCE_CODE_10000007("10000007", "授权已到期!"),
         RESOURCE_CODE_10000008("10000008", "已达调用次数上限!"),
