@@ -86,11 +86,13 @@ export default {
       this.options = options
       this.$refs.baseDialog.open()
       if (opType === 'edit') {
-        const { generateId, name, desc } = options.row
-        this.oldGroupName = name
-        this.appGroupForm.generateId = generateId
-        this.appGroupForm.name = name
-        this.appGroupForm.desc = desc
+        this.$nextTick(() => {
+          const { generateId, name, desc } = options.row
+          this.oldGroupName = name
+          this.appGroupForm.generateId = generateId
+          this.appGroupForm.name = name
+          this.appGroupForm.desc = desc
+        })
       } else {
         this.fetchAppGroupId()
       }

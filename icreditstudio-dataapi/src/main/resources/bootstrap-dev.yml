@@ -1,6 +1,6 @@
 spring:
   kafka:
-    bootstrap-servers: "192.168.0.93:9091,192.168.0.93:9092,192.168.0.93:9093"
+    bootstrap-servers: "192.168.0.120:9091,192.168.0.120:9092,192.168.0.120:9093"
     producer:
       # 发生错误后，消息重发的次数。
       retries: 0
@@ -73,4 +73,7 @@ minio:
   bucketName: test
 
 host:
-  addr: 192.168.0.201:8108/openapi
+  addr: http://192.168.0.201:8108/openapi
+
+kafkaConsumer:
+  topic: apiInvoke_dev

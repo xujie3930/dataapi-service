@@ -77,22 +77,25 @@ export default {
 
       // 编辑回显
       if (opType === 'edit') {
-        const { id, name, desc } = options
-        this.processForm.id = id
-        this.processForm.name = name
-        this.processForm.desc = desc
+        this.$nextTick(() => {
+          const { id, name, desc } = options
+          this.processForm.id = id
+          this.processForm.name = name
+          this.processForm.desc = desc
+        })
       }
     },
 
     close() {
       const options = { command: 'process', ...this.options }
-      this.$refs.processForm.resetFields()
+      this.reset()
       this.$refs.baseDialog.close()
       this.$emit('on-close', options)
     },
 
     reset() {
       this.$refs.processForm.resetFields()
+      this.processForm.id = ''
     },
 
     change(visible) {

@@ -21,7 +21,7 @@ public class ApiFactory {
 
     public ApiBaseService getApiService(RedisApiInfo apiInfo) {
         if (CollectionUtils.isEmpty(apiInfo.getRegisterApiParamInfoList())){
-            return registerService;
+            return generateService;
         }
         return registerService;
     }

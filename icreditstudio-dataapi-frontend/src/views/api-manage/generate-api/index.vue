@@ -202,7 +202,7 @@
                 >
                 </el-input>
                 <p class="form-row-item--tip">
-                  支持英文、数字、下划线、连字符（-），请手动输入
+                  支持英文、数字、下划线、连字符（-）、斜杠（/），请手动输入
                 </p>
               </el-form-item>
             </el-col>
@@ -702,9 +702,7 @@ export default {
       this.form.reqPath = strExcludeBlank(value)
 
       if (cb) {
-        const str = value.replaceAll('_', '')
-        const excludeStr = str.replaceAll('-', '')
-        console.log(verifyIncludeCnString(excludeStr), 'llpp')
+        const excludeStr = value.replaceAll(/[/_-]+/gi, '', '')
         verifySpecialString(excludeStr)
           ? cb(new Error('Path中包含不规范字符，请重新输入'))
           : verifyIncludeCnString(excludeStr)
