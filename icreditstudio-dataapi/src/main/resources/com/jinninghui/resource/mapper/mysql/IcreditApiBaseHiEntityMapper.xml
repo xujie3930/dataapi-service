@@ -74,6 +74,6 @@
         <if test="apiId != null and apiId != ''">
             and api_base_id = #{apiId}
         </if>
-        order by apiVersion desc
+        order by api_version desc
     </select>
 </mapper>
