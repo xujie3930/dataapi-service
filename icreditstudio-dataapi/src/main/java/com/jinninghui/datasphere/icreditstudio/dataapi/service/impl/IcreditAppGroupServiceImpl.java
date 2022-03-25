@@ -21,6 +21,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +45,8 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     private IcreditAppGroupMapper appGroupMapper;
     @Resource
     private IcreditAppService appService;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public BusinessResult<String> saveDef(String userId, AppGroupSaveRequest request) {
@@ -150,11 +153,12 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
         if(StringUtils.isNotEmpty(appId)){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000049.getMessage());
         }
-        if(!CollectionUtils.isEmpty(appIdList)) {
-            appService.removeByIds(appIdList);
-        }
         if(!CollectionUtils.isEmpty(request.getAppGroupIds())){
             removeByIds(request.getAppGroupIds());
+        }
+        if(!CollectionUtils.isEmpty(appIdList)) {
+            appService.removeByIds(appIdList);
+            redisTemplate.delete(appIdList);
         }
         return BusinessResult.success(true);
     }
