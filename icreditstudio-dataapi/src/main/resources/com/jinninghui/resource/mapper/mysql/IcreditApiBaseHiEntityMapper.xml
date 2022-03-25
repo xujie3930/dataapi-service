@@ -66,4 +66,14 @@
             id=#{id}
         </where>
     </update>
+
+    <select id="listByApiBaseId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseHiEntity">
+        select *
+        from icredit_api_base_hi
+        where del_flag = 0
+        <if test="apiId != null and apiId != ''">
+            and api_base_id = #{apiId}
+        </if>
+        order by apiVersion desc
+    </select>
 </mapper>

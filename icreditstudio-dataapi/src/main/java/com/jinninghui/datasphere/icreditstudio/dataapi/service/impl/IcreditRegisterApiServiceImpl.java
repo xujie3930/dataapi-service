@@ -26,4 +26,9 @@ public class IcreditRegisterApiServiceImpl extends ServiceImpl<IcreditRegisterAp
     public IcreditRegisterApiEntity findByApiIdAndApiVersion(String apiBaseId, Integer apiVersion) {
         return registerApiMapper.findByApiIdAndApiVersion(apiBaseId, apiVersion);
     }
+
+    @Override
+    public void deleteByApiIdAndApiVersion(String apiBaseId, Integer apiVersion) {
+        registerApiMapper.deleteByApiIdAndApiVersion(apiBaseId, apiVersion);
+    }
 }

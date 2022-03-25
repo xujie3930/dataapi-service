@@ -14,4 +14,7 @@
         </if>
     </select>
 
+    <delete id="deleteByApiIdAndApiVersion">
+        delete from icredit_register_api where api_base_id = #{apiId} AND api_version = #{apiVersion}
+    </delete>
 </mapper>

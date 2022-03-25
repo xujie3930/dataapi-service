@@ -19,4 +19,8 @@
     <delete id="removeByApiId">
         delete from icredit_generate_api where api_base_id = #{apiId}
     </delete>
+
+    <delete id="deleteByApiIdAndVersion">
+        delete from icredit_generate_api where api_base_id = #{apiId} AND api_version = #{apiVersion}
+    </delete>
 </mapper>
