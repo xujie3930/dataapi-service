@@ -259,7 +259,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     private void checkReqPath(String reqPath) {
-        if(!reqPath.matches("[/a-zA-Z_-]+")){
+        if(!reqPath.matches("[/a-zA-Z0-9_-]+")){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000043.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000043.getMessage());
         }
     }
