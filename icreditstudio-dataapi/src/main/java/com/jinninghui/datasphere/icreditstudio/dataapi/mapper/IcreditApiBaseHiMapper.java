@@ -25,4 +25,11 @@ public interface IcreditApiBaseHiMapper extends BaseMapper<IcreditApiBaseHiEntit
     Long countApiBaseHi(ApiHistoryListRequest request);
 
     void deleteByEntity(IcreditApiBaseHiEntity entity);
+
+    /**
+     * 获取该api所有版本，按版本号降序
+     * @param apiId
+     * @return
+     */
+    List<IcreditApiBaseHiEntity> listByApiBaseId(@Param("apiId") String apiId);
 }

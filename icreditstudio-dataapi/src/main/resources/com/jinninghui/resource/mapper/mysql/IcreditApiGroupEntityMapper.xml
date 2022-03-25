@@ -34,6 +34,7 @@
                 and work_id = #{workFlowId}
             </if>
         </where>
+        and del_flag = 0
     </select>
 
     <select id="searchFromName"

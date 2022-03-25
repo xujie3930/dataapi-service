@@ -31,4 +31,9 @@ public class IcreditGenerateApiServiceImpl extends ServiceImpl<IcreditGenerateAp
     public void removeByApiId(String id) {
         generateApiMapper.removeByApiId(id);
     }
+
+    @Override
+    public void deleteByApiIdAndVersion(String id, Integer apiVersion) {
+        generateApiMapper.deleteByApiIdAndVersion(id, apiVersion);
+    }
 }

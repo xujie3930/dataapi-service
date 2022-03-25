@@ -16,4 +16,6 @@ public interface IcreditGenerateApiService extends IService<IcreditGenerateApiEn
     IcreditGenerateApiEntity getByApiIdAndVersion(String id, Integer apiVersion);
 
     void removeByApiId(String id);
+
+    void deleteByApiIdAndVersion(String id, Integer apiVersion);
 }
