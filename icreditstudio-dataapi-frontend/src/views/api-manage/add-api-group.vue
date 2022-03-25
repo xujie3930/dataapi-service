@@ -161,8 +161,10 @@ export default {
       this.pageLoading = true
       API.getBusinessProcess()
         .then(({ success, data }) => {
-          if (success) {
-            this.processOptions = data
+          if (success && data) {
+            const defalutProcess = data.filter(({ id }) => id === '0')
+            const restProcess = data.filter(({ id }) => id !== '0')
+            this.processOptions = [...defalutProcess, ...restProcess]
           }
         })
         .finally(() => {
