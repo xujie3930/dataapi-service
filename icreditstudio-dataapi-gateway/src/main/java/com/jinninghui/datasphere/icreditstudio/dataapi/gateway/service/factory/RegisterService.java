@@ -37,7 +37,7 @@ public class RegisterService implements ApiBaseService {
                 .filter((RegisterApiParamInfo r) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(r.getIsRequest()))
                 .collect(Collectors.toList());
         List<RegisterApiParamInfo> responseList = registerApiParamInfos.stream()
-                .filter((RegisterApiParamInfo r) -> ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(r.getIsRequest()))
+                .filter((RegisterApiParamInfo r) -> ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(r.getIsResponse()))
                 .collect(Collectors.toList());
         //获取所有返回参数
         Set<String> set = new HashSet<>(responseList.stream().map(RegisterApiParamInfo -> RegisterApiParamInfo.getFieldName()).collect(Collectors.toList()));
