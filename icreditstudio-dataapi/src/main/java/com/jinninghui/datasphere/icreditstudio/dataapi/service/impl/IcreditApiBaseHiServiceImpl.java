@@ -301,14 +301,15 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         //历史版本全部删除了，则删除其API
         if (CollectionUtils.isEmpty(apiBaseHiEntityList)){
             apiBaseService.removeById(entity.getApiBaseId());
-        }
-        //删除历史版本中最新的版本，那么API列表中展示最新版本 - 1的API数据
-        IcreditApiBaseHiEntity apiBaseHiNewest = apiBaseHiEntityList.get(0);
-        if (!apiBaseEntity.getApiVersion().equals(apiBaseHiNewest.getApiVersion())){
-            String apiBaseId = apiBaseEntity.getId();
-            BeanCopyUtils.copyProperties(apiBaseHiNewest, apiBaseEntity);
-            apiBaseEntity.setId(apiBaseId);
-            apiBaseService.updateById(apiBaseEntity);
+        }else {
+            //删除历史版本中最新的版本，那么API列表中展示最新版本 - 1的API数据
+            IcreditApiBaseHiEntity apiBaseHiNewest = apiBaseHiEntityList.get(0);
+            if (!apiBaseEntity.getApiVersion().equals(apiBaseHiNewest.getApiVersion())){
+                String apiBaseId = apiBaseEntity.getId();
+                BeanCopyUtils.copyProperties(apiBaseHiNewest, apiBaseEntity);
+                apiBaseEntity.setId(apiBaseId);
+                apiBaseService.updateById(apiBaseEntity);
+            }
         }
     }
 
