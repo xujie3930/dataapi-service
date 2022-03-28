@@ -916,7 +916,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         log.info("保存apiParam耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //保存 generate api
         startTime = System.currentTimeMillis();
-        generateApiService.removeByApiId(apiBaseEntity.getId());
+        generateApiService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
         IcreditGenerateApiEntity generateApiEntity = new IcreditGenerateApiEntity();
         BeanUtils.copyProperties(param.getApiGenerateSaveRequest(), generateApiEntity);
         generateApiEntity.setId(param.getApiGenerateSaveRequest().getId());

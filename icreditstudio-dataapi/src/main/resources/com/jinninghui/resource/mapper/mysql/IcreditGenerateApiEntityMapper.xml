@@ -17,7 +17,8 @@
     </select>
 
     <delete id="removeByApiId">
-        delete from icredit_generate_api where api_base_id = #{apiId}
+        delete from icredit_generate_api
+        where api_base_id = #{apiId} and api_version = #{apiVersion}
     </delete>
 
     <delete id="deleteByApiIdAndVersion">
