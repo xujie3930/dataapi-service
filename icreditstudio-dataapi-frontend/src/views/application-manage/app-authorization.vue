@@ -156,7 +156,7 @@ export default {
             required: true,
             type: 'array',
             message: '必填项不能为空',
-            trigger: ['change', 'blur']
+            trigger: ['blur']
           }
         ]
       }
