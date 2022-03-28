@@ -45,7 +45,7 @@ public class OpenApiServiceImpl implements OpenApiService {
         RedisApiInfo apiInfo = DataApiGatewayContextHolder.get().getApiInfo();
         ApiLogInfo apiLogInfo = DataApiGatewayContextHolder.get().getApiLogInfo();
         try {
-            ApiBaseService apiService = apiFactory.getApiService(apiInfo);
+            ApiBaseService apiService = apiFactory.getApiService(apiInfo, apiLogInfo);
             return apiService.getData(map, apiInfo, apiLogInfo);
         } catch (Exception e) {
             e.printStackTrace();
