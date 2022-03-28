@@ -230,6 +230,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                     saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                             generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                             responseFields, registerApiParamInfos, param.getReqHost(), param.getReqPath());
+                }else{
+                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+                            generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+                            createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
                 }
             }else{
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
@@ -912,7 +916,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         log.info("保存apiParam耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //保存 generate api
         startTime = System.currentTimeMillis();
-        generateApiService.removeByApiId(apiBaseEntity.getId());
+        generateApiService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
         IcreditGenerateApiEntity generateApiEntity = new IcreditGenerateApiEntity();
         BeanUtils.copyProperties(param.getApiGenerateSaveRequest(), generateApiEntity);
         generateApiEntity.setId(param.getApiGenerateSaveRequest().getId());

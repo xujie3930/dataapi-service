@@ -56,6 +56,8 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     private IcreditWorkFlowService workFlowService;
     @Value("${host.addr}")
     private String host;
+    @Autowired
+    private IcreditGenerateApiService generateApiService;
 
     @Override
     public IcreditApiBaseHiEntity findByApiBaseId(String apiId) {
@@ -190,6 +192,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             ApiSaveResult apiSaveResult;
             String apiId = apiBaseEntity.getId();
             String apiBaseHiId = apiBaseHiEntity.getId();
+            apiParamService.removeByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
+            generateApiService.removeByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
+            registerApiService.deleteByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
             if(apiBaseHiEntity.getApiVersion().equals(apiBaseEntity.getApiVersion())){//编辑最新版本，需要更新apiEntity、apiHiEntity、generateApi、apiParam
                 BeanUtils.copyProperties(param, apiBaseEntity);
                 apiBaseEntity.setId(apiId);
@@ -202,7 +207,6 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                     apiBaseEntity.setPublishUser(userId);
                     apiBaseEntity.setPublishTime(new Date());
                 }
-                apiParamService.removeByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
                 BeanUtils.copyProperties(apiBaseEntity, apiBaseHiEntity);
                 apiBaseHiEntity.setId(apiBaseHiId);
                 apiBaseHiEntity.setApiBaseId(apiId);
@@ -223,7 +227,6 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                     apiBaseHiEntity.setPublishUser(userId);
                     apiBaseHiEntity.setPublishTime(new Date());
                 }
-                apiParamService.removeByApiIdAndApiVersion(apiId, apiBaseHiEntity.getApiVersion());
                 apiBaseHiEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
                 saveOrUpdate(apiBaseHiEntity);
                 IcreditApiBaseEntity newApiBaseEntity = new IcreditApiBaseEntity();
@@ -290,6 +293,23 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         entity.setUpdateTime(new Date());
         entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
         apiBaseHiMapper.deleteByEntity(entity);
+        //删除param参数信息、注册api信息、数据源生成api信息
+        apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+        generateApiService.deleteByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+        registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+        List<IcreditApiBaseHiEntity> apiBaseHiEntityList = apiBaseHiMapper.listByApiBaseId(entity.getApiBaseId());
+        //历史版本全部删除了，则删除其API
+        if (CollectionUtils.isEmpty(apiBaseHiEntityList)){
+            apiBaseService.removeById(entity.getApiBaseId());
+        }
+        //删除历史版本中最新的版本，那么API列表中展示最新版本 - 1的API数据
+        IcreditApiBaseHiEntity apiBaseHiNewest = apiBaseHiEntityList.get(0);
+        if (!apiBaseEntity.getApiVersion().equals(apiBaseHiNewest.getApiVersion())){
+            String apiBaseId = apiBaseEntity.getId();
+            BeanCopyUtils.copyProperties(apiBaseHiNewest, apiBaseEntity);
+            apiBaseEntity.setId(apiBaseId);
+            apiBaseService.updateById(apiBaseEntity);
+        }
     }
 
     @Override

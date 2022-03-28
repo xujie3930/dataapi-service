@@ -15,4 +15,6 @@ import org.apache.ibatis.annotations.Param;
 public interface IcreditRegisterApiMapper extends BaseMapper<IcreditRegisterApiEntity> {
 
     IcreditRegisterApiEntity findByApiIdAndApiVersion(@Param("apiBaseId") String apiBaseId, @Param("apiVersion") Integer apiVersion);
+
+    void deleteByApiIdAndApiVersion(@Param("apiId") String apiId, @Param("apiVersion") Integer apiVersion);
 }
