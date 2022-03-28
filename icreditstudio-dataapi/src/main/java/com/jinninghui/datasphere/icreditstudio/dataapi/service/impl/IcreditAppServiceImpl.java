@@ -71,9 +71,11 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
             appEntity.setPeriod(TokenTypeEnum.EIGHT_HOURS.getDuration());
         }
         saveOrUpdate(appEntity);
-        AppAuthInfo appAuthInfo = BeanCopyUtils.copyProperties(appEntity, new AppAuthInfo());
-        //新增应用时候，保存应用信息至redis
-        redisTemplate.opsForValue().set(request.getGenerateId(), JSON.toJSONString(appAuthInfo));
+        if(AppEnableEnum.ENABLE.getCode().equals(request.getIsEnable())) {//启用状态才保存到redis
+            AppAuthInfo appAuthInfo = BeanCopyUtils.copyProperties(appEntity, new AppAuthInfo());
+            //新增应用时候，保存应用信息至redis
+            redisTemplate.opsForValue().set(request.getGenerateId(), JSON.toJSONString(appAuthInfo));
+        }
         return BusinessResult.success(appEntity.getId());
     }
 

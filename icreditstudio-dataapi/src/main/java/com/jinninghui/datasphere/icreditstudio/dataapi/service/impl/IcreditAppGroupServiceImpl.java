@@ -158,7 +158,6 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
         }
         if(!CollectionUtils.isEmpty(appIdList)) {
             appService.removeByIds(appIdList);
-            redisTemplate.delete(appIdList);
         }
         return BusinessResult.success(true);
     }
