@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.APPAuthConstant;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.AuthService;
@@ -42,6 +43,8 @@ public class AuthServiceImpl implements AuthService {
         String token = UUID.randomUUID().toString().replaceAll("-", "");
         appAuthInfo.setTokenCreateTime(System.currentTimeMillis());
         redisTemplate.opsForValue().set(token, JSON.toJSONString(appAuthInfo));
+        //存储该应用id对应的token信息，用于删除应用时候删除其token
+        redisTemplate.opsForValue().set(appAuthInfo.getGenerateId() + APPAuthConstant.appAuthTokenFix, token);
         return BusinessResult.success(token);
     }
 }

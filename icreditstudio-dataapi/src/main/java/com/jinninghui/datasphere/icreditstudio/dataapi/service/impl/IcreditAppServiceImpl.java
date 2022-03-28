@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.APPAuthConstant;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -90,6 +92,11 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
             redisTemplate.opsForValue().set(appEntity.getGenerateId(), JSON.toJSONString(appAuthInfo));
         }else{
             redisTemplate.delete(appEntity.getGenerateId());
+            Object redisToken = redisTemplate.opsForValue().get(appEntity.getGenerateId() + APPAuthConstant.appAuthTokenFix);
+            if (!Objects.isNull(redisToken)){
+                String appToken = JSON.parseObject(redisToken.toString(), String.class);
+                redisTemplate.delete(appToken);
+            }
         }
         return BusinessResult.success(update);
     }
