@@ -165,6 +165,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
         }
+        apiBaseEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
+        saveOrUpdate(apiBaseEntity);
         IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiService.findByApiBaseId(apiBaseEntity.getId());
         if(null == apiBaseHiEntity) {
             apiBaseHiEntity = new IcreditApiBaseHiEntity();
@@ -174,8 +176,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             BeanUtils.copyProperties(apiBaseEntity, apiBaseHiEntity);
             apiBaseHiEntity.setId(apiBaseHiId);
         }
-        apiBaseEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
-        saveOrUpdate(apiBaseEntity);
+        registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+        apiBaseHiEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
         apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
         apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
