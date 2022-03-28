@@ -283,6 +283,7 @@ export default {
     },
 
     reset() {
+      this.appForm.id = ''
       this.isShowPassword = false
       this.$refs.appForm.resetFields()
     },
@@ -397,6 +398,7 @@ export default {
 
     // 点击-新增或编辑应用
     addApp() {
+      const { opType } = this.options
       this.$refs?.appForm.validate(valid => {
         !valid
           ? this.$refs.baseDialog.setButtonLoading(false)
@@ -405,7 +407,8 @@ export default {
                 if ((success, data)) {
                   this.$notify.success({
                     title: '操作结果',
-                    message: '新增应用成功！',
+                    message:
+                      opType === 'edit' ? '编辑应用成功！' : '新增应用成功！',
                     duration: 1500
                   })
                   this.close('save')

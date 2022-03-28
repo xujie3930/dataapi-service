@@ -158,7 +158,6 @@ export default {
 
     // 点击-编辑应用
     handleEditAppClick({ row }) {
-      console.log(row, 'rowow')
       this.$refs.addApp.open({ row, title: '编辑应用', opType: 'edit' })
     },
 
@@ -268,23 +267,24 @@ export default {
 
     // 点击-停用或启用App状态
     handleChangeAppStatusClick({ row }) {
-      this.$confirm(
-        '停用该应用后将不能进行API调用，请确认是否停用该应用？',
-        '停用提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      )
-        .then(() => {
-          this.changeAppStatus(row)
-        })
-        .catch(() => {})
+      !row.isEnable
+        ? this.changeAppStatus(row)
+        : this.$confirm(
+            '停用该应用后将不能进行API调用，请确认是否停用该应用？',
+            '停用提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          )
+            .then(() => {
+              this.changeAppStatus(row)
+            })
+            .catch(() => {})
     },
 
-    closeAddAppGroupCallback(options) {
-      console.log(options, 'options')
+    closeAddAppGroupCallback() {
       this.mixinRetrieveTableData()
     },
 
