@@ -5,6 +5,7 @@
 
 <template>
   <Dialog
+    v-if="isShowDialog"
     ref="baseDialog"
     width="735px"
     footer-placement="center"
@@ -118,6 +119,7 @@ export default {
       },
       apiOptions: [],
       loading: false,
+      isShowDialog: false,
       veifyNameLoading: false,
       oldGroupName: '',
       authorizeForm: {
@@ -156,7 +158,7 @@ export default {
             required: true,
             type: 'array',
             message: '必填项不能为空',
-            trigger: ['change', 'blur']
+            trigger: ['blur']
           }
         ]
       }
@@ -170,7 +172,10 @@ export default {
       this.authorizeForm.name = row?.name
       this.authorizeForm.appId = row?.id
       this.fetchApiAuthDetail(row?.id)
-      this.$refs.baseDialog.open()
+      this.isShowDialog = true
+      this.$nextTick(() => {
+        this.$refs.baseDialog.open()
+      })
     },
 
     close() {
@@ -184,6 +189,7 @@ export default {
     },
 
     reset() {
+      this.isShowDialog = false
       this.$refs.authorizeForm.resetFields()
     },
 

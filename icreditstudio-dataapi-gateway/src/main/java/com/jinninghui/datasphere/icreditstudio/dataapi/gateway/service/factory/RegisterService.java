@@ -54,23 +54,16 @@ public class RegisterService implements ApiBaseService {
         ResponseEntity<String> restResult = restTemplate.getForEntity(StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr, String.class);
         String response = restResult.getBody();
         //返回分别对bean类型和array类型做处理
-        JSONObject newJsonObj = new JSONObject();
+        JSONArray jsonArray = null;
+        JSONObject jsonObject = null;
         if (response.startsWith("[") && response.endsWith("]")){
-            JSONArray array = JSON.parseArray(response);
-            for (String key : set) {
-                for (Object o : array) {
-                    newJsonObj.put(key, ((JSONObject)o).get(key));
-                }
-            }
+            jsonArray = JSON.parseArray(response);
         }else {
-            JSONObject jsonObject = JSON.parseObject(response);
-            for (String key : set) {
-                newJsonObj.put(key, jsonObject.get(key));
-            }
+            jsonObject = JSON.parseObject(response);
         }
         ApiLogInfo successLog = generateSuccessLog(apiLogInfo, requestHttpPre + requestParamStr);
         kafkaProducer.send(successLog);
-        return BusinessResult.success(newJsonObj);
+        return BusinessResult.success(jsonArray == null? jsonObject : jsonArray);
     }
 
     private ApiLogInfo generateSuccessLog(ApiLogInfo apiLogInfo, String querySql) {

@@ -48,9 +48,8 @@
           size="mini"
           v-model.trim="selectValue"
           @input="fetchTreeDataByName"
-          @clear="fetchBusinessProcessList()"
         >
-          <!-- <i slot="suffix" class="search el-icon-search"></i> -->
+          <!-- @clear="fetchBusinessProcessList()" -->
         </el-input>
       </div>
 
@@ -58,10 +57,9 @@
         class="tree"
         ref="tree"
         node-key="id"
-        lazy
-        draggable
         highlight-current
         v-loading="isTreeLoading"
+        :lazy="isTreeLazy"
         :prop="treeProps"
         :data="treeData"
         :load="fetchTreeData"
@@ -240,6 +238,7 @@ export default {
       isInterfaceFirstCalling: true,
       isChilInterfaceFirstCalling: true,
       isFirstNodeHasChild: false,
+      isTreeLazy: true,
       defalutExpandKey: [],
       selectOptions: [],
       currentTreeNodeId: null,
@@ -287,7 +286,6 @@ export default {
 
     // 点击-历史版本
     handleVersionClick(options) {
-      console.log(row, 'rowrow')
       const { row } = options ?? {}
       this.$refs.versionLists.open(row)
     },
@@ -326,7 +324,6 @@ export default {
       if (level === 1) {
         const { length } = childNodes
         this.isFirstNodeHasChild = length
-        // length && this.setHighlightCurrentNode(childNodes[0]?.data?.id)
       } else {
         this.setHighlightCurrentNode(id)
         this.isFirstNodeHasChild = level > 1
@@ -655,14 +652,16 @@ export default {
     // 获取-符合输入的分组以及流程数据
     fetchTreeDataByName() {
       if (this.selectValue === '' || isUndef(this.selectValue)) {
+        this.isInterfaceFirstCalling = true
         this.fetchBusinessProcessList()
         return
       }
 
       this.isTreeLoading = true
+      this.isTreeLazy = true
       API.searchProcessOrGroup({ name: this.selectValue })
         .then(({ success, data }) => {
-          if (success) {
+          if (success && data) {
             this.treeData = data.map(
               ({ apiGroup: children, workFlowId: id, workFlowName: name }) => {
                 return {
@@ -670,14 +669,18 @@ export default {
                   name,
                   icon: 'process',
                   leaf: false,
-                  children: children?.map(item => ({
-                    ...item,
-                    icon: 'group',
-                    leaf: true
-                  }))
+                  children: children?.map(item => {
+                    return {
+                      ...item,
+                      icon: 'group',
+                      leaf: true
+                    }
+                  })
                 }
               }
             )
+
+            this.isTreeLazy = false
           }
         })
         .finally(() => {
@@ -751,21 +754,23 @@ export default {
       API.getBusinessProcessChild({ workId: id })
         .then(({ success, data: children }) => {
           if (success && children) {
-            const data = children?.map(item => {
-              return {
-                ...item,
-                leaf: true,
-                icon: 'group',
-                isRename: false,
-                oldName: item.name
-              }
-            })
+            const data = children
+              ?.map(item => {
+                return {
+                  ...item,
+                  leaf: true,
+                  icon: 'group',
+                  isRename: false,
+                  oldName: item.name
+                }
+              })
+              .filter(({ name }) =>
+                this.isTreeLazy ? true : name.includes(this.selectValue)
+              )
 
             resolve(data)
-
             this.isFirstNodeHasChild = !!data.length
-            children?.length &&
-              this.setHighlightCurrentNode(children[0].id, true)
+            children?.length && this.setHighlightCurrentNode(data[0].id, true)
 
             // 首次加载
             if (this.isChilInterfaceFirstCalling) {
