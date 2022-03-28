@@ -411,7 +411,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         }
         for (String requiredField : requiredFieldArr) {
             if(requiredField.contains("${")) {
-                requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+                requiredFields.append(requiredField.contains(" =") ? requiredField.substring(0, requiredField.indexOf(" =")) : requiredField.substring(0, requiredField.indexOf("="))).append(SQL_FIELD_SPLIT_CHAR);
             }
         }
         List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
