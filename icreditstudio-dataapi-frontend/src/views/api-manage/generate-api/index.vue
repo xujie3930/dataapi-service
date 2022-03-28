@@ -694,7 +694,9 @@ export default {
         !value.startsWith('http://')
           ? cb(new Error('IP地址要以http://开头，请重新输入'))
           : validIpAddress(ipStrArr[0])
-          ? cb()
+          ? /[0-9]$/.test(ipStrArr[1])
+            ? cb()
+            : cb(new Error('非法端口，请重新输入'))
           : cb(new Error('非法IP地址，请重新输入'))
       }
     },
