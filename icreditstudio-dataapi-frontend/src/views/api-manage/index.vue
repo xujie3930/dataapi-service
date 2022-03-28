@@ -260,7 +260,8 @@ export default {
       contentmenuCommand: '',
       curEditName: '',
       curNode: {},
-      curNodeData: {}
+      curNodeData: {},
+      options: { treeOperateType: '', currentTreeNodeId: '' }
     }
   },
 
@@ -604,7 +605,6 @@ export default {
 
     // 回调-版本历史列表
     editApiCallback(options) {
-      console.log(options, 'dejji')
       this.opType = 'edit'
       this.$refs.versionLists.close()
       this.$nextTick(() =>
@@ -619,18 +619,24 @@ export default {
 
     // 回调-新增业务流程或API分组
     async closeDialogCallback(options) {
-      const { currentTreeNodeId, command, workId } = options
+      const { currentTreeNodeId, command, workId, opType } = options
+      this.treeOperateType = opType
+      this.options = options
       this.currentTreeNodeId = currentTreeNodeId
       this.defalutExpandKey = workId
         ? [workId, currentTreeNodeId]
         : [currentTreeNodeId]
       const isFinish = await this.fetchBusinessProcessList()
+
       if (isFinish) {
         this.selectValue = ''
+        // 新增或编辑流程
         command === 'process' && this.setHighlightCurrentNode(workId)
 
         // 新增分组左侧树高亮节点
-        command === 'group' && this.setHighlightCurrentNode(workId)
+        command === 'group' &&
+          opType === 'add' &&
+          this.setHighlightCurrentNode(workId)
       }
     },
 
@@ -751,9 +757,11 @@ export default {
 
     // 获取-左侧树二级节点数据
     fetchBusinessProcessChildList(id, resolve) {
+      const that = this
       API.getBusinessProcessChild({ workId: id })
         .then(({ success, data: children }) => {
           if (success && children) {
+            const { treeOperateType, currentTreeNodeId } = this.options
             const data = children
               ?.map(item => {
                 return {
@@ -769,8 +777,19 @@ export default {
               )
 
             resolve(data)
+
             this.isFirstNodeHasChild = !!data.length
-            children?.length && this.setHighlightCurrentNode(data[0].id, true)
+
+            children?.length &&
+              treeOperateType !== 'edit' &&
+              this.setHighlightCurrentNode(data[0].id, true)
+
+            // 编辑API分组高亮被编辑节点
+            if (that.treeOperateType === 'edit') {
+              this.$nextTick(() =>
+                this.setHighlightCurrentNode(currentTreeNodeId, true)
+              )
+            }
 
             // 首次加载
             if (this.isChilInterfaceFirstCalling) {
