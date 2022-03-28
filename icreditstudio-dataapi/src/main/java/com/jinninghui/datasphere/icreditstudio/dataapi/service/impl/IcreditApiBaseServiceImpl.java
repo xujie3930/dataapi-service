@@ -461,7 +461,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                                 && requiredField.substring(requiredField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (requiredField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
                             apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
                             apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
-                            requiredFields.append(tableNameInfoBO.getTableName()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+                            requiredFields.append(tableNameInfoBO.getTableAlias()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                         }
                     }
                 }
@@ -479,7 +479,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                         } else if (apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
                                 && responseField.substring(responseField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (responseField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
                             apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
-                            responseFields.append(tableNameInfoBO.getTableName()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+                            responseFields.append(tableNameInfoBO.getTableAlias()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                         }
                     }
                 }
