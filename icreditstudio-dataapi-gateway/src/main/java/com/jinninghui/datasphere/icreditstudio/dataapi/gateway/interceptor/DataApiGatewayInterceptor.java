@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Project：icreditstudio-dataapi-service
@@ -186,6 +187,17 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         List<String> params = MapUtils.mapKeyToList(map);
         if (StringUtils.isNotBlank(apiInfo.getRequiredFields())) {
             Set<String> requestList = new HashSet<>(Arrays.asList(apiInfo.getRequiredFields().split(",")));
+            if (!CollectionUtils.isEmpty(requestList) && !params.containsAll(requestList)) {
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getMessage());
+            }
+        }
+        if (!CollectionUtils.isEmpty(apiInfo.getRegisterApiParamInfoList())) {
+            List<String> requiredList = apiInfo.getRegisterApiParamInfoList().stream()
+                    .filter((RegisterApiParamInfo r) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(r.getIsRequest()))
+                    .filter((RegisterApiParamInfo r) -> RequiredFiledEnum.IS_REQUIRED_FIELD.getCode().equals(r.getRequired()))
+                    .map(RegisterApiParamInfo::getFieldName)
+                    .collect(Collectors.toList());
+            Set<String> requestList = new HashSet<>(requiredList);
             if (!CollectionUtils.isEmpty(requestList) && !params.containsAll(requestList)) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000004.getMessage());
             }

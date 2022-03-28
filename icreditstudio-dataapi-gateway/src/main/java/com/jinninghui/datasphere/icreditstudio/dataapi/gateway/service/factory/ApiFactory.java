@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.base.ApiBaseService;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -20,7 +21,7 @@ public class ApiFactory {
     private RegisterService registerService;
 
     public ApiBaseService getApiService(RedisApiInfo apiInfo) {
-        if (CollectionUtils.isEmpty(apiInfo.getRegisterApiParamInfoList())){
+        if (StringUtils.isBlank(apiInfo.getReqHost()) && StringUtils.isBlank(apiInfo.getReqPath())){
             return generateService;
         }
         return registerService;
