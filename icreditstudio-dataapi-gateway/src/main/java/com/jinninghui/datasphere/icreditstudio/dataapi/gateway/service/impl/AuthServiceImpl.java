@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
         appAuthInfo.setTokenCreateTime(System.currentTimeMillis());
         redisTemplate.opsForValue().set(token, JSON.toJSONString(appAuthInfo));
         //存储该应用id对应的token信息，用于删除应用时候删除其token
-        redisTemplate.opsForValue().set(appAuthInfo.getGenerateId() + APPAuthConstant.appAuthTokenFix, token);
+        redisTemplate.opsForValue().set(appAuthInfo.getGenerateId() + APPAuthConstant.appAuthTokenFix, JSON.toJSONString(token));
         return BusinessResult.success(token);
     }
 }
