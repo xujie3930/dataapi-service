@@ -173,7 +173,9 @@ export default {
       this.authorizeForm.appId = row?.id
       this.fetchApiAuthDetail(row?.id)
       this.isShowDialog = true
-      this.$refs.baseDialog.open()
+      this.$nextTick(() => {
+        this.$refs.baseDialog.open()
+      })
     },
 
     close() {
