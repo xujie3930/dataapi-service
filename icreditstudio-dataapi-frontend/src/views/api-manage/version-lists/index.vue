@@ -121,29 +121,6 @@ export default {
       this.$emit('edit-api', row)
     },
 
-    // 点击-发布API
-    handlePublishApiClick() {},
-
-    // 点击-停止发布
-    handleStopApiClick({ row }) {
-      const { publishStatus } = row
-      publishStatus === 2
-        ? this.$confirm(
-            '停止发布后，该版本API将不能授权给其他应用，并且已授权的应用也将全部失效，需重新发布该版本API后才能继续被授权的应用调用，请确认是否停止发布该版本API？',
-            '提示',
-            {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning'
-            }
-          )
-            .then(() => {
-              this.$message({ type: 'success', message: '删除成功!' })
-            })
-            .catch(() => {})
-        : this.stopOrPublishApi()
-    },
-
     handleSelectChange(selection) {
       this.selection = selection
     },
@@ -187,12 +164,13 @@ export default {
             .catch(() => {})
     },
 
-    //  点击-删除删除API
+    //  点击-删除API
     handleDeleteApiClick({ row }) {
       const { publishStatus, apiHiId: id } = row
       publishStatus === 2
         ? this.$alert('该API已发布，请先停止发布', '提示', {
-            confirmButtonText: '确定',
+            showConfirmButton: false,
+            showCancelButton: true,
             type: 'warning'
           })
         : this.$confirm('请确认是否删除该API？', '提示', {

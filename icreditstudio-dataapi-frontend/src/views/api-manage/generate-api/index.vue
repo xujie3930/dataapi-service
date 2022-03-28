@@ -534,7 +534,7 @@ export default {
       isSaveBtnLoading: false,
       isTestBtnLoading: false,
       isPublishBtnLoading: false,
-      isShowCascader: true,
+      isShowCascader: false,
       oldTableData: [],
       tableConfiguration: dataServiceParamTableConfig,
       tableRequestConfiguration: tableRequestConfiguration(this),
@@ -647,10 +647,11 @@ export default {
       const { opType, cascaderOptions } = options
       this.options = options
       this.pageLoading = true
-      this.isShowCascader = true
 
       if (opType === 'add') {
         // this.cascaderOptions = cascaderOptions
+        this.isShowCascader = true
+
         this.form.apiGroupId = [
           cascaderOptions[0].value,
           cascaderOptions[0].children[0].value
@@ -741,7 +742,7 @@ export default {
     },
 
     handleJumpBackClick() {
-      this.isShowCascader = true
+      this.isShowCascader = false
       this.$emit('on-jump', this.opType)
     },
 
@@ -942,7 +943,6 @@ export default {
       API.getHistoryApiDetail({ apiHiId })
         .then(({ success, data }) => {
           if (success && data) {
-            console.log(data, 'data')
             const {
               type,
               apiPath,
@@ -982,6 +982,7 @@ export default {
         })
         .finally(() => {
           this.pageLoading = false
+          this.isShowCascader = true
         })
     },
 
