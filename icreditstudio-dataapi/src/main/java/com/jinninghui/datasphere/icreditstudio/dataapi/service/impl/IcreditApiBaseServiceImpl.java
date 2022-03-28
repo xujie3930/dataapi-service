@@ -583,9 +583,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     public Object checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type) {
         String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
-        String regEx = "[!<>|between]";
-        Pattern p = Pattern.compile(regEx);
-        Matcher m = p.matcher(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()));
         if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)){
             if(StringUtils.isEmpty(request.getSql())){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage());
@@ -593,7 +590,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
             }
-            if(sql.contains(SQL_WHERE) && m.find()){
+            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage());
             }
         }else{
@@ -603,7 +600,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
             }
-            if(sql.contains(SQL_WHERE) && m.find()){
+            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
             }
         }
@@ -619,7 +616,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
             if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
-                String sqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM)).replaceAll(" ", "");
+                String sqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM)).replaceAll(EMPTY_CHAR, "");
                 apiParamEntityList = new ArrayList<>();
                 if(sql.contains(SQL_WHERE)) {
                     if(sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)) {
@@ -674,6 +671,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             closeConnection(conn);
         }
         return createApiInfoBO;
+    }
+
+    private boolean checkSqlWhere(String sqlWhere) {
+        if(sqlWhere.contains(" or ") || sqlWhere.contains(" between")|| sqlWhere.contains(" >")|| sqlWhere.contains(" <") || sqlWhere.contains(" !") || sqlWhere.contains(" like") || sqlWhere.contains(" in") ||
+                sqlWhere.contains(" is null") || sqlWhere.contains(" is not null")){
+            return true;
+        }
+        return false;
     }
 
     @Override
