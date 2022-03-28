@@ -45,7 +45,7 @@ public class KafkaConsumer {
                 Object msg = message.get();
                 ApiLogInfo logInfo = JSON.parseObject(String.valueOf(msg), ApiLogInfo.class);
                 //true-第一次插入，false-第二次插入
-                if(redisTemplate.opsForValue().setIfAbsent(logInfo.getTraceId(), logInfo, 5, TimeUnit.SECONDS)){
+                if(redisTemplate.opsForValue().setIfAbsent(logInfo.getTraceId(), logInfo)){
                     IcreditApiLogEntity apiLogEntity = new IcreditApiLogEntity();
                     BeanUtils.copyProperties(logInfo, apiLogEntity);
                     apiLogMapper.insert(apiLogEntity);
