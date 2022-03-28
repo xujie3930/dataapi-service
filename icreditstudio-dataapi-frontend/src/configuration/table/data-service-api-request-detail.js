@@ -24,7 +24,8 @@ export default {
       type: 'text',
       label: '是否必填',
       prop: 'required',
-      width: 150
+      width: 150,
+      formatter: ({ required }) => (required ? '否' : '是')
     },
     {
       type: 'text',
