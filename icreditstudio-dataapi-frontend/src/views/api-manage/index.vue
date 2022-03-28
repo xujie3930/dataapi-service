@@ -345,7 +345,6 @@ export default {
 
     // 点击-右键
     handleNodeContextmenuClick(evt, data, node) {
-      console.log(evt, data, node)
       // 默认API分组无右键操作
       if (data.id === '000') return
       const { left, top } = this.getNextContextMenuPostion(evt)

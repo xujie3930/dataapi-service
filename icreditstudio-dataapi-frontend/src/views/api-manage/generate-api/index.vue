@@ -68,7 +68,6 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="API名称" prop="name">
               <el-input
-                :disabled="options.opType === 'edit'"
                 show-word-limit
                 maxlength="50"
                 style="width: 100%"
@@ -145,11 +144,14 @@
 
         <el-row type="flex" justify="space-between" class="form-row-item">
           <el-col :span="11">
-            <el-form-item label="所属分组" prop="apiGroupId">
+            <el-form-item
+              label="所属分组"
+              prop="apiGroupId"
+              v-if="isShowCascader"
+            >
               <el-cascader
-                v-if="isShowCascader"
                 style="width: 100%"
-                :disabled="options.opType === 'add'"
+                :disabled="true"
                 v-model="form.apiGroupId"
                 :props="cascaderProps"
                 :options="cascaderOptions"
@@ -187,7 +189,7 @@
                 >
                 </el-input>
                 <p class="form-row-item--tip">
-                  以http://开头，后台服务的IP地址
+                  以http://开头，后台服务的IP地址、端口
                 </p>
               </el-form-item>
             </el-col>
@@ -686,12 +688,12 @@ export default {
     verifyHost(rule, value, cb) {
       this.form.reqHost = strExcludeBlank(value)
       const ipStr = value.replaceAll('http://', '')
-      console.log(ipStr, validIpAddress(ipStr), 'kkoo')
+      const ipStrArr = ipStr.split(':')
 
       if (cb) {
         !value.startsWith('http://')
           ? cb(new Error('IP地址要以http://开头，请重新输入'))
-          : validIpAddress(ipStr.split(':')[0])
+          : validIpAddress(ipStrArr[0])
           ? cb()
           : cb(new Error('非法IP地址，请重新输入'))
       }
