@@ -5,6 +5,7 @@
 
 <template>
   <Dialog
+    v-if="isShowDialog"
     ref="baseDialog"
     width="735px"
     footer-placement="center"
@@ -118,6 +119,7 @@ export default {
       },
       apiOptions: [],
       loading: false,
+      isShowDialog: false,
       veifyNameLoading: false,
       oldGroupName: '',
       authorizeForm: {
@@ -170,6 +172,7 @@ export default {
       this.authorizeForm.name = row?.name
       this.authorizeForm.appId = row?.id
       this.fetchApiAuthDetail(row?.id)
+      this.isShowDialog = true
       this.$refs.baseDialog.open()
     },
 
@@ -184,6 +187,7 @@ export default {
     },
 
     reset() {
+      this.isShowDialog = false
       this.$refs.authorizeForm.resetFields()
     },
 

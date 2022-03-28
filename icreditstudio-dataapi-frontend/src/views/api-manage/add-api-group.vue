@@ -140,6 +140,7 @@ export default {
     },
 
     reset() {
+      this.apiGroupForm.id = ''
       this.$refs.apiGroupForm.resetFields()
     },
 
