@@ -144,12 +144,9 @@
 
         <el-row type="flex" justify="space-between" class="form-row-item">
           <el-col :span="11">
-            <el-form-item
-              label="所属分组"
-              prop="apiGroupId"
-              v-if="isShowCascader"
-            >
+            <el-form-item label="所属分组" prop="apiGroupId">
               <el-cascader
+                v-if="isShowCascader"
                 style="width: 100%"
                 :disabled="true"
                 v-model="form.apiGroupId"
@@ -537,7 +534,7 @@ export default {
       isSaveBtnLoading: false,
       isTestBtnLoading: false,
       isPublishBtnLoading: false,
-      isShowCascader: false,
+      isShowCascader: true,
       oldTableData: [],
       tableConfiguration: dataServiceParamTableConfig,
       tableRequestConfiguration: tableRequestConfiguration(this),
@@ -744,7 +741,7 @@ export default {
     },
 
     handleJumpBackClick() {
-      this.isShowCascader = false
+      this.isShowCascader = true
       this.$emit('on-jump', this.opType)
     },
 
