@@ -195,6 +195,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
             List<String> requiredList = apiInfo.getRegisterApiParamInfoList().stream()
                     .filter((RegisterApiParamInfo r) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(r.getIsRequest()))
                     .filter((RegisterApiParamInfo r) -> RequiredFiledEnum.IS_REQUIRED_FIELD.getCode().equals(r.getRequired()))
+                    .filter((RegisterApiParamInfo r) -> StringUtils.isBlank(r.getDefaultValue()))
                     .map(RegisterApiParamInfo::getFieldName)
                     .collect(Collectors.toList());
             Set<String> requestList = new HashSet<>(requiredList);
