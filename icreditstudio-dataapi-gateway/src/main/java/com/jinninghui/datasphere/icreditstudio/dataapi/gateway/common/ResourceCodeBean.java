@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 public class ResourceCodeBean {
 
     public enum ResourceCode {
-        RESOURCE_CODE_10000000("10000000", "应用状态异常!"),
+        RESOURCE_CODE_10000000("10000000", "应用已停用!"),
         RESOURCE_CODE_10000001("10000001", "密钥验证失败!"),
-        RESOURCE_CODE_10000002("10000002", "API尚未发布!"),
+        RESOURCE_CODE_10000002("10000002", "API尚未发布或者已删除!"),
         RESOURCE_CODE_10000003("10000003", "token失效，请重新获取!"),
         RESOURCE_CODE_10000004("10000004", "参数缺失!"),
         RESOURCE_CODE_10000005("10000005", "该应用未启用！"),
