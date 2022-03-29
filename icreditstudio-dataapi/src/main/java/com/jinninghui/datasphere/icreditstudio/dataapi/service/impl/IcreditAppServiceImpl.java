@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.APPAuthConstant;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
@@ -107,6 +108,7 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
     }
 
     @Override
+    @ResultReturning
     public BusinessResult<AppDetailResult> detail(AppDetailRequest request) {
         StringLegalUtils.checkId(request.getId());
         IcreditAppEntity appEntity = appMapper.selectById(request.getId());

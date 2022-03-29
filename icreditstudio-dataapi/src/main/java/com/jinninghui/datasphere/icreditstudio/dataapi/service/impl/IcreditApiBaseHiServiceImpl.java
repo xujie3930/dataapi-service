@@ -65,6 +65,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     }
 
     @Override
+    @ResultReturning
     public BusinessResult<BusinessPageResult<ApiHistoryListResult>> getList(ApiHistoryListRequest request) {
         StringLegalUtils.checkId(request.getApiId());
         if(!StringUtils.isEmpty(request.getPublishDateStart())) {
@@ -80,6 +81,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     }
 
     @Override
+    @ResultReturning
     public BusinessResult<ApiDetailResult> info(ApiBaseHiDetailRequest request) {
         StringLegalUtils.checkId(request.getApiHiId());
         IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiMapper.selectById(request.getApiHiId());
@@ -152,7 +154,12 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
 
     private String getRegisterInterfaceAddress(IcreditApiBaseHiEntity apiBaseHiEntity, List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList){
         IcreditRegisterApiEntity registerApiEntity = registerApiService.findByApiIdAndApiVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion());
-        StringBuilder address = new StringBuilder(registerApiEntity.getHost()).append("/").append(registerApiEntity.getPath());
+        StringBuilder address = new StringBuilder(registerApiEntity.getHost());
+        if(registerApiEntity.getPath().startsWith("/")){
+            address.append(registerApiEntity.getPath());
+        }else{
+            address.append("/").append(registerApiEntity.getPath());
+        }
         int size = registerRequestParamSaveRequestList.size();
         for (int i = 0; i < size; i++) {
             if(i == 0){

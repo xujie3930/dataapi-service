@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
@@ -103,6 +104,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String SQL_COUNT_ALL = "count(*)";
 
     @Override
+    @ResultReturning
     public BusinessResult<BusinessPageResult> getList(ApiBaseListRequest request) {
         Wrapper<IcreditApiBaseEntity> wrapper = queryWrapper(request);
         IPage<IcreditApiBaseEntity> page = this.page(

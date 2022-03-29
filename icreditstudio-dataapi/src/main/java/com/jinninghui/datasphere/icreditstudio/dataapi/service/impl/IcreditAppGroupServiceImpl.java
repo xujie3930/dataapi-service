@@ -63,8 +63,9 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
         return BusinessResult.success(appGroupEntity.getId());
     }
 
-    @Override
     //查询所有的应用分组
+    @Override
+    @ResultReturning
     public BusinessResult<List<AppGroupQueryListResult>> getList(AppQueryListRequest request) {
         AppQueryListParam param = BeanCopyUtils.copyProperties(request, new AppQueryListParam());
         List<AppQueryListDTO> list = appGroupMapper.getList(param);
