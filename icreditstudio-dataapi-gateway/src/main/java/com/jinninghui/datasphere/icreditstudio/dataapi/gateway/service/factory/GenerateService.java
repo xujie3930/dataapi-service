@@ -46,6 +46,7 @@ public class GenerateService implements ApiBaseService {
     public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
         Long dataCount = 0L;
         String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), params);
+        log.info("数据源生成API查询sql：{}", querySql);
         Connection conn = null;
         try {
             //连接数据源，执行SQL

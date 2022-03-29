@@ -9,6 +9,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.b
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * @description 注册api
  * @create 2022-02-24 14:35
  **/
+@Slf4j
 @Service
 public class RegisterService implements ApiBaseService {
 
@@ -56,6 +58,7 @@ public class RegisterService implements ApiBaseService {
         }
         String requestHttpPre = apiInfo.getReqHost() + apiInfo.getReqPath();
         String requestUrl = StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr;
+        log.info("注册API查询uri：{}", requestUrl);
         ResponseEntity<String> restResult = restTemplate.getForEntity(requestUrl, String.class);
         String response = restResult.getBody();
         //返回分别对bean类型和array类型做处理
