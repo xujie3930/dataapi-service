@@ -44,6 +44,9 @@ public class RegisterService implements ApiBaseService {
         StringBuilder builder = new StringBuilder();
         if (!CollectionUtils.isEmpty(requestList)){
             for (RegisterApiParamInfo requestParam : requestList) {
+                if (StringUtils.isBlank((String) params.get(requestParam.getFieldName())) && StringUtils.isBlank(requestParam.getDefaultValue())){
+                    continue;
+                }
                 builder.append(requestParam.getFieldName()).append("=").append(StringUtils.isBlank((String) params.get(requestParam.getFieldName()))? requestParam.getDefaultValue() : (String) params.get(requestParam.getFieldName())).append("&");
             }
         }
