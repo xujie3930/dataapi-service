@@ -6,12 +6,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiTypeEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequestFiledEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequiredFiledEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ResponseFiledEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
@@ -19,7 +21,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.CreateApiInfoBO;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.RegisterApiParamInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableFieldBO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableNameInfoBO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
@@ -520,6 +521,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     @Override
     public BusinessResult<List<Map<String, Object>>> getDataSourcesList(DataSourcesListRequest request) {
+        request.setStatus(DatasourceEnableEnum.ENABLE.getCode());
         return dataSourceFeignClient.getDataSourcesList(request);
     }
 
