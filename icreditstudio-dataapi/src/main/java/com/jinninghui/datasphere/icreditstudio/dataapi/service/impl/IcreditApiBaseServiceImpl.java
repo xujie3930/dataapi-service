@@ -228,10 +228,12 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         //发布操作 存放信息到redis
         if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
             if(ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())){
-                String sqlCount = createApiInfoBO.getQuerySql().substring(createApiInfoBO.getQuerySql().indexOf(SQL_START) + SQL_START.length(), createApiInfoBO.getQuerySql().indexOf(SQL_FROM)).replaceAll(" ", "");
-                if(sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)){
-                    String responseFields = sqlCount.contains(SQL_AS) ? sqlCount.substring(sqlCount.indexOf(SQL_AS) + SQL_AS.length()) : sqlCount.contains(EMPTY_CHAR) ?
-                            sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
+                String sql = createApiInfoBO.getQuerySql().toLowerCase();
+                String lowerCaseSqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM));
+                if(lowerCaseSqlCount.contains(SQL_COUNT_ONE) || lowerCaseSqlCount.contains(SQL_COUNT_ALL)){
+                    String naturalSqlCount = createApiInfoBO.getQuerySql().substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM));
+                    String responseFields = lowerCaseSqlCount.contains(SQL_AS) ? naturalSqlCount.substring(lowerCaseSqlCount.indexOf(SQL_AS) + SQL_AS.length()) : lowerCaseSqlCount.contains(EMPTY_CHAR) ?
+                            naturalSqlCount.substring(lowerCaseSqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : lowerCaseSqlCount;
                     saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                             generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                             responseFields, registerApiParamInfos, param.getReqHost(), param.getReqPath());
@@ -490,7 +492,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             }
         }
         tableFieldBO.setRequiredFieldStr(requiredFields.length() >= 1 ? String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))) : null);
-        tableFieldBO.setResponseFieldStr(String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
+        tableFieldBO.setResponseFieldStr(responseFields.length() >= 1 ? String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))) : null);
         return tableFieldBO;
     }
 
