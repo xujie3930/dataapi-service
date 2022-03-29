@@ -1389,16 +1389,33 @@ public abstract class StringUtils {
 	 * @return
 	 */
 	public static String parseSql(String content, Map<String, String> kvs) {
+		//必填参数
+		Set<String> noRequiredSet = new HashSet<>();
 		Pattern p = Pattern.compile("(\\$\\{)([\\w]+)(\\})");
 		Matcher m = p.matcher(content);
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
 			String group = m.group();
 			String key = group.replace("${", "").replace("}",  "");
-			m.appendReplacement(sb, "'" + kvs.get(key)  + "'");
+			String value = kvs.get(key);
+			if (value == null){
+				noRequiredSet.add(key);
+			}
+			m.appendReplacement(sb, "'" + value + "'");
 		}
 		m.appendTail(sb);
-		return sb.toString();
+		String tempSql = sb.toString();
+		//对string做选填处理
+		if (!CollectionUtils.isEmpty(noRequiredSet)){
+			for (String field : noRequiredSet) {
+				tempSql = tempSql.replaceAll(field + " = " + "'null'", "");
+			}
+		}
+		if (!tempSql.contains("=")){
+			tempSql = tempSql.replaceAll("where", "");
+			tempSql = tempSql.replaceAll("WHERE", "");
+		}
+		return tempSql;
 	}
 
 	public static String addPageParam(String sql, Integer pageNum, Integer pageSize) {
@@ -1428,7 +1445,11 @@ public abstract class StringUtils {
 
 	public static void main(String[] args) {
 		String str = "select * from table_setting WHERE id = ${id}";
-		String s = getSelectCountSql(str);
+//		String s = getSelectCountSql(str);
+//		System.out.println(s);
+		HashMap<String, String> map = new HashMap<>();
+		map.put("id", "1");
+		String s = parseSql(str, map);
 		System.out.println(s);
 	}
 }

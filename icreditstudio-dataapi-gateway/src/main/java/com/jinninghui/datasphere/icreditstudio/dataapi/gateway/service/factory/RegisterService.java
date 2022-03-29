@@ -7,6 +7,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.base.ApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,22 +37,23 @@ public class RegisterService implements ApiBaseService {
         List<RegisterApiParamInfo> requestList = registerApiParamInfos.stream()
                 .filter((RegisterApiParamInfo r) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(r.getIsRequest()))
                 .collect(Collectors.toList());
-        List<RegisterApiParamInfo> responseList = registerApiParamInfos.stream()
-                .filter((RegisterApiParamInfo r) -> ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(r.getIsResponse()))
-                .collect(Collectors.toList());
-        //获取所有返回参数
-        Set<String> set = new HashSet<>(responseList.stream().map(RegisterApiParamInfo -> RegisterApiParamInfo.getFieldName()).collect(Collectors.toList()));
+//        List<RegisterApiParamInfo> responseList = registerApiParamInfos.stream()
+//                .filter((RegisterApiParamInfo r) -> ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(r.getIsResponse()))
+//                .collect(Collectors.toList());
         //生成入参列表,参数格式:name1=value1&name2=value2
         StringBuilder builder = new StringBuilder();
-        for (RegisterApiParamInfo requestParam : requestList) {
-            builder.append(requestParam.getFieldName()).append("=").append(StringUtils.isBlank((String) params.get(requestParam.getFieldName()))? requestParam.getDefaultValue() : (String) params.get(requestParam.getFieldName())).append("&");
+        if (!CollectionUtils.isEmpty(requestList)){
+            for (RegisterApiParamInfo requestParam : requestList) {
+                builder.append(requestParam.getFieldName()).append("=").append(StringUtils.isBlank((String) params.get(requestParam.getFieldName()))? requestParam.getDefaultValue() : (String) params.get(requestParam.getFieldName())).append("&");
+            }
         }
         String requestParamStr = builder.toString();
         if (!StringUtils.isBlank(requestParamStr)){
             requestParamStr = requestParamStr.substring(0, requestParamStr.length() - 1);
         }
         String requestHttpPre = apiInfo.getReqHost() + apiInfo.getReqPath();
-        ResponseEntity<String> restResult = restTemplate.getForEntity(StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr, String.class);
+        String requestUrl = StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr;
+        ResponseEntity<String> restResult = restTemplate.getForEntity(requestUrl, String.class);
         String response = restResult.getBody();
         //返回分别对bean类型和array类型做处理
         JSONArray jsonArray = null;
