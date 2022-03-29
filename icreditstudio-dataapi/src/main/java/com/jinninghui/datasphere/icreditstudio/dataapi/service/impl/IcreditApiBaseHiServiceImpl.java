@@ -329,4 +329,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         deleteByUserIdAndId(userId, apiHiId);
         return BusinessResult.success(true);
     }
+
+    @Override
+    public void removeByApiBaseId(String id) {
+        apiBaseHiMapper.removeByApiBaseId(id);
+    }
 }

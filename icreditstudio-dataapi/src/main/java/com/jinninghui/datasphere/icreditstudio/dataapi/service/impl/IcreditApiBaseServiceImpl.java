@@ -823,6 +823,12 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseEntity.setPublishTime(new Date());
         }
         saveOrUpdate(apiBaseEntity);
+        IcreditApiBaseHiEntity apiBaseHiEntity = BeanCopyUtils.copyProperties(apiBaseEntity, new IcreditApiBaseHiEntity());
+        apiBaseHiEntity.setId(null);
+        apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
+        //先删除，再插入
+        apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
+        apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         log.info("保存api耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         startTime = System.currentTimeMillis();
         String querySql;
