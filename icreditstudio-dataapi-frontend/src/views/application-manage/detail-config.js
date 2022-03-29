@@ -5,8 +5,8 @@
 
 import {
   ENABLED_STATUS,
-  CERTIFICATION_TYPE,
-  CALL_TYPE
+  CERTIFICATION_TYPE
+  // CALL_TYPE
 } from '@/config/constant'
 import { dateFormat } from '@/utils'
 
@@ -68,12 +68,12 @@ export const detailConfiguration = {
         }`
     },
     {
-      label: '调用次数类型',
+      label: '可调用次数',
       value: '',
       key: 'allowCall',
       span: 24,
-      formatter: ({ allowCall, callCountType }) =>
-        `${CALL_TYPE[callCountType]}  ${allowCall < 0 ? '' : `${allowCall}次`}`
+      formatter: ({ allowCall }) =>
+        allowCall === -1 ? '无限次' : `${allowCall}次`
     }
   ]
 }
