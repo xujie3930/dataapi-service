@@ -61,6 +61,6 @@ spring.redis.lettuce:
 host:
   addr: https://njnaopen.nanjingdata.cn/data-pf/openapi
 
-kafkaProducer:
+kafkaConsumer:
   topic: apiInvoke
 

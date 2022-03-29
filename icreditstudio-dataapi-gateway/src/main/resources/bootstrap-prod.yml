@@ -51,3 +51,5 @@ logging:
   level:
     com.hashtech: info
 
+kafkaProducer:
+  topic: apiInvoke
