@@ -1408,8 +1408,8 @@ public abstract class StringUtils {
 		//对string做选填处理
 		if (!CollectionUtils.isEmpty(noRequiredSet)){
 			for (String field : noRequiredSet) {
-				tempSql = tempSql.replaceAll(field + " = " + "'null'", "");
 				tempSql = tempSql.replaceAll("and " + field + " = " + "'null'", "");
+				tempSql = tempSql.replaceAll(field + " = " + "'null'", "");
 			}
 		}
 		if (!tempSql.contains("=")){
