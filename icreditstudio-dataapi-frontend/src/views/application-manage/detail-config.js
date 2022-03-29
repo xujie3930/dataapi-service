@@ -6,7 +6,6 @@
 import {
   ENABLED_STATUS,
   CERTIFICATION_TYPE,
-  TOEKN_PERIOD,
   CALL_TYPE
 } from '@/config/constant'
 import { dateFormat } from '@/utils'
@@ -50,11 +49,12 @@ export const detailConfiguration = {
 
   authTime: [
     {
-      label: '授权有效时间',
+      label: '授权有效期',
       value: '',
-      key: 'tokenType',
+      key: 'authEffectiveTime',
       span: 24,
-      formatter: ({ tokenType }) => TOEKN_PERIOD[tokenType]
+      formatter: ({ authEffectiveTime }) =>
+        authEffectiveTime ? '永久' : '短期'
     },
     {
       label: '选择日期时间',
