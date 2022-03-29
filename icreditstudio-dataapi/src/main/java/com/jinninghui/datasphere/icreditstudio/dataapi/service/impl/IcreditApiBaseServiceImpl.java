@@ -823,12 +823,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseEntity.setPublishTime(new Date());
         }
         saveOrUpdate(apiBaseEntity);
-        IcreditApiBaseHiEntity apiBaseHiEntity = BeanCopyUtils.copyProperties(apiBaseEntity, new IcreditApiBaseHiEntity());
-        apiBaseHiEntity.setId(null);
-        apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
-        //先删除，再插入
-        apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
-        apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         log.info("保存api耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         startTime = System.currentTimeMillis();
         String querySql;
@@ -967,7 +961,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                    generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
+                    apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
                     null, null);
         }
         log.info("发布耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
@@ -980,7 +974,13 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         startTime = System.currentTimeMillis();
         List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(apiParamEntityList, ApiParamSaveResult.class);
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
-        publish(userId, new ApiPublishRequest(apiBaseEntity.getId(), ApiPublishStatusEnum.PUBLISHED.getCode()));
+        apiBaseEntity = publish(userId, new ApiPublishRequest(apiBaseEntity.getId(), ApiPublishStatusEnum.PUBLISHED.getCode()));
+        IcreditApiBaseHiEntity apiBaseHiEntity = BeanCopyUtils.copyProperties(apiBaseEntity, new IcreditApiBaseHiEntity());
+        apiBaseHiEntity.setId(null);
+        apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
+        //先删除，再插入
+        apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
+        apiBaseHiService.save(apiBaseHiEntity);
         //只对入参做筛选
         apiParamEntityList = apiParamEntityList.stream()
                 .filter((IcreditApiParamEntity a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
@@ -991,7 +991,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(apiSaveResult);
     }
 
-    public BusinessResult<Boolean> publish(String userId, ApiPublishRequest request) {
+    private IcreditApiBaseEntity publish(String userId, ApiPublishRequest request) {
         long startTime = System.currentTimeMillis();
         apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus());
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getId());
@@ -1024,14 +1024,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                    generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
+                    apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                     registerApiParamInfos, null, null);
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
             saveOrUpdate(apiBaseEntity);
         }
         log.info("发布耗时:{}毫秒", System.currentTimeMillis() - startTime);
-        return BusinessResult.success(true);
+        return apiBaseEntity;
     }
 
 
