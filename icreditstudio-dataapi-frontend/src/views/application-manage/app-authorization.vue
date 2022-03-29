@@ -31,7 +31,7 @@
       </el-form-item>
 
       <el-form-item label="选择API" prop="apiId">
-        <el-cascader
+        <!-- <el-cascader
           ref="cascader"
           clearable
           filterable
@@ -42,7 +42,12 @@
           :props="cascaderProps"
           v-model="authorizeForm.apiId"
           @change="handleCascaderChange"
-        ></el-cascader>
+        ></el-cascader> -->
+        <JTransferTree
+          :left-tree-data="leftTreeData"
+          :right-tree-data="rightTreeData"
+          @transfer-data="transferDataCallback"
+        />
       </el-form-item>
 
       <template v-if="!!authorizeForm.apiId.length">
@@ -103,10 +108,69 @@
 <script>
 import API from '@/api/api'
 import { cloneDeep } from 'lodash'
+import JTransferTree from '@/components/transfer-tree'
 
 export default {
+  components: { JTransferTree },
+
   data() {
     return {
+      leftTreeData: [
+        {
+          label: '一级 1',
+          children: [
+            {
+              label: '二级 1-1',
+              children: [
+                {
+                  label: '三级 1-1-1'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          label: '二级 3',
+          children: [
+            {
+              label: '二级 1-1',
+              children: [
+                {
+                  label: '三级 1-1-1'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          label: '二级 4',
+          children: [
+            {
+              label: '二级 1-1',
+              children: [
+                {
+                  label: '三级 1-1-1'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          label: '二级 2',
+          children: [
+            {
+              label: '二级 1-1',
+              children: [
+                {
+                  label: '三级 1-1-1'
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      rightTreeData: [],
+
       timerId: null,
       oldApiId: [],
       options: {},
@@ -230,6 +294,10 @@ export default {
     handleCascaderChange(value) {
       console.log(value, 'ooo')
       // value.length && (this.oldApiId = value)
+    },
+
+    transferDataCallback(data, targetTree) {
+      console.log(data, targetTree)
     },
 
     // 级联-懒加载
