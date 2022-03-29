@@ -1409,6 +1409,7 @@ public abstract class StringUtils {
 		if (!CollectionUtils.isEmpty(noRequiredSet)){
 			for (String field : noRequiredSet) {
 				tempSql = tempSql.replaceAll(field + " = " + "'null'", "");
+				tempSql = tempSql.replaceAll("and " + field + " = " + "'null'", "");
 			}
 		}
 		if (!tempSql.contains("=")){
