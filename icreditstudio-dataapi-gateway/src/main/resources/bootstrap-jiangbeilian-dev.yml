@@ -69,5 +69,8 @@ logging:
     com.hashtech: debug
 
 host:
-  addr: 192.168.0.201:8108/openapi
+  addr: 192.168.0.125:8108/openapi
+
+kafkaProducer:
+  topic: apiInvoke_dev
 
