@@ -1415,6 +1415,11 @@ public abstract class StringUtils {
 			tempSql = tempSql.replaceAll("where", "");
 			tempSql = tempSql.replaceAll("WHERE", "");
 		}
+		//TODO：暂且先字符串替换，选填参数得做转换
+		tempSql = tempSql.replaceAll("where  and", "where ");
+		tempSql = tempSql.replaceAll("WHERE  and", "WHERE ");
+		tempSql = tempSql.replaceAll("where and", "where ");
+		tempSql = tempSql.replaceAll("WHERE and", "WHERE ");
 		return tempSql;
 	}
 
