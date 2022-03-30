@@ -193,7 +193,7 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
         AppUpdatePageInfoResult updatePageInfoResult = new AppUpdatePageInfoResult();
         BeanUtils.copyProperties(appEntity, updatePageInfoResult);
         if(TokenTypeEnum.CUSTOM.getCode().equals(appEntity.getTokenType())){
-            updatePageInfoResult.setPeriod(String.valueOf(new StringBuilder().append(appEntity.getPeriod()).append("小时")));
+            updatePageInfoResult.setPeriod(appEntity.getPeriod());
         }else {
             updatePageInfoResult.setPeriod(null);
         }

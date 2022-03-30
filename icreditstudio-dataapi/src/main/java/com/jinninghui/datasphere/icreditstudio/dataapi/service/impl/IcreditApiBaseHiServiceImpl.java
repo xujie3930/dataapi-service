@@ -22,6 +22,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMapper, IcreditApiBaseHiEntity> implements IcreditApiBaseHiService {
+
+    private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
 
     @Resource
     private IcreditApiBaseHiMapper apiBaseHiMapper;
@@ -58,6 +61,8 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     private String host;
     @Autowired
     private IcreditGenerateApiService generateApiService;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public IcreditApiBaseHiEntity findByApiBaseId(String apiId) {
@@ -318,6 +323,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                 apiBaseService.updateById(apiBaseEntity);
             }
         }
+        redisTemplate.delete(String.valueOf(new StringBuilder(entity.getPath()).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(entity.getApiVersion())));
     }
 
     @Override
@@ -328,5 +334,10 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         }
         deleteByUserIdAndId(userId, apiHiId);
         return BusinessResult.success(true);
+    }
+
+    @Override
+    public void removeByApiBaseId(String id) {
+        apiBaseHiMapper.removeByApiBaseId(id);
     }
 }

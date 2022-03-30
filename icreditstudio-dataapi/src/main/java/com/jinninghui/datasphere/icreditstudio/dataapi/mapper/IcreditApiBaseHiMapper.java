@@ -32,4 +32,6 @@ public interface IcreditApiBaseHiMapper extends BaseMapper<IcreditApiBaseHiEntit
      * @return
      */
     List<IcreditApiBaseHiEntity> listByApiBaseId(@Param("apiId") String apiId);
+
+    void removeByApiBaseId(@Param("id") String id);
 }

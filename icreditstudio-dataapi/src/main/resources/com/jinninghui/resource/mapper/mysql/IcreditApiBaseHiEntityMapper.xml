@@ -76,4 +76,8 @@
         </if>
         order by api_version desc
     </select>
+
+    <delete id="removeByApiBaseId">
+        delete from icredit_api_base_hi where api_base_id = #{id}
+    </delete>
 </mapper>

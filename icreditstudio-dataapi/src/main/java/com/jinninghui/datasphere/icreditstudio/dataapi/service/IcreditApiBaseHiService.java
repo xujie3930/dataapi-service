@@ -32,4 +32,6 @@ public interface IcreditApiBaseHiService extends IService<IcreditApiBaseHiEntity
     BusinessResult<Boolean> deleteBatch(String userId, String[] apiHiIdsArry);
 
     BusinessResult<Boolean> deleteById(String userId, String apiHiId);
+
+    void removeByApiBaseId(String id);
 }

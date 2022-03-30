@@ -6,12 +6,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.FieldInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiTypeEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequestFiledEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequiredFiledEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ResponseFiledEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
@@ -19,7 +21,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.CreateApiInfoBO;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.RegisterApiParamInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableFieldBO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableNameInfoBO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
@@ -129,6 +130,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     private Wrapper<IcreditApiBaseEntity> queryWrapper(ApiBaseListRequest request) {
         QueryWrapper<IcreditApiBaseEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq(IcreditApiBaseEntity.DEL_FLAG, DelFlagEnum.ENA_BLED.getCode());
         if (StringUtils.isNotBlank(request.getName())){
             wrapper.like(IcreditApiBaseEntity.NAME, request.getName());
         }
@@ -235,16 +237,16 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                     String responseFields = lowerCaseSqlCount.contains(SQL_AS) ? naturalSqlCount.substring(lowerCaseSqlCount.indexOf(SQL_AS) + SQL_AS.length()) : lowerCaseSqlCount.contains(EMPTY_CHAR) ?
                             naturalSqlCount.substring(lowerCaseSqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : lowerCaseSqlCount;
                     saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                            generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+                            apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                             responseFields, registerApiParamInfos, param.getReqHost(), param.getReqPath());
                 }else{
                     saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                            generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+                            apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                             createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
                 }
             }else{
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                        generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+                        apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                         createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
             }
         }
@@ -520,6 +522,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     @Override
     public BusinessResult<List<Map<String, Object>>> getDataSourcesList(DataSourcesListRequest request) {
+        request.setStatus(DatasourceEnableEnum.ENABLE.getCode());
         return dataSourceFeignClient.getDataSourcesList(request);
     }
 
@@ -961,7 +964,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                    generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
+                    apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
                     null, null);
         }
         log.info("发布耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
@@ -974,7 +977,13 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         startTime = System.currentTimeMillis();
         List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(apiParamEntityList, ApiParamSaveResult.class);
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
-        publish(userId, new ApiPublishRequest(apiBaseEntity.getId(), ApiPublishStatusEnum.PUBLISHED.getCode()));
+        apiBaseEntity = publish(userId, new ApiPublishRequest(apiBaseEntity.getId(), ApiPublishStatusEnum.PUBLISHED.getCode()));
+        IcreditApiBaseHiEntity apiBaseHiEntity = BeanCopyUtils.copyProperties(apiBaseEntity, new IcreditApiBaseHiEntity());
+        apiBaseHiEntity.setId(null);
+        apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
+        //先删除，再插入
+        apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
+        apiBaseHiService.save(apiBaseHiEntity);
         //只对入参做筛选
         apiParamEntityList = apiParamEntityList.stream()
                 .filter((IcreditApiParamEntity a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
@@ -985,7 +994,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(apiSaveResult);
     }
 
-    public BusinessResult<Boolean> publish(String userId, ApiPublishRequest request) {
+    private IcreditApiBaseEntity publish(String userId, ApiPublishRequest request) {
         long startTime = System.currentTimeMillis();
         apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus());
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getId());
@@ -1018,14 +1027,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                    generateApiEntity.getModel(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
+                    apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                     registerApiParamInfos, null, null);
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(new Date());
             saveOrUpdate(apiBaseEntity);
         }
         log.info("发布耗时:{}毫秒", System.currentTimeMillis() - startTime);
-        return BusinessResult.success(true);
+        return apiBaseEntity;
     }
 
 
@@ -1048,4 +1057,31 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     public void truthDelById(String id) {
         apiBaseMapper.truthDelById(id);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BusinessResult<Boolean> deleteByPath(String userId, List<String> paths) {
+        if (CollectionUtils.isEmpty(paths)){
+            return BusinessResult.success(true);
+        }
+        for (String path : paths) {
+            IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.findByApiPath(path);
+            if (Objects.isNull(apiBaseEntity)){
+                return BusinessResult.success(true);
+            }
+            if (InterfaceSourceEnum.IN_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000055.getCode());
+            }
+            removeById(apiBaseEntity.getId());
+            apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
+            //删除param参数信息、注册api信息、数据源生成api信息
+            apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            generateApiService.deleteByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            //只有一个版本
+            redisTemplate.delete(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(1)));
+        }
+        return BusinessResult.success(true);
+    }
+
 }

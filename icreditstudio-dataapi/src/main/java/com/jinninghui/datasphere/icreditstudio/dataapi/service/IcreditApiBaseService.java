@@ -58,4 +58,6 @@ public interface IcreditApiBaseService extends IService<IcreditApiBaseEntity> {
     String findPublishedByApiGroupId(String id);
 
     void truthDelById(String id);
+
+    BusinessResult<Boolean> deleteByPath(String userId, List<String> paths);
 }

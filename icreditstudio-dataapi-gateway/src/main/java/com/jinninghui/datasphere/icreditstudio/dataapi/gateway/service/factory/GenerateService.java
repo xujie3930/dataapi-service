@@ -13,6 +13,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.base.BusinessBasePageForm;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class GenerateService implements ApiBaseService {
     public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
         Long dataCount = 0L;
         String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), params);
+        log.info("数据源生成API查询sql：{}", querySql);
         Connection conn = null;
         try {
             //连接数据源，执行SQL
@@ -115,6 +117,10 @@ public class GenerateService implements ApiBaseService {
         apiLogInfo.setCallEndTime(new Date());
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_SUCCESS.getCode());
         apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getCallBeginTime().getTime());
+        //取where条件后面的值,取到limit
+        String requestParam = StringUtils.splitBetween(querySql, "where", "limit");
+        requestParam = requestParam.replaceAll("and ", ",");
+        apiLogInfo.setRequestParam(requestParam);
         return apiLogInfo;
     }
 }
