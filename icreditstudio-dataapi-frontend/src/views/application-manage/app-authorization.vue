@@ -37,7 +37,7 @@
           filterable
           style="width: 500px"
           placeholder="请选择API"
-          :collapse-tags="false"
+          :collapse-tags="true"
           :options="apiOptions"
           :props="cascaderProps"
           v-model="authorizeForm.apiId"
@@ -126,8 +126,8 @@ export default {
       options: {},
       cascaderProps: {
         multiple: true,
-        lazy: true,
-        lazyLoad: this.lazyLoad,
+        // lazy: true,
+        // lazyLoad: this.lazyLoad,
         label: 'name',
         value: 'id'
       },
@@ -486,7 +486,7 @@ export default {
             } = data.authResult ?? {}
 
             // 级联回显
-            this.apiOptions = apiCascadeInfoStrList ?? []
+            this.apiOptions = noApiCascadeInfoStrList ?? []
             this.authorizeForm.apiId = []
             this.oldApiId = []
 
@@ -513,7 +513,7 @@ export default {
         })
         .finally(() => {
           this.loading = false
-          this.fetchBusinessProcessList()
+          // this.fetchBusinessProcessList()
         })
     }
   }
