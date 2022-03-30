@@ -40,7 +40,7 @@ public class IcreditApiLogServiceImpl extends ServiceImpl<IcreditApiLogMapper, I
             request.setCallBeginTime(String.valueOf(new StringBuffer(request.getCallBeginTime()).append(" 00:00:00")));
         }
         if(!StringUtils.isEmpty(request.getCallEndTime())) {
-            request.setCallEndTime(String.valueOf(new StringBuffer(request.getCallEndTime()).append(" 59:59:59")));
+            request.setCallEndTime(String.valueOf(new StringBuffer(request.getCallEndTime()).append(" 23:59:59")));
         }
         request.setPageStartNum((request.getPageNum() - 1) * request.getPageSize());
         Long logCount = apiLogMapper.countLog(request);
