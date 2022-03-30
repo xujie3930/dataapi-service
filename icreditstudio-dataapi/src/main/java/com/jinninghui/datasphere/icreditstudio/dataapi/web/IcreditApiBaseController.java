@@ -104,5 +104,10 @@ public class IcreditApiBaseController {
         return apiBaseService.createAndPublish(userId, param);
     }
 
+    @PostMapping("/deleteByPath")
+    BusinessResult<Boolean> deleteByPath(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody List<String> paths) {
+        return apiBaseService.deleteByPath(userId, paths);
+    }
+
 }
 
