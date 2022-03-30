@@ -15,7 +15,7 @@ public class AppUpdatePageInfoResult {
     private String allowIp;
     private Integer certificationType;
     private Integer isEnable;
-    private String period;
+    private Integer period;
     //0-长期，1-8小时，2-自定义
     private Integer tokenType;
 
