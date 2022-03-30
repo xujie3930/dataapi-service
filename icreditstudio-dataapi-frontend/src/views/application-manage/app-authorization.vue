@@ -31,7 +31,7 @@
       </el-form-item>
 
       <el-form-item label="选择API" prop="apiId">
-        <!-- <el-cascader
+        <el-cascader
           ref="cascader"
           clearable
           filterable
@@ -42,14 +42,14 @@
           :props="cascaderProps"
           v-model="authorizeForm.apiId"
           @change="handleCascaderChange"
-        ></el-cascader> -->
-        <JTransferTree
+        ></el-cascader>
+        <!-- <JTransferTree
           ref="transferTree"
           :props="{ key: 'id', label: 'name' }"
           :left-tree-data="leftTreeData"
           :right-tree-data="rightTreeData"
           @transfer-data="transferDataCallback"
-        />
+        /> -->
       </el-form-item>
 
       <template v-if="!!authorizeForm.apiId.length">
@@ -110,11 +110,11 @@
 <script>
 import API from '@/api/api'
 import { cloneDeep } from 'lodash'
-import JTransferTree from '@/components/transfer-tree'
+// import JTransferTree from '@/components/transfer-tree'
 import { flattern } from '@/utils'
 
 export default {
-  components: { JTransferTree },
+  // components: { JTransferTree },
 
   data() {
     return {
