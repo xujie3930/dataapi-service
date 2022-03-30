@@ -130,6 +130,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     private Wrapper<IcreditApiBaseEntity> queryWrapper(ApiBaseListRequest request) {
         QueryWrapper<IcreditApiBaseEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq(IcreditApiBaseEntity.DEL_FLAG, DelFlagEnum.ENA_BLED.getCode());
         if (StringUtils.isNotBlank(request.getName())){
             wrapper.like(IcreditApiBaseEntity.NAME, request.getName());
         }
@@ -1077,6 +1078,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
             generateApiService.deleteByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
             registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            //只有一个版本
+            redisTemplate.delete(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(1)));
         }
         return BusinessResult.success(true);
     }

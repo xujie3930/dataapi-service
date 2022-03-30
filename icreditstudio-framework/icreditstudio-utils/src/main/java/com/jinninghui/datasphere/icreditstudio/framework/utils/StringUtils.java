@@ -1450,12 +1450,24 @@ public abstract class StringUtils {
 	}
 
 	public static void main(String[] args) {
-		String str = "select * from table_setting WHERE id = ${id}";
+//		String str = "select * from table_setting WHERE id = ${id}";
 //		String s = getSelectCountSql(str);
 //		System.out.println(s);
-		HashMap<String, String> map = new HashMap<>();
-		map.put("id", "1");
-		String s = parseSql(str, map);
+//		HashMap<String, String> map = new HashMap<>();
+//		map.put("id", "1");
+//		String s = parseSql(str, map);
+//		System.out.println(s);
+		String str = "localhost:8108/openapi/v4/PHKskISGXebjVJpQ?NAME=南京金宁汇科技有限公司&token=064bde81b4c840a9ad988a748e7b6a7c";
+		String s = splitBetween(str, "?", " ");
+		s = s.replaceAll("&", ",");
 		System.out.println(s);
 	}
+
+	public static String splitBetween(String querySql, String start, String end) {
+		if (isBlank(end)){
+			return querySql.substring(querySql.indexOf(start)+start.length());
+		}
+		return querySql.substring(querySql.indexOf(start)+start.length(),querySql.indexOf(end));
+	}
+
 }

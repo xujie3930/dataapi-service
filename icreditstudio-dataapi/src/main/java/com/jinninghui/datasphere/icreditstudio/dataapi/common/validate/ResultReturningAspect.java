@@ -40,24 +40,12 @@ public class ResultReturningAspect {
             returnValue = ((BusinessPageResult<?>) returnValue).getList();
         }
         Set<String> userIdSet = new HashSet<>();
-        if (returnValue instanceof Collection){
-            for (Object obj : ((Collection<?>) returnValue)) {
-                getUserIds(obj, userIdSet);
-            }
-        }else {
-            getUserIds(returnValue, userIdSet);
-        }
+        getUserIds(returnValue, userIdSet);
         Map<String, String> map = oauthApiService.getUserNameBatch(new ArrayList<>(userIdSet));
         if (CollectionUtils.isEmpty(map)){
             return;
         }
-        if (returnValue instanceof Collection){
-            for (Object obj : ((Collection<?>) returnValue)) {
-                process(obj, map);
-            }
-        }else {
-            process(returnValue, map);
-        }
+        process(returnValue, map);
         log.info("后置处理耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
     }
 
