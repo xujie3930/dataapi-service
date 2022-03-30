@@ -929,6 +929,13 @@ export default {
         .then(({ success, data }) => {
           if (success && data) {
             this[key] = data
+
+            if (key === 'dataNameOptions') {
+              const ids = data.map(item => item.id) ?? []
+              const { datasourceId } = this.form.apiGenerateSaveRequest
+              !ids.includes(datasourceId) &&
+                (this.form.apiGenerateSaveRequest.datasourceId = undefined)
+            }
           }
         })
         .finally(() => {
