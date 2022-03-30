@@ -514,6 +514,8 @@ import {
   tableResponseConfiguration
 } from '@/configuration/table'
 
+import { cloneDeep } from 'lodash'
+
 // API模式
 const API_MODE_MAPPING = { TABLE: 0, SQL: 1, CHAIN: 2 }
 
@@ -759,6 +761,24 @@ export default {
       }
       this.$refs.form.validate(valid => {
         if (valid) {
+          console.log(this.form, 'ddff')
+          const {
+            registerRequestParamSaveRequestList: req,
+            registerResponseParamSaveRequestList: res
+          } = this.form
+
+          cloneDeep(req).forEach(
+            ({ fieldName }, index) =>
+              fieldName === '' &&
+              this.form.registerRequestParamSaveRequestList.splice(index, 1)
+          )
+
+          cloneDeep(res).forEach(
+            ({ fieldName }, index) =>
+              fieldName === '' &&
+              this.form.registerResponseParamSaveRequestList.splice(index, 1)
+          )
+
           const { opType } = this.options
           const { apiGroupId, ...restForm } = this.form
           const params = {
