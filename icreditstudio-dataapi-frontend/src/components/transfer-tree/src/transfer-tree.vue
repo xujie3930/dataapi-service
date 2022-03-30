@@ -15,21 +15,22 @@
         class="btn"
         size="mini"
         type="primary"
-        icon="el-icon-caret-left"
-        :disabled="!rightSelectedData.length"
-        @click="transferTreeData(leftSelectedData, 'left')"
+        icon="el-icon-caret-right"
+        :disabled="!leftSelectedData.length"
+        @click="transferTreeData(leftSelectedData, 'right')"
       />
       <el-button
         circle
         class="btn"
         size="mini"
         type="primary"
-        icon="el-icon-caret-right"
-        :disabled="!leftSelectedData.length"
-        @click="transferTreeData(rightSelectedData, 'right')"
+        icon="el-icon-caret-left"
+        :disabled="!rightSelectedData.length"
+        @click="transferTreeData(rightSelectedData, 'left')"
       />
     </div>
     <TransferTreePanel
+      ref="rightTreePanel"
       :data="rightTreeData"
       v-bind="$props"
       @select-change="handleRightSelectChange"
@@ -78,6 +79,10 @@ export default {
       type: Boolean,
       default: true
     },
+    loading: {
+      type: Boolean,
+      default: false
+    },
     props: {
       type: Object,
       default() {
@@ -93,23 +98,39 @@ export default {
   data() {
     return {
       leftSelectedData: [],
-      rightSelectedData: []
+      rightSelectedData: [],
+      checkedData: {}
     }
   },
 
   methods: {
-    handleLeftSelectChange(data) {
+    handleLeftSelectChange(data, checkedData) {
+      console.log(data, 'data')
       this.leftSelectedData = data
+      this.checkedData = checkedData
       this.$emit('left-select-change', data)
     },
 
-    handleRightSelectChange(data) {
+    handleRightSelectChange(data, checkedKeys) {
       this.rightSelectedData = data
+      this.checkedKeys = checkedKeys
       this.$emit('right-select-change', data)
     },
 
     transferTreeData(data, to) {
-      this.$emit('transfer-data', data, to)
+      this.$emit('transfer-data', data, to, this.checkedData)
+    },
+
+    removeNode(data) {
+      this.$refs.rightTreePanel.removeNode(data)
+    },
+
+    setCheckedKeys(keys, leafOnly) {
+      this.$refs.rightTreePanel.setCheckedKeys(keys, leafOnly)
+    },
+
+    setCheckedNodesCount() {
+      this.$refs.rightTreePanel.setCheckedNodesCount()
     }
   }
 }

@@ -15,12 +15,12 @@
     @on-confirm="addApiAuthorization"
   >
     <el-form
+      v-loading="loading"
       ref="authorizeForm"
       class="icredit-form"
       label-width="120px"
       :model="authorizeForm"
       :rules="rules"
-      v-loading="loading"
     >
       <el-form-item>
         <div slot="label" class="icredit-form--title">选择授权应用</div>
@@ -44,6 +44,8 @@
           @change="handleCascaderChange"
         ></el-cascader> -->
         <JTransferTree
+          ref="transferTree"
+          :props="{ key: 'id', label: 'name' }"
           :left-tree-data="leftTreeData"
           :right-tree-data="rightTreeData"
           @transfer-data="transferDataCallback"
@@ -109,66 +111,14 @@
 import API from '@/api/api'
 import { cloneDeep } from 'lodash'
 import JTransferTree from '@/components/transfer-tree'
+import { flattern } from '@/utils'
 
 export default {
   components: { JTransferTree },
 
   data() {
     return {
-      leftTreeData: [
-        {
-          label: '一级 1',
-          children: [
-            {
-              label: '二级 1-1',
-              children: [
-                {
-                  label: '三级 1-1-1'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: '二级 3',
-          children: [
-            {
-              label: '二级 1-1',
-              children: [
-                {
-                  label: '三级 1-1-1'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: '二级 4',
-          children: [
-            {
-              label: '二级 1-1',
-              children: [
-                {
-                  label: '三级 1-1-1'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: '二级 2',
-          children: [
-            {
-              label: '二级 1-1',
-              children: [
-                {
-                  label: '三级 1-1-1'
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      leftTreeData: [],
       rightTreeData: [],
 
       timerId: null,
@@ -235,6 +185,7 @@ export default {
       this.options = options
       this.authorizeForm.name = row?.name
       this.authorizeForm.appId = row?.id
+      this.loading = true
       this.fetchApiAuthDetail(row?.id)
       this.isShowDialog = true
       this.$nextTick(() => {
@@ -253,6 +204,8 @@ export default {
     },
 
     reset() {
+      this.leftTreeData = []
+      this.rightTreeData = []
       this.isShowDialog = false
       this.$refs.authorizeForm.resetFields()
     },
@@ -297,7 +250,142 @@ export default {
     },
 
     transferDataCallback(data, targetTree) {
-      console.log(data, targetTree)
+      if (targetTree === 'right') {
+        const firstLevelNodeIds = [
+          ...new Set(data.map(({ grandParentId: gid }) => gid))
+        ]
+        const secondLevelNodeIds = [...new Set(data.map(item => item.parentId))]
+        const threeLevelNodeIds = [...new Set(data.map(item => item.id))]
+
+        const getIds = level =>
+          flattern(this.rightTreeData)
+            .filter(item => item.level === level)
+            .map(item => item.id)
+        const selectedFirstLevelNodeIds = getIds(1)
+        const selectedSecondLevelNodeIds = getIds(2)
+        const selectedThreeLevelNodeIds = getIds(3)
+
+        const firstShowNodeIds = [
+          ...new Set([...firstLevelNodeIds, selectedFirstLevelNodeIds])
+        ]
+
+        //更新右侧树数据 (want to die ~_~)
+        firstShowNodeIds.forEach(id => {
+          const node = this.leftTreeData.find(item => item.id === id)
+          if (selectedFirstLevelNodeIds.includes(id)) {
+            const { children, ...rest } = node
+            const idx = this.rightTreeData.findIndex(item => item.id === id)
+            const secondNodeShowIds = [
+              ...new Set([...selectedSecondLevelNodeIds, ...secondLevelNodeIds])
+            ]
+            const threeNodeShowIds = [
+              ...new Set([...selectedThreeLevelNodeIds, ...threeLevelNodeIds])
+            ]
+
+            const child = children
+              .filter(item => secondNodeShowIds.includes(item.id))
+              .map(item => {
+                const { children: secondChild, ...restData } = item
+
+                const threeChild = secondChild
+                  .filter(item => threeNodeShowIds.includes(item.id))
+                  .map(item => ({ ...item, disabled: false }))
+
+                return {
+                  ...restData,
+                  disabled: false,
+                  children: threeChild
+                }
+              })
+
+            this.rightTreeData.splice(idx, 1)
+            this.rightTreeData.splice(idx, 1, {
+              ...rest,
+              disabled: false,
+              children: child
+            })
+          } else if (node) {
+            const { children, ...rest } = node
+            const child = children
+              .filter(item => secondLevelNodeIds.includes(item.id))
+              .map(item => {
+                const { children: c, ...restData } = item
+                return {
+                  ...restData,
+                  children: c.filter(item =>
+                    threeLevelNodeIds.includes(item.id)
+                  )
+                }
+              })
+            this.rightTreeData.push({ ...rest, children: child })
+          }
+        })
+
+        // 禁用已从左侧树节点添加到右侧树的节点
+        this.setLeftTreeNodeStatus()
+      }
+
+      if (targetTree === 'left') {
+        data?.forEach(({ grandParentId, id, parentId }) => {
+          const gidx = this.rightTreeData.findIndex(
+            item => item.id === grandParentId
+          )
+          if (gidx < 0) return
+          const { children: gChild } = this.rightTreeData[gidx] ?? {}
+          const pidx = gChild.findIndex(item => item.id === parentId)
+          const { children: child } = gChild.find(item => item.id === parentId)
+          if (pidx < 0) return
+          const idx = child.findIndex(item => item.id === id)
+          if (idx < 0) return
+          this.rightTreeData[gidx].children[pidx].children.splice(idx, 1)
+        })
+
+        this.removeRightTreeNode()
+
+        this.setLeftTreeNodeStatus()
+      }
+    },
+
+    // 设置左侧树节点禁用状态
+    setLeftTreeNodeStatus() {
+      const selectedIds = flattern(cloneDeep(this.rightTreeData)).map(
+        item => item.id
+      )
+      const getChildrenData = ({ children, id, ...restData }) => {
+        const baseParams = {
+          id,
+          ...restData,
+          disabled: selectedIds.includes(id)
+        }
+
+        return children
+          ? {
+              ...baseParams,
+              children: children.map(item => getChildrenData(item))
+            }
+          : baseParams
+      }
+
+      // 左侧树禁用已经选的节点
+      this.leftTreeData = cloneDeep(this.leftTreeData).map(item =>
+        getChildrenData(item)
+      )
+    },
+
+    // 移除右侧节点
+    removeRightTreeNode() {
+      cloneDeep(this.rightTreeData).forEach((item, index) => {
+        if (!item?.children || !item?.children.length) {
+          this.rightTreeData.splice(index, 1)
+        } else {
+          item.children.forEach((list, listIndex) => {
+            if (!list.children || !list.children.length) {
+              this.rightTreeData[index]?.children.splice(listIndex, 1)
+              if (!this.rightTreeData[index]?.length) this.removeRightTreeNode()
+            }
+          })
+        }
+      })
     },
 
     // 级联-懒加载
@@ -387,21 +475,23 @@ export default {
       API.getAppAuthDetail({ appId })
         .then(({ success, data }) => {
           if (success && data) {
+            const { noApiCascadeInfoStrList, apiCascadeInfoStrList } = data
+
             const {
-              apiCascadeInfoStrList,
-              authResult: {
-                allowCall,
-                authEffectiveTime,
-                callCountType,
-                periodBegin,
-                periodEnd
-              }
-            } = data
+              allowCall,
+              authEffectiveTime,
+              callCountType,
+              periodBegin,
+              periodEnd
+            } = data.authResult ?? {}
 
             // 级联回显
-            this.apiOptions = apiCascadeInfoStrList
+            this.apiOptions = apiCascadeInfoStrList ?? []
             this.authorizeForm.apiId = []
             this.oldApiId = []
+
+            this.leftTreeData = []
+            this.leftTreeData = noApiCascadeInfoStrList
 
             apiCascadeInfoStrList?.forEach(({ id: pid, children: groups }) => {
               groups?.forEach(({ id: gid, children: apis }) => {
@@ -422,6 +512,7 @@ export default {
           }
         })
         .finally(() => {
+          this.loading = false
           this.fetchBusinessProcessList()
         })
     }

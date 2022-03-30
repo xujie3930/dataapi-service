@@ -45,6 +45,8 @@
 </template>
 
 <script>
+import { flattern } from '@/utils'
+
 export default {
   props: {
     placeholder: {
@@ -63,6 +65,7 @@ export default {
     return {
       checked: [],
       checkedNodes: [],
+      checkedData: [],
       allChecked: false,
       query: '',
       inputHover: false,
@@ -90,7 +93,7 @@ export default {
     },
 
     totalNodesCount() {
-      return this.flattern(this.data).length ?? 0
+      return flattern(this.data).length ?? 0
     },
 
     hasNoMatch() {
@@ -125,30 +128,30 @@ export default {
       immediate: true,
       deep: true,
       handler(nVal) {
-        this.$emit('select-change', nVal)
+        this.$emit('select-change', nVal, this.checkedKeys)
       }
+    },
+
+    data: {
+      deep: true,
+      handler() {
+        this.setCheckedNodesCount()
+      }
+    },
+
+    totalNodesCount(nVal) {
+      if (!nVal) {
+        this.checkedNodesCount = 0
+        this.allChecked = false
+      }
+    },
+
+    checkedNodesCount(nVal) {
+      if (nVal !== this.totalNodesCount) this.allChecked = false
     }
   },
 
   methods: {
-    flattern(arr) {
-      return arr.reduce((result, item) => {
-        if (item.children && Array.isArray(item.children)) {
-          return result.concat(this.flattern(item.children)).concat(item)
-        }
-        return result.concat(item)
-      }, [])
-    },
-
-    updateAllChecked() {
-      const checkableDataKeys = this.checkableData.map(
-        item => item[this.keyProp]
-      )
-      this.allChecked =
-        checkableDataKeys.length > 0 &&
-        checkableDataKeys.every(item => this.checked.indexOf(item) > -1)
-    },
-
     handleAllCheckedChange(value) {
       this.checkedNodes = value ? this.data : []
       this.checkedNodesCount = value ? this.totalNodesCount : 0
@@ -164,17 +167,32 @@ export default {
     },
 
     treeNodeCheck(data, checkedData) {
-      const { checkedKeys, checkedNodes } = checkedData
+      console.log(data, checkedData, 'checkedData')
+      const { checkedKeys } = checkedData
       this.allChecked = checkedKeys.length === this.totalNodesCount
       this.checkedNodesCount = this.$refs.tree.getCheckedKeys().length ?? 0
-      this.checkedNodes = checkedNodes
-      this.$emit('check', data, checkedData)
+      const selectedNodes = this.$refs.tree.getCheckedNodes(true, false)
+      this.checkedNodes = selectedNodes
+      this.checkedKeys = checkedData
+      this.$emit('check', data, selectedNodes)
     },
 
     filterNode(value, data) {
       this.$emit('filter-node', value, data)
       if (!value) return true
-      return data.label.indexOf(value) !== -1
+      return data[this.labelProp].indexOf(value) !== -1
+    },
+
+    removeNode(data) {
+      this.$refs.tree.remove(data)
+    },
+
+    setCheckedNodesCount() {
+      this.checkedNodesCount = this.$refs?.tree?.getCheckedKeys().length ?? 0
+    },
+
+    setCheckedKeys(keys, leafOnly) {
+      this.$refs.tree.setCheckedKeys(keys, leafOnly)
     }
   }
 }
@@ -203,7 +221,7 @@ export default {
     padding-top: 0;
 
     .tree {
-      max-height: calc(100% - 30px);
+      height: 280px;
       overflow-x: hidden;
       overflow-y: auto;
     }
