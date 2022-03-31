@@ -69,7 +69,7 @@ public class RegisterService implements ApiBaseService {
         }else {
             jsonObject = JSON.parseObject(response);
         }
-        ApiLogInfo successLog = generateSuccessLog(apiLogInfo, requestHttpPre + requestParamStr);
+        ApiLogInfo successLog = generateSuccessLog(apiLogInfo, requestUrl);
         kafkaProducer.send(successLog);
         return BusinessResult.success(jsonArray == null? jsonObject : jsonArray);
     }
