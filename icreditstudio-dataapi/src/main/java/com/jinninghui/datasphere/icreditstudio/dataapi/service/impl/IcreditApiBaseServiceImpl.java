@@ -217,10 +217,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             IcreditRegisterApiEntity registerApiEntity = new IcreditRegisterApiEntity();
             registerApiEntity.setHost(param.getReqHost());
             registerApiEntity.setPath(param.getReqPath());
-            registerApiEntity.setId(param.getId());
             registerApiEntity.setApiVersion(param.getApiVersion());
             registerApiEntity.setApiBaseId(apiBaseEntity.getId());
-            registerApiService.saveOrUpdate(registerApiEntity);
+            registerApiService.save(registerApiEntity);
         }
 
         if(null != createApiInfoBO && !CollectionUtils.isEmpty(createApiInfoBO.getApiParamEntityList())) {
