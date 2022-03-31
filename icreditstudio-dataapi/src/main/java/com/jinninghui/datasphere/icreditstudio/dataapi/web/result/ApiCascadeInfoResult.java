@@ -13,5 +13,6 @@ public class ApiCascadeInfoResult {
     private String name;
     private List<ApiGroupIdAAndNameResult> children;
     private Boolean leaf;
+    private Integer level;
 
 }
