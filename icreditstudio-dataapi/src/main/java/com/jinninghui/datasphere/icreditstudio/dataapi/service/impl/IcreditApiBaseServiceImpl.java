@@ -1067,7 +1067,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         for (String path : paths) {
             IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.findByApiPath(path);
             if (Objects.isNull(apiBaseEntity)){
-                return BusinessResult.success(true);
+                continue;
             }
             if (InterfaceSourceEnum.IN_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000055.getCode());

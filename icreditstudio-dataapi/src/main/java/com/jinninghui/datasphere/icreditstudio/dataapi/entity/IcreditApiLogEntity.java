@@ -53,10 +53,10 @@ public class IcreditApiLogEntity extends BaseEntity implements Serializable {
 
     private String responseParam;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "CST")
     private Date callBeginTime;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "CST")
     private Date callEndTime;
 
     private Long runTime;

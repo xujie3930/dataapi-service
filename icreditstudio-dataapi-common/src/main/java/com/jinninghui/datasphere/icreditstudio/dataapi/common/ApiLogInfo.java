@@ -2,6 +2,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.common;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.htrace.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -57,9 +58,11 @@ public class ApiLogInfo implements Serializable {
     private String responseParam;
 
     //可以获取
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "CST")
     private Date callBeginTime;
 
     //可以获取
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "CST")
     private Date callEndTime;
 
     //可以获取
