@@ -53,9 +53,10 @@
 
     <select id="findApiInfoByApiIds" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO">
         select iwf.name as workFlowName,iag.name as apiGroupName,iab.name as apiName,iwf.id as workFlowId,iag.id as apiGroupId,iab.id as apiId
-        from icredit_work_flow iwf right join icredit_api_group iag on iwf.id = iag.work_id
-        right join icredit_api_base iab on iab.api_group_id = iag.id
-        where iab.del_flag = 0
+        from icredit_work_flow iwf,icredit_api_group iag,icredit_api_base iab
+        where iwf.id = iag.work_id
+        and iab.api_group_id = iag.id
+        and iab.del_flag = 0
         <if test="list != null">
             and iab.id in
             <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
