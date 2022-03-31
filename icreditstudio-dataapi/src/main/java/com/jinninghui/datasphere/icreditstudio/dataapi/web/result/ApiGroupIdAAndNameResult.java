@@ -13,5 +13,7 @@ public class ApiGroupIdAAndNameResult {
     private String name;
     private List<ApiIdAAndNameResult> children;
     private Boolean leaf;
+    private Integer level;
+    private String parentId;
 
 }

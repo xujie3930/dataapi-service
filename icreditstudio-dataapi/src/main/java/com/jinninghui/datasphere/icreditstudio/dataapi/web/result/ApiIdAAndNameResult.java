@@ -10,5 +10,8 @@ public class ApiIdAAndNameResult {
     private String id;
     private String name;
     private Boolean leaf;
+    private Integer level;
+    private String parentId;
+    private String grandParentId;
 
 }

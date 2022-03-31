@@ -9,6 +9,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthEffectiveTimeEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthInfoTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthConfigService;
@@ -113,32 +114,60 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     public BusinessResult<AuthInfoResult> authInfo(AuthInfoRequest request) {
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
         List<IcreditAuthEntity> authEntityList = authService.findByAppId(request.getAppId());
-        if(CollectionUtils.isEmpty(authEntityList)){
-            return BusinessResult.success(null);
-        }
-        List<String> apiIds = new ArrayList<>(authEntityList.size());
         AuthInfoResult authInfoResult = new AuthInfoResult();
+        List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null);//所有业务流程、api分组、api
+        if(CollectionUtils.isEmpty(authEntityList)){//新增授权
+            List<ApiCascadeInfoResult> notSelectedApiCascadeInfoList = handleApiInfo(allApiInfoList);
+            authInfoResult.setNoApiCascadeInfoStrList(notSelectedApiCascadeInfoList);
+            authInfoResult.setInfoType(AuthInfoTypeEnum.ADD.getCode());
+            return BusinessResult.success(authInfoResult);
+        }
+
+        //编辑授权
+        List<String> apiIds = new ArrayList<>(authEntityList.size());
         authInfoResult.setAppName(appEntity.getName());
         authInfoResult.setAppId(appEntity.getId());
         for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
             apiIds.add(icreditAuthEntity.getApiId());
         }
-        List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);
+        List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);//已授权的业务流程、api分组、api
+
+        //移除已选择的api
+        List<ApiInfoDTO> allNoSelectedApiInfoList = new ArrayList();
+        for (ApiInfoDTO apiInfoDTO : allApiInfoList) {
+            for (ApiInfoDTO infoDTO : apiInfoList) {
+                if(!infoDTO.equals(apiInfoDTO)){
+                    allNoSelectedApiInfoList.add(apiInfoDTO);
+                }
+            }
+        }
+
+        List<ApiCascadeInfoResult> noApiCascadeInfoList = handleApiInfo(allNoSelectedApiInfoList);
+        List<ApiCascadeInfoResult> apiCascadeInfoList = handleApiInfo(apiInfoList);
+        authInfoResult.setApiCascadeInfoStrList(apiCascadeInfoList);
+        authInfoResult.setNoApiCascadeInfoStrList(noApiCascadeInfoList);
+
+        AuthResult authResult = appService.generateAuthResultInfo(authEntityList.get(0).getAuthConfigId(), appEntity.getTokenType());
+        authInfoResult.setAuthResult(authResult);
+        authInfoResult.setInfoType(AuthInfoTypeEnum.UPDATE.getCode());
+        return BusinessResult.success(authInfoResult);
+    }
+
+    private List<ApiCascadeInfoResult> handleApiInfo(List<ApiInfoDTO> apiInfoList){
         List<ApiCascadeInfoResult> apiCascadeInfoList = new ArrayList<>();
-        String initWorkFlowId = apiInfoList.get(0).getWorkFlowId();
-        apiCascadeInfoList.add(new ApiCascadeInfoResult(initWorkFlowId, apiInfoList.get(0).getWorkFlowName(), null, false));
+        List<String> workFlowIdList = new ArrayList<>();
         for (ApiInfoDTO apiInfo : apiInfoList) {//获取业务流程
-            if(!initWorkFlowId.equals(apiInfo.getWorkFlowId())){
-                apiCascadeInfoList.add(new ApiCascadeInfoResult(apiInfo.getWorkFlowId(), apiInfo.getWorkFlowName(), null, false));
-                initWorkFlowId = apiInfo.getWorkFlowId();
+            if(!workFlowIdList.contains(apiInfo.getWorkFlowId())){
+                apiCascadeInfoList.add(new ApiCascadeInfoResult(apiInfo.getWorkFlowId(), apiInfo.getWorkFlowName(), null, false, 1));
+                workFlowIdList.add(apiInfo.getWorkFlowId());
             }
         }
         for (ApiCascadeInfoResult apiCascadeInfoResult : apiCascadeInfoList) {//获取api分组
             List<ApiGroupIdAAndNameResult> apiGroupIdAAndNameResultList = new ArrayList<>();
             List<String> apiGroupIdList = new ArrayList<>();
             for (ApiInfoDTO apiInfo : apiInfoList) {
-                if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && !apiGroupIdList.contains(apiInfo.getApiGroupId())){
-                    apiGroupIdAAndNameResultList.add(new ApiGroupIdAAndNameResult(apiInfo.getApiGroupId(), apiInfo.getApiGroupName(), null, false));
+                if(!apiGroupIdList.contains(apiInfo.getApiGroupId()) && apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId())){
+                    apiGroupIdAAndNameResultList.add(new ApiGroupIdAAndNameResult(apiInfo.getApiGroupId(), apiInfo.getApiGroupName(), null, false, 2, apiInfo.getWorkFlowId()));
                     apiGroupIdList.add(apiInfo.getApiGroupId());
                 }
             }
@@ -149,18 +178,15 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                 List<ApiIdAAndNameResult> apiIdAAndNameResultList = new ArrayList<>();
                 List<String> apiIdList = new ArrayList<>();
                 for (ApiInfoDTO apiInfo : apiInfoList) {
-                    if(apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && apiGroup.getId().equals(apiInfo.getApiGroupId()) && !apiIdList.contains(apiInfo.getApiId())){
-                        apiIdAAndNameResultList.add(new ApiIdAAndNameResult(apiInfo.getApiId(), apiInfo.getApiName(), true));
+                    if(!apiIdList.contains(apiInfo.getApiId()) && apiCascadeInfoResult.getId().equals(apiInfo.getWorkFlowId()) && apiGroup.getId().equals(apiInfo.getApiGroupId())){
+                        apiIdAAndNameResultList.add(new ApiIdAAndNameResult(apiInfo.getApiId(), apiInfo.getApiName(), true, 3, apiInfo.getApiGroupId(), apiInfo.getWorkFlowId()));
                         apiIdList.add(apiInfo.getApiId());
                     }
                 }
                 apiGroup.setChildren(apiIdAAndNameResultList);
             }
         }
-        authInfoResult.setApiCascadeInfoStrList(apiCascadeInfoList);
-
-        AuthResult authResult = appService.generateAuthResultInfo(authEntityList.get(0).getAuthConfigId(), appEntity.getTokenType());
-        authInfoResult.setAuthResult(authResult);
-        return BusinessResult.success(authInfoResult);
+        return apiCascadeInfoList;
     }
+
 }

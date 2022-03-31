@@ -234,10 +234,11 @@ export default {
                     message: '授权成功！',
                     duration: 1500
                   })
+                  this.$refs.baseDialog.setButtonLoading(false)
                   this.close()
                 }
               })
-              .finally(() => {
+              .catch(() => {
                 this.$refs.baseDialog.setButtonLoading(false)
               })
       })
