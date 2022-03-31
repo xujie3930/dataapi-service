@@ -53,11 +53,9 @@ public class KafkaConsumer {
                     if (!CallStatusEnum.CALL_ON.getCode().equals(logInfo.getCallStatus())){
                         IcreditApiLogEntity logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
                         String logId = logApiLogEntity.getId();
-                        Date createTime = logApiLogEntity.getCreateTime();
                         String createBy = logApiLogEntity.getCreateBy();
                         BeanUtils.copyProperties(logInfo, logApiLogEntity);
                         logApiLogEntity.setId(logId);
-                        logApiLogEntity.setCreateTime(createTime);
                         logApiLogEntity.setCreateBy(createBy);
                         apiLogMapper.updateById(logApiLogEntity);
                     }
