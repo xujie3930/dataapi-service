@@ -279,8 +279,12 @@ export const objectConvertToArray = sourceObj => {
   return targetArray
 }
 
-export const flatten = arr => {
-  return [].concat(
-    ...arr.map(item => [].concat(item, ...flatten(item.children)))
-  )
+// 扁平化
+export const flattern = arr => {
+  return arr.reduce((result, item) => {
+    if (item.children && Array.isArray(item.children)) {
+      return result.concat(flattern(item.children)).concat(item)
+    }
+    return result.concat(item)
+  }, [])
 }
