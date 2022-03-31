@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseHiEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.ApiHistoryListRequest;
@@ -34,4 +35,8 @@ public interface IcreditApiBaseHiMapper extends BaseMapper<IcreditApiBaseHiEntit
     List<IcreditApiBaseHiEntity> listByApiBaseId(@Param("apiId") String apiId);
 
     void removeByApiBaseId(@Param("id") String id);
+
+    List<IcreditApiBaseHiEntity> findWaitPublishedByApiId(@Param("apiId") String apiId);
+
+    List<IcreditApiBaseHiEntity> findByApiBaseIdAndName(@Param("apiId") String apiId, @Param("name") String name);
 }

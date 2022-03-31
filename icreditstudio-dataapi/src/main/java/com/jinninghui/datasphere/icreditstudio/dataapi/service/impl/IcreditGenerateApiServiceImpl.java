@@ -1,12 +1,14 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.DatasourceApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditGenerateApiMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditGenerateApiService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.LinkedList;
 
 /**
  * <p>
@@ -35,5 +37,10 @@ public class IcreditGenerateApiServiceImpl extends ServiceImpl<IcreditGenerateAp
     @Override
     public void deleteByApiIdAndVersion(String id, Integer apiVersion) {
         generateApiMapper.deleteByApiIdAndVersion(id, apiVersion);
+    }
+
+    @Override
+    public LinkedList<DatasourceApiDTO> findWaitPublishedByApiId(String apiBaseId) {
+        return generateApiMapper.findWaitPublishedByApiId(apiBaseId);
     }
 }

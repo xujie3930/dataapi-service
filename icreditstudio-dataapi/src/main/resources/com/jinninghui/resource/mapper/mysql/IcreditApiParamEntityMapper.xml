@@ -21,4 +21,10 @@
             and api_version = #{apiVersion}
         </if>
     </delete>
+
+    <select id="findWaitPublishedByApiId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiParamInfoDTO">
+        select ap.api_version apiVersion,concat_ws(',',ap.field_name,ap.field_type,ap.`required`,ap.is_request,ap.is_response,ap.default_value,ap.`desc`) apiParamStr
+        from icredit_api_param ap
+        where ap.del_flag = 0 and ap.api_base_id = #{apiId}
+    </select>
 </mapper>

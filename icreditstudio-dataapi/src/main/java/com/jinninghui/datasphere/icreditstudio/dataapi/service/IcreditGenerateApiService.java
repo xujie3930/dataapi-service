@@ -1,7 +1,10 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.DatasourceApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
+
+import java.util.LinkedList;
 
 /**
  * <p>
@@ -18,4 +21,6 @@ public interface IcreditGenerateApiService extends IService<IcreditGenerateApiEn
     void removeByApiIdAndApiVersion(String id, Integer apiVersion);
 
     void deleteByApiIdAndVersion(String id, Integer apiVersion);
+
+    LinkedList<DatasourceApiDTO> findWaitPublishedByApiId(String apiBaseId);
 }

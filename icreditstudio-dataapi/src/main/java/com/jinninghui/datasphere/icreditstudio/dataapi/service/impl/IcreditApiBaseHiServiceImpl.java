@@ -3,6 +3,9 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiParamInfoDTO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.DatasourceApiDTO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.RegisterApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseHiMapper;
@@ -196,6 +199,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     @Transactional
     public BusinessResult<ApiSaveResult> updateApi(String userId, DatasourceApiSaveParam param) {
         StringLegalUtils.checkId(param.getApiHiId());
+        checkApiName(new CheckApiNameRequest(param.getApiHiId(), param.getName()));
         IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiMapper.selectById(param.getApiHiId());
         IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(apiBaseHiEntity.getApiBaseId());
         //待发布的编辑，版本号不变
@@ -249,6 +253,13 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             }
             return BusinessResult.success(apiSaveResult);
         }else {
+            //根据apiId查询待发布状态的api，和当前传参作比较，有相同的则不做保存，否则版本号+1保存
+            if(checkHaveSameApi(apiBaseHiEntity.getApiBaseId(), param)){//true--表示已有相同的待发布的api，false--表示没有
+                ApiSaveResult apiSaveResult = new ApiSaveResult();
+                BeanUtils.copyProperties(param, apiSaveResult);
+                return BusinessResult.success(apiSaveResult);
+            }
+
             //未发布、已发布的编辑，版本号 为最新版本号+1
             param.setApiVersion(apiBaseEntity.getApiVersion() + 1);
 
@@ -276,6 +287,125 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             apiSaveResult.setApiHiId(newApiBaseHiEntity.getId());
             return BusinessResult.success(apiSaveResult);
         }
+    }
+
+    private void checkApiName(CheckApiNameRequest request) {
+        if (!request.getName().matches("[a-zA-Z0-9\u4e00-\u9fa5_]{2,50}")) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000002.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000002.getMessage());
+        }
+        IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiMapper.selectById(request.getId());
+        List<IcreditApiBaseHiEntity> apiBaseEntityList = apiBaseHiMapper.findByApiBaseIdAndName(apiBaseHiEntity.getApiBaseId(), request.getName());
+        if(!CollectionUtils.isEmpty(apiBaseEntityList)){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000003.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000003.getMessage());
+        }
+    }
+
+    private boolean checkHaveSameApi(String apiBaseId, DatasourceApiSaveParam param) {
+        LinkedList<ApiParamInfoDTO> apiInfoStrList = null;
+        String apiInfoStr = "";
+        if(ApiTypeEnum.API_REGISTER.getCode().equals(param.getType())){//注册api
+            apiInfoStrList = apiParamService.findWaitPublishedByApiId(apiBaseId);
+            LinkedList<RegisterApiDTO> registerApiDTOS = registerApiService.findWaitPublishedByApiId(apiBaseId);
+            LinkedList<String> registerApiStrList = generateRegisterApi(registerApiDTOS, apiInfoStrList);
+            apiInfoStr = String.valueOf(new StringBuilder(param.getName()).append(param.getDesc()).append(param.getReqHost())
+                    .append(param.getReqPath()).append(generateForRegisterApi(param.getRegisterRequestParamSaveRequestList(), param.getRegisterResponseParamSaveRequestList())));
+            for (String registerApiStr : registerApiStrList) {
+                if(apiInfoStr.equals(registerApiStr)){
+                    return true;
+                }
+            }
+        }else{//数据源api
+            LinkedList<DatasourceApiDTO> datasourceApiDTOS = generateApiService.findWaitPublishedByApiId(apiBaseId);
+            if(ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())){//单表模式
+                apiInfoStrList = apiParamService.findWaitPublishedByApiId(apiBaseId);
+                LinkedList<String> singleTableApiStrList = generateSingleTableApi(datasourceApiDTOS, apiInfoStrList);
+                apiInfoStr = String.valueOf(new StringBuilder(param.getName()).append(param.getDesc()).append(param.getApiGenerateSaveRequest().getDatasourceId())
+                        .append(param.getApiGenerateSaveRequest().getTableName()).append(generateForSingleTableApi(param.getApiParamSaveRequestList())));
+                for (String singleTableApiStr : singleTableApiStrList) {
+                    if(apiInfoStr.equals(singleTableApiStr)){
+                        return true;
+                    }
+                }
+            }else{//sql模式
+                apiInfoStr = String.valueOf(new StringBuilder(param.getName()).append(param.getDesc()).append(param.getApiGenerateSaveRequest().getDatasourceId()).append(param.getApiGenerateSaveRequest().getSql()));
+                for (DatasourceApiDTO datasourceApiDTO : datasourceApiDTOS) {
+                    StringBuilder datasourceApiStr = new StringBuilder(datasourceApiDTO.getApiName()).append(datasourceApiDTO.getApiDesc()).append(datasourceApiDTO.getDatasourceId()).append(datasourceApiDTO.getQuerySql());
+                    if(apiInfoStr.equals(String.valueOf(datasourceApiStr))){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private LinkedList<String> generateRegisterApi(LinkedList<RegisterApiDTO> registerApiDTOS, LinkedList<ApiParamInfoDTO> apiInfoStrList) {
+        LinkedList<String> registerApiStrList = new LinkedList<>();
+        for (RegisterApiDTO registerApiDTO : registerApiDTOS) {
+            StringBuilder registerApiStr = new StringBuilder(registerApiDTO.getApiName()).append(registerApiDTO.getApiDesc()).append(registerApiDTO.getReqHost()).append(registerApiDTO.getReqPath());
+            for (ApiParamInfoDTO apiParamInfoDTO : apiInfoStrList) {
+                if(apiParamInfoDTO.getApiVersion().equals(registerApiDTO.getApiVersion())){
+                    registerApiStr.append(apiParamInfoDTO.getApiParamStr()).append(",");
+                }
+            }
+            if(registerApiStr.indexOf(",") != -1){
+                registerApiStrList.add(String.valueOf(registerApiStr.substring(0, registerApiStr.lastIndexOf(","))));
+            }
+        }
+        return registerApiStrList;
+    }
+
+    private LinkedList<String> generateSingleTableApi(LinkedList<DatasourceApiDTO> datasourceApiDTOS, LinkedList<ApiParamInfoDTO> apiInfoStrList) {
+        LinkedList<String> singleTableApiStrList = new LinkedList<>();
+        for (DatasourceApiDTO datasourceApiDTO : datasourceApiDTOS) {
+            StringBuilder singleTableApiStr = new StringBuilder(datasourceApiDTO.getApiName()).append(datasourceApiDTO.getApiDesc()).append(datasourceApiDTO.getDatasourceId()).append(datasourceApiDTO.getTableName());
+            for (ApiParamInfoDTO apiParamInfoDTO : apiInfoStrList) {
+                if(apiParamInfoDTO.getApiVersion().equals(datasourceApiDTO.getApiVersion())){
+                    singleTableApiStr.append(apiParamInfoDTO.getApiParamStr()).append(",");
+                }
+            }
+            if(singleTableApiStr.indexOf(",") != -1){
+                singleTableApiStrList.add(String.valueOf(singleTableApiStr.substring(0, singleTableApiStr.lastIndexOf(","))));
+            }
+        }
+        return singleTableApiStrList;
+    }
+
+    private String generateForSingleTableApi(List<DatasourceApiParamSaveRequest> apiParamSaveRequestList) {
+        StringBuilder apiParamStr = new StringBuilder();
+        for (DatasourceApiParamSaveRequest datasourceApiParamSaveRequest : apiParamSaveRequestList) {
+            apiParamStr.append(datasourceApiParamSaveRequest.getFieldName()).append(",");
+            apiParamStr.append(datasourceApiParamSaveRequest.getFieldType()).append(",");
+            apiParamStr.append(datasourceApiParamSaveRequest.getRequired()).append(",");
+            apiParamStr.append(datasourceApiParamSaveRequest.getIsRequest()).append(",");
+            apiParamStr.append(datasourceApiParamSaveRequest.getIsResponse()).append(",");
+            apiParamStr.append(datasourceApiParamSaveRequest.getDesc()).append(",");
+        }
+        String tableInfoStr = String.valueOf(new StringBuilder(apiParamStr));
+        return tableInfoStr.substring(0, tableInfoStr.lastIndexOf(","));
+    }
+
+    private String generateForRegisterApi(List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList, List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList) {
+        StringBuilder apiParamStr = new StringBuilder();
+        for (RegisterRequestParamSaveRequest registerRequestParamSaveRequest : registerRequestParamSaveRequestList) {
+            apiParamStr.append(registerRequestParamSaveRequest.getFieldName()).append(",");
+            apiParamStr.append(registerRequestParamSaveRequest.getFieldType()).append(",");
+            if(null != registerRequestParamSaveRequest.getRequired()){
+                apiParamStr.append(registerRequestParamSaveRequest.getRequired()).append(",");
+            }
+            apiParamStr.append(registerRequestParamSaveRequest.getIsRequest()).append(",");
+            apiParamStr.append(registerRequestParamSaveRequest.getDefaultValue()).append(",");
+            apiParamStr.append(registerRequestParamSaveRequest.getDesc()).append(",");
+        }
+        for (RegisterResponseParamSaveRequest registerResponseParamSaveRequest : registerResponseParamSaveRequestList) {
+            apiParamStr.append(registerResponseParamSaveRequest.getFieldName()).append(",");
+            apiParamStr.append(registerResponseParamSaveRequest.getFieldType()).append(",");
+            apiParamStr.append(registerResponseParamSaveRequest.getIsResponse()).append(",");
+            apiParamStr.append(registerResponseParamSaveRequest.getDefaultValue()).append(",");
+            apiParamStr.append(registerResponseParamSaveRequest.getDesc()).append(",");
+        }
+        String tableInfoStr = String.valueOf(new StringBuilder(apiParamStr));
+        return tableInfoStr.length() >= 1 ? tableInfoStr.substring(0, tableInfoStr.lastIndexOf(",")) : "";
     }
 
     @Override

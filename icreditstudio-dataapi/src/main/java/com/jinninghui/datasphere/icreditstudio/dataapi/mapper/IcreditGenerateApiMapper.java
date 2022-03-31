@@ -1,8 +1,11 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.DatasourceApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditGenerateApiEntity;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.LinkedList;
 
 /**
  * <p>
@@ -19,4 +22,6 @@ public interface IcreditGenerateApiMapper extends BaseMapper<IcreditGenerateApiE
     void removeByApiId(@Param("apiId") String apiId, @Param("apiVersion") Integer apiVersion);
 
     void deleteByApiIdAndVersion(@Param("apiId") String apiId, @Param("apiVersion") Integer apiVersion);
+
+    LinkedList<DatasourceApiDTO> findWaitPublishedByApiId(@Param("apiId") String apiId);
 }
