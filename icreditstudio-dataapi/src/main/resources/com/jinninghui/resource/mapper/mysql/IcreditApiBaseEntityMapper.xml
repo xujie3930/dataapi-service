@@ -22,7 +22,7 @@
     </select>
 
     <update id="updatePublishStatusById">
-        UPDATE icredit_api_base SET publish_status = #{publishStatus} WHERE id = #{id}
+        UPDATE icredit_api_base SET publish_status = #{publishStatus},publish_time = #{nowDate},publish_user = #{userId} WHERE id = #{id}
     </update>
 
     <select id="getApiByApiGroupId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult">

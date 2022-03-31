@@ -47,8 +47,6 @@ import javax.annotation.Resource;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
@@ -706,8 +704,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         StringLegalUtils.checkId(request.getApiHiId());
         IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiService.getById(request.getApiHiId());
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(apiBaseHiEntity.getApiBaseId());
+        Date nowDate = new Date();
         if(apiBaseHiEntity.getApiVersion().equals(apiBaseEntity.getApiVersion())){//最新版本
-            apiBaseMapper.updatePublishStatusById(apiBaseEntity.getId(), request.getPublishStatus());
+            apiBaseMapper.updatePublishStatusById(apiBaseEntity.getId(), request.getPublishStatus(), nowDate, userId);
         }
         apiBaseHiEntity.setPublishStatus(request.getPublishStatus());
         if(ApiPublishStatusEnum.NO_PUBLISHED.getCode().equals(request.getPublishStatus())){//停止发布
@@ -761,7 +760,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                         registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
             }
             apiBaseHiEntity.setPublishUser(userId);
-            apiBaseHiEntity.setPublishTime(new Date());
+            apiBaseHiEntity.setPublishTime(nowDate);
             apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
         }
         return BusinessResult.success(true);
@@ -995,7 +994,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     private IcreditApiBaseEntity publish(String userId, ApiPublishRequest request) {
         long startTime = System.currentTimeMillis();
-        apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus());
+        Date nowDate = new Date();
+        apiBaseMapper.updatePublishStatusById(request.getId(), request.getPublishStatus(), nowDate, userId);
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getId());
         if(ApiPublishStatusEnum.NO_PUBLISHED.getCode().equals(request.getPublishStatus())){//停止发布
             redisTemplate.delete(String.valueOf(new StringBuilder(apiBaseEntity.getPath()).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiBaseEntity.getApiVersion())));
@@ -1029,7 +1029,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                     apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                     registerApiParamInfos, null, null);
             apiBaseEntity.setPublishUser(userId);
-            apiBaseEntity.setPublishTime(new Date());
+            apiBaseEntity.setPublishTime(nowDate);
             saveOrUpdate(apiBaseEntity);
         }
         log.info("发布耗时:{}毫秒", System.currentTimeMillis() - startTime);
