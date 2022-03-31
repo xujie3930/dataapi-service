@@ -659,16 +659,15 @@ export default {
           cascaderOptions[0].children[0].value
         ]
         this.fetchDataApiPath()
+        this.fetchSelectOptionsByKey({
+          key: 'datasourceOptions',
+          methodName: 'getDatasourceOptions'
+        })
       }
 
       if (opType === 'edit') {
         this.fetchDataApiDetail()
       }
-
-      this.fetchSelectOptionsByKey({
-        key: 'datasourceOptions',
-        methodName: 'getDatasourceOptions'
-      })
     },
 
     // 校验-API名称
@@ -759,24 +758,23 @@ export default {
         0: { type: '保存', loading: 'isSaveBtnLoading' },
         1: { type: '发布', loading: 'isPublishBtnLoading' }
       }
+      const {
+        registerRequestParamSaveRequestList: req,
+        registerResponseParamSaveRequestList: res
+      } = cloneDeep(this.form)
+
       this.$refs.form.validate(valid => {
         if (valid) {
-          console.log(this.form, 'ddff')
-          const {
-            registerRequestParamSaveRequestList: req,
-            registerResponseParamSaveRequestList: res
-          } = this.form
-
-          cloneDeep(req).forEach(
-            ({ fieldName }, index) =>
-              fieldName === '' &&
-              this.form.registerRequestParamSaveRequestList.splice(index, 1)
+          this.form.registerRequestParamSaveRequestList = cloneDeep(req).filter(
+            ({ fieldName, defaultValue, desc }) =>
+              !(fieldName === '' && defaultValue === '' && desc === '')
           )
 
-          cloneDeep(res).forEach(
-            ({ fieldName }, index) =>
-              fieldName === '' &&
-              this.form.registerResponseParamSaveRequestList.splice(index, 1)
+          this.form.registerResponseParamSaveRequestList = cloneDeep(
+            res
+          ).filter(
+            ({ fieldName, defaultValue, desc }) =>
+              !(fieldName === '' && defaultValue === '' && desc === '')
           )
 
           const { opType } = this.options
@@ -939,6 +937,7 @@ export default {
 
     // 获取-数据表名称列表
     fetchSelectOptionsByKey({ methodName, key }) {
+      const { opType } = this.options
       const { databaseTye: type, apiGenerateSaveRequest: r } = this.form
       const params = {
         dataNameOptions: { id: r.datasourceId },
@@ -950,11 +949,11 @@ export default {
           if (success && data) {
             this[key] = data
 
-            if (key === 'dataNameOptions') {
+            if (opType === 'edit' && key === 'datasourceOptions') {
               const ids = data.map(item => item.id) ?? []
               const { datasourceId } = this.form.apiGenerateSaveRequest
               !ids.includes(datasourceId) &&
-                (this.form.apiGenerateSaveRequest.datasourceId = undefined)
+                (this.form.apiGenerateSaveRequest.datasourceId = '')
             }
           }
         })
@@ -1005,6 +1004,11 @@ export default {
                 methodName: 'getDataTableOptions'
               })
             }
+
+            this.fetchSelectOptionsByKey({
+              key: 'datasourceOptions',
+              methodName: 'getDatasourceOptions'
+            })
           }
         })
         .finally(() => {
