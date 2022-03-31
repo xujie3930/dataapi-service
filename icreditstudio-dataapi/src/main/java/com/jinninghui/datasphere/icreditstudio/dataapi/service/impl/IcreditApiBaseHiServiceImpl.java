@@ -357,9 +357,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                     registerApiStr.append(apiParamInfoDTO.getApiParamStr()).append(",");
                 }
             }
-            if(registerApiStr.indexOf(",") != -1){
-                registerApiStrList.add(String.valueOf(registerApiStr.substring(0, registerApiStr.lastIndexOf(","))));
-            }
+            registerApiStrList.add(registerApiStr.indexOf(",") != -1 ? String.valueOf(registerApiStr.substring(0, registerApiStr.lastIndexOf(","))) : String.valueOf(registerApiStr));
         }
         return registerApiStrList;
     }
@@ -373,9 +371,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
                     singleTableApiStr.append(apiParamInfoDTO.getApiParamStr()).append(",");
                 }
             }
-            if(singleTableApiStr.indexOf(",") != -1){
-                singleTableApiStrList.add(String.valueOf(singleTableApiStr.substring(0, singleTableApiStr.lastIndexOf(","))));
-            }
+            singleTableApiStrList.add(singleTableApiStr.indexOf(",") != -1 ? String.valueOf(singleTableApiStr.substring(0, singleTableApiStr.lastIndexOf(","))) : String.valueOf(singleTableApiStr));
         }
         return singleTableApiStrList;
     }
