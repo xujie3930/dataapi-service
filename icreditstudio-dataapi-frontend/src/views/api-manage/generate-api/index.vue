@@ -659,16 +659,15 @@ export default {
           cascaderOptions[0].children[0].value
         ]
         this.fetchDataApiPath()
+        this.fetchSelectOptionsByKey({
+          key: 'datasourceOptions',
+          methodName: 'getDatasourceOptions'
+        })
       }
 
       if (opType === 'edit') {
         this.fetchDataApiDetail()
       }
-
-      this.fetchSelectOptionsByKey({
-        key: 'datasourceOptions',
-        methodName: 'getDatasourceOptions'
-      })
     },
 
     // 校验-API名称
@@ -939,6 +938,7 @@ export default {
 
     // 获取-数据表名称列表
     fetchSelectOptionsByKey({ methodName, key }) {
+      const { opType } = this.options
       const { databaseTye: type, apiGenerateSaveRequest: r } = this.form
       const params = {
         dataNameOptions: { id: r.datasourceId },
@@ -950,11 +950,11 @@ export default {
           if (success && data) {
             this[key] = data
 
-            if (key === 'dataNameOptions') {
+            if (opType === 'edit' && key === 'datasourceOptions') {
               const ids = data.map(item => item.id) ?? []
               const { datasourceId } = this.form.apiGenerateSaveRequest
               !ids.includes(datasourceId) &&
-                (this.form.apiGenerateSaveRequest.datasourceId = undefined)
+                (this.form.apiGenerateSaveRequest.datasourceId = '')
             }
           }
         })
@@ -1005,6 +1005,11 @@ export default {
                 methodName: 'getDataTableOptions'
               })
             }
+
+            this.fetchSelectOptionsByKey({
+              key: 'datasourceOptions',
+              methodName: 'getDatasourceOptions'
+            })
           }
         })
         .finally(() => {
