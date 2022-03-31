@@ -758,28 +758,23 @@ export default {
         0: { type: '保存', loading: 'isSaveBtnLoading' },
         1: { type: '发布', loading: 'isPublishBtnLoading' }
       }
+      const {
+        registerRequestParamSaveRequestList: req,
+        registerResponseParamSaveRequestList: res
+      } = cloneDeep(this.form)
+
       this.$refs.form.validate(valid => {
         if (valid) {
-          console.log(this.form, 'ddff')
-          const {
-            registerRequestParamSaveRequestList: req,
-            registerResponseParamSaveRequestList: res
-          } = this.form
-
-          cloneDeep(req).forEach(
-            ({ fieldName, defaultValue, desc }, index) =>
-              fieldName === '' &&
-              defaultValue === '' &&
-              desc === '' &&
-              this.form.registerRequestParamSaveRequestList.splice(index, 1)
+          this.form.registerRequestParamSaveRequestList = cloneDeep(req).filter(
+            ({ fieldName, defaultValue, desc }) =>
+              !(fieldName === '' && defaultValue === '' && desc === '')
           )
 
-          cloneDeep(res).forEach(
-            ({ fieldName, defaultValue, desc }, index) =>
-              fieldName === '' &&
-              defaultValue === '' &&
-              desc === '' &&
-              this.form.registerResponseParamSaveRequestList.splice(index, 1)
+          this.form.registerResponseParamSaveRequestList = cloneDeep(
+            res
+          ).filter(
+            ({ fieldName, defaultValue, desc }) =>
+              !(fieldName === '' && defaultValue === '' && desc === '')
           )
 
           const { opType } = this.options

@@ -1,8 +1,11 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.RegisterApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditRegisterApiEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.LinkedList;
 
 /**
  * <p>
@@ -17,4 +20,6 @@ public interface IcreditRegisterApiMapper extends BaseMapper<IcreditRegisterApiE
     IcreditRegisterApiEntity findByApiIdAndApiVersion(@Param("apiBaseId") String apiBaseId, @Param("apiVersion") Integer apiVersion);
 
     void deleteByApiIdAndApiVersion(@Param("apiId") String apiId, @Param("apiVersion") Integer apiVersion);
+
+    LinkedList<RegisterApiDTO> findWaitPublishedByApiId(@Param("apiId") String apiId);
 }
