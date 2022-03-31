@@ -19,9 +19,8 @@
     </delete>
 
     <select id="findWaitPublishedByApiId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.dto.RegisterApiDTO">
-        SELECT apiHi.api_version apiVersion,apiHi.`name` apiName,apiHi.`desc` apiDesc,registerApi.`host` reqHost,registerApi.path reqPath
+        SELECT DISTINCT apiHi.api_version,apiHi.api_version apiVersion,apiHi.`name` apiName,apiHi.`desc` apiDesc,registerApi.`host` reqHost,registerApi.path reqPath
         FROM icredit_api_base_hi apiHi,icredit_register_api registerApi
         where apiHi.api_base_id = registerApi.api_base_id and apiHi.api_base_id = #{apiId}
-        GROUP BY apiHi.api_version
     </select>
 </mapper>
