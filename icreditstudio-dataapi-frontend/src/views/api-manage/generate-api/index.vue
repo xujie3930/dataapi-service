@@ -767,14 +767,18 @@ export default {
           } = this.form
 
           cloneDeep(req).forEach(
-            ({ fieldName }, index) =>
+            ({ fieldName, defaultValue, desc }, index) =>
               fieldName === '' &&
+              defaultValue === '' &&
+              desc === '' &&
               this.form.registerRequestParamSaveRequestList.splice(index, 1)
           )
 
           cloneDeep(res).forEach(
-            ({ fieldName }, index) =>
+            ({ fieldName, defaultValue, desc }, index) =>
               fieldName === '' &&
+              defaultValue === '' &&
+              desc === '' &&
               this.form.registerResponseParamSaveRequestList.splice(index, 1)
           )
 
