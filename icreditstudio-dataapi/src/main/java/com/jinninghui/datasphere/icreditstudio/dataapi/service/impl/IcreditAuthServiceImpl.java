@@ -132,17 +132,17 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         }
         List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);//已授权的业务流程、api分组、api
 
-        //移除已选择的api
-        List<ApiInfoDTO> allNoSelectedApiInfoList = new ArrayList();
-        for (ApiInfoDTO apiInfoDTO : allApiInfoList) {
-            for (ApiInfoDTO infoDTO : apiInfoList) {
-                if(!infoDTO.equals(apiInfoDTO)){
-                    allNoSelectedApiInfoList.add(apiInfoDTO);
-                }
-            }
-        }
+//        //移除已选择的api
+//        List<ApiInfoDTO> allNoSelectedApiInfoList = new ArrayList();
+//        for (ApiInfoDTO apiInfoDTO : allApiInfoList) {
+//            for (ApiInfoDTO infoDTO : apiInfoList) {
+//                if(!infoDTO.equals(apiInfoDTO)){
+//                    allNoSelectedApiInfoList.add(apiInfoDTO);
+//                }
+//            }
+//        }
 
-        List<ApiCascadeInfoResult> noApiCascadeInfoList = handleApiInfo(allNoSelectedApiInfoList);
+        List<ApiCascadeInfoResult> noApiCascadeInfoList = handleApiInfo(allApiInfoList);
         List<ApiCascadeInfoResult> apiCascadeInfoList = handleApiInfo(apiInfoList);
         authInfoResult.setApiCascadeInfoStrList(apiCascadeInfoList);
         authInfoResult.setNoApiCascadeInfoStrList(noApiCascadeInfoList);
