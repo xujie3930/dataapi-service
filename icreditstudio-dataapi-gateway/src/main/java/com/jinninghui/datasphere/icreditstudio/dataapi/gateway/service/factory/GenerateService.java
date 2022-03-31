@@ -118,9 +118,11 @@ public class GenerateService implements ApiBaseService {
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_SUCCESS.getCode());
         apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getCallBeginTime().getTime());
         //取where条件后面的值,取到limit
-        String requestParam = StringUtils.splitBetween(querySql, "where", "limit");
-        requestParam = requestParam.replaceAll("and ", ",");
-        apiLogInfo.setRequestParam(requestParam);
+        if (querySql.contains("where")){
+            String requestParam = StringUtils.splitBetween(querySql, "where", "limit");
+            requestParam = requestParam.replaceAll("and ", ",");
+            apiLogInfo.setRequestParam(requestParam);
+        }
         return apiLogInfo;
     }
 }
