@@ -40,7 +40,7 @@ spring:
       discovery:
         server-addr: 192.168.211.3:8848
         group: PROD
-spring.datasource.url: "jdbc:mysql://192.168.211.2:3306/dataapi?useSSL=false&useUnicode=true&characterEncoding=utf8"
+spring.datasource.url: "jdbc:mysql://192.168.211.2:3306/dataapi?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
 spring.datasource.username: 'daas'
 spring.datasource.password: 'daas@1122'
 spring.redis.host: 192.168.211.2
