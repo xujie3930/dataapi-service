@@ -41,7 +41,7 @@ spring:
         server-addr: 192.168.0.178:8848
         group: DEV
   datasource:
-    url: "jdbc:mysql://192.168.0.23/dataapi?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Hongkong"
+    url: "jdbc:mysql://192.168.0.23/dataapi?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
     username: 'icdstu'
     password: 'icdstu@0902'
   redis:
