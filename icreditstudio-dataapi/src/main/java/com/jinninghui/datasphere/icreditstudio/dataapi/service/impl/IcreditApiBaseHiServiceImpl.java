@@ -257,6 +257,15 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             if(checkHaveSameApi(apiBaseHiEntity.getApiBaseId(), param)){//true--表示已有相同的待发布的api，false--表示没有
                 ApiSaveResult apiSaveResult = new ApiSaveResult();
                 BeanUtils.copyProperties(param, apiSaveResult);
+                ApiGenerateSaveResult generateApiSaveResult = new ApiGenerateSaveResult();
+                BeanUtils.copyProperties(param.getApiGenerateSaveRequest(), generateApiSaveResult);
+                apiSaveResult.setApiGenerateSaveRequest(generateApiSaveResult);
+                List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(param.getApiParamSaveRequestList(), ApiParamSaveResult.class);
+                List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList = BeanCopyUtils.copy(param.getRegisterRequestParamSaveRequestList(), RegisterRequestParamSaveRequest.class);
+                List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList = BeanCopyUtils.copy(param.getRegisterResponseParamSaveRequestList(), RegisterResponseParamSaveRequest.class);
+                apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
+                apiSaveResult.setRegisterRequestParamSaveRequestList(registerRequestParamSaveRequestList);
+                apiSaveResult.setRegisterResponseParamSaveRequestList(registerResponseParamSaveRequestList);
                 return BusinessResult.success(apiSaveResult);
             }
 
