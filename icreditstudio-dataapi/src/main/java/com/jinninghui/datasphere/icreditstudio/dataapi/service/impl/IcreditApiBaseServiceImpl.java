@@ -130,6 +130,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     private Wrapper<IcreditApiBaseEntity> queryWrapper(ApiBaseListRequest request) {
         QueryWrapper<IcreditApiBaseEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq(IcreditApiBaseEntity.DEL_FLAG, DelFlagEnum.ENA_BLED.getCode());
         if (StringUtils.isNotBlank(request.getName())){
             wrapper.like(IcreditApiBaseEntity.NAME, request.getName());
         }
@@ -1056,4 +1057,31 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     public void truthDelById(String id) {
         apiBaseMapper.truthDelById(id);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BusinessResult<Boolean> deleteByPath(String userId, List<String> paths) {
+        if (CollectionUtils.isEmpty(paths)){
+            return BusinessResult.success(true);
+        }
+        for (String path : paths) {
+            IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.findByApiPath(path);
+            if (Objects.isNull(apiBaseEntity)){
+                continue;
+            }
+            if (InterfaceSourceEnum.IN_SIDE.getCode().equals(apiBaseEntity.getInterfaceSource())){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000055.getCode());
+            }
+            removeById(apiBaseEntity.getId());
+            apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
+            //删除param参数信息、注册api信息、数据源生成api信息
+            apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            generateApiService.deleteByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+            //只有一个版本
+            redisTemplate.delete(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(1)));
+        }
+        return BusinessResult.success(true);
+    }
+
 }

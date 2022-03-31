@@ -79,6 +79,9 @@ public class RegisterService implements ApiBaseService {
         apiLogInfo.setCallEndTime(new Date());
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_SUCCESS.getCode());
         apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getCallBeginTime().getTime());
+        String requestParam = StringUtils.splitBetween(querySql, "?", " ");
+        requestParam = requestParam.replaceAll("&", ",");
+        apiLogInfo.setRequestParam(requestParam);
         return apiLogInfo;
     }
 }

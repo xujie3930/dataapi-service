@@ -63,9 +63,9 @@ public class IcreditApiBaseEntity extends BaseEntity implements Serializable {
 
     private String publishUser;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "CST")
     private Date publishTime;
 
-    //0-数据服务，1-资源管理
+    //0-内部，1-外部
     private Integer interfaceSource;
 }
