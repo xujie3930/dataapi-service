@@ -226,26 +226,26 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
         //发布操作 存放信息到redis
         if (ApiSaveStatusEnum.API_PUBLISH.getCode().equals(param.getSaveType())){
-            if(ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())){
-                String sql = createApiInfoBO.getQuerySql().toLowerCase();
-                String lowerCaseSqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM));
-                if(lowerCaseSqlCount.contains(SQL_COUNT_ONE) || lowerCaseSqlCount.contains(SQL_COUNT_ALL)){
-                    String naturalSqlCount = createApiInfoBO.getQuerySql().substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM));
-                    String responseFields = lowerCaseSqlCount.contains(SQL_AS) ? naturalSqlCount.substring(lowerCaseSqlCount.indexOf(SQL_AS) + SQL_AS.length()) : lowerCaseSqlCount.contains(EMPTY_CHAR) ?
-                            naturalSqlCount.substring(lowerCaseSqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : lowerCaseSqlCount;
-                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                            apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
-                            responseFields, registerApiParamInfos, param.getReqHost(), param.getReqPath());
-                }else{
-                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                            apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
-                            createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
-                }
-            }else{
+//            if(ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())){
+//                String sql = createApiInfoBO.getQuerySql().toLowerCase();
+//                String lowerCaseSqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM));
+//                if(lowerCaseSqlCount.contains(SQL_COUNT_ONE) || lowerCaseSqlCount.contains(SQL_COUNT_ALL)){
+//                    String naturalSqlCount = createApiInfoBO.getQuerySql().substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM));
+//                    String responseFields = lowerCaseSqlCount.contains(SQL_AS) ? naturalSqlCount.substring(lowerCaseSqlCount.indexOf(SQL_AS) + SQL_AS.length()) : lowerCaseSqlCount.contains(EMPTY_CHAR) ?
+//                            naturalSqlCount.substring(lowerCaseSqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : lowerCaseSqlCount;
+//                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+//                            apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+//                            createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
+//                }else{
+//                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+//                            apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+//                            createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
+//                }
+//            }else{
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                         apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                         createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
-            }
+//            }
         }
         //返回参数
         ApiSaveResult apiSaveResult = new ApiSaveResult();
@@ -746,20 +746,20 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 registerApiParamInfos = BeanCopyUtils.copy(apiParamEntityList, RegisterApiParamInfo.class);
             }
 
-            if(ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(generateApiEntity.getModel())) {
-                String sqlCount = generateApiEntity.getSql().substring(generateApiEntity.getSql().indexOf(SQL_START) + SQL_START.length(), generateApiEntity.getSql().indexOf(SQL_FROM)).replaceAll(" ", "");
-                if (sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)) {
-                    String responseField = sqlCount.contains(SQL_AS) ? sqlCount.substring(sqlCount.indexOf(SQL_AS) + SQL_AS.length()) : sqlCount.contains(EMPTY_CHAR) ?
-                            sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
-                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
-                            generateApiEntity.getModel(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr,
-                            responseField, registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
-                }
-            }else {
+//            if(ApiModelTypeEnum.SQL_CREATE_MODEL.getCode().equals(generateApiEntity.getModel())) {
+//                String sqlCount = generateApiEntity.getSql().substring(generateApiEntity.getSql().indexOf(SQL_START) + SQL_START.length(), generateApiEntity.getSql().indexOf(SQL_FROM)).replaceAll(" ", "");
+//                if (sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)) {
+//                    String responseField = sqlCount.contains(SQL_AS) ? sqlCount.substring(sqlCount.indexOf(SQL_AS) + SQL_AS.length()) : sqlCount.contains(EMPTY_CHAR) ?
+//                            sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
+//                    saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
+//                            generateApiEntity.getModel(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr,
+//                            responseField, registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
+//                }
+//            }else {
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
                         generateApiEntity.getModel(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                         registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
-            }
+//            }
             apiBaseHiEntity.setPublishUser(userId);
             apiBaseHiEntity.setPublishTime(nowDate);
             apiBaseHiService.saveOrUpdate(apiBaseHiEntity);
