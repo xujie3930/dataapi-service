@@ -56,7 +56,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_20000038("20000038", "该api分组下有已发布的api，不能删除,请先下线完该api分组下的全部API后再进行操作！"),
         RESOURCE_CODE_20000039("20000039", "默认业务流程不能删除！"),
         RESOURCE_CODE_20000040("20000040", "默认API分组不能删除！"),
-        RESOURCE_CODE_20000041("20000041", "sql中的where条件只支持 id = ${id} and user_id = ${userId} 的形式！"),
+//        RESOURCE_CODE_20000041("20000041", "sql中的where条件只支持 id = ${id} and user_id = ${userId} 的形式！"),
         RESOURCE_CODE_20000042("20000042", "后台服务Host不能为空，且只能以“http://”开头，后面为ip地址 + 端口！"),
         RESOURCE_CODE_20000043("20000043", "后台Path不能为空，且只支持【英文、数字、/、-、_】！"),
         RESOURCE_CODE_20000044("20000044", "字段名只能由英文、中文构成，长度在50以内！"),

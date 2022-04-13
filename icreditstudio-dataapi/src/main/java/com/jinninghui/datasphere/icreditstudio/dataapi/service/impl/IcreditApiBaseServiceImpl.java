@@ -91,7 +91,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String SQL_WHERE = " where ";
     private static final String SQL_FROM = " from ";
     private static final String SQL_END = ";";
-    private static final String SQL_LIMIT = " limit 1";
+    private static final String SQL_LIMIT_ONE = " limit 1";
     private static final String SQL_CONN_CHAR = ".";
     private static final String SEPARATOR = "|";
     private static final String PERCENTAGE = "%";
@@ -397,103 +397,104 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     //sql模式
     private CreateApiInfoBO createApiBySqlModel(DatasourceApiSaveParam param, Integer apiVersion, String apiId){
-        String querySql;
-        String requiredFieldStr = null;
-        String responseFieldStr = null;
-        StringBuffer requiredFields = new StringBuffer();//请求参数
-        StringBuffer responseFields = new StringBuffer();//返回参数
-        CreateApiInfoBO createApiInfoBO = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiId, apiVersion, QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
-        List<IcreditApiParamEntity> apiParamEntityList = createApiInfoBO.getApiParamEntityList();
-        querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
-        String[] tableNames = null;
-        String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
-        String[] requiredFieldArr;
-        if(querySql.contains(SQL_WHERE)) {
-            requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
-            tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-        }else{
-            requiredFieldArr = new String[]{};
-            tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-        }
-        for (String requiredField : requiredFieldArr) {
-            if(requiredField.contains("${")) {
-                requiredFields.append(requiredField.contains(" =") ? requiredField.substring(0, requiredField.indexOf(" =")) : requiredField.substring(0, requiredField.indexOf("="))).append(SQL_FIELD_SPLIT_CHAR);
-            }
-        }
-        List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
-        for (String tableName : tableNames) {
-            TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
-            tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
-            tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
-            String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
-            tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
-            tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
-            tableNameInfoBOList.add(tableNameInfoBO);
-        }
-        for (String responseField : responseFieldArr) {
-            responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
-            responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
-            responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
-        }
-        if (requiredFields.length() >= 1) {
-            requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-        }
-        if (responseFields.length() >= 1) {
-            responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-        }
-        TableFieldBO tableFieldBO = handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
+//        String querySql;
+//        String requiredFieldStr = null;
+//        String responseFieldStr = null;
+//        StringBuffer requiredFields = new StringBuffer();//请求参数
+//        StringBuffer responseFields = new StringBuffer();//返回参数
+        checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiVersion, QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+//        List<IcreditApiParamEntity> apiParamEntityList = createApiInfoBO.getApiParamEntityList();
+//        querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
+//        String[] tableNames = null;
+//        String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
+//        String[] requiredFieldArr;
+//        if(querySql.contains(SQL_WHERE)) {
+//            requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+//            tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
+//        }else{
+//            requiredFieldArr = new String[]{};
+//            tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
+//        }
+//        for (String requiredField : requiredFieldArr) {
+//            if(requiredField.contains("${")) {
+//                requiredFields.append(requiredField.contains(" =") ? requiredField.substring(0, requiredField.indexOf(" =")) : requiredField.substring(0, requiredField.indexOf("="))).append(SQL_FIELD_SPLIT_CHAR);
+//            }
+//        }
+//        List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
+//        for (String tableName : tableNames) {
+//            TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
+//            tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
+//            tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
+//            String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
+//            tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
+//            tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
+//            tableNameInfoBOList.add(tableNameInfoBO);
+//        }
+//        for (String responseField : responseFieldArr) {
+//            responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
+//            responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
+//            responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
+//        }
+//        if (requiredFields.length() >= 1) {
+//            requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+//        }
+//        if (responseFields.length() >= 1) {
+//            responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+//        }
+//        TableFieldBO tableFieldBO = handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
+        CreateApiInfoBO createApiInfoBO = new CreateApiInfoBO();
         createApiInfoBO.setQuerySql(param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).replaceAll(SQL_END, ""));
-        createApiInfoBO.setRequiredFieldStr(tableFieldBO.getRequiredFieldStr());
-        createApiInfoBO.setResponseFieldStr(tableFieldBO.getResponseFieldStr());
+//        createApiInfoBO.setRequiredFieldStr(tableFieldBO.getRequiredFieldStr());
+//        createApiInfoBO.setResponseFieldStr(tableFieldBO.getResponseFieldStr());
         return createApiInfoBO;
     }
 
-    private TableFieldBO handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr, List<TableNameInfoBO> tableNameInfoBOList) {
-        TableFieldBO tableFieldBO = new TableFieldBO();
-        StringBuilder requiredFields = new StringBuilder();
-        StringBuilder responseFields = new StringBuilder();
-        if(StringUtils.isNotEmpty(requiredFieldStr)) {
-            String[] requiredFieldArr = requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
-            for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
-                for (String requiredField : requiredFieldArr) {
-                    for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
-                        if(StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && requiredField.equals(apiParamEntity.getFieldName().toLowerCase())){//没有表别名，单表
-                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
-                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
-                            requiredFields.append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
-                            //有表别名，多表
-                        }else if (apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
-                                && requiredField.substring(requiredField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (requiredField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
-                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
-                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
-                            requiredFields.append(tableNameInfoBO.getTableAlias()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
-                        }
-                    }
-                }
-            }
-        }
-        if(StringUtils.isNotEmpty(responseFieldStr)) {
-            String[] responseFieldArr =  responseFieldStr.split(SQL_FIELD_SPLIT_CHAR);
-            for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
-                for (String responseField : responseFieldArr) {
-                    for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
-                        if (StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && responseField.equals(apiParamEntity.getFieldName().toLowerCase())) {//没有表别名，单表
-                            apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
-                            responseFields.append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
-                            //有表别名，多表
-                        } else if (apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
-                                && responseField.substring(responseField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (responseField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
-                            apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
-                            responseFields.append(tableNameInfoBO.getTableAlias()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
-                        }
-                    }
-                }
-            }
-        }
-        tableFieldBO.setRequiredFieldStr(requiredFields.length() >= 1 ? String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))) : null);
-        tableFieldBO.setResponseFieldStr(responseFields.length() >= 1 ? String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))) : null);
-        return tableFieldBO;
-    }
+//    private TableFieldBO handleField(List<IcreditApiParamEntity> apiParamEntityList, String requiredFieldStr, String responseFieldStr, List<TableNameInfoBO> tableNameInfoBOList) {
+//        TableFieldBO tableFieldBO = new TableFieldBO();
+//        StringBuilder requiredFields = new StringBuilder();
+//        StringBuilder responseFields = new StringBuilder();
+//        if(StringUtils.isNotEmpty(requiredFieldStr)) {
+//            String[] requiredFieldArr = requiredFieldStr.split(SQL_FIELD_SPLIT_CHAR);
+//            for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
+//                for (String requiredField : requiredFieldArr) {
+//                    for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
+//                        if(StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && requiredField.equals(apiParamEntity.getFieldName().toLowerCase())){//没有表别名，单表
+//                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+//                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+//                            requiredFields.append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+//                            //有表别名，多表
+//                        }else if (apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
+//                                && requiredField.substring(requiredField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (requiredField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
+//                            apiParamEntity.setRequired(RequiredFiledEnum.IS_REQUIRED_FIELD.getCode());
+//                            apiParamEntity.setIsRequest(RequestFiledEnum.IS_REQUEST_FIELD.getCode());
+//                            requiredFields.append(tableNameInfoBO.getTableAlias()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        if(StringUtils.isNotEmpty(responseFieldStr)) {
+//            String[] responseFieldArr =  responseFieldStr.split(SQL_FIELD_SPLIT_CHAR);
+//            for (IcreditApiParamEntity apiParamEntity : apiParamEntityList) {
+//                for (String responseField : responseFieldArr) {
+//                    for (TableNameInfoBO tableNameInfoBO : tableNameInfoBOList) {
+//                        if (StringUtils.isEmpty(tableNameInfoBO.getTableAlias()) && responseField.equals(apiParamEntity.getFieldName().toLowerCase())) {//没有表别名，单表
+//                            apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+//                            responseFields.append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+//                            //有表别名，多表
+//                        } else if (apiParamEntity.getTableName().equals(tableNameInfoBO.getTableName())
+//                                && responseField.substring(responseField.contains(tableNameInfoBO.getTableAlias() + SQL_CONN_CHAR) ? (responseField.indexOf(SQL_CONN_CHAR) + 1) : 0).equals(apiParamEntity.getFieldName().toLowerCase())) {
+//                            apiParamEntity.setIsResponse(ResponseFiledEnum.IS_RESPONSE_FIELD.getCode());
+//                            responseFields.append(tableNameInfoBO.getTableAlias()).append(SQL_CONN_CHAR).append(apiParamEntity.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        tableFieldBO.setRequiredFieldStr(requiredFields.length() >= 1 ? String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))) : null);
+//        tableFieldBO.setResponseFieldStr(responseFields.length() >= 1 ? String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))) : null);
+//        return tableFieldBO;
+//    }
 
     private String getDatasourceInterfaceAddress(IcreditApiBaseEntity apiBaseEntity, List<APIParamResult> params) {
         StringBuilder builder = new StringBuilder(host + "/v" + apiBaseEntity.getApiVersion() + "/" + apiBaseEntity.getPath() + "?");
@@ -598,7 +599,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     @Override
-    public Object checkQuerySql(CheckQuerySqlRequest request, String id, Integer apiVersion, Integer type) {
+    public String checkQuerySql(CheckQuerySqlRequest request, Integer apiVersion, Integer type) {
         String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
         if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)){
             if(StringUtils.isEmpty(request.getSql())){
@@ -607,9 +608,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
             }
-            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage());
-            }
+//            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
+//                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage());
+//            }
         }else{
             if(StringUtils.isEmpty(request.getSql())){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage();
@@ -617,77 +618,77 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
             }
-            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
-                return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
-            }
+//            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
+//                return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
+//            }
         }
         sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''").replaceAll(SQL_END, "");
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
         String uri = datasource.getUri();
-        List<IcreditApiParamEntity> apiParamEntityList = null;
+//        List<IcreditApiParamEntity> apiParamEntityList = null;
         Connection conn = null;
         CreateApiInfoBO createApiInfoBO = null;
-        StringBuilder tableNames = new StringBuilder();
+//        StringBuilder tableNames = new StringBuilder();
         try {
             conn = getConnectionByUri(uri);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
-            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
-                String sqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM)).replaceAll(EMPTY_CHAR, "");
-                apiParamEntityList = new ArrayList<>();
-                if(sql.contains(SQL_WHERE)) {
-                    if(sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)) {
-                        sql = String.valueOf(new StringBuilder(SQL_SELECT_ALL).append(SQL_FROM).append(sql.substring(sql.indexOf(SQL_FROM) + SQL_FROM.length(), sql.indexOf(SQL_WHERE))).append(SQL_LIMIT));
-                    }else {
-                        sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(SQL_LIMIT));
-                    }
-                }else{
-                    if(sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)) {
-                        sql = String.valueOf(new StringBuilder(SQL_SELECT_ALL).append(SQL_FROM).append(sql.substring(sql.indexOf(SQL_FROM) + SQL_FROM.length())).append(SQL_LIMIT));
-                    }else {
-                        sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START))).append(SQL_LIMIT));
-                    }
-                }
-                ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery(sql);
-                ResultSetMetaData metaData = rs.getMetaData();
-                int len = metaData.getColumnCount();
-                List<String> tableNameList = new ArrayList<>();
-                for (int i = 1; i <= len; i++) {//获取SQL语句中的表名称
-                    if(!tableNameList.contains(metaData.getTableName(i))){
-                        tableNameList.add(metaData.getTableName(i));
-                        tableNames.append(metaData.getTableName(i)).append(",");
-                    }
-                }
-
-                DatabaseMetaData databaseMetaData = conn.getMetaData();
-                for (String tableName : tableNameList) {//根据表名称获取对应的表字段信息
-                    ResultSet columnRs = databaseMetaData.getColumns(conn.getCatalog(), PERCENTAGE, tableName, PERCENTAGE);
-                    while (columnRs.next()){
-                        IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
-                        apiParamEntity.setTableName(tableName);
-                        apiParamEntity.setFieldType(columnRs.getString("TYPE_NAME").toLowerCase());
-                        apiParamEntity.setFieldName(columnRs.getString("COLUMN_NAME"));
-                        apiParamEntity.setDesc(columnRs.getString("REMARKS"));
-                        apiParamEntity.setIsRequest(RequestFiledEnum.NOT_IS_REQUEST_FIELD.getCode());
-                        apiParamEntity.setIsResponse(ResponseFiledEnum.NOT_IS_RESPONSE_FIELD.getCode());
-                        apiParamEntity.setRequired(RequiredFiledEnum.NOT_IS_REQUIRED_FIELD.getCode());
-                        apiParamEntity.setApiBaseId(id);
-                        apiParamEntity.setApiVersion(apiVersion);
-                        apiParamEntityList.add(apiParamEntity);
-                    }
-                }
-                createApiInfoBO = new CreateApiInfoBO();
-                createApiInfoBO.setApiParamEntityList(apiParamEntityList);
-                createApiInfoBO.setTableNames(String.valueOf(new StringBuffer(tableNames.substring(0, tableNames.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
-            }
+//            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
+//                String sqlCount = sql.substring(sql.indexOf(SQL_START) + SQL_START.length(), sql.indexOf(SQL_FROM)).replaceAll(EMPTY_CHAR, "");
+//                apiParamEntityList = new ArrayList<>();
+//                if(sql.contains(SQL_WHERE)) {
+//                    if(sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)) {
+//                        sql = String.valueOf(new StringBuilder(SQL_SELECT_ALL).append(SQL_FROM).append(sql.substring(sql.indexOf(SQL_FROM) + SQL_FROM.length(), sql.indexOf(SQL_WHERE))).append(SQL_LIMIT_ONE));
+//                    }else {
+//                        sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START), sql.lastIndexOf(SQL_WHERE))).append(SQL_LIMIT_ONE));
+//                    }
+//                }else{
+//                    if(sqlCount.contains(SQL_COUNT_ONE) || sqlCount.contains(SQL_COUNT_ALL)) {
+//                        sql = String.valueOf(new StringBuilder(SQL_SELECT_ALL).append(SQL_FROM).append(sql.substring(sql.indexOf(SQL_FROM) + SQL_FROM.length())).append(SQL_LIMIT_ONE));
+//                    }else {
+//                        sql = String.valueOf(new StringBuilder(sql.substring(sql.indexOf(SQL_START))).append(SQL_LIMIT_ONE));
+//                    }
+//                }
+//                ps = conn.prepareStatement(sql);
+//                ResultSet rs = ps.executeQuery(sql);
+//                ResultSetMetaData metaData = rs.getMetaData();
+//                int len = metaData.getColumnCount();
+//                List<String> tableNameList = new ArrayList<>();
+//                for (int i = 1; i <= len; i++) {//获取SQL语句中的表名称
+//                    if(!tableNameList.contains(metaData.getTableName(i))){
+//                        tableNameList.add(metaData.getTableName(i));
+//                        tableNames.append(metaData.getTableName(i)).append(",");
+//                    }
+//                }
+//
+//                DatabaseMetaData databaseMetaData = conn.getMetaData();
+//                for (String tableName : tableNameList) {//根据表名称获取对应的表字段信息
+//                    ResultSet columnRs = databaseMetaData.getColumns(conn.getCatalog(), PERCENTAGE, tableName, PERCENTAGE);
+//                    while (columnRs.next()){
+//                        IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
+//                        apiParamEntity.setTableName(tableName);
+//                        apiParamEntity.setFieldType(columnRs.getString("TYPE_NAME").toLowerCase());
+//                        apiParamEntity.setFieldName(columnRs.getString("COLUMN_NAME"));
+//                        apiParamEntity.setDesc(columnRs.getString("REMARKS"));
+//                        apiParamEntity.setIsRequest(RequestFiledEnum.NOT_IS_REQUEST_FIELD.getCode());
+//                        apiParamEntity.setIsResponse(ResponseFiledEnum.NOT_IS_RESPONSE_FIELD.getCode());
+//                        apiParamEntity.setRequired(RequiredFiledEnum.NOT_IS_REQUIRED_FIELD.getCode());
+//                        apiParamEntity.setApiBaseId(id);
+//                        apiParamEntity.setApiVersion(apiVersion);
+//                        apiParamEntityList.add(apiParamEntity);
+//                    }
+//                }
+//                createApiInfoBO = new CreateApiInfoBO();
+//                createApiInfoBO.setApiParamEntityList(apiParamEntityList);
+//                createApiInfoBO.setTableNames(String.valueOf(new StringBuffer(tableNames.substring(0, tableNames.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
+//            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
         }finally {
             closeConnection(conn);
         }
-        return createApiInfoBO;
+        return "";
     }
 
     private boolean checkSqlWhere(String sqlWhere) {
@@ -826,7 +827,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         saveOrUpdate(apiBaseEntity);
         log.info("保存api耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         startTime = System.currentTimeMillis();
-        String querySql;
+        String querySql = "";
         String requiredFieldStr = null;
         String responseFieldStr = null;
         CreateApiInfoBO sqlModelInfo = new CreateApiInfoBO();
@@ -883,54 +884,53 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if (responseFields.length() >= 1) {
                 responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
             }
-        } else {
-            sqlModelInfo = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
-            apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-            sqlModelInfo = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getId(), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
-            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
-            if(null != sqlModelInfo) {
-                apiParamEntityList = sqlModelInfo.getApiParamEntityList();
-                String[] tableNames = null;
-                String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
-                String[] requiredFieldArr;
-                if (querySql.contains(SQL_WHERE)) {
-                    requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
-                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-                } else {
-                    requiredFieldArr = new String[]{};
-                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
-                }
-                for (String requiredField : requiredFieldArr) {
-                    if (requiredField.contains("${")) {
-                        requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
-                    }
-                }
-                List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
-                for (String tableName : tableNames) {
-                    TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
-                    tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
-                    tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
-                    String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
-                    tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
-                    tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
-                    tableNameInfoBOList.add(tableNameInfoBO);
-                }
-                for (String responseField : responseFieldArr) {
-                    responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
-                    responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
-                    responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
-                }
-                if (requiredFields.length() >= 1) {
-                    requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-                }
-                if (responseFields.length() >= 1) {
-                    responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
-                }
-                handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
-            }else{
-                String sqlCount = querySql.substring(querySql.indexOf(SQL_START) + SQL_START.length(), querySql.indexOf(SQL_FROM));
-                responseFieldStr = sqlCount.contains(SQL_AS) ? sqlCount.substring(sqlCount.indexOf(SQL_AS) + SQL_AS.length()) : sqlCount.contains(EMPTY_CHAR) ? sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
-            }
+//        } else {
+//            sqlModelInfo = (CreateApiInfoBO) checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiBaseEntity.getApiVersion(), QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+//            apiParamEntityList = sqlModelInfo.getApiParamEntityList();
+//            querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
+//            if(null != sqlModelInfo) {
+//                apiParamEntityList = sqlModelInfo.getApiParamEntityList();
+//                String[] tableNames = null;
+//                String[] responseFieldArr = querySql.substring(SQL_START.length(), querySql.indexOf(SQL_FROM)).split(SQL_FIELD_SPLIT_CHAR);
+//                String[] requiredFieldArr;
+//                if (querySql.contains(SQL_WHERE)) {
+//                    requiredFieldArr = querySql.substring(querySql.indexOf(SQL_WHERE) + SQL_WHERE.length()).split(SQL_AND);
+//                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length(), querySql.indexOf(SQL_WHERE)).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
+//                } else {
+//                    requiredFieldArr = new String[]{};
+//                    tableNames = querySql.substring(querySql.indexOf(SQL_FROM) + SQL_FROM.length()).replaceAll(" left join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" right join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" full join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" inner join ", SQL_FIELD_SPLIT_CHAR).replaceAll(" join ", SQL_FIELD_SPLIT_CHAR).split(SQL_FIELD_SPLIT_CHAR);
+//                }
+//                for (String requiredField : requiredFieldArr) {
+//                    if (requiredField.contains("${")) {
+//                        requiredFields.append(requiredField.substring(0, requiredField.indexOf(" ="))).append(SQL_FIELD_SPLIT_CHAR);
+//                    }
+//                }
+//                List<TableNameInfoBO> tableNameInfoBOList = new ArrayList<>(tableNames.length);
+//                for (String tableName : tableNames) {
+//                    TableNameInfoBO tableNameInfoBO = new TableNameInfoBO();
+//                    tableName = tableName.contains(SQL_ON) ? tableName.substring(0, tableName.indexOf(SQL_ON)) : tableName;
+//                    tableName = tableName.startsWith(EMPTY_CHAR) ? tableName.trim() : tableName;
+//                    String tableAlia = tableName.contains(SQL_AS) ? tableName.substring(tableName.indexOf(SQL_AS) + SQL_AS.length()) : tableName.contains(EMPTY_CHAR) ? tableName.substring(tableName.indexOf(EMPTY_CHAR) + 1) : "";
+//                    tableNameInfoBO.setTableAlias(tableAlia.replaceAll(EMPTY_CHAR, ""));
+//                    tableNameInfoBO.setTableName(tableName.contains(EMPTY_CHAR) ? tableName.substring(0, tableName.indexOf(EMPTY_CHAR)) : tableName);
+//                    tableNameInfoBOList.add(tableNameInfoBO);
+//                }
+//                for (String responseField : responseFieldArr) {
+//                    responseField = responseField.startsWith(EMPTY_CHAR) ? responseField.trim() : responseField;
+//                    responseField = responseField.contains(EMPTY_CHAR) ? responseField.substring(0, responseField.indexOf(EMPTY_CHAR)) : responseField;
+//                    responseFields.append(responseField).append(SQL_FIELD_SPLIT_CHAR);
+//                }
+//                if (requiredFields.length() >= 1) {
+//                    requiredFieldStr = String.valueOf(new StringBuffer(requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+//                }
+//                if (responseFields.length() >= 1) {
+//                    responseFieldStr = String.valueOf(new StringBuffer(responseFields.substring(0, responseFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR))));
+//                }
+//                handleField(apiParamEntityList, requiredFieldStr, responseFieldStr, tableNameInfoBOList);
+//            }else{
+//                String sqlCount = querySql.substring(querySql.indexOf(SQL_START) + SQL_START.length(), querySql.indexOf(SQL_FROM));
+//                responseFieldStr = sqlCount.contains(SQL_AS) ? sqlCount.substring(sqlCount.indexOf(SQL_AS) + SQL_AS.length()) : sqlCount.contains(EMPTY_CHAR) ? sqlCount.substring(sqlCount.indexOf(EMPTY_CHAR) + EMPTY_CHAR.length()) : sqlCount;
+//            }
         }
         if(!CollectionUtils.isEmpty(apiParamEntityList)) {
             apiParamService.saveOrUpdateBatch(apiParamEntityList);
