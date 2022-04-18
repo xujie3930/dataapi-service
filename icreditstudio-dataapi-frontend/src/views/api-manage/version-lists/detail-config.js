@@ -83,7 +83,8 @@ export const detailTitleKeyMapping = {
 export const detailTableTitleKeyMapping = {
   params: { label: '选择参数', visible: false },
   request: { label: '请求参数定义', visible: false },
-  response: { label: '返回参数定义', visible: false }
+  response: { label: '返回参数定义', visible: false },
+  sql: { label: 'SQL语句', visible: false }
 }
 
 export const detailTableConfiguration = {
@@ -103,6 +104,12 @@ export const detailTableConfiguration = {
     tableLoading: false,
     tableData: [],
     tableConfig: tableResponseConfigurationDetail,
+    visible: false
+  },
+  sql: {
+    tableLoading: false,
+    tableData: '',
+    tableConfig: 'textarea',
     visible: false
   }
 }

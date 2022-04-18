@@ -55,7 +55,16 @@
           <div class="text">{{ detailTableTitleKeyMapping[key].label }}</div>
         </div>
 
+        <el-input
+          autosize
+          class="sql-textarea"
+          type="textarea"
+          v-if="table.tableConfiguration === 'textarea'"
+          v-model="table.tableData"
+        ></el-input>
+
         <JTable
+          v-else
           ref="editTable"
           v-loading="table.tableLoading"
           :table-data="table.tableData"

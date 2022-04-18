@@ -289,10 +289,12 @@ export default {
             this.detailTableConfiguration.params.tableData = paramList ?? []
 
             this.detailTitleKeyMapping.service.visible = !data.type
-            this.detailTitleKeyMapping.table.visible = !!data.type
+            this.detailTitleKeyMapping.table.visible =
+              !!data.type && generateApi?.model !== 1
 
             Object.assign(this.detailTableConfiguration.params, {
-              visible: data.type === 1 ? true : false
+              visible:
+                data.type === 1 && generateApi?.model !== 1 ? true : false
             })
             Object.assign(this.detailTableConfiguration.request, {
               visible: data.type === 0 ? true : false,
@@ -301,6 +303,13 @@ export default {
             Object.assign(this.detailTableConfiguration.response, {
               visible: data.type === 0 ? true : false,
               tableData: registerResponseParamSaveRequestList
+            })
+
+            // API模式为SQL模式
+            Object.assign(this.detailTableConfiguration.sql, {
+              visible:
+                data.type === 1 && generateApi?.model === 1 ? true : false,
+              tableData: generateApi?.sql
             })
           }
         })
