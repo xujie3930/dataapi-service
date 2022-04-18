@@ -223,6 +223,10 @@ export default {
     }
   }
 
+  .sql-wrap {
+    text-align: left;
+  }
+
   .banner-title-hide {
     &::before {
       display: none;

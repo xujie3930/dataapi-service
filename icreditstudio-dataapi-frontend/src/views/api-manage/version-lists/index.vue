@@ -291,8 +291,7 @@ export default {
             this.detailTableConfiguration.params.tableData = paramList ?? []
 
             this.detailTitleKeyMapping.service.visible = !data.type
-            this.detailTitleKeyMapping.table.visible =
-              !!data.type && generateApi?.model !== 1
+            this.detailTitleKeyMapping.table.visible = !!data.type
 
             Object.assign(this.detailTableConfiguration.params, {
               visible:
