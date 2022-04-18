@@ -59,7 +59,7 @@
           autosize
           class="sql-textarea"
           type="textarea"
-          v-if="table.tableConfiguration === 'textarea'"
+          v-if="table.tableConfig === 'textarea'"
           v-model="table.tableData"
         ></el-input>
 
