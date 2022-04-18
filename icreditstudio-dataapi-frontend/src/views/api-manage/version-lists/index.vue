@@ -271,12 +271,14 @@ export default {
             })
 
             // 选择表
-            cloneDeep(this.detailConfiguration.table).forEach(
-              ({ key, value }, idx) => {
-                this.detailConfiguration.table[idx].value =
-                  key in cloneDeep(generateApi ?? {}) ? generateApi[key] : value
+            cloneDeep(this.detailConfiguration.table).forEach((list, idx) => {
+              const { key, value, hide } = list
+              this.detailConfiguration.table[idx].value =
+                key in cloneDeep(generateApi ?? {}) ? generateApi[key] : value
+              if ('hide' in list) {
+                this.detailConfiguration.base[idx].hide = hide(generateApi)
               }
-            )
+            })
 
             // 后台服务
             cloneDeep(this.detailConfiguration.service).forEach(
