@@ -276,6 +276,7 @@ export default {
               this.detailConfiguration.table[idx].value =
                 key in cloneDeep(generateApi ?? {}) ? generateApi[key] : value
               if ('hide' in list) {
+                console.log(list, 'kkk')
                 this.detailConfiguration.table[idx].hide = hide(generateApi)
               }
             })
