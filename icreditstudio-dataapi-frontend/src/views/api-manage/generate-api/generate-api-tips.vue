@@ -66,7 +66,8 @@ export default {
         '2、只支持输入一条完整的SQL语句；',
         '3、支持同一数据源下的多张表的关联查询；',
         '4、编写好SQL后可点击测试进行参数设置，保证SQL查询语句正确以便API调用者成功调用； ',
-        '5、不能输入<span style="color: #ff4d4f"> SELECT * </span>的SQL语句进行查询。'
+        '5、不能输入<span style="color: #ff4d4f"> SELECT * </span>的SQL语句进行查询；',
+        '6、由于默认设置PageNum和PageSize两个字段，所以不支持输入limit语句。'
       ]
     }
   }
