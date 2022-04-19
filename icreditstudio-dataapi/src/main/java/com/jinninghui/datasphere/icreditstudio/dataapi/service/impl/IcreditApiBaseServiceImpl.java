@@ -86,6 +86,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String SQL_ON = " on ";
     private static final String SQL_AS = " as ";
     private static final String SQL_SELECT_ALL = "select *";
+    private static final String SQL_LIMIT = "limit";
     private static final String SQL_AND = " and ";
     private static final String SQL_FIELD_SPLIT_CHAR = ",";
     private static final String SQL_WHERE = " where ";
@@ -608,9 +609,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage());
             }
-//            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
-//                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage());
-//            }
+            if(sql.contains(SQL_LIMIT)){
+                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage());
+            }
         }else{
             if(StringUtils.isEmpty(request.getSql())){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage();
@@ -618,9 +619,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(sql.contains(SQL_SELECT_ALL)){
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000006.getMessage();
             }
-//            if(sql.contains(SQL_WHERE) && checkSqlWhere(sql.substring(sql.indexOf(SQL_WHERE) + SQL_WHERE.length()))){
-//                return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
-//            }
+            if(sql.contains(SQL_LIMIT)){
+                return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
+            }
         }
         sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''").replaceAll(SQL_END, "");
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
