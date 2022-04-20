@@ -410,7 +410,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         Pattern r = Pattern.compile(SQL_PLACEHOLDER);
         Matcher m = r.matcher(param.getApiGenerateSaveRequest().getSql());
         while (m.find()) {
-            requiredFields.append(m.group()).append(SQL_FIELD_SPLIT_CHAR);
+            String requestParam = m.group();
+            requestParam = requestParam.substring(requestParam.indexOf("${") + 2, requestParam.lastIndexOf("}")).replaceAll(EMPTY_CHAR, "");
+            requiredFields.append(requestParam).append(SQL_FIELD_SPLIT_CHAR);
         }
         if(requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR) != -1){
             requiredFieldStr = requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR));
