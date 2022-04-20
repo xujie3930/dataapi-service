@@ -1391,12 +1391,12 @@ public abstract class StringUtils {
 	public static String parseSql(String content, Map<String, String> kvs) {
 		//必填参数
 		Set<String> noRequiredSet = new HashSet<>();
-		Pattern p = Pattern.compile("(\\$\\{)([\\w]+)(\\})");
+		Pattern p = Pattern.compile("\\$\\{.*?\\}");
 		Matcher m = p.matcher(content);
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
 			String group = m.group();
-			String key = group.replace("${", "").replace("}",  "");
+			String key = group.replace("${", "").replace("}",  "").replaceAll(" ", "");
 			String value = kvs.get(key);
 			if (value == null){
 				noRequiredSet.add(key);
