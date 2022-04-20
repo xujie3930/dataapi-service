@@ -1412,7 +1412,7 @@ public abstract class StringUtils {
 				tempSql = tempSql.replaceAll(field + " = " + "'null'", "");
 			}
 		}
-		if (!tempSql.contains("=")){
+		if (!tempSql.contains("=") || !tempSql.contains("like")){
 			tempSql = tempSql.replaceAll("where", "");
 			tempSql = tempSql.replaceAll("WHERE", "");
 		}
