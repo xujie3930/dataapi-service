@@ -64,7 +64,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         RedisApiInfo apiInfo = getApiAuthInfoByVersionAndPath(version, path);
 
         String queryString = request.getQueryString();
-        Map paramMap = MapUtils.str2Map(queryString);
+        Map<String, Object> paramMap = MapUtils.str2Map(queryString);
 
         String token = checkRequestToken(request);
 

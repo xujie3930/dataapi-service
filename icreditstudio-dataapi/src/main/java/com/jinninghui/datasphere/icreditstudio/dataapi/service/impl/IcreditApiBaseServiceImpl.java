@@ -47,6 +47,8 @@ import javax.annotation.Resource;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
@@ -92,6 +94,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private static final String SQL_WHERE = " where ";
     private static final String SQL_FROM = " from ";
     private static final String SQL_END = ";";
+    private static final String SQL_PLACEHOLDER = "\\$\\{.*?\\}";
     private static final String SQL_LIMIT_ONE = " limit 1";
     private static final String SQL_CONN_CHAR = ".";
     private static final String SEPARATOR = "|";
@@ -330,7 +333,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         if(ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())){
             return createApiBySingleTableModel(param, apiVersion, apiId);
         }else{
-            return createApiBySqlModel(param, apiVersion, apiId);
+            return createApiBySqlModel(param, apiVersion);
         }
     }
 
@@ -397,13 +400,21 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     }
 
     //sql模式
-    private CreateApiInfoBO createApiBySqlModel(DatasourceApiSaveParam param, Integer apiVersion, String apiId){
+    private CreateApiInfoBO createApiBySqlModel(DatasourceApiSaveParam param, Integer apiVersion){
 //        String querySql;
-//        String requiredFieldStr = null;
+        String requiredFieldStr = null;
 //        String responseFieldStr = null;
-//        StringBuffer requiredFields = new StringBuffer();//请求参数
+        StringBuffer requiredFields = new StringBuffer();//请求参数
 //        StringBuffer responseFields = new StringBuffer();//返回参数
         checkQuerySql(new CheckQuerySqlRequest(param.getApiGenerateSaveRequest().getDatasourceId(), param.getApiGenerateSaveRequest().getSql()), apiVersion, QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode());
+        Pattern r = Pattern.compile(SQL_PLACEHOLDER);
+        Matcher m = r.matcher(param.getApiGenerateSaveRequest().getSql());
+        while (m.find()) {
+            requiredFields.append(m.group()).append(SQL_FIELD_SPLIT_CHAR);
+        }
+        if(requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR) != -1){
+            requiredFieldStr = requiredFields.substring(0, requiredFields.lastIndexOf(SQL_FIELD_SPLIT_CHAR));
+        }
 //        List<IcreditApiParamEntity> apiParamEntityList = createApiInfoBO.getApiParamEntityList();
 //        querySql = param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase().replaceAll(SQL_END, "");
 //        String[] tableNames = null;
@@ -447,6 +458,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         createApiInfoBO.setQuerySql(param.getApiGenerateSaveRequest().getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).replaceAll(SQL_END, ""));
 //        createApiInfoBO.setRequiredFieldStr(tableFieldBO.getRequiredFieldStr());
 //        createApiInfoBO.setResponseFieldStr(tableFieldBO.getResponseFieldStr());
+        createApiInfoBO.setRequiredFieldStr(requiredFieldStr);
         return createApiInfoBO;
     }
 
@@ -623,7 +635,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 return ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000041.getMessage();
             }
         }
-        sql = "explain " + sql.replaceAll("\\$\\{.*?\\}", "''").replaceAll(SQL_END, "");
+        sql = "explain " + sql.replaceAll(SQL_PLACEHOLDER, "''").replaceAll(SQL_END, "");
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
         String uri = datasource.getUri();
 //        List<IcreditApiParamEntity> apiParamEntityList = null;
