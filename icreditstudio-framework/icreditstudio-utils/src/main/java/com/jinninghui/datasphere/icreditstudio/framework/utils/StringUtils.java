@@ -1391,12 +1391,12 @@ public abstract class StringUtils {
 	public static String parseSql(String content, Map<String, String> kvs) {
 		//必填参数
 		Set<String> noRequiredSet = new HashSet<>();
-		Pattern p = Pattern.compile("(\\$\\{)([\\w]+)(\\})");
+		Pattern p = Pattern.compile("\\$\\{.*?\\}");
 		Matcher m = p.matcher(content);
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
 			String group = m.group();
-			String key = group.replace("${", "").replace("}",  "");
+			String key = group.replace("${", "").replace("}",  "").replaceAll(" ", "");
 			String value = kvs.get(key);
 			if (value == null){
 				noRequiredSet.add(key);
@@ -1412,15 +1412,9 @@ public abstract class StringUtils {
 				tempSql = tempSql.replaceAll(field + " = " + "'null'", "");
 			}
 		}
-		if (!tempSql.contains("=")){
-			tempSql = tempSql.replaceAll("where", "");
-			tempSql = tempSql.replaceAll("WHERE", "");
+		if (tempSql.contains("where")){
+			tempSql = tempSql.replaceAll("where", "where 1=1 and ");
 		}
-		//TODO：暂且先字符串替换，选填参数得做转换
-		tempSql = tempSql.replaceAll("where  and", "where ");
-		tempSql = tempSql.replaceAll("WHERE  and", "WHERE ");
-		tempSql = tempSql.replaceAll("where and", "where ");
-		tempSql = tempSql.replaceAll("WHERE and", "WHERE ");
 		return tempSql;
 	}
 

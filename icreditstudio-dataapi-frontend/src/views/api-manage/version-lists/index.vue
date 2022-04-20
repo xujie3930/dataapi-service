@@ -271,12 +271,15 @@ export default {
             })
 
             // 选择表
-            cloneDeep(this.detailConfiguration.table).forEach(
-              ({ key, value }, idx) => {
-                this.detailConfiguration.table[idx].value =
-                  key in cloneDeep(generateApi ?? {}) ? generateApi[key] : value
+            cloneDeep(this.detailConfiguration.table).forEach((list, idx) => {
+              const { key, value, hide } = list
+              this.detailConfiguration.table[idx].value =
+                key in cloneDeep(generateApi ?? {}) ? generateApi[key] : value
+              if ('hide' in list) {
+                console.log(list, 'kkk')
+                this.detailConfiguration.table[idx].hide = hide(generateApi)
               }
-            )
+            })
 
             // 后台服务
             cloneDeep(this.detailConfiguration.service).forEach(
@@ -292,7 +295,8 @@ export default {
             this.detailTitleKeyMapping.table.visible = !!data.type
 
             Object.assign(this.detailTableConfiguration.params, {
-              visible: data.type === 1 ? true : false
+              visible:
+                data.type === 1 && generateApi?.model !== 1 ? true : false
             })
             Object.assign(this.detailTableConfiguration.request, {
               visible: data.type === 0 ? true : false,
@@ -301,6 +305,13 @@ export default {
             Object.assign(this.detailTableConfiguration.response, {
               visible: data.type === 0 ? true : false,
               tableData: registerResponseParamSaveRequestList
+            })
+
+            // API模式为SQL模式
+            Object.assign(this.detailTableConfiguration.sql, {
+              visible:
+                data.type === 1 && generateApi?.model === 1 ? true : false,
+              tableData: generateApi?.sql
             })
           }
         })

@@ -65,7 +65,15 @@ export const detailConfiguration = {
   table: [
     { label: '数据库类型', value: 'MySQL', key: 'databaseType' },
     { label: '数据源名称', value: '', key: 'databaseName' },
-    { label: '数据表名称', value: '', key: 'tableName' }
+    {
+      label: '数据表名称',
+      value: '',
+      key: 'tableName',
+      hide: data => {
+        console.log(data, data.model !== 1, 'data')
+        return data.model !== 1
+      }
+    }
   ],
 
   service: [
@@ -83,7 +91,8 @@ export const detailTitleKeyMapping = {
 export const detailTableTitleKeyMapping = {
   params: { label: '选择参数', visible: false },
   request: { label: '请求参数定义', visible: false },
-  response: { label: '返回参数定义', visible: false }
+  response: { label: '返回参数定义', visible: false },
+  sql: { label: 'SQL语句', visible: false }
 }
 
 export const detailTableConfiguration = {
@@ -103,6 +112,12 @@ export const detailTableConfiguration = {
     tableLoading: false,
     tableData: [],
     tableConfig: tableResponseConfigurationDetail,
+    visible: false
+  },
+  sql: {
+    tableLoading: false,
+    tableData: '',
+    tableConfig: 'textarea',
     visible: false
   }
 }

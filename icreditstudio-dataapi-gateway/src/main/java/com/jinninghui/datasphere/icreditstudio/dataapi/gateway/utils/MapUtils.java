@@ -2,7 +2,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Date;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +16,12 @@ import java.util.stream.Collectors;
  **/
 public class MapUtils {
 
-    public static Map str2Map(String str){
-        Map map = new HashMap();
+    private static String UTF8 = "UTF-8";
+    private static String PERCENT_CHAR = "%";
+    private static String DOUBLE_PERCENT_CHAR = "%%";
+
+    public static Map<String, Object> str2Map(String str){
+        Map<String, Object> map = new HashMap();
         if (StringUtils.isBlank(str)){
             return map;
         }
@@ -50,5 +55,26 @@ public class MapUtils {
         map.put("keyb", "222");
         List<String> str = mapKeyToList(map);
         System.out.println(map);
+    }
+
+    public static Map<String, Object> convertParams(String queryString) {
+        Map<String, Object> paramMap = MapUtils.str2Map(queryString);
+        try {
+            for (String key : paramMap.keySet()) {
+                String value = String.valueOf(paramMap.get(key));
+                if(value.startsWith(DOUBLE_PERCENT_CHAR) && value.endsWith(PERCENT_CHAR)){//like 的参数值 -- %xxx%
+                    paramMap.put(key, PERCENT_CHAR + URLDecoder.decode(value.substring(1, value.lastIndexOf(PERCENT_CHAR)),UTF8) + PERCENT_CHAR);
+                }else if(value.startsWith(DOUBLE_PERCENT_CHAR)){//like 的参数值 -- %xxx
+                    paramMap.put(key, PERCENT_CHAR + URLDecoder.decode(value.substring(1),UTF8));
+                }else if(value.endsWith(PERCENT_CHAR)){//like 的参数值 -- xxx%
+                    paramMap.put(key, URLDecoder.decode(value.substring(0, value.lastIndexOf(PERCENT_CHAR)),UTF8) + PERCENT_CHAR);
+                }else{
+                    paramMap.put(key, URLDecoder.decode(value, UTF8));
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return paramMap;
     }
 }

@@ -55,7 +55,12 @@
           <div class="text">{{ detailTableTitleKeyMapping[key].label }}</div>
         </div>
 
+        <div class="sql-wrap" v-if="table.tableConfig === 'textarea'">
+          {{ table.tableData }}
+        </div>
+
         <JTable
+          v-else
           ref="editTable"
           v-loading="table.tableLoading"
           :table-data="table.tableData"
@@ -216,6 +221,10 @@ export default {
       background: #1890ff;
       border-radius: 0px 2px 2px 0px;
     }
+  }
+
+  .sql-wrap {
+    text-align: left;
   }
 
   .banner-title-hide {
