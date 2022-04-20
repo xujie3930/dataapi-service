@@ -1412,15 +1412,9 @@ public abstract class StringUtils {
 				tempSql = tempSql.replaceAll(field + " = " + "'null'", "");
 			}
 		}
-		if (!tempSql.contains("=") || !tempSql.contains("like")){
-			tempSql = tempSql.replaceAll("where", "");
-			tempSql = tempSql.replaceAll("WHERE", "");
+		if (tempSql.contains("where")){
+			tempSql = tempSql.replaceAll("where", "where 1=1 ");
 		}
-		//TODO：暂且先字符串替换，选填参数得做转换
-		tempSql = tempSql.replaceAll("where  and", "where ");
-		tempSql = tempSql.replaceAll("WHERE  and", "WHERE ");
-		tempSql = tempSql.replaceAll("where and", "where ");
-		tempSql = tempSql.replaceAll("WHERE and", "WHERE ");
 		return tempSql;
 	}
 
