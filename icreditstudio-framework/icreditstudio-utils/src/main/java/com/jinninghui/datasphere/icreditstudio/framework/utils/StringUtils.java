@@ -1413,7 +1413,7 @@ public abstract class StringUtils {
 			}
 		}
 		if (tempSql.contains("where")){
-			tempSql = tempSql.replaceAll("where", "where 1=1 ");
+			tempSql = tempSql.replaceAll("where", "where 1=1 and ");
 		}
 		return tempSql;
 	}
