@@ -552,7 +552,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         Connection conn = null;
         try {
             conn = getConnectionByUri(uri);
-            System.out.println(conn == null? "null" : "notnull");
             ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), PERCENTAGE, request.getTableName(), PERCENTAGE);
             while(rs.next()) {
                 FieldInfo fieldInfo = new FieldInfo();
@@ -577,8 +576,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         String password = DBConnectionManager.getInstance().getPassword(uri);
         String url = DBConnectionManager.getInstance().getUri(uri);
         Connection conn = DriverManager.getConnection(url, username, password);
-        String schama = DBConnectionManager.getInstance().getPassword(uri);
-        if (StringUtils.isBlank(schama)){
+        String schama = DBConnectionManager.getInstance().getSchema(uri);
+        if (StringUtils.isNotBlank(schama)){
             conn.setSchema(schama);
         }
         return conn;
