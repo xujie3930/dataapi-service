@@ -552,6 +552,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         Connection conn = null;
         try {
             conn = getConnectionByUri(uri);
+            System.out.println(conn == null? "null" : "notnull");
             ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), PERCENTAGE, request.getTableName(), PERCENTAGE);
             while(rs.next()) {
                 FieldInfo fieldInfo = new FieldInfo();
