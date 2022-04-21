@@ -295,15 +295,19 @@
           >
             <el-row type="flex" class="form-row-item" justify="space-between">
               <el-col :span="11">
-                <el-form-item label="数据库类型" prop="databaseTye">
+                <el-form-item
+                  label="数据库类型"
+                  prop="apiGenerateSaveRequest.databaseType"
+                >
                   <el-select
-                    readonly
-                    disabled
+                    filterable
                     style="width: 100%"
-                    v-model="form.databaseTye"
                     placeholder="请选择数据库类型"
+                    v-model="form.apiGenerateSaveRequest.databaseType"
+                    @change="handleDatabaseTypeChange"
                   >
                     <el-option label="MySQL" :value="1"></el-option>
+                    <el-option label="Postgresql" :value="3"></el-option>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -427,15 +431,19 @@
           >
             <el-row type="flex" class="form-row-item" justify="space-between">
               <el-col :span="11">
-                <el-form-item label="数据库类型" prop="databaseTye">
+                <el-form-item
+                  label="数据库类型"
+                  prop="apiGenerateSaveRequest.databaseType"
+                >
                   <el-select
-                    readonly
-                    disabled
+                    filterable
                     style="width: 100%"
-                    v-model="form.databaseTye"
                     placeholder="请选择数据库类型"
+                    v-model="form.apiGenerateSaveRequest.databaseType"
+                    @change="handleDatabaseTypeChange"
                   >
                     <el-option label="MySQL" :value="1"></el-option>
+                    <el-option label="Postgresql" :value="3"></el-option>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -560,7 +568,6 @@ export default {
         name: '',
         reqPath: '',
         reqHost: '',
-        databaseTye: 1,
         apiGroupId: null,
         requestType: 'GET',
         responseType: 'JSON',
@@ -570,6 +577,7 @@ export default {
           model: 0,
           datasourceId: '',
           tableName: '',
+          databaseType: 1,
           sql: ''
         },
         apiParamSaveRequestList: [],
@@ -584,9 +592,6 @@ export default {
           { required: true, message: 'API名称不能为空', trigger: 'blur' },
           { min: 2, message: '至少输入2个字符', trigger: 'blur' },
           { validator: this.verifyApiName, trigger: 'blur' }
-        ],
-        databaseTye: [
-          { required: true, message: '必填项不能为空', trigger: 'change' }
         ],
         apiGroupId: [
           { required: true, message: '所属分组不能为空', trigger: 'change' }
@@ -613,6 +618,9 @@ export default {
         ],
         responseType: [
           { required: true, message: '必填项不能为空', trigger: 'blur' }
+        ],
+        'apiGenerateSaveRequest.databaseType': [
+          { required: true, message: '必填项不能为空', trigger: 'change' }
         ],
         'apiGenerateSaveRequest.model': [
           { required: true, message: '必填项不能为空', trigger: 'change' }
@@ -831,6 +839,18 @@ export default {
       !value && (row.isRequest = value)
     },
 
+    // 切换-数据库类型发生更改
+    handleDatabaseTypeChange() {
+      this.form.apiGenerateSaveRequest.datasourceId = ''
+      this.form.apiParamSaveRequestList = []
+      this.form.apiGenerateSaveRequest.tableName = ''
+      this.selectTableName = ''
+      this.fetchSelectOptionsByKey({
+        key: 'datasourceOptions',
+        methodName: 'getDatasourceOptions'
+      })
+    },
+
     // 切换-数据源名称发生更改
     handleDatasourceNameChange() {
       this.form.apiParamSaveRequestList = []
@@ -938,10 +958,10 @@ export default {
     // 获取-数据表名称列表
     fetchSelectOptionsByKey({ methodName, key }) {
       const { opType } = this.options
-      const { databaseTye: type, apiGenerateSaveRequest: r } = this.form
+      const { apiGenerateSaveRequest: r } = this.form
       const params = {
         dataNameOptions: { id: r.datasourceId },
-        datasourceOptions: { type }
+        datasourceOptions: { type: r.databaseType }
       }
 
       API[methodName](params[key])
@@ -993,7 +1013,13 @@ export default {
 
             // 数据源生成API
             if (type === 1) {
-              const fieldArr = ['tableName', 'datasourceId', 'model', 'sql']
+              const fieldArr = [
+                'databaseType',
+                'tableName',
+                'datasourceId',
+                'model',
+                'sql'
+              ]
               fieldArr.forEach(
                 item =>
                   (this.form.apiGenerateSaveRequest[item] = generateApi[item])
