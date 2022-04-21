@@ -40,37 +40,24 @@ public class ResultReturningAspect {
             returnValue = ((BusinessPageResult<?>) returnValue).getList();
         }
         Set<String> userIdSet = new HashSet<>();
-        if (returnValue instanceof Collection){
-            for (Object obj : ((Collection<?>) returnValue)) {
-                getUserIds(obj, userIdSet);
-            }
-        }else {
-            getUserIds(returnValue, userIdSet);
-        }
+        getUserIds(returnValue, userIdSet);
         Map<String, String> map = oauthApiService.getUserNameBatch(new ArrayList<>(userIdSet));
         if (CollectionUtils.isEmpty(map)){
             return;
         }
-        if (returnValue instanceof Collection){
-            for (Object obj : ((Collection<?>) returnValue)) {
-                process(obj, map);
-            }
-        }else {
-            process(returnValue, map);
-        }
+        process(returnValue, map);
         log.info("后置处理耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
     }
 
     private Set<String> getUserIds(Object obj, Set<String> set) throws IllegalAccessException {
+        if (obj instanceof Collection){
+            for (Object junior : ((Collection<?>) obj)) {
+                getUserIds(junior, set);
+            }
+        }
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
-            if (field.get(obj) instanceof Collection){
-                Collection collection = (Collection) field.get(obj);
-                for (Object junior : collection) {
-                    getUserIds(junior, set);
-                }
-            }
             if (returnSet.contains(field.getName())){
                 //丢到统一的List中
                 addToList(obj, field, set);
@@ -78,6 +65,13 @@ public class ResultReturningAspect {
         }
         Field[] superFields = obj.getClass().getSuperclass().getDeclaredFields();
         for (Field superField : superFields) {
+            superField.setAccessible(true);
+            if (superField.get(obj) instanceof Collection){
+                Collection collection = (Collection) superField.get(obj);
+                for (Object junior : collection) {
+                    getUserIds(junior, set);
+                }
+            }
             if (returnSet.contains(superField.getName())){
                 addToList(obj, superField, set);
             }
@@ -104,15 +98,14 @@ public class ResultReturningAspect {
     }
 
     private void process(Object obj, Map map) throws IllegalAccessException {
+        if (obj instanceof Collection){
+            for (Object junior : ((Collection<?>) obj)) {
+                process(junior, map);
+            }
+        }
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
-            if (field.get(obj) instanceof Collection){
-                Collection collection = (Collection) field.get(obj);
-                for (Object junior : collection) {
-                    process(junior, map);
-                }
-            }
             if (returnSet.contains(field.getName())){
                 setNewValue(obj, map, field);
             }

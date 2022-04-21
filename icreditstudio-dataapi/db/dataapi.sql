@@ -308,6 +308,7 @@ CREATE TABLE icredit_generate_api
     `update_time`   datetime     DEFAULT NULL,
     `update_by`     varchar(30)  DEFAULT NULL,
     `del_flag`      tinyint(1) DEFAULT NULL,
+    `database_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '数据源类型：1-mysql,2-oracle,3-postgre',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='生成API表';
 

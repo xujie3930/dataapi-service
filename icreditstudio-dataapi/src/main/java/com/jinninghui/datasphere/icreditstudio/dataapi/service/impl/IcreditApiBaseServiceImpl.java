@@ -247,7 +247,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 //                }
 //            }else{
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                        apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
+                        apiBaseEntity.getType(), param.getApiGenerateSaveRequest().getDatabaseType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                         createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
 //            }
         }
@@ -551,7 +551,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<FieldInfo> fieldList = new ArrayList<>();
         Connection conn = null;
         try {
-            conn = getConnectionByUri(uri);
+            conn = DBConnectionManager.getInstance().getConnection(uri, datasource.getType());
             ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), PERCENTAGE, request.getTableName(), PERCENTAGE);
             while(rs.next()) {
                 FieldInfo fieldInfo = new FieldInfo();
@@ -566,16 +566,17 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            closeConnection(conn);
+            DBConnectionManager.getInstance().freeConnection(uri, conn);
         }
         return BusinessResult.success(fieldList);
     }
 
-    private Connection getConnectionByUri(String uri) throws SQLException {
+    private Connection getConnectionByUri(String uri, Integer type) throws SQLException {
         String username = DBConnectionManager.getInstance().getUsername(uri);
         String password = DBConnectionManager.getInstance().getPassword(uri);
         String url = DBConnectionManager.getInstance().getUri(uri);
-        return DriverManager.getConnection(url, username, password);
+//        return DriverManager.getConnection(url, username, password);
+        return DBConnectionManager.getInstance().getConnection(uri, type);
     }
 
     private DatasourceDetailResult getDatasourceDetail(String datasourceId) {
@@ -645,7 +646,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         CreateApiInfoBO createApiInfoBO = null;
 //        StringBuilder tableNames = new StringBuilder();
         try {
-            conn = getConnectionByUri(uri);
+            conn = getConnectionByUri(uri, datasource.getType());
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
 //            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
@@ -772,7 +773,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 //                }
 //            }else {
                 saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
-                        generateApiEntity.getModel(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
+                        generateApiEntity.getModel(), generateApiEntity.getDatabaseType(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                         registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
 //            }
             apiBaseHiEntity.setPublishUser(userId);
@@ -782,13 +783,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(true);
     }
 
-    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, String apiName, Integer apiType, Integer apiVersion, String sql,
+    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, String apiName, Integer apiType, Integer databaseType, Integer apiVersion, String sql,
                                     String requiredFieldStr, String responseFieldStr, List<RegisterApiParamInfo> registerApiParamInfos, String reqHost, String reqPath) {
         BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(datasourceId));
         ConnectionInfoVO connInfo = connResult.getData();
         RedisApiInfo redisApiInfo = new RedisApiInfo();
         redisApiInfo.setApiId(apiId);
         redisApiInfo.setApiType(apiType);
+        redisApiInfo.setDatabaseType(databaseType);
         redisApiInfo.setApiName(apiName);
         if(null != connInfo){
             redisApiInfo.setUrl(handleUrl(connInfo.getUrl()));
@@ -977,7 +979,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                    apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
+                    apiBaseEntity.getType(), param.getApiGenerateSaveRequest().getDatabaseType(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
                     null, null);
         }
         log.info("发布耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
@@ -1041,7 +1043,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
             saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
-                    apiBaseEntity.getType(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
+                    apiBaseEntity.getType(), generateApiEntity.getDatabaseType(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                     registerApiParamInfos, null, null);
             apiBaseEntity.setPublishUser(userId);
             apiBaseEntity.setPublishTime(nowDate);

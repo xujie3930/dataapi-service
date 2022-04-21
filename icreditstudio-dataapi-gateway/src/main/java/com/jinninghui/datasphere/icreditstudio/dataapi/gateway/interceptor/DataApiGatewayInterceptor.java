@@ -86,7 +86,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
             //发送kafka失败信息
             ApiLogInfo failLog = generateFailLog(apiLogInfo, e);
             kafkaProducer.send(failLog);
-            logger.info("发送kafka异常日志:{}", failLog);
+            logger.info("`发送kafka异常日志:{}", failLog);
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000013.getCode(), failLog.getExceptionDetail());
         }
         DataApiGatewayContext context = new DataApiGatewayContext();

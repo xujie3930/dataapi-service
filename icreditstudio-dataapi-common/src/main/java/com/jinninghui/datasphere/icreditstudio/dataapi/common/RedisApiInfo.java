@@ -9,6 +9,7 @@ public class RedisApiInfo {
 
     private String apiId;
     private Integer apiType;
+    private Integer databaseType;
     private String apiName;
     private String url;
     private String userName;

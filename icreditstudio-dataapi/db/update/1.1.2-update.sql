@@ -1,0 +1,1 @@
+ALTER TABLE icredit_generate_api ADD `database_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '数据源类型：1-mysql,2-oracle,3-postgre';

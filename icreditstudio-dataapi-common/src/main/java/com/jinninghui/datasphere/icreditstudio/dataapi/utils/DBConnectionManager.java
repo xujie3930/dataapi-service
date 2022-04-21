@@ -16,6 +16,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.Vector;
 
 @Slf4j
@@ -229,12 +230,16 @@ public class DBConnectionManager {
         private Connection newConnection() {
             Connection con = null;
             try {
-                if (user == null) {
-                    con = DriverManager.getConnection(URL);
-                } else {
-                    con = DriverManager.getConnection(URL, user, password);
+                Properties props =new Properties();
+                Class.forName(driver);
+                props.setProperty("remarks", "true"); //设置可以获取remarks信息
+                props.setProperty("useInformationSchema", "true");//设置可以获取tables remarks信息
+                if (user != null) {
+                    props.setProperty("user", user);
+                    props.setProperty("password", password);
                 }
-            } catch (SQLException e) {
+                con = DriverManager.getConnection(URL, props);
+            } catch (Exception e) {
                 return null;
             }
             return con;

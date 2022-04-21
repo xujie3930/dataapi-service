@@ -10,4 +10,5 @@ public class DatasourceApiGenerateSaveRequest {
     private String datasourceId;
     private String sql;
     private String tableName;
+    private Integer databaseType;//数据库类型:1-mysql,2-oracle,3-pg
 }
