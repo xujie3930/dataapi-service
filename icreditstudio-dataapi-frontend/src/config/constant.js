@@ -59,6 +59,14 @@ export const REQUEST_STATUS = {
   2: { name: '失败', color: '#ff4d4f' }
 }
 
+// 数据库类型
+export const DATABASE_TYPE = {
+  mysql: 1,
+  oracle: 2,
+  postgresql: 3,
+  sqlserver: 4
+}
+
 export default {
   STATUS_MAPPING,
   API_TYPE,

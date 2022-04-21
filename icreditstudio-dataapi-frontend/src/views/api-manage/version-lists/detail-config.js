@@ -2,13 +2,27 @@
  * @Description: 详情参数配置
  * @Date: 2022-03-06
  */
-import { API_TYPE, STATUS_MAPPING, API_MODE } from '@/config/constant'
+import {
+  API_TYPE,
+  STATUS_MAPPING,
+  API_MODE,
+  DATABASE_TYPE
+} from '@/config/constant'
 import { dateFormat } from '@/utils'
 import {
   tableServiceApiDetailTableConfig,
   tableRequestConfigurationDetail,
   tableResponseConfigurationDetail
 } from '@/configuration/table'
+
+const objectKeyConvertToValue = source => {
+  let temp = {}
+  for (const key in source) {
+    temp[source[key]] = key
+  }
+
+  return temp
+}
 
 export const detailConfiguration = {
   base: [
@@ -63,7 +77,12 @@ export const detailConfiguration = {
   ],
 
   table: [
-    { label: '数据库类型', value: 'MySQL', key: 'databaseType' },
+    {
+      label: '数据库类型',
+      value: 'MySQL',
+      key: 'databaseType',
+      formatter: val => objectKeyConvertToValue(DATABASE_TYPE)[val]
+    },
     { label: '数据源名称', value: '', key: 'databaseName' },
     {
       label: '数据表名称',
