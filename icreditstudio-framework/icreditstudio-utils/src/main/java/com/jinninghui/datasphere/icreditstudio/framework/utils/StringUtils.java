@@ -1418,11 +1418,6 @@ public abstract class StringUtils {
 		return tempSql;
 	}
 
-	public static String addPageParam(String sql, Integer pageNum, Integer pageSize) {
-		int index = (pageNum - 1) * pageSize;
-		String addPageParam = new StringBuilder(sql).append(" limit ").append(index).append(" , ").append(pageSize).toString();
-		return addPageParam;
-	}
 
 	public static String getSelectCountSql(String sql) {
 		String matterSelect = "select";

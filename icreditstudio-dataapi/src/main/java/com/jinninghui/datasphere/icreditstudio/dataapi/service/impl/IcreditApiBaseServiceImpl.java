@@ -551,7 +551,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<FieldInfo> fieldList = new ArrayList<>();
         Connection conn = null;
         try {
-            conn = DBConnectionManager.getInstance().getConnection(uri, datasource.getType());
+            conn = getConnectionByUri(uri);
             ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), PERCENTAGE, request.getTableName(), PERCENTAGE);
             while(rs.next()) {
                 FieldInfo fieldInfo = new FieldInfo();
@@ -566,17 +566,21 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            DBConnectionManager.getInstance().freeConnection(uri, conn);
+            closeConnection(conn);
         }
         return BusinessResult.success(fieldList);
     }
 
-    private Connection getConnectionByUri(String uri, Integer type) throws SQLException {
+    private Connection getConnectionByUri(String uri) throws SQLException {
         String username = DBConnectionManager.getInstance().getUsername(uri);
         String password = DBConnectionManager.getInstance().getPassword(uri);
         String url = DBConnectionManager.getInstance().getUri(uri);
-//        return DriverManager.getConnection(url, username, password);
-        return DBConnectionManager.getInstance().getConnection(uri, type);
+        Connection conn = DriverManager.getConnection(url, username, password);
+        String schama = DBConnectionManager.getInstance().getPassword(uri);
+        if (StringUtils.isBlank(schama)){
+            conn.setSchema(schama);
+        }
+        return conn;
     }
 
     private DatasourceDetailResult getDatasourceDetail(String datasourceId) {
@@ -646,7 +650,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         CreateApiInfoBO createApiInfoBO = null;
 //        StringBuilder tableNames = new StringBuilder();
         try {
-            conn = getConnectionByUri(uri, datasource.getType());
+            conn =  DBConnectionManager.getInstance().getConnection(uri, type);;
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
 //            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
@@ -793,7 +797,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         redisApiInfo.setDatabaseType(databaseType);
         redisApiInfo.setApiName(apiName);
         if(null != connInfo){
-            redisApiInfo.setUrl(handleUrl(connInfo.getUrl()));
+            redisApiInfo.setUrl(connInfo.getUrl());
             redisApiInfo.setUserName(connInfo.getUsername());
             redisApiInfo.setPassword(connInfo.getPassword());
             redisApiInfo.setQuerySql(sql);

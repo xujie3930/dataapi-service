@@ -4,6 +4,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.ApiLogInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.CallStatusEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DatasourceTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceFactory;
+import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.DataApiGatewayPageResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
@@ -45,8 +47,9 @@ public class GenerateService implements ApiBaseService {
 
     @Override
     public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
-        Long dataCount = 0L;
         String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), params);
+        DatasourceSync factory = DatasourceFactory.getDatasource(apiInfo.getDatabaseType());
+        querySql = factory.getPageParamBySql(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("数据源生成API查询sql：{}", querySql);
         Connection conn = null;
         try {
@@ -55,10 +58,13 @@ public class GenerateService implements ApiBaseService {
             if (conn == null) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
             }
-            Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
             if (params.containsKey(PAGENUM_MARK) && params.containsKey(PAGESIZE_MARK)) {
-                DataApiGatewayPageResult<Object> build = getPageResult(params, querySql, dataCount, apiLogInfo, stmt);
+                Integer pageNum = Math.max(Integer.parseInt((String) params.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
+                Integer pageSize = Math.min(Integer.parseInt((String) params.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
+                querySql = factory.getPageParamBySql(querySql, pageNum, pageSize);
+                DataApiGatewayPageResult<Object> build = getPageResult(pageNum, pageSize, querySql, apiLogInfo, stmt);
                 return BusinessResult.success(build);
             } else {
                 //如果不传分页最大查询500条，不需要用分页对象包装
@@ -70,19 +76,17 @@ public class GenerateService implements ApiBaseService {
         }
     }
 
-    private DataApiGatewayPageResult<Object> getPageResult(Map map, String querySql, Long dataCount, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
-        Integer pageNum = Math.max(Integer.parseInt((String) map.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
-        Integer pageSize = Math.min(Integer.parseInt((String) map.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
+    private DataApiGatewayPageResult<Object> getPageResult(Integer pageNum, Integer pageSize, String querySql, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
+        Long dataCount = 0L;
         String countSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.getSelectCountSql(querySql);
         ResultSet countRs = stmt.executeQuery(countSql);
         if (countRs.next()) {
             //rs结果集第一个参数即为记录数，且其结果集中只有一个参数
             dataCount = countRs.getLong(1);
         }
-        String pageSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, pageNum, pageSize);
-        log.info("查询sql分页:{}", pageSql);
-        ResultSet pagingRsForPageParam = stmt.executeQuery(pageSql);
-        ApiLogInfo successLog = generateSuccessLog(apiLogInfo, pageSql);
+        log.info("查询sql分页:{}", querySql);
+        ResultSet pagingRsForPageParam = stmt.executeQuery(querySql);
+        ApiLogInfo successLog = generateSuccessLog(apiLogInfo, querySql);
         kafkaProducer.send(successLog);
         log.info("发送kafka成功日志:{}", successLog);
         if (pagingRsForPageParam.next()) {
@@ -98,7 +102,6 @@ public class GenerateService implements ApiBaseService {
     }
 
     private List getListResult(String querySql, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
-        querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.addPageParam(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("查询sql:{}", querySql);
         ResultSet pagingRs = stmt.executeQuery(querySql);
         //发送成功消息
