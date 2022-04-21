@@ -60,7 +60,7 @@
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
                     <compilerArguments>
-                        <extdirs>${project.basedir}/lib</extdirs>
+                        <extdirs>${basedir}/src/main/resources/lib</extdirs>
                     </compilerArguments>
                 </configuration>
             </plugin>
