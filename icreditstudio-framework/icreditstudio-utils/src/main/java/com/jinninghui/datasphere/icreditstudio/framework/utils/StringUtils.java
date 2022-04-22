@@ -1424,8 +1424,9 @@ public abstract class StringUtils {
 		String matterFrom = "from";
 		String countSsql = " count(*) ";
 		int selectIndex = sql.indexOf(matterSelect);//第一个字符串的起始位置
+		int limitIndex = sql.indexOf("limit");//第一个字符串的起始位置
 		int fromIndex = sql.indexOf(matterFrom);//第二个字符串的起始位置
-		return sql.substring(0, selectIndex + matterSelect.length()) + countSsql + sql.substring(fromIndex, sql.length());
+		return sql.substring(0, selectIndex + matterSelect.length()) + countSsql + sql.substring(fromIndex, limitIndex);
 	}
 
 	public static String removeExtraStr(String str, List<String> extraList) {
