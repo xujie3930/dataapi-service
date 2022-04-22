@@ -575,7 +575,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         String username = DBConnectionManager.getInstance().getUsername(uri);
         String password = DBConnectionManager.getInstance().getPassword(uri);
         String url = DBConnectionManager.getInstance().getUri(uri);
-        Connection conn = DriverManager.getConnection(url, username, password);
+        Connection conn = DriverManager.getConnection(uri, username, password);
         String schama = DBConnectionManager.getInstance().getSchema(uri);
         if (StringUtils.isNotBlank(schama)){
             conn.setSchema(schama);
