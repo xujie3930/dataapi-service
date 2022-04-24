@@ -97,7 +97,7 @@ public class GenerateService implements ApiBaseService {
             pageForm.setPageNum(pageNum);
             pageForm.setPageSize(pageSize);
             DataApiGatewayPageResult build = DataApiGatewayPageResult.build(list, pageForm, dataCount);
-            build.setPageCount(Math.max(build.getPageCount(), RECORDS_MAX % pageSize == 0? RECORDS_MAX / pageSize : RECORDS_MAX / pageSize + 1));
+            build.setPageCount(Math.min(build.getPageCount(), RECORDS_MAX % pageSize == 0? RECORDS_MAX / pageSize : RECORDS_MAX / pageSize + 1));
             return build;
         }
         return null;
