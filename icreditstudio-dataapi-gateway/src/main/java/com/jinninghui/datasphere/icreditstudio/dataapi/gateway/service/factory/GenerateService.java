@@ -47,8 +47,9 @@ public class GenerateService implements ApiBaseService {
 
     @Override
     public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
-        String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), params);
         DatasourceSync factory = DatasourceFactory.getDatasource(apiInfo.getDatabaseType());
+        String querySql = factory.parseSql(apiInfo.getQuerySql(), params);
+//        String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), params);
         querySql = factory.getPageParamBySql(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("数据源生成API查询sql：{}", querySql);
         Connection conn = null;

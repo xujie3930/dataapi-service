@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Objects;
 
 public interface DatasourceSync {
@@ -111,4 +112,6 @@ public interface DatasourceSync {
     }
 
     String getPageParamBySql(String querySql, Integer pageNum, Integer pageSize);
+
+    String parseSql(String content, Map<String, String> kvs);
 }
