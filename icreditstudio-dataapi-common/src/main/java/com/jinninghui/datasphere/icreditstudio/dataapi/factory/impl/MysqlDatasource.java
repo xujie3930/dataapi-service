@@ -31,6 +31,9 @@ public class MysqlDatasource implements DatasourceSync {
 
     @Override
     public String getPageParamBySql(String querySql, Integer pageNum, Integer pageSize) {
+        if (querySql.contains("limit")){
+            querySql = querySql.substring(0, querySql.indexOf("limit"));
+        }
         int index = (pageNum - 1) * pageSize;
         String addPageParam = new StringBuilder(querySql).append(" limit ").append(index).append(" , ").append(Math.min((MAX_IMUM - index), pageSize)).toString();
         return addPageParam;
