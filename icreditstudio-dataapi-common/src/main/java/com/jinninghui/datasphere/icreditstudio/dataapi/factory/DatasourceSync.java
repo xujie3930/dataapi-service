@@ -17,7 +17,7 @@ public interface DatasourceSync {
     String DATASOURCEINFO = "datasourceInfo";
     //整个数据库的表数量
     String TABLESCOUNT = "tablesCount";
-    static final int MAX_IMUM = 10000;
+    int MAX_IMUM = 10000;
 
     /**
      * 根据uri获取jdbc连接

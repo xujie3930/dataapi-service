@@ -35,7 +35,7 @@ public class PostgreDatasource implements DatasourceSync {
             querySql = querySql.substring(0, querySql.indexOf("limit"));
         }
         int index = (pageNum - 1) * pageSize;
-        String addPageParam = new StringBuilder(querySql).append(" limit ").append(pageSize).append(" offset ").append(index).toString();
+        String addPageParam = new StringBuilder(querySql).append(" limit ").append(Math.min((MAX_IMUM - index), pageSize)).append(" offset ").append(index).toString();
         return addPageParam;
     }
 
@@ -68,10 +68,10 @@ public class PostgreDatasource implements DatasourceSync {
         }
 
 
-        //pg数据库需要对所有字段加上""
-        int begin = tempSql.indexOf("select");
-        int last = tempSql.indexOf("from");
-        String substring = tempSql.substring(begin + "select".length(), last).replaceAll(" ", "");
+        //pg数据库需要对所有返回字符按字段加上""
+        int selectIndex = tempSql.indexOf("select");
+        int fromIndex = tempSql.indexOf("from");
+        String substring = tempSql.substring(selectIndex + "select".length(), fromIndex).replaceAll(" ", "");
         String[] split = substring.split(",");
         StringBuilder builder = new StringBuilder("select ");
         for (String key : split) {
@@ -80,21 +80,16 @@ public class PostgreDatasource implements DatasourceSync {
         String s = builder.toString();
         String sql= s.substring(0, s.length() -1) + tempSql.substring(tempSql.lastIndexOf("from"));
 
+        //对所有入参字段加上""
         Set set = kvs.entrySet();
-
         Iterator i = set.iterator();
-
+        //where条件后面的谓词
         String resp = sql.substring(sql.indexOf("and"));
         String param = sql.substring(0, sql.indexOf("and"));
-
         while(i.hasNext()){
-
             Map.Entry<String, String> entry=(Map.Entry<String, String>)i.next();
-
             String key = entry.getKey();
-
             resp = resp.replaceAll(key, "\"" + key + "\"");
-
         }
         return param + resp;
     }

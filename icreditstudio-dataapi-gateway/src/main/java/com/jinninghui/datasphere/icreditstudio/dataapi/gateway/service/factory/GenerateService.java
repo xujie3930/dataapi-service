@@ -41,6 +41,7 @@ public class GenerateService implements ApiBaseService {
     private static final String PAGESIZE_MARK = "pageSize";
     private static final Integer PAGENUM_DEFALUT = 1;
     private static final Integer PAGESIZE_DEFALUT = 500;
+    private static final Long RECORDS_MAX = 10000L;
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -49,7 +50,6 @@ public class GenerateService implements ApiBaseService {
     public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
         DatasourceSync factory = DatasourceFactory.getDatasource(apiInfo.getDatabaseType());
         String querySql = factory.parseSql(apiInfo.getQuerySql(), params);
-//        String querySql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.parseSql(apiInfo.getQuerySql(), params);
         querySql = factory.getPageParamBySql(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("数据源生成API查询sql：{}", querySql);
         Connection conn = null;
@@ -97,6 +97,7 @@ public class GenerateService implements ApiBaseService {
             pageForm.setPageNum(pageNum);
             pageForm.setPageSize(pageSize);
             DataApiGatewayPageResult build = DataApiGatewayPageResult.build(list, pageForm, dataCount);
+            build.setPageCount(Math.max(build.getPageCount(), RECORDS_MAX % pageSize == 0? RECORDS_MAX / pageSize : RECORDS_MAX / pageSize + 1));
             return build;
         }
         return null;
