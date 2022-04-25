@@ -4,10 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,23 +61,30 @@ public class PostgreDatasource implements DatasourceSync {
         if (!CollectionUtils.isEmpty(noRequiredSet)){
             for (String field : noRequiredSet) {
                 tempSql = tempSql.replaceAll("and " + field + " = " + "'null'", "");
+                tempSql = tempSql.replaceAll("AND " + field + " = " + "'null'", "");
             }
         }
 
 
         //pg数据库需要对所有返回字符按字段加上""
         int selectIndex = tempSql.indexOf("select");
+        int SELECTIndex = tempSql.indexOf("SELECT");
         int fromIndex = tempSql.indexOf("from");
-        String substring = tempSql.substring(selectIndex + "select".length(), fromIndex).replaceAll(" ", "");
+        int FROMIndex = tempSql.indexOf("FROM");
+        String substring = tempSql.substring(Math.max(selectIndex, SELECTIndex) + "select".length(), Math.max(fromIndex, FROMIndex)).replaceAll(" ", "");
         String[] split = substring.split(",");
         StringBuilder builder = new StringBuilder("select ");
         for (String key : split) {
-            builder.append("\"" + key + "\"" + ",");
+            if (key.contains("\"") || (key.contains("(") && key.contains(")"))){
+                builder.append(key).append(",");
+            }else {
+                builder.append("\"" + key + "\"" + ",");
+            }
         }
         String s = builder.toString();
-        String sql= s.substring(0, s.length() -1) + tempSql.substring(tempSql.lastIndexOf("from"));
+        String sql= s.substring(0, s.length() -1) + tempSql.substring(Math.max(fromIndex, FROMIndex));
 
-        if (!sql.contains("and")){
+        if (!sql.contains("and") && !sql.contains("AND")){
             return sql;
         }
 
@@ -88,8 +92,10 @@ public class PostgreDatasource implements DatasourceSync {
         Set set = kvs.entrySet();
         Iterator i = set.iterator();
         //where条件后面的谓词
-        String resp = sql.substring(sql.indexOf("and"));
-        String param = sql.substring(0, sql.indexOf("and"));
+        int andIndex = sql.indexOf("and");
+        int ANDIndex = sql.indexOf("AND");
+        String resp = sql.substring(Math.max(andIndex, ANDIndex));
+        String param = sql.substring(0, Math.max(andIndex, ANDIndex));
         while(i.hasNext()){
             Map.Entry<String, String> entry=(Map.Entry<String, String>)i.next();
             String key = entry.getKey();
