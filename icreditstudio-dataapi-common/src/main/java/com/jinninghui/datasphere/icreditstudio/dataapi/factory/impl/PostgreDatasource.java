@@ -71,7 +71,7 @@ public class PostgreDatasource implements DatasourceSync {
         int SELECTIndex = tempSql.indexOf("SELECT");
         int fromIndex = tempSql.indexOf("from");
         int FROMIndex = tempSql.indexOf("FROM");
-        String substring = tempSql.substring(Math.max(selectIndex, SELECTIndex) + "select".length(), Math.max(fromIndex, FROMIndex));
+        String substring = tempSql.substring(Math.max(selectIndex, SELECTIndex) + "select".length(), Math.max(fromIndex, FROMIndex)).trim();
         String[] split = substring.split(",");
         StringBuilder builder = new StringBuilder("select ");
         for (String key : split) {
