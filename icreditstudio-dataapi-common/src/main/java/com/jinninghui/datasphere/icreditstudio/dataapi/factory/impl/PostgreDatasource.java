@@ -80,6 +80,10 @@ public class PostgreDatasource implements DatasourceSync {
         String s = builder.toString();
         String sql= s.substring(0, s.length() -1) + tempSql.substring(tempSql.lastIndexOf("from"));
 
+        if (!sql.contains("and")){
+            return sql;
+        }
+
         //对所有入参字段加上""
         Set set = kvs.entrySet();
         Iterator i = set.iterator();
