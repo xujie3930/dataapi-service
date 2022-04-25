@@ -650,7 +650,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         CreateApiInfoBO createApiInfoBO = null;
 //        StringBuilder tableNames = new StringBuilder();
         try {
-            conn =  DBConnectionManager.getInstance().getConnection(uri, type);;
+            conn =  DBConnectionManager.getInstance().getConnection(uri, type);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
 //            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
@@ -706,7 +706,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
         }finally {
-            closeConnection(conn);
+            DBConnectionManager.getInstance().freeConnection(uri, conn);
         }
         return "";
     }

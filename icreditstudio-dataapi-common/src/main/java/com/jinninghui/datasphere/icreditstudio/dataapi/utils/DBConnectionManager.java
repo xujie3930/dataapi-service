@@ -30,7 +30,7 @@ public class DBConnectionManager {
     private static final String SQL_CHARACTER = "useSSL=false&useUnicode=true&characterEncoding=utf8";
     //cpu核心数*2
     //TODO：开发环境设置为1，复现生产问题
-    private final int defaultConn = 20;
+    private final int defaultConn = 1;
 
     public Hashtable getPools() {
         return pools;
@@ -51,7 +51,7 @@ public class DBConnectionManager {
         String poolName = uri;
         String username = getUsername(uri);
         String password = getPassword(uri);
-        String url = getUri(uri);
+        String url = uri;
         String drvier = getDrvierByType(type);
         DBConnectionPool pool = new DBConnectionPool(poolName, drvier, url, username, password, defaultConn);
         pools.put(poolName, pool);
@@ -201,7 +201,7 @@ public class DBConnectionManager {
             this.URL = URL;
             this.user = user;
             this.password = password;
-            if(maxConn <= 1){
+            if(maxConn < 1){
                 throw new IllegalArgumentException("maxCoon must > 1");
             }
             this.maxConn = maxConn;
