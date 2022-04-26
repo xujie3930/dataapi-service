@@ -49,7 +49,7 @@ public class GenerateService implements ApiBaseService {
     @Override
     public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
         DatasourceSync factory = DatasourceFactory.getDatasource(apiInfo.getDatabaseType());
-        String querySql = factory.parseSql(apiInfo.getQuerySql(), params);
+        String querySql = factory.parseSql(apiInfo.getQuerySql().replaceAll(";", ""), params);
         querySql = factory.getPageParamBySql(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("数据源生成API查询sql：{}", querySql);
         Connection conn = null;
