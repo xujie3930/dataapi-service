@@ -49,7 +49,7 @@ public class GenerateService implements ApiBaseService {
     @Override
     public BusinessResult<Object> getData(Map params, RedisApiInfo apiInfo, ApiLogInfo apiLogInfo) throws SQLException {
         DatasourceSync factory = DatasourceFactory.getDatasource(apiInfo.getDatabaseType());
-        String querySql = factory.parseSql(apiInfo.getQuerySql(), params);
+        String querySql = factory.parseSql(apiInfo.getQuerySql().replaceAll(";", ""), params);
         querySql = factory.getPageParamBySql(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("数据源生成API查询sql：{}", querySql);
         Connection conn = null;
@@ -124,8 +124,9 @@ public class GenerateService implements ApiBaseService {
         apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getCallBeginTime().getTime());
         //取where条件后面的值,取到limit
         if (querySql.contains("where")){
-            String requestParam = StringUtils.splitBetween(querySql, "where", "limit");
+            String requestParam = StringUtils.splitBetween(querySql, "where", "limit").trim();
             requestParam = requestParam.replaceAll("and ", ",");
+            requestParam = requestParam.replaceAll("1=1 ,", "").trim();
             apiLogInfo.setRequestParam(requestParam);
         }else {
             apiLogInfo.setRequestParam(null);
