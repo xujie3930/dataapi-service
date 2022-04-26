@@ -384,7 +384,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             apiParamStr.append(datasourceApiParamSaveRequest.getRequired()).append(",");
             apiParamStr.append(datasourceApiParamSaveRequest.getIsRequest()).append(",");
             apiParamStr.append(datasourceApiParamSaveRequest.getIsResponse()).append(",");
-            apiParamStr.append(datasourceApiParamSaveRequest.getDesc()).append(",");
+            if(!StringUtils.isEmpty(datasourceApiParamSaveRequest.getDesc())){
+                apiParamStr.append(datasourceApiParamSaveRequest.getDesc()).append(",");
+            }
         }
         String tableInfoStr = String.valueOf(new StringBuilder(apiParamStr));
         return tableInfoStr.substring(0, tableInfoStr.lastIndexOf(","));
