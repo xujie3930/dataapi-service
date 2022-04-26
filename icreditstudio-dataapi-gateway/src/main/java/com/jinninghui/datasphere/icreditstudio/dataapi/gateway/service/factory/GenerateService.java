@@ -79,7 +79,7 @@ public class GenerateService implements ApiBaseService {
 
     private DataApiGatewayPageResult<Object> getPageResult(Integer pageNum, Integer pageSize, String querySql, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
         Long dataCount = 0L;
-        String countSql = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.getSelectCountSql(querySql);
+        String countSql = getSelectCountSql(querySql);
         ResultSet countRs = stmt.executeQuery(countSql);
         if (countRs.next()) {
             //rs结果集第一个参数即为记录数，且其结果集中只有一个参数
@@ -101,6 +101,25 @@ public class GenerateService implements ApiBaseService {
             return build;
         }
         return null;
+    }
+
+    private String getSelectCountSql(String sql) {
+        String matterSelect = "select";
+        String matterFrom = "from";
+        String countSsql = " count(*) ";
+        String orderBy = "order by";
+        String groupBy = "group by";
+        int selectIndex = sql.indexOf(matterSelect);//第一个字符串的起始位置
+        int limitIndex = sql.indexOf("limit");//第一个字符串的起始位置
+        int fromIndex = sql.indexOf(matterFrom);//第二个字符串的起始位置
+        sql = sql.substring(0, selectIndex + matterSelect.length()) + countSsql + sql.substring(fromIndex, limitIndex);
+        if (sql.contains(orderBy)){
+            sql = sql.substring(0, sql.indexOf(orderBy));
+        }
+        if (sql.contains(groupBy)){
+            sql = sql.substring(0, sql.indexOf(groupBy));
+        }
+        return sql;
     }
 
     private List getListResult(String querySql, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {

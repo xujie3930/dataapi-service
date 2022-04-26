@@ -1418,26 +1418,6 @@ public abstract class StringUtils {
 		return tempSql;
 	}
 
-
-	public static String getSelectCountSql(String sql) {
-		String matterSelect = "select";
-		String matterFrom = "from";
-		String countSsql = " count(*) ";
-		String orderBy = "order by";
-		String groupBy = "group by";
-		int selectIndex = sql.indexOf(matterSelect);//第一个字符串的起始位置
-		int limitIndex = sql.indexOf("limit");//第一个字符串的起始位置
-		int fromIndex = sql.indexOf(matterFrom);//第二个字符串的起始位置
-		sql = sql.substring(0, selectIndex + matterSelect.length()) + countSsql + sql.substring(fromIndex, limitIndex);
-		if (sql.contains(orderBy)){
-			sql = sql.substring(0, sql.indexOf(orderBy));
-		}
-		if (sql.contains(groupBy)){
-			sql = sql.substring(0, sql.indexOf(groupBy));
-		}
-		return sql;
-	}
-
 	public static String removeExtraStr(String str, List<String> extraList) {
 		if (CollectionUtils.isEmpty(extraList)){
 			return str;
