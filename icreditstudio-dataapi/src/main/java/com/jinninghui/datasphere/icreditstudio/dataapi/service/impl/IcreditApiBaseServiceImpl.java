@@ -818,19 +818,17 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BusinessResult<ApiSaveResult> createAndPublish(String userId, DatasourceApiSaveParam param) {
-        checkApiName(new CheckApiNameRequest(param.getId(), param.getName()));
-        checkApiPath(new CheckApiPathRequest(param.getId(), param.getPath()));
-        long startTime = System.currentTimeMillis();
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.findByApiPath(param.getPath());
-        log.info("api查询耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
-        startTime = System.currentTimeMillis();
         if (!Objects.isNull(apiBaseEntity)){
             param.setId(apiBaseEntity.getId());
         }else {
             apiBaseEntity = new IcreditApiBaseEntity();
-            checkApiName(new CheckApiNameRequest(param.getId(), param.getName()));
-            checkApiPath(new CheckApiPathRequest(param.getId(), param.getPath()));
         }
+        checkApiName(new CheckApiNameRequest(param.getId(), param.getName()));
+        checkApiPath(new CheckApiPathRequest(param.getId(), param.getPath()));
+        long startTime = System.currentTimeMillis();
+        log.info("api查询耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
+        startTime = System.currentTimeMillis();
         log.info("参数校验查询耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         //保存api基础信息
         startTime = System.currentTimeMillis();
