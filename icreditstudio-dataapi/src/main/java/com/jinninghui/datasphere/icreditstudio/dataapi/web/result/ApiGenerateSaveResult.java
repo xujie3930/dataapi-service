@@ -15,4 +15,6 @@ public class ApiGenerateSaveResult {
 
     private String tableName;
 
+    private Integer databaseType;
+
 }
