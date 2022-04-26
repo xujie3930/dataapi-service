@@ -126,7 +126,7 @@ public class GenerateService implements ApiBaseService {
         if (querySql.contains("where")){
             String requestParam = StringUtils.splitBetween(querySql, "where", "limit").trim();
             requestParam = requestParam.replaceAll("and ", ",");
-            requestParam.replaceAll("1=1 ,", "");
+            requestParam = requestParam.replaceAll("1=1 ,", "").trim();
             apiLogInfo.setRequestParam(requestParam);
         }else {
             apiLogInfo.setRequestParam(null);
