@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMapper, IcreditApiBaseHiEntity> implements IcreditApiBaseHiService {
 
     private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
+    private static final String COMMA = ",";
 
     @Resource
     private IcreditApiBaseHiMapper apiBaseHiMapper;
@@ -354,10 +355,10 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             StringBuilder registerApiStr = new StringBuilder(registerApiDTO.getApiName()).append(registerApiDTO.getApiDesc()).append(registerApiDTO.getReqHost()).append(registerApiDTO.getReqPath());
             for (ApiParamInfoDTO apiParamInfoDTO : apiInfoStrList) {
                 if(apiParamInfoDTO.getApiVersion().equals(registerApiDTO.getApiVersion())){
-                    registerApiStr.append(apiParamInfoDTO.getApiParamStr()).append(",");
+                    registerApiStr.append(apiParamInfoDTO.getApiParamStr()).append(COMMA);
                 }
             }
-            registerApiStrList.add(registerApiStr.indexOf(",") != -1 ? String.valueOf(registerApiStr.substring(0, registerApiStr.lastIndexOf(","))) : String.valueOf(registerApiStr));
+            registerApiStrList.add(registerApiStr.indexOf(COMMA) != -1 ? String.valueOf(registerApiStr.substring(0, registerApiStr.lastIndexOf(COMMA))) : String.valueOf(registerApiStr));
         }
         return registerApiStrList;
     }
@@ -368,10 +369,10 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             StringBuilder singleTableApiStr = new StringBuilder(datasourceApiDTO.getApiName()).append(datasourceApiDTO.getApiDesc()).append(datasourceApiDTO.getDatasourceId()).append(datasourceApiDTO.getTableName());
             for (ApiParamInfoDTO apiParamInfoDTO : apiInfoStrList) {
                 if(apiParamInfoDTO.getApiVersion().equals(datasourceApiDTO.getApiVersion())){
-                    singleTableApiStr.append(apiParamInfoDTO.getApiParamStr()).append(",");
+                    singleTableApiStr.append(apiParamInfoDTO.getApiParamStr()).append(COMMA);
                 }
             }
-            singleTableApiStrList.add(singleTableApiStr.indexOf(",") != -1 ? String.valueOf(singleTableApiStr.substring(0, singleTableApiStr.lastIndexOf(","))) : String.valueOf(singleTableApiStr));
+            singleTableApiStrList.add(singleTableApiStr.indexOf(COMMA) != -1 ? String.valueOf(singleTableApiStr.substring(0, singleTableApiStr.lastIndexOf(COMMA))) : String.valueOf(singleTableApiStr));
         }
         return singleTableApiStrList;
     }
@@ -379,40 +380,40 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
     private String generateForSingleTableApi(List<DatasourceApiParamSaveRequest> apiParamSaveRequestList) {
         StringBuilder apiParamStr = new StringBuilder();
         for (DatasourceApiParamSaveRequest datasourceApiParamSaveRequest : apiParamSaveRequestList) {
-            apiParamStr.append(datasourceApiParamSaveRequest.getFieldName()).append(",");
-            apiParamStr.append(datasourceApiParamSaveRequest.getFieldType()).append(",");
-            apiParamStr.append(datasourceApiParamSaveRequest.getRequired()).append(",");
-            apiParamStr.append(datasourceApiParamSaveRequest.getIsRequest()).append(",");
-            apiParamStr.append(datasourceApiParamSaveRequest.getIsResponse()).append(",");
+            apiParamStr.append(datasourceApiParamSaveRequest.getFieldName()).append(COMMA);
+            apiParamStr.append(datasourceApiParamSaveRequest.getFieldType()).append(COMMA);
+            apiParamStr.append(datasourceApiParamSaveRequest.getRequired()).append(COMMA);
+            apiParamStr.append(datasourceApiParamSaveRequest.getIsRequest()).append(COMMA);
+            apiParamStr.append(datasourceApiParamSaveRequest.getIsResponse()).append(COMMA);
             if(!StringUtils.isEmpty(datasourceApiParamSaveRequest.getDesc())){
-                apiParamStr.append(datasourceApiParamSaveRequest.getDesc()).append(",");
+                apiParamStr.append(datasourceApiParamSaveRequest.getDesc()).append(COMMA);
             }
         }
         String tableInfoStr = String.valueOf(new StringBuilder(apiParamStr));
-        return tableInfoStr.substring(0, tableInfoStr.lastIndexOf(","));
+        return tableInfoStr.substring(0, tableInfoStr.lastIndexOf(COMMA));
     }
 
     private String generateForRegisterApi(List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList, List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList) {
         StringBuilder apiParamStr = new StringBuilder();
         for (RegisterRequestParamSaveRequest registerRequestParamSaveRequest : registerRequestParamSaveRequestList) {
-            apiParamStr.append(registerRequestParamSaveRequest.getFieldName()).append(",");
-            apiParamStr.append(registerRequestParamSaveRequest.getFieldType()).append(",");
+            apiParamStr.append(registerRequestParamSaveRequest.getFieldName()).append(COMMA);
+            apiParamStr.append(registerRequestParamSaveRequest.getFieldType()).append(COMMA);
             if(null != registerRequestParamSaveRequest.getRequired()){
-                apiParamStr.append(registerRequestParamSaveRequest.getRequired()).append(",");
+                apiParamStr.append(registerRequestParamSaveRequest.getRequired()).append(COMMA);
             }
-            apiParamStr.append(registerRequestParamSaveRequest.getIsRequest()).append(",");
-            apiParamStr.append(registerRequestParamSaveRequest.getDefaultValue()).append(",");
-            apiParamStr.append(registerRequestParamSaveRequest.getDesc()).append(",");
+            apiParamStr.append(registerRequestParamSaveRequest.getIsRequest()).append(COMMA);
+            apiParamStr.append(registerRequestParamSaveRequest.getDefaultValue()).append(COMMA);
+            apiParamStr.append(registerRequestParamSaveRequest.getDesc()).append(COMMA);
         }
         for (RegisterResponseParamSaveRequest registerResponseParamSaveRequest : registerResponseParamSaveRequestList) {
-            apiParamStr.append(registerResponseParamSaveRequest.getFieldName()).append(",");
-            apiParamStr.append(registerResponseParamSaveRequest.getFieldType()).append(",");
-            apiParamStr.append(registerResponseParamSaveRequest.getIsResponse()).append(",");
-            apiParamStr.append(registerResponseParamSaveRequest.getDefaultValue()).append(",");
-            apiParamStr.append(registerResponseParamSaveRequest.getDesc()).append(",");
+            apiParamStr.append(registerResponseParamSaveRequest.getFieldName()).append(COMMA);
+            apiParamStr.append(registerResponseParamSaveRequest.getFieldType()).append(COMMA);
+            apiParamStr.append(registerResponseParamSaveRequest.getIsResponse()).append(COMMA);
+            apiParamStr.append(registerResponseParamSaveRequest.getDefaultValue()).append(COMMA);
+            apiParamStr.append(registerResponseParamSaveRequest.getDesc()).append(COMMA);
         }
         String tableInfoStr = String.valueOf(new StringBuilder(apiParamStr));
-        return tableInfoStr.length() >= 1 ? tableInfoStr.substring(0, tableInfoStr.lastIndexOf(",")) : "";
+        return tableInfoStr.length() >= 1 ? tableInfoStr.substring(0, tableInfoStr.lastIndexOf(COMMA)) : "";
     }
 
     @Override
