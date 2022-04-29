@@ -15,4 +15,21 @@
         delete from icredit_auth where app_id = #{appId}
     </delete>
 
+    <select id="getApiAuthCount" resultType="java.lang.Long">
+        select ifnull(count(distinct api_id), 0) from icredit_auth
+        <where>
+            <if test="delFlag != null">
+                AND del_flag = #{delFlag}
+            </if>
+        </where>
+    </select>
+
+    <select id="getAppAuthCount" resultType="java.lang.Long">
+        select ifnull(count(distinct app_id), 0) from icredit_auth
+        <where>
+            <if test="delFlag != null">
+                AND del_flag = #{delFlag}
+            </if>
+        </where>
+    </select>
 </mapper>

@@ -3,8 +3,10 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.StatisticsService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.CharacterUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ public class SearchController {
 
     @Autowired
     private IcreditWorkFlowService icreditWorkFlowService;
+    @Autowired
+    private StatisticsService statisticsService;
 
     @PostMapping("/search")
     @ResultReturning
@@ -38,6 +42,11 @@ public class SearchController {
     public BusinessResult<String> generateRandom(@RequestParam(value = "len", defaultValue = "16") Integer len) {
         String randomString = CharacterUtils.getRandomString(len);
         return BusinessResult.success(randomString);
+    }
+
+    @GetMapping ("/statistics")
+    public BusinessResult<StatisticsResult> statistics() {
+        return BusinessResult.success(statisticsService.statistics());
     }
 }
 

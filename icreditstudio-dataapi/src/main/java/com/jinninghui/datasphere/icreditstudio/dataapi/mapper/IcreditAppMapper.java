@@ -30,4 +30,6 @@ public interface IcreditAppMapper extends BaseMapper<IcreditAppEntity> {
     List<String> getIdsByAppGroupIds(List<String> ids);
 
     String findEnableAppIdByIds(List<String> appIds);
+
+    Long getCountByEnableAndDelFlag(@Param("isEnable") Integer isEnable, @Param("delFlag") Integer delFlag);
 }

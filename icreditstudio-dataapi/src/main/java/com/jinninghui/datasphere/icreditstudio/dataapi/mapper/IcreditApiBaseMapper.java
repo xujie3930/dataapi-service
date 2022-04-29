@@ -33,4 +33,6 @@ public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
     String findPublishedByApiGroupId(@Param("apiGroupId") String apiGroupId);
 
     void truthDelById(@Param("id") String id);
+
+    Long getCountByPublishAndDelFlag(@Param("publishStatus") Integer publishStatus, @Param("delFlag") Integer delFlag);
 }

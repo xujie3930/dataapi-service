@@ -86,4 +86,16 @@
         </foreach>
         limit 1
     </select>
+
+    <select id="getCountByEnableAndDelFlag" resultType="java.lang.Long">
+        select ifnull(count(*), 0) from icredit_app
+        <where>
+            <if test="isEnable != null">
+                AND is_enable = #{isEnable}
+            </if>
+            <if test="delFlag != null">
+                AND del_flag = #{delFlag}
+            </if>
+        </where>
+    </select>
 </mapper>
