@@ -11,7 +11,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProdu
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.base.ApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
-import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.base.BusinessBasePageForm;
@@ -20,13 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author xujie
@@ -42,6 +39,7 @@ public class GenerateService implements ApiBaseService {
     private static final Integer PAGENUM_DEFALUT = 1;
     private static final Integer PAGESIZE_DEFALUT = 500;
     private static final Long RECORDS_MAX = 10000L;
+    private static final String SEPARATOR = "|";
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -55,7 +53,8 @@ public class GenerateService implements ApiBaseService {
         Connection conn = null;
         try {
             //连接数据源，执行SQL
-            conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
+            conn = tempConnection(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
+//            conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
             if (conn == null) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
             }
@@ -73,8 +72,53 @@ public class GenerateService implements ApiBaseService {
                 return BusinessResult.success(list);
             }
         }finally {
-            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
+//            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
+            if (conn != null){
+                conn.close();
+            }
         }
+    }
+
+    public static Connection tempConnection(String url, String username, String password, Integer type) {
+        Connection con = null;
+        try {
+            Properties props =new Properties();
+            String driver = getDrvierByType(type);
+            Class.forName(driver);
+            props.setProperty("remarks", "true"); //设置可以获取remarks信息
+            props.setProperty("useInformationSchema", "true");//设置可以获取tables remarks信息
+            if (username != null) {
+                props.setProperty("user", username);
+                props.setProperty("password", password);
+            }
+            con = DriverManager.getConnection(url, props);
+            if (url.contains("schema=")){
+                String schema = getSchema(url);
+                con.setSchema(schema);
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return con;
+    }
+
+    public static String getSchema(String uri) {
+        if (!uri.contains("schema=")){
+            return null;
+        }
+        //根据uri获取username
+        int index = uri.indexOf("schema=") + "schema=".length();
+        String temp = uri.substring(index);
+        if (!uri.substring(index).contains(SEPARATOR)) {
+            return temp;
+        } else {
+            return temp.substring(0, temp.indexOf(SEPARATOR));
+        }
+    }
+
+    public static String getDrvierByType(Integer type) {
+        String driver = DatasourceTypeEnum.findDatasourceTypeByType(type).getDriver();
+        return driver;
     }
 
     private DataApiGatewayPageResult<Object> getPageResult(Integer pageNum, Integer pageSize, String querySql, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
