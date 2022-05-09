@@ -11,6 +11,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProdu
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory.base.ApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.ResultSetToListUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.base.BusinessBasePageForm;
@@ -53,8 +54,7 @@ public class GenerateService implements ApiBaseService {
         Connection conn = null;
         try {
             //连接数据源，执行SQL
-            conn = tempConnection(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
-//            conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
+            conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());//            conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
             if (conn == null) {
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
             }
@@ -72,10 +72,7 @@ public class GenerateService implements ApiBaseService {
                 return BusinessResult.success(list);
             }
         }finally {
-//            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
-            if (conn != null){
-                conn.close();
-            }
+            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
         }
     }
 

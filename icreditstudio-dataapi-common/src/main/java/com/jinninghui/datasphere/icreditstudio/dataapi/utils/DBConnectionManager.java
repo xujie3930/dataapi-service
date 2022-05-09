@@ -18,6 +18,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class DBConnectionManager {
@@ -193,7 +194,7 @@ public class DBConnectionManager {
         private final String password;
         private final String URL;
         private final String user;
-        private int checkedOut;
+        private AtomicInteger checkedOut = new AtomicInteger(0);
 
         public DBConnectionPool(String name, String driver, String URL, String user, String password, int maxConn) {
             this.name = name;
@@ -209,7 +210,7 @@ public class DBConnectionManager {
 
         public synchronized void freeConnection(Connection con) {
             freeConnections.add(con);
-            checkedOut--;
+            checkedOut.decrementAndGet();
             notifyAll();
         }
 
@@ -218,18 +219,21 @@ public class DBConnectionManager {
             if (freeConnections.size() > 0) {
                 con = (Connection) freeConnections.firstElement();
                 freeConnections.removeElementAt(0);
+                System.out.println("剩余线程数：" + freeConnections.size());
                 try {
                     if (con.isClosed()) {
-                        con = getConnection();
+                        con = newConnection();
                     }
                 } catch (SQLException e) {
-                    con = getConnection();
+                    con = newConnection();
                 }
-            } else if(maxConn == 0 || checkedOut < maxConn){
+            } else if(maxConn == 0 || checkedOut.get() < maxConn){
+                System.out.println("创建前在使用线程数：" + checkedOut.get());
                 con = newConnection();
             }
             if (con != null) {
-                checkedOut++;
+                checkedOut.incrementAndGet();
+                System.out.println("创建后在使用线程数：" + checkedOut.get());
             }
             return con;
         }
