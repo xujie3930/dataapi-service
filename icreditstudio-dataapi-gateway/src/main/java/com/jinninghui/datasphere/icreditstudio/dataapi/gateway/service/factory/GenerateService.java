@@ -2,8 +2,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.service.factory;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ApiLogInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.CallStatusEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.common.DatasourceTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisApiInfo;
+import com.jinninghui.datasphere.icreditstudio.dataapi.druid.DataApiDruidDataSourceService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceFactory;
 import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.DataApiGatewayPageResult;
@@ -19,11 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author xujie
@@ -39,7 +41,6 @@ public class GenerateService implements ApiBaseService {
     private static final Integer PAGENUM_DEFALUT = 1;
     private static final Integer PAGESIZE_DEFALUT = 500;
     private static final Long RECORDS_MAX = 10000L;
-    private static final String SEPARATOR = "|";
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -50,15 +51,10 @@ public class GenerateService implements ApiBaseService {
         String querySql = factory.parseSql(apiInfo.getQuerySql().replaceAll(";", ""), params);
         querySql = factory.getPageParamBySql(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.info("数据源生成API查询sql：{}", querySql);
-        Connection conn = null;
-        try {
+        try (Connection conn = DataApiDruidDataSourceService.getInstance()
+                .getOrCreateConnection(apiInfo.getUrl(), apiInfo.getDatabaseType(), apiInfo.getUserName(), apiInfo.getPassword());
+             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
             //连接数据源，执行SQL
-            conn = tempConnection(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
-//            conn = DBConnectionManager.getInstance().getConnectionByUserNameAndPassword(apiInfo.getUrl(), apiInfo.getUserName(), apiInfo.getPassword(), DatasourceTypeEnum.MYSQL.getType());
-            if (conn == null) {
-                throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
-            }
-            Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
             if (params.containsKey(PAGENUM_MARK) && params.containsKey(PAGESIZE_MARK)) {
                 Integer pageNum = Math.max(Integer.parseInt((String) params.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
@@ -71,54 +67,12 @@ public class GenerateService implements ApiBaseService {
                 List list = getListResult(querySql, apiLogInfo, stmt);
                 return BusinessResult.success(list);
             }
-        }finally {
-//            DBConnectionManager.getInstance().freeConnection(apiInfo.getUrl(), conn);
-            if (conn != null){
-                conn.close();
-            }
-        }
-    }
 
-    public static Connection tempConnection(String url, String username, String password, Integer type) {
-        Connection con = null;
-        try {
-            Properties props =new Properties();
-            String driver = getDrvierByType(type);
-            Class.forName(driver);
-            props.setProperty("remarks", "true"); //设置可以获取remarks信息
-            props.setProperty("useInformationSchema", "true");//设置可以获取tables remarks信息
-            if (username != null) {
-                props.setProperty("user", username);
-                props.setProperty("password", password);
-            }
-            con = DriverManager.getConnection(url, props);
-            if (url.contains("schema=")){
-                String schema = getSchema(url);
-                con.setSchema(schema);
-            }
         } catch (Exception e) {
-            return null;
+            log.error("连接数据源查询数据异常", e);
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(),
+                    ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
         }
-        return con;
-    }
-
-    public static String getSchema(String uri) {
-        if (!uri.contains("schema=")){
-            return null;
-        }
-        //根据uri获取username
-        int index = uri.indexOf("schema=") + "schema=".length();
-        String temp = uri.substring(index);
-        if (!uri.substring(index).contains(SEPARATOR)) {
-            return temp;
-        } else {
-            return temp.substring(0, temp.indexOf(SEPARATOR));
-        }
-    }
-
-    public static String getDrvierByType(Integer type) {
-        String driver = DatasourceTypeEnum.findDatasourceTypeByType(type).getDriver();
-        return driver;
     }
 
     private DataApiGatewayPageResult<Object> getPageResult(Integer pageNum, Integer pageSize, String querySql, ApiLogInfo apiLogInfo, Statement stmt) throws SQLException {
