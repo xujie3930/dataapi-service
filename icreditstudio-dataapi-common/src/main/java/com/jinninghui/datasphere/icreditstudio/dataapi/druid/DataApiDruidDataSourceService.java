@@ -9,7 +9,10 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,6 +126,31 @@ public final class DataApiDruidDataSourceService {
         source.setLastUseDate(new Date());
         logger.warn("当前数据库连接池的量为：" + source.getDruidDataSource().getActiveConnections().size() + "---" + source.getDruidDataSource().getActiveCount() + "---" + source.getDruidDataSource().getCloseCount());
         return (DruidPooledConnection) source.getDruidDataSource().getPooledConnection();
+    }
+
+    //定义release方法，释放资源
+    public static void release(ResultSet resultSet, Statement statement, Connection connection){
+        if (resultSet!=null){
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        if (statement!=null){
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        if (connection!=null){
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

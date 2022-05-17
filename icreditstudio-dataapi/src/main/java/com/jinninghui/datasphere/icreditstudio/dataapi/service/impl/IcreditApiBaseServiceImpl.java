@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
+import com.jinninghui.datasphere.icreditstudio.dataapi.druid.DataApiDruidDataSourceService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiTypeEnum;
@@ -646,11 +647,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         DatasourceDetailResult datasource = getDatasourceDetail(request.getDatasourceId());
         String uri = datasource.getUri();
 //        List<IcreditApiParamEntity> apiParamEntityList = null;
-        Connection conn = null;
         CreateApiInfoBO createApiInfoBO = null;
 //        StringBuilder tableNames = new StringBuilder();
-        try {
-            conn =  DBConnectionManager.getInstance().getConnection(uri, type);
+        try (Connection conn = DataApiDruidDataSourceService.getInstance()
+                .getOrCreateConnectionWithoutUsername(uri, type)) {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
 //            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
@@ -702,11 +702,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 //                createApiInfoBO.setApiParamEntityList(apiParamEntityList);
 //                createApiInfoBO.setTableNames(String.valueOf(new StringBuffer(tableNames.substring(0, tableNames.lastIndexOf(SQL_FIELD_SPLIT_CHAR)))));
 //            }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000007.getMessage());
-        }finally {
-            DBConnectionManager.getInstance().freeConnection(uri, conn);
         }
         return "";
     }
