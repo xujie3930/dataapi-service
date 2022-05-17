@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
  **/
 public class PostgreDatasource implements DatasourceSync {
 
+    private static final String PRE_SCHEMA = "?currentSchema=";
+
     /**
      * 取得数据库名称
      * @param uri
@@ -104,4 +106,10 @@ public class PostgreDatasource implements DatasourceSync {
         return param + resp;
     }
 
+    @Override
+    public String geturi(String uri) {
+        //根据uri获取jdbc连接
+        String substring = uri.substring(0, uri.indexOf(URL_SEPARATOR));
+        return substring + PRE_SCHEMA + DatasourceSync.getSchema(uri);
+    }
 }

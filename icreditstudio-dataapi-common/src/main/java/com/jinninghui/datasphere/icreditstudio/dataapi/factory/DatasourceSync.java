@@ -13,6 +13,7 @@ public interface DatasourceSync {
 
     Logger logger = LoggerFactory.getLogger(DatasourceSync.class);
     String SEPARATOR = "|";
+    String URL_SEPARATOR = "?";
     //整个数据库的表结构json格式
     String DATASOURCEINFO = "datasourceInfo";
     //整个数据库的表数量
@@ -25,7 +26,7 @@ public interface DatasourceSync {
      * @param uri
      * @return
      */
-    static String geturi(String uri) {
+    default String geturi(String uri) {
         //根据uri获取jdbc连接
         return uri.substring(0, uri.indexOf(SEPARATOR));
     }
@@ -49,6 +50,9 @@ public interface DatasourceSync {
      * @return
      */
     static String getSchema(String uri) {
+        if (StringUtils.isBlank(uri) || !uri.contains("schema=")){
+            return null;
+        }
         //根据uri获取username
         int index = uri.indexOf("schema=") + "schema=".length();
         String temp = uri.substring(index);

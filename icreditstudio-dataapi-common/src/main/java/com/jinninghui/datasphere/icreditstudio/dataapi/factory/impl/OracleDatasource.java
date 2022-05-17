@@ -17,6 +17,11 @@ import java.util.regex.Pattern;
  **/
 public class OracleDatasource implements DatasourceSync {
     @Override
+    public String geturi(String uri) {
+        return uri.substring(0, uri.indexOf(SEPARATOR));
+    }
+
+    @Override
     public String getDatabaseName(String uri) {
         String s = StrUtil.subBefore(uri, "?", false);
         return StrUtil.subAfter(s, "/", true);

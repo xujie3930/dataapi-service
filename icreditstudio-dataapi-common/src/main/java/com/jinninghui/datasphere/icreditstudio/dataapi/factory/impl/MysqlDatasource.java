@@ -17,6 +17,11 @@ import java.util.regex.Pattern;
  **/
 public class MysqlDatasource implements DatasourceSync {
 
+    @Override
+    public String geturi(String uri) {
+        return uri;
+    }
+
     /**
      * 取得数据库名称
      *

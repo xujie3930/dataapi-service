@@ -4,6 +4,8 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DatasourceTypeEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceFactory;
+import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +59,9 @@ public final class DataApiDruidDataSourceService {
     DataApiDruidDataSource initDataSource(String url, Integer type, String userName, String password) throws Exception {
         Properties prop = new Properties();
         prop.setProperty("driver", DatasourceTypeEnum.findDatasourceTypeByType(type).getDriver());
-        prop.setProperty("url", url);
+        DatasourceSync dataFactory = DatasourceFactory.getDatasource(type);
+        String uri = dataFactory.geturi(url);
+        prop.setProperty("url", uri);
         prop.setProperty("connectionProperties", "useUnicode=true;characterEncoding=UTF8");
         prop.setProperty("username", userName);
         prop.setProperty("password", password);
@@ -95,6 +99,22 @@ public final class DataApiDruidDataSourceService {
         DataApiDruidDataSource source;
         synchronized (this) {
             if (!map.containsKey(url)) {
+                source = initDataSource(url, type, userName, password);
+                return (DruidPooledConnection) source.getDruidDataSource().getPooledConnection();
+            }
+        }
+        source = map.get(url);
+        source.setLastUseDate(new Date());
+        logger.warn("当前数据库连接池的量为：" + source.getDruidDataSource().getActiveConnections().size() + "---" + source.getDruidDataSource().getActiveCount() + "---" + source.getDruidDataSource().getCloseCount());
+        return (DruidPooledConnection) source.getDruidDataSource().getPooledConnection();
+    }
+
+    public DruidPooledConnection getOrCreateConnectionWithoutUsername(String url, Integer type) throws Exception {
+        DataApiDruidDataSource source;
+        synchronized (this) {
+            if (!map.containsKey(url)) {
+                String userName = DatasourceSync.getUsername(url);
+                String password = DatasourceSync.getPassword(url);
                 source = initDataSource(url, type, userName, password);
                 return (DruidPooledConnection) source.getDruidDataSource().getPooledConnection();
             }
