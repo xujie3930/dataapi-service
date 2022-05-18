@@ -21,6 +21,7 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
+@Deprecated
 public class DBConnectionManager {
     static private DBConnectionManager instance;
     static private int clients;

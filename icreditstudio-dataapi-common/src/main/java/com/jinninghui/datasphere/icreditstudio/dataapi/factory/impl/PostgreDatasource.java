@@ -77,6 +77,7 @@ public class PostgreDatasource implements DatasourceSync {
         String[] split = substring.split(",");
         StringBuilder builder = new StringBuilder("select ");
         for (String key : split) {
+            key = key.trim();
             if (key.contains("\"") || (key.contains("(") && key.contains(")"))){
                 builder.append(key).append(",");
             }else {

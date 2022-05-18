@@ -621,7 +621,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     @Override
     public String checkQuerySql(CheckQuerySqlRequest request, Integer apiVersion, Integer type) {
-        String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
+//        String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR).toLowerCase();
+        String sql = request.getSql().replaceAll(MANY_EMPTY_CHAR, EMPTY_CHAR);
         if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)){
             if(StringUtils.isEmpty(request.getSql())){
                 throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000008.getMessage());
