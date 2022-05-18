@@ -651,7 +651,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         CreateApiInfoBO createApiInfoBO = null;
 //        StringBuilder tableNames = new StringBuilder();
         try (Connection conn = DataApiDruidDataSourceService.getInstance()
-                .getOrCreateConnectionWithoutUsername(uri, type)) {
+                .getOrCreateConnectionWithoutUsername(uri, datasource.getType())) {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.execute();
 //            if(QuerySqlCheckType.NEED_GET_TABLE_FIELD.getCode().equals(type)) {
