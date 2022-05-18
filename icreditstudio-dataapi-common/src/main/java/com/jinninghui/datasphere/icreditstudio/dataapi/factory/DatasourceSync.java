@@ -49,6 +49,9 @@ public interface DatasourceSync {
      * @return
      */
     static String getSchema(String uri) {
+        if (StringUtils.isBlank(uri) || !uri.contains("schema=")){
+            return null;
+        }
         //根据uri获取username
         int index = uri.indexOf("schema=") + "schema=".length();
         String temp = uri.substring(index);

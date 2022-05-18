@@ -444,9 +444,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         entity.setDelFlag(DelFlagEnum.DIS_ABLED.getCode());
         apiBaseHiMapper.deleteByEntity(entity);
         //删除param参数信息、注册api信息、数据源生成api信息
-        apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
-        generateApiService.deleteByApiIdAndVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
-        registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
+        apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), entity.getApiVersion());
+        generateApiService.deleteByApiIdAndVersion(apiBaseEntity.getId(), entity.getApiVersion());
+        registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), entity.getApiVersion());
         List<IcreditApiBaseHiEntity> apiBaseHiEntityList = apiBaseHiMapper.listByApiBaseId(entity.getApiBaseId());
         //历史版本全部删除了，则删除其API
         if (CollectionUtils.isEmpty(apiBaseHiEntityList)){

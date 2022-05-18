@@ -219,21 +219,18 @@ public class DBConnectionManager {
             if (freeConnections.size() > 0) {
                 con = (Connection) freeConnections.firstElement();
                 freeConnections.removeElementAt(0);
-                System.out.println("剩余线程数：" + freeConnections.size());
                 try {
-                    if (con.isClosed()) {
+                    if (con == null || con.isClosed()) {
                         con = newConnection();
                     }
                 } catch (SQLException e) {
-                    con = newConnection();
+                    return con;
                 }
             } else if(maxConn == 0 || checkedOut.get() < maxConn){
-                System.out.println("创建前在使用线程数：" + checkedOut.get());
                 con = newConnection();
             }
             if (con != null) {
                 checkedOut.incrementAndGet();
-                System.out.println("创建后在使用线程数：" + checkedOut.get());
             }
             return con;
         }
