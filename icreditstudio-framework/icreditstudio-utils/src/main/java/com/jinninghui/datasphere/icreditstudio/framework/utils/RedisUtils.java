@@ -22,12 +22,12 @@ import java.util.concurrent.TimeUnit;
  **/
 @Component
 public class RedisUtils {
+    @Autowired
+    private RedisTemplate redisTemplate;
 
-    private static RedisTemplate redisTemplate;
-
-    public static void setRedisTemplate(RedisTemplate redisTemplate) {
+    /*public static void setRedisTemplate(RedisTemplate redisTemplate) {
         RedisUtils.redisTemplate = redisTemplate;
-    }
+    }*/
 
     /**
      * 实现命令：TTL key，以秒为单位，返回给定 key的剩余生存时间(TTL, time to live)。
@@ -82,7 +82,7 @@ public class RedisUtils {
      * @param value
      * @param timeout（以秒为单位）
      */
-    public static void set(String key, Object value, Long timeout) {
+    public void set(String key, Object value, Long timeout) {
         redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
     }
 
@@ -92,7 +92,7 @@ public class RedisUtils {
      * @param key
      * @return value
      */
-    public static Object get(String key) {
+    public Object get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -134,6 +134,13 @@ public class RedisUtils {
     public void hset(String key, String field, Object value) {
         redisTemplate.opsForHash().put(key, field, value);
     }
+    public void hsetnx(String key, String field, Object value) {
+        redisTemplate.opsForHash().putIfAbsent(key, field, value);
+    }
+
+    public Long hincrby(String key, String field, Integer num){
+        return redisTemplate.opsForHash().increment(key, field, num);
+    }
 
     /**
      * 实现命令：HGET key field，返回哈希表 key中给定域 field的值
@@ -156,13 +163,25 @@ public class RedisUtils {
         redisTemplate.opsForHash().delete(key, fields);
     }
 
+    public List<String> hmget(String key, List<String> fields){
+        return redisTemplate.opsForHash().multiGet(key, fields);
+    }
+
+    public Set<String> hkeys(String key){
+        return redisTemplate.opsForHash().keys(key);
+    }
+
+    public Long hlen(String key){
+        return redisTemplate.opsForHash().size(key);
+    }
+
     /**
      * 实现命令：HGETALL key，返回哈希表 key中，所有的域和值。
      *
      * @param key
      * @return
      */
-    public Map<Object, Object> hgetall(String key) {
+    public Map<String, Object> hgetall(String key) {
         return redisTemplate.opsForHash().entries(key);
     }
 

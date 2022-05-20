@@ -1,6 +1,9 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResu
 public interface StatisticsService  {
 
     StatisticsResult statistics();
+
+    List<StatisticsAppTopResult> appTopView(Integer pageNum, Integer pageSize);
 }

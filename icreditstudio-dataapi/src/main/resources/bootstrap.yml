@@ -40,6 +40,8 @@ server:
 
 system:
   errorCode: 500
+  prop:
+    app.used.count.redis.key: system.prop.app.used.count
 #mybatis:
 #  mapper-locations: classpath*:com/hashtech/**/mapper/mysql/*.xml
 #  type-handlers-package: com.hashtech
