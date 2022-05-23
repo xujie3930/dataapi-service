@@ -61,11 +61,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<StatisticsAppTopResult> appTopView(Integer pageNum, Integer pageSize) {
+    public List<StatisticsAppTopResult> appTopView() {
 
-        int pageStart = (pageNum-1)*pageSize, pageEnd = pageNum*pageSize;
         List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
-        if(null==appApiCountList || appApiCountList.isEmpty() || pageStart>appApiCountList.size()){
+        if(null==appApiCountList || appApiCountList.isEmpty()){
             return new ArrayList<>(0);
         }
         List<StatisticsAppTopResult> resultList = new ArrayList<>();
@@ -116,7 +115,6 @@ public class StatisticsServiceImpl implements StatisticsService {
             }
         }
         //排序
-        List<StatisticsAppTopResult> sortList = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed()).collect(Collectors.toList());
-        return pageStart>sortList.size()?new ArrayList<>(0):sortList.subList(pageStart, pageEnd>sortList.size()?sortList.size():pageEnd);
+        return resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed()).collect(Collectors.toList());
     }
 }

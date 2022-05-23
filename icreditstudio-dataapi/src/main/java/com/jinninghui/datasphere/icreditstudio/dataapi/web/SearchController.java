@@ -53,15 +53,8 @@ public class SearchController {
     }
 
     @GetMapping ("/appTopView")
-    public BusinessResult<List<StatisticsAppTopResult>> appTopView(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum, @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
-        return BusinessResult.success(statisticsService.appTopView(pageNum, pageSize));
-    }
-
-    @Autowired
-    private KafkaConsumer kafkaConsumer;
-    @GetMapping ("/t")
-    public BusinessResult<Boolean> t(HttpServletRequest request) {
-        return BusinessResult.success(kafkaConsumer.addAppUsedCount(request.getParameter("appId")));
+    public BusinessResult<List<StatisticsAppTopResult>> appTopView() {
+        return BusinessResult.success(statisticsService.appTopView());
     }
 }
 

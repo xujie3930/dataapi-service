@@ -17,5 +17,5 @@ public interface StatisticsService  {
 
     StatisticsResult statistics();
 
-    List<StatisticsAppTopResult> appTopView(Integer pageNum, Integer pageSize);
+    List<StatisticsAppTopResult> appTopView();
 }
