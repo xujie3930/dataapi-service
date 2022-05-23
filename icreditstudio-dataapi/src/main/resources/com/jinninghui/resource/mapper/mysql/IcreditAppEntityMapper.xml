@@ -98,4 +98,9 @@
             </if>
         </where>
     </select>
+
+    <select id="getAppApiCountList" resultType="java.util.Map">
+        SELECT app.name appName, app.id appId, (SELECT COUNT(1) FROM icredit_auth auth where auth.del_flag=0 and auth.app_id=app.id) apiCount
+        FROM icredit_app app where del_flag=0
+    </select>
 </mapper>

@@ -1,5 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.framework.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.dao.DataAccessException;
@@ -7,9 +9,12 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,12 +27,35 @@ import java.util.concurrent.TimeUnit;
  **/
 @Component
 public class RedisUtils {
+    private RedisTemplate redisTemplate;
 
-    private static RedisTemplate redisTemplate;
-
-    public static void setRedisTemplate(RedisTemplate redisTemplate) {
-        RedisUtils.redisTemplate = redisTemplate;
+    public RedisTemplate getRedisTemplate() {
+        return redisTemplate;
     }
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate redisTemplate) {
+        //重载GenericJackson2JsonRedisSerializer，解决在使用hincrby时ERR hash value is not an integer的问题
+        this.redisTemplate = redisTemplate;
+        this.redisTemplate.setHashValueSerializer(new MyGenericJackson2JsonRedisSerializer());
+    }
+
+    class MyGenericJackson2JsonRedisSerializer extends GenericJackson2JsonRedisSerializer {
+
+        public byte[] serialize(Object object) throws SerializationException {
+            if (object == null) return new byte[0];
+            if (object instanceof Long || object instanceof Double) return object.toString().getBytes(Charset.forName("UTF-8"));
+            try {
+                return JSON.toJSONBytes(object, SerializerFeature.WriteClassName);
+            } catch (Exception exception) {
+                throw new SerializationException("Could not serialize : " + exception.getMessage(), exception);
+            }
+        }
+    }
+
+    /*public static void setRedisTemplate(RedisTemplate redisTemplate) {
+        RedisUtils.redisTemplate = redisTemplate;
+    }*/
 
     /**
      * 实现命令：TTL key，以秒为单位，返回给定 key的剩余生存时间(TTL, time to live)。
@@ -82,7 +110,7 @@ public class RedisUtils {
      * @param value
      * @param timeout（以秒为单位）
      */
-    public static void set(String key, Object value, Long timeout) {
+    public void set(String key, Object value, Long timeout) {
         redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
     }
 
@@ -92,7 +120,7 @@ public class RedisUtils {
      * @param key
      * @return value
      */
-    public static Object get(String key) {
+    public Object get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -134,6 +162,13 @@ public class RedisUtils {
     public void hset(String key, String field, Object value) {
         redisTemplate.opsForHash().put(key, field, value);
     }
+    public void hsetnx(String key, String field, Object value) {
+        redisTemplate.opsForHash().putIfAbsent(key, field, value);
+    }
+
+    public Long hincrby(String key, String field, Integer num){
+        return redisTemplate.opsForHash().increment(key, field, num);
+    }
 
     /**
      * 实现命令：HGET key field，返回哈希表 key中给定域 field的值
@@ -142,8 +177,8 @@ public class RedisUtils {
      * @param field
      * @return
      */
-    public String hget(String key, String field) {
-        return (String) redisTemplate.opsForHash().get(key, field);
+    public Object hget(String key, String field) {
+        return redisTemplate.opsForHash().get(key, field);
     }
 
     /**
@@ -156,13 +191,25 @@ public class RedisUtils {
         redisTemplate.opsForHash().delete(key, fields);
     }
 
+    public List<String> hmget(String key, List<String> fields){
+        return redisTemplate.opsForHash().multiGet(key, fields);
+    }
+
+    public Set<String> hkeys(String key){
+        return redisTemplate.opsForHash().keys(key);
+    }
+
+    public Long hlen(String key){
+        return redisTemplate.opsForHash().size(key);
+    }
+
     /**
      * 实现命令：HGETALL key，返回哈希表 key中，所有的域和值。
      *
      * @param key
      * @return
      */
-    public Map<Object, Object> hgetall(String key) {
+    public Map<String, Object> hgetall(String key) {
         return redisTemplate.opsForHash().entries(key);
     }
 

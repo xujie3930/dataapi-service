@@ -6,7 +6,9 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryR
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -23,4 +25,12 @@ public interface IcreditApiLogMapper extends BaseMapper<IcreditApiLogEntity> {
     List<LogListQueryResult> getList(LogListQueryRequest request);
 
     IcreditApiLogEntity findByTraceId(@Param("traceId") String traceId);
+
+    /**
+     * 通过APPID查询使用次数
+     * @author  maoc
+     * @create  2022/5/20 14:25
+     * @desc
+     **/
+    List<Map<String, Object>> queryUsedCountByAppIds(@Param("list") Collection<String> list);
 }

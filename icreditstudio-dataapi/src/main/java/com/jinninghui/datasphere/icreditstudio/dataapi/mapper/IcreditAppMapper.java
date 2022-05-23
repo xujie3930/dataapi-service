@@ -6,6 +6,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AppEnableRequ
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -32,4 +33,6 @@ public interface IcreditAppMapper extends BaseMapper<IcreditAppEntity> {
     String findEnableAppIdByIds(List<String> appIds);
 
     Long getCountByEnableAndDelFlag(@Param("isEnable") Integer isEnable, @Param("delFlag") Integer delFlag);
+
+    List<Map<String, Object>> getAppApiCountList();
 }

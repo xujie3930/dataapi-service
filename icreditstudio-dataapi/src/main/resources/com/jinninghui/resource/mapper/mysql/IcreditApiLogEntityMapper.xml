@@ -58,4 +58,12 @@
         select * from icredit_api_log where trace_id = #{traceId}
     </select>
 
+    <select id="queryUsedCountByAppIds" resultType="java.util.Map" parameterType="java.util.Collection">
+        SELECT app_id appId, count(1) nums
+        FROM icredit_api_log WHERE del_flag=0 AND app_id IN
+        <foreach collection="list" item="appId" open=" (" close=")" separator=",">
+            #{appId}
+        </foreach>
+         group by app_id
+    </select>
 </mapper>
