@@ -73,14 +73,15 @@ public class StatisticsServiceImpl implements StatisticsService {
         //注意，hgetall有性能问题
         Map<String, Object> counts = redisUtils.hgetall(appUsedCount);
 
-
-        appApiCountList.stream().forEach(appApiCount->{
+        for(int i=0;i<appApiCountList.size();i++){
+            Map<String, Object> appApiCount = appApiCountList.get(i);
             StatisticsAppTopResult appTop = new StatisticsAppTopResult();
             String appId = (String) appApiCount.get("appId");
             String appName = (String) appApiCount.get("appName");
             Long apiCount = (Long) appApiCount.get("apiCount");
             String redisCount = (counts.get(appId)==null||"".equals(counts.get(appId))?null:counts.get(appId)+"");
             boolean redisCountFlag = StringUtils.isEmpty(redisCount);
+            appTop.setSort(i+1);
             appTop.setAppId(appId);
             appTop.setAppName(appName);
             appTop.setAuthApiCount(apiCount==null?0:apiCount.intValue());
@@ -90,7 +91,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             if(redisCountFlag){
                 noappIds.add(appId);
             }
-        });
+        }
 
         if(!noappIds.isEmpty()){
             //使用锁，防止同步操作时数据错乱
