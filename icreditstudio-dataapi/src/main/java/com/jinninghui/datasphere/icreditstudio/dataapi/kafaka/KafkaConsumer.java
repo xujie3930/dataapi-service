@@ -84,26 +84,29 @@ public class KafkaConsumer {
             return false;
         }
         //操作redis
-        String appUseCount = redisUtils.hget(appUsedCount, appId);
-        if(StringUtils.isEmpty(appUseCount)){
+        Object useCountObj = redisUtils.hget(appUsedCount, appId);
+        Integer useCount = (null==useCountObj || "null".equals(useCountObj+""))?null:Integer.valueOf(useCountObj+"");
+        if(null==useCount){
             //使用锁，防止同步操作时数据错乱
             synchronized (StatisticsServiceImpl.updateRedisUsedCountLock){
-                if(StringUtils.isEmpty(redisUtils.hget(appUsedCount, appId))){
+                if(null==redisUtils.hget(appUsedCount, appId)){
                     //查询数据库，回写redis
                     List<String> querys = new ArrayList<>(2);
                     querys.add(appId);
                     List<Map<String, Object>> dbdata = apiLogMapper.queryUsedCountByAppIds(querys);
-                    appUseCount = (null==dbdata || null==dbdata.get(0) || null==dbdata.get(0).get("nums"))?"0":dbdata.get(0).get("nums")+"";
+                    useCount = (null==dbdata || null==dbdata.get(0) || null==dbdata.get(0).get("nums"))?0:Integer.valueOf(dbdata.get(0).get("nums")+"");
                     //回写redis
-                    redisUtils.hset(appUseCount, appId, Integer.valueOf(appUseCount)+1);
+                    redisUtils.hset(appUsedCount, appId, useCount+1);
                 }else{
                     //+1
-                    redisUtils.hincrby(appUseCount, appId, 1);
+                    Long hincrby = redisUtils.hincrby(appUsedCount, appId, 1);
+                    System.out.println(hincrby);
                 }
             }
         }else{
             //+1
-            redisUtils.hincrby(appUseCount, appId, 1);
+            Long hincrby = redisUtils.hincrby(appUsedCount, appId, 1);
+            System.out.println(hincrby);
         }
         return true;
     }

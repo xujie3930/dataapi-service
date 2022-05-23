@@ -62,8 +62,10 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<StatisticsAppTopResult> appTopView(Integer pageNum, Integer pageSize) {
+
+        int pageStart = (pageNum-1)*pageSize, pageEnd = pageNum*pageSize;
         List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
-        if(null==appApiCountList || appApiCountList.isEmpty()){
+        if(null==appApiCountList || appApiCountList.isEmpty() || pageStart>appApiCountList.size()){
             return new ArrayList<>(0);
         }
         List<StatisticsAppTopResult> resultList = new ArrayList<>();
@@ -74,13 +76,13 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 
         appApiCountList.stream().forEach(appApiCount->{
-
             StatisticsAppTopResult appTop = new StatisticsAppTopResult();
             String appId = (String) appApiCount.get("appId");
             String appName = (String) appApiCount.get("appName");
             Long apiCount = (Long) appApiCount.get("apiCount");
-            String redisCount = (counts.get(appId)==null?null:counts.get(appId)+"");
+            String redisCount = (counts.get(appId)==null||"".equals(counts.get(appId))?null:counts.get(appId)+"");
             boolean redisCountFlag = StringUtils.isEmpty(redisCount);
+            appTop.setAppId(appId);
             appTop.setAppName(appName);
             appTop.setAuthApiCount(apiCount==null?0:apiCount.intValue());
             appTop.setUseApiCount(redisCountFlag?0:Integer.valueOf(redisCount));
@@ -96,26 +98,25 @@ public class StatisticsServiceImpl implements StatisticsService {
             synchronized (updateRedisUsedCountLock){
                 //查询数据库回写redis
                 List<Map<String, Object>> dbdatalist = apiLogMapper.queryUsedCountByAppIds(noappIds);
-                Map<String, Integer> dbdatamap = new HashMap<>();
                 if(null!=dbdatalist && !dbdatalist.isEmpty()){
                     dbdatalist.stream().forEach(dbdata->{
                         String dbappid = (String) dbdata.get("appId");
-                        Long dbcount = (Long) dbdata.get("nums");
-                        dbdatamap.put(dbappid, dbcount==null?0:dbcount.intValue());
+                        Integer dbcount = (null==dbdata.get("nums")?0:((Long) dbdata.get("nums")).intValue());
+                        appMap.get(dbappid).setUseApiCount(dbcount);
+                        redisUtils.hset(appUsedCount, dbappid, dbcount);
+                        noappIds.remove(dbappid);
                     });
                 }
-                //遍历redis没有的key
-                noappIds.stream().forEach(noappId->{
-                    Integer count = dbdatamap.get(noappId);
-                    //写入redis
-                    count = (null == count ? 0 : count);
-                    redisUtils.hset(appUsedCount, noappId, count);
-                    appMap.get(noappId).setUseApiCount(count);
-                });
+                if(!noappIds.isEmpty()){
+                    //如果存在没访问记录的引用，给默认访问记录
+                    noappIds.stream().forEach(noappId->{
+                        redisUtils.hset(appUsedCount, noappId, 0);
+                    });
+                }
             }
         }
         //排序
         List<StatisticsAppTopResult> sortList = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed()).collect(Collectors.toList());
-        return pageNum*pageSize>sortList.size()?new ArrayList<>(0):sortList.subList((pageNum-1)*pageSize, pageSize);
+        return pageStart>sortList.size()?new ArrayList<>(0):sortList.subList(pageStart, pageEnd>sortList.size()?sortList.size():pageEnd);
     }
 }

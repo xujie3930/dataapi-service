@@ -1,5 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.framework.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.dao.DataAccessException;
@@ -7,9 +9,12 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,8 +27,31 @@ import java.util.concurrent.TimeUnit;
  **/
 @Component
 public class RedisUtils {
-    @Autowired
     private RedisTemplate redisTemplate;
+
+    public RedisTemplate getRedisTemplate() {
+        return redisTemplate;
+    }
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate redisTemplate) {
+        //重载GenericJackson2JsonRedisSerializer，解决在使用hincrby时ERR hash value is not an integer的问题
+        this.redisTemplate = redisTemplate;
+        this.redisTemplate.setHashValueSerializer(new MyGenericJackson2JsonRedisSerializer());
+    }
+
+    class MyGenericJackson2JsonRedisSerializer extends GenericJackson2JsonRedisSerializer {
+
+        public byte[] serialize(Object object) throws SerializationException {
+            if (object == null) return new byte[0];
+            if (object instanceof Long || object instanceof Double) return object.toString().getBytes(Charset.forName("UTF-8"));
+            try {
+                return JSON.toJSONBytes(object, SerializerFeature.WriteClassName);
+            } catch (Exception exception) {
+                throw new SerializationException("Could not serialize : " + exception.getMessage(), exception);
+            }
+        }
+    }
 
     /*public static void setRedisTemplate(RedisTemplate redisTemplate) {
         RedisUtils.redisTemplate = redisTemplate;
@@ -149,8 +177,8 @@ public class RedisUtils {
      * @param field
      * @return
      */
-    public String hget(String key, String field) {
-        return (String) redisTemplate.opsForHash().get(key, field);
+    public Object hget(String key, String field) {
+        return redisTemplate.opsForHash().get(key, field);
     }
 
     /**
