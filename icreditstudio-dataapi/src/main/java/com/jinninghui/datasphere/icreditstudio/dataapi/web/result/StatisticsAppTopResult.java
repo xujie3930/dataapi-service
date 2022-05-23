@@ -17,4 +17,6 @@ public class StatisticsAppTopResult {
     private Integer authApiCount;
     //调用接口次数
     private Integer useApiCount;
+
+    private Integer sort;
 }
