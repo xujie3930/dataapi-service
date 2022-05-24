@@ -14,9 +14,9 @@ import com.jinninghui.datasphere.icreditstudio.framework.utils.RedisUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.sql.DataSource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,21 +67,18 @@ public class StatisticsServiceImpl implements StatisticsService {
         if(null==appApiCountList || appApiCountList.isEmpty()){
             return new ArrayList<>(0);
         }
-        List<StatisticsAppTopResult> resultList = new ArrayList<>();
-        Map<String, StatisticsAppTopResult> appMap = new HashMap<>();
-        Set<String> noappIds=new HashSet<>();
+        final List<StatisticsAppTopResult> resultList = new ArrayList<>();
+        final Map<String, StatisticsAppTopResult> appMap = new HashMap<>();
+        final Set<String> noappIds=new HashSet<>();
         //注意，hgetall有性能问题
-        Map<String, Object> counts = redisUtils.hgetall(appUsedCount);
-
-        for(int i=0;i<appApiCountList.size();i++){
-            Map<String, Object> appApiCount = appApiCountList.get(i);
+        final Map<String, Object> counts = redisUtils.hgetall(appUsedCount);
+        appApiCountList.stream().forEach(appApiCount->{
             StatisticsAppTopResult appTop = new StatisticsAppTopResult();
             String appId = (String) appApiCount.get("appId");
             String appName = (String) appApiCount.get("appName");
             Long apiCount = (Long) appApiCount.get("apiCount");
             String redisCount = (counts.get(appId)==null||"".equals(counts.get(appId))?null:counts.get(appId)+"");
             boolean redisCountFlag = StringUtils.isEmpty(redisCount);
-            appTop.setSort(i+1);
             appTop.setAppId(appId);
             appTop.setAppName(appName);
             appTop.setAuthApiCount(apiCount==null?0:apiCount.intValue());
@@ -91,7 +88,18 @@ public class StatisticsServiceImpl implements StatisticsService {
             if(redisCountFlag){
                 noappIds.add(appId);
             }
-        }
+        });
+
+        /*Connection connection = DataSourceUtils.getConnection(dataSource);
+        try{
+            DatabaseMetaData metaData = connection.getMetaData();
+            Properties clientInfo = connection.getClientInfo();
+            ResultSet clientInfoProperties = metaData.getClientInfoProperties();
+            ResultSet typeInfo = metaData.getTypeInfo();
+            System.out.println(JSON.toJSONString(metaData));
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }*/
 
         if(!noappIds.isEmpty()){
             //使用锁，防止同步操作时数据错乱
@@ -110,12 +118,16 @@ public class StatisticsServiceImpl implements StatisticsService {
                 if(!noappIds.isEmpty()){
                     //如果存在没访问记录的引用，给默认访问记录
                     noappIds.stream().forEach(noappId->{
-                        redisUtils.hset(appUsedCount, noappId, 0);
+                        redisUtils.hincrby(appUsedCount, noappId, 0);
                     });
                 }
             }
         }
         //排序
-        return resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed()).collect(Collectors.toList());
+        final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed()).collect(Collectors.toList());
+        for(int i=0;i<results.size();i++){
+            results.get(i).setSort(i+1);
+        }
+        return results;
     }
 }
