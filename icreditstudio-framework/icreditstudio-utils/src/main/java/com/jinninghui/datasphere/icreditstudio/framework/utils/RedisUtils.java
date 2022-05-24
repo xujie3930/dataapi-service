@@ -1,9 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.framework.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
@@ -13,7 +10,6 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -35,21 +31,44 @@ public class RedisUtils {
 
     @Autowired
     public void setRedisTemplate(RedisTemplate redisTemplate) {
-        //重载GenericJackson2JsonRedisSerializer，解决在使用hincrby时ERR hash value is not an integer的问题
+        //自定义string类型序列化器，防止乱码
         this.redisTemplate = redisTemplate;
+        //this.redisTemplate.setKeySerializer(new StringRedisSerializer());
+        //this.redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        //重载GenericJackson2JsonRedisSerializer，解决在使用hincrby时ERR hash value is not an integer的问题
         this.redisTemplate.setHashValueSerializer(new MyGenericJackson2JsonRedisSerializer());
     }
 
     class MyGenericJackson2JsonRedisSerializer extends GenericJackson2JsonRedisSerializer {
-
+        @Override
         public byte[] serialize(Object object) throws SerializationException {
-            if (object == null) return new byte[0];
-            if (object instanceof Long || object instanceof Double) return object.toString().getBytes(Charset.forName("UTF-8"));
+            if (object == null){
+                return new byte[0];
+            }
+            //由于redisTemplate原生的序列化工具存在的问题，导致在对hash执行hincrby操作时报错（ERR hash value is not an integer）
+            //原型是hash的value序列化后转化为非数字字符串，而increase方法没有序列化，直接相加。导致报错
+            //此处做判断，单StatisticsServiceImpl类的appTopView方法调用hset时，不执行默认序列化器，其他方法继续调用默认序列化器
+            //避免改动对已有其他方法的影响
+            if (object instanceof Long || object instanceof Double || object instanceof Integer) {
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                for(int i=2;i<stackTrace.length;i++){
+                    StackTraceElement st = stackTrace[i];
+                    String className = st.getClassName();
+                    String methodName = st.getMethodName();
+                    if("appTopView".equals(methodName) && className.endsWith("StatisticsServiceImpl")){
+                        return object.toString().getBytes(Charset.forName("UTF-8"));
+                    }
+                }
+            }
+            return super.serialize(object);
+            /*if(object instanceof java.lang.String){
+                return ((String)object).getBytes(Charset.forName("UTF-8"));
+            }
             try {
                 return JSON.toJSONBytes(object, SerializerFeature.WriteClassName);
             } catch (Exception exception) {
                 throw new SerializationException("Could not serialize : " + exception.getMessage(), exception);
-            }
+            }*/
         }
     }
 
