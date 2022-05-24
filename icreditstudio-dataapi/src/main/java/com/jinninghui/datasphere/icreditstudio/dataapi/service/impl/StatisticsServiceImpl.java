@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -126,11 +127,20 @@ public class StatisticsServiceImpl implements StatisticsService {
             }
         }
         //排序
-        final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
-        for(int i=0;i<results.size();i++){
-            results.get(i).setSort(i+1);
+        Comparator compareIns = Collator.getInstance(java.util.Locale.CHINA);
+        resultList.sort((p1, p2)-> {
+            int perCom = Double.valueOf(p2.getUseApiCount()).compareTo(Double.valueOf(p1.getUseApiCount()));
+            if (perCom == 0) {
+                return compareIns.compare(p1.getAppName(), p2.getAppName());}
+                else {
+                    return perCom;
+                }
+        });
+        //final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
+        for(int i=0;i<resultList.size();i++){
+            resultList.get(i).setSort(i+1);
         }
-        return results;
+        return resultList;
     }
 
     public static void main(String[] s){
