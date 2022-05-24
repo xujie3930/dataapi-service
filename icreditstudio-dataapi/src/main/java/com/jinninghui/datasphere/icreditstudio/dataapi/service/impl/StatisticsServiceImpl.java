@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiPublishStatusEnum;
@@ -8,6 +9,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMappe
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.StatisticsService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.HttpUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.RedisUtils;
@@ -124,10 +126,24 @@ public class StatisticsServiceImpl implements StatisticsService {
             }
         }
         //排序
-        final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed()).collect(Collectors.toList());
+        final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
         for(int i=0;i<results.size();i++){
             results.get(i).setSort(i+1);
         }
         return results;
+    }
+
+    public static void main(String[] s){
+        String url = "http://127.0.0.1:9080/resource/table/info/baseInfo";
+        Map<String, Object> map = new HashMap<>(8);
+        Map<String, String> hea = new HashMap<>(4);
+        map.put("tableName", "tag");
+        map.put("datasourceId", "943883401306308608");
+        map.put("type", 1);
+        hea.put("Content-Type", "application/json");
+        String send = JSON.toJSONString(map);
+        while (true){
+            System.out.println(HttpUtils.sendPost(url, send, hea).length());
+        }
     }
 }
