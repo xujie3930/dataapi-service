@@ -1,6 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiPublishStatusEnum;
@@ -84,25 +85,25 @@ public class StatisticsServiceImpl implements StatisticsService {
     private List<Map<String, Object>> getAppApiCountList(){
         long a = System.currentTimeMillis();
         List<Map<String, Object>> results = new ArrayList<>();
-        List<Object> cacheData = redisUtils.lrange(appApiAuth, 0, -1);
+        String cacheData = (String) redisUtils.get(appApiAuth);
         xnMap.get("8").addAndGet(System.currentTimeMillis()-a);
         a = System.currentTimeMillis();
-        if(null==cacheData || cacheData.isEmpty()){
+        if(StringUtils.isEmpty(cacheData)){
             List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
             if(null!=appApiCountList && !appApiCountList.isEmpty()){
-                List<String> redisSave = new ArrayList<>();
+                List<Map<String, Object>> redisSave = new ArrayList<>();
                 appApiCountList.stream().forEach(appApiCount->{
-                    redisSave.add(JSON.toJSONString(appApiCount));
+                    redisSave.add(appApiCount);
                     results.add(appApiCount);
 
                 });
-                redisUtils.lpush(appApiAuth, redisSave.toArray(new String[redisSave.size()]));
-                redisUtils.expire(appApiAuth, 60);
+                redisUtils.set(appApiAuth, JSONArray.toJSONString(redisSave), 60l);
+                //redisUtils.expire(appApiAuth, 60);
             }
             xnMap.get("9").addAndGet(System.currentTimeMillis()-a);
         }else{
-            cacheData.stream().forEach(cache->{
-                results.add(JSON.parseObject((String) cache));
+            JSONArray.parseArray(cacheData).stream().forEach(cache->{
+                results.add((Map<String, Object>) cache);
             });
             xnMap.get("10").addAndGet(System.currentTimeMillis()-a);
         }
