@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.sql.DataSource;
 import java.text.Collator;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +34,18 @@ import java.util.stream.Collectors;
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
 
+    public StatisticsServiceImpl(){
+        xnMap.put("1", new AtomicLong(0));
+        xnMap.put("2", new AtomicLong(0));
+        xnMap.put("3", new AtomicLong(0));
+        xnMap.put("4", new AtomicLong(0));
+        xnMap.put("5", new AtomicLong(0));
+        xnMap.put("6", new AtomicLong(0));
+        xnMap.put("7", new AtomicLong(0));
+        xnMap.put("8", new AtomicLong(0));
+        xnMap.put("9", new AtomicLong(0));
+        xnMap.put("10", new AtomicLong(0));
+    }
     @Autowired
     private IcreditApiBaseMapper apiBaseMapper;
     @Autowired
@@ -68,8 +82,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     private List<Map<String, Object>> getAppApiCountList(){
+        long a = System.currentTimeMillis();
         List<Map<String, Object>> results = new ArrayList<>();
         List<Object> cacheData = redisUtils.lrange(appApiAuth, 0, -1);
+        xnMap.get("8").addAndGet(System.currentTimeMillis()-a);
+        a = System.currentTimeMillis();
         if(null==cacheData || cacheData.isEmpty()){
             List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
             if(null!=appApiCountList && !appApiCountList.isEmpty()){
@@ -82,28 +99,33 @@ public class StatisticsServiceImpl implements StatisticsService {
                 redisUtils.lpush(appApiAuth, redisSave.toArray(new String[redisSave.size()]));
                 redisUtils.expire(appApiAuth, 60);
             }
-
+            xnMap.get("9").addAndGet(System.currentTimeMillis()-a);
         }else{
             cacheData.stream().forEach(cache->{
                 results.add(JSON.parseObject((String) cache));
             });
+            xnMap.get("10").addAndGet(System.currentTimeMillis()-a);
         }
         return results;
     }
 
     @Override
     public List<StatisticsAppTopResult> appTopView() {
-
+        long a = System.currentTimeMillis();
         //List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
         List<Map<String, Object>> appApiCountList = this.getAppApiCountList();
         if(null==appApiCountList || appApiCountList.isEmpty()){
             return new ArrayList<>(0);
         }
+        xnMap.get("1").addAndGet(System.currentTimeMillis()-a);
+        a = System.currentTimeMillis();
         final List<StatisticsAppTopResult> resultList = new ArrayList<>();
         final Map<String, StatisticsAppTopResult> appMap = new HashMap<>();
         final Set<String> noappIds=new HashSet<>();
         //注意，hgetall有性能问题
         final Map<String, Object> counts = redisUtils.hgetall(appUsedCount);
+        xnMap.get("2").addAndGet(System.currentTimeMillis()-a);
+        a = System.currentTimeMillis();
         appApiCountList.stream().forEach(appApiCount->{
             StatisticsAppTopResult appTop = new StatisticsAppTopResult();
             String appId = (String) appApiCount.get("appId");
@@ -121,18 +143,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                 noappIds.add(appId);
             }
         });
-
-        /*Connection connection = DataSourceUtils.getConnection(dataSource);
-        try{
-            DatabaseMetaData metaData = connection.getMetaData();
-            Properties clientInfo = connection.getClientInfo();
-            ResultSet clientInfoProperties = metaData.getClientInfoProperties();
-            ResultSet typeInfo = metaData.getTypeInfo();
-            System.out.println(JSON.toJSONString(metaData));
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }*/
-
+        xnMap.get("3").addAndGet(System.currentTimeMillis()-a);
+        a = System.currentTimeMillis();
         if(!noappIds.isEmpty()){
             //使用锁，防止同步操作时数据错乱
             synchronized (updateRedisUsedCountLock){
@@ -147,12 +159,16 @@ public class StatisticsServiceImpl implements StatisticsService {
                         noappIds.remove(dbappid);
                     });
                 }
+                xnMap.get("4").addAndGet(System.currentTimeMillis()-a);
+                a = System.currentTimeMillis();
                 if(!noappIds.isEmpty()){
                     //如果存在没访问记录的引用，给默认访问记录
                     noappIds.stream().forEach(noappId->{
                         redisUtils.hincrby(appUsedCount, noappId, 0);
                     });
                 }
+                xnMap.get("5").addAndGet(System.currentTimeMillis()-a);
+                a = System.currentTimeMillis();
             }
         }
         //排序
@@ -165,12 +181,17 @@ public class StatisticsServiceImpl implements StatisticsService {
                     return perCom;
                 }
         });
+        xnMap.get("6").addAndGet(System.currentTimeMillis()-a);
+        a = System.currentTimeMillis();
         //final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
         for(int i=0;i<resultList.size();i++){
             resultList.get(i).setSort(i+1);
         }
+        xnMap.get("7").addAndGet(System.currentTimeMillis()-a);
         return resultList;
     }
+
+    public final Map<String, AtomicLong> xnMap = new HashMap<>();
 
     public static void main(String[] s){
         String url = "http://127.0.0.1:9080/resource/table/info/baseInfo";
@@ -192,5 +213,17 @@ public class StatisticsServiceImpl implements StatisticsService {
         }*/
         System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
         System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
+    }
+
+    @Override
+    public List<Map<String, String>> xnMap() {
+        List<Map<String, String>> results = new ArrayList<>();
+        xnMap.entrySet().stream().forEach(xn->{
+            Map<String, String> xm = new HashMap<>();
+            xm.put("key", xn.getKey());
+            xm.put("value", xn.getValue().get()+"");
+            results.add(xm);
+        });
+        return results;
     }
 }

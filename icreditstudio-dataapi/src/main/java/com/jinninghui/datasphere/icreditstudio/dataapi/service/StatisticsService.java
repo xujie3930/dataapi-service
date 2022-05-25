@@ -4,6 +4,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppT
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -18,4 +19,6 @@ public interface StatisticsService  {
     StatisticsResult statistics();
 
     List<StatisticsAppTopResult> appTopView();
+
+    List<Map<String, String>> xnMap();
 }
