@@ -257,6 +257,13 @@ public class RedisUtils {
     public long lpush(String key, String value) {
         return redisTemplate.opsForList().leftPush(key, value);
     }
+    public long lpush(String key, String... value) {
+        return redisTemplate.opsForList().leftPushAll(key, value);
+    }
+
+    public List<Object> lrange(String key, long start, long end) {
+        return redisTemplate.opsForList().range(key, start, end);
+    }
 
     /**
      * 实现命令：LPOP key，移除并返回列表 key的头元素。

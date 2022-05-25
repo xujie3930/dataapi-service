@@ -12,6 +12,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.StatisticsService
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.HttpUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.RedisUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     private RedisUtils redisUtils;
     @Value("${system.prop.app.used.count.redis.key}")
     private String appUsedCount;
+    @Value("${system.prop.app.api.auth.redis.key}")
+    private String appApiAuth;
+
     public static final String updateRedisUsedCountLock = "updateRedisUsedCountLock";
 
     @Override
@@ -63,10 +67,35 @@ public class StatisticsServiceImpl implements StatisticsService {
         return result;
     }
 
+    private List<Map<String, Object>> getAppApiCountList(){
+        List<Map<String, Object>> results = new ArrayList<>();
+        List<Object> cacheData = redisUtils.lrange(appApiAuth, 0, -1);
+        if(null==cacheData || cacheData.isEmpty()){
+            List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
+            if(null!=appApiCountList && !appApiCountList.isEmpty()){
+                List<String> redisSave = new ArrayList<>();
+                appApiCountList.stream().forEach(appApiCount->{
+                    redisSave.add(JSON.toJSONString(appApiCount));
+                    results.add(appApiCount);
+
+                });
+                redisUtils.lpush(appApiAuth, redisSave.toArray(new String[redisSave.size()]));
+                redisUtils.expire(appApiAuth, 60);
+            }
+
+        }else{
+            cacheData.stream().forEach(cache->{
+                results.add(JSON.parseObject((String) cache));
+            });
+        }
+        return results;
+    }
+
     @Override
     public List<StatisticsAppTopResult> appTopView() {
 
-        List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
+        //List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
+        List<Map<String, Object>> appApiCountList = this.getAppApiCountList();
         if(null==appApiCountList || appApiCountList.isEmpty()){
             return new ArrayList<>(0);
         }
@@ -79,7 +108,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             StatisticsAppTopResult appTop = new StatisticsAppTopResult();
             String appId = (String) appApiCount.get("appId");
             String appName = (String) appApiCount.get("appName");
-            Long apiCount = (Long) appApiCount.get("apiCount");
+            Long apiCount = (appApiCount.get("apiCount") instanceof Long?(Long)appApiCount.get("apiCount"):(Integer)appApiCount.get("apiCount"));
             String redisCount = (counts.get(appId)==null||"".equals(counts.get(appId))?null:counts.get(appId)+"");
             boolean redisCountFlag = StringUtils.isEmpty(redisCount);
             appTop.setAppId(appId);
@@ -152,8 +181,16 @@ public class StatisticsServiceImpl implements StatisticsService {
         map.put("type", 1);
         hea.put("Content-Type", "application/json");
         String send = JSON.toJSONString(map);
-        while (true){
-            System.out.println(HttpUtils.sendPost(url, send, hea).length());
-        }
+        /*for(int i=1;i<Integer.MAX_VALUE;i++){
+            try {
+                Thread.sleep(i<=6?i*1000:6000);
+                System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //System.out.println(HttpUtils.sendPost(url, send, hea).length());
+        }*/
+        System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
+        System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
     }
 }

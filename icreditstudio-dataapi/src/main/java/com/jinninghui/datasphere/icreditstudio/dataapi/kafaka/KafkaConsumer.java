@@ -56,6 +56,8 @@ public class KafkaConsumer {
                     IcreditApiLogEntity apiLogEntity = new IcreditApiLogEntity();
                     BeanUtils.copyProperties(logInfo, apiLogEntity);
                     apiLogMapper.insert(apiLogEntity);
+                    //修改redis引用调用数
+                    this.addAppUsedCount(logInfo.getAppId());
                 }else{
                     if (!CallStatusEnum.CALL_ON.getCode().equals(logInfo.getCallStatus())){
                         IcreditApiLogEntity logApiLogEntity = apiLogMapper.findByTraceId(logInfo.getTraceId());
@@ -68,8 +70,7 @@ public class KafkaConsumer {
                     }
                     redisTemplate.delete(logInfo.getTraceId());
                 }
-                //修改redis引用调用数
-                this.addAppUsedCount(logInfo.getAppId());
+
                 log.info("topic_test 消费了： Topic:" + topic + ",Message:" + msg);
             }
         } catch (BeansException e) {
@@ -89,7 +90,9 @@ public class KafkaConsumer {
         if(null==useCount){
             //使用锁，防止同步操作时数据错乱
             synchronized (StatisticsServiceImpl.updateRedisUsedCountLock){
-                if(null==redisUtils.hget(appUsedCount, appId)){
+                Object useCountObj2 = redisUtils.hget(appUsedCount, appId);
+                Integer useCount2 = (null==useCountObj2 || "null".equals(useCountObj2+""))?null:Integer.valueOf(useCountObj2+"");
+                if(null==useCount2){
                     //查询数据库，回写redis
                     List<String> querys = new ArrayList<>(2);
                     querys.add(appId);
@@ -99,14 +102,12 @@ public class KafkaConsumer {
                     redisUtils.hset(appUsedCount, appId, useCount+1);
                 }else{
                     //+1
-                    Long hincrby = redisUtils.hincrby(appUsedCount, appId, 1);
-                    System.out.println(hincrby);
+                    redisUtils.hincrby(appUsedCount, appId, 1);
                 }
             }
         }else{
             //+1
-            Long hincrby = redisUtils.hincrby(appUsedCount, appId, 1);
-            System.out.println(hincrby);
+            redisUtils.hincrby(appUsedCount, appId, 1);
         }
         return true;
     }

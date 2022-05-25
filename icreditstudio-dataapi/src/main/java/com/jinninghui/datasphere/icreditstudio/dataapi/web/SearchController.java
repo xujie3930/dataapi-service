@@ -56,10 +56,63 @@ public class SearchController {
     }
 
     /*@Autowired
-    private KafkaConsumer kafkaConsumer;
+    private IcreditAppService appService;
+    @Autowired
+    private IcreditApiBaseService apiBaseService;
+    @Autowired
+    private IcreditAuthService authService;
     @GetMapping ("/t")
     public BusinessResult<Boolean> t(HttpServletRequest request) {
-        return BusinessResult.success(kafkaConsumer.addAppUsedCount(request.getParameter("appId")));
+
+
+        List<IcreditAppEntity> apps = new ArrayList<>();
+        List<IcreditApiBaseEntity> apis = new ArrayList<>();
+        for(int i=200;i<210;i++){
+            IcreditApiBaseEntity api = new IcreditApiBaseEntity();
+            IcreditAppEntity app  = new IcreditAppEntity();
+            app.setCertificationType(0);
+            app.setIsEnable(1);
+            app.setName("mao_test_app_"+(i+1));
+            app.setSecretContent("9xanKIIqBuNo2HHs");
+            app.setAppGroupId("1506112839704748033");
+            app.setPeriod(8);
+            app.setDelFlag(0);
+            app.setTokenType(1);
+            app.setAppGroupId(app.getName());
+            appService.save(app);
+            System.out.println(app.getId());
+            api.setType(1);
+            api.setName("mao_test_api_"+(i+1));
+            api.setPath("mSxlCKjKBgCfrYyn");
+            api.setRequestType("GET");
+            api.setResponseType("JSON");
+            api.setApiGroupId("1508748961916215298");
+            api.setPublishStatus(2);
+            api.setApiVersion(1);
+            api.setDelFlag(0);
+            apiBaseService.save(api);
+            System.out.println(api.getId());
+
+            apps.add(app);
+            apis.add(api);
+        }
+
+        for(int i=0;i<apps.size();i++){
+            IcreditAppEntity app = apps.get(i);
+            List<IcreditAuthEntity> saves = new ArrayList<>(100);
+            for(int j=0;j<apis.size();j++){
+                IcreditApiBaseEntity api = apis.get(j);
+                IcreditAuthEntity auth = new IcreditAuthEntity();
+                auth.setRemark("maoshi_test_auth_"+(i+201)+"_"+(j+201));
+                auth.setApiId(api.getId());
+                auth.setAppId(app.getId());
+                auth.setDelFlag(0);
+                saves.add(auth);
+            }
+            authService.saveBatch(saves);
+        }
+
+        return BusinessResult.success(true);
     }*/
 }
 

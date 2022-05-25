@@ -42,6 +42,7 @@ system:
   errorCode: 500
   prop:
     app.used.count.redis.key: system.prop.app.used.count
+    app.api.auth.redis.key: system.prop.app.api.auth
 #mybatis:
 #  mapper-locations: classpath*:com/hashtech/**/mapper/mysql/*.xml
 #  type-handlers-package: com.hashtech
