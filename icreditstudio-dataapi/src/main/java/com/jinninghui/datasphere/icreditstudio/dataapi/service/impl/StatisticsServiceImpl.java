@@ -105,7 +105,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public List<StatisticsAppTopResult> appTopView() {
         //long a = System.currentTimeMillis();
-        System.out.println("addAppUsedCount消费了： 6");
         List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
         //List<Map<String, Object>> appApiCountList = this.getAppApiCountList();
         if(null==appApiCountList || appApiCountList.isEmpty()){
@@ -158,7 +157,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 if(!noappIds.isEmpty()){
                     //如果存在没访问记录的引用，给默认访问记录
                     noappIds.stream().forEach(noappId->{
-                        redisUtils.hincrby(appUsedCount, noappId, 0);
+                        redisUtils.hincrby(appUsedCount, noappId, 0l);
                     });
                 }
                 //xnMap.get("5").addAndGet(System.currentTimeMillis()-a);
