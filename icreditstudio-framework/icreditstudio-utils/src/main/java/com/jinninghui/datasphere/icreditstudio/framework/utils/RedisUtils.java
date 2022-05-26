@@ -41,7 +41,7 @@ public class RedisUtils {
         this.redisTemplate.setHashValueSerializer(new MyGenericJackson2JsonRedisSerializer());
     }
 
-    public static void main(String[] ss){
+    /*public static void main(String[] ss){
         byte[] serialize = new JdkSerializationRedisSerializer().serialize("system.prop.app.used.count");
         try {
             String string = new java.lang.String(serialize, "utf-8");
@@ -50,7 +50,7 @@ public class RedisUtils {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
     class MyGenericJackson2JsonRedisSerializer extends GenericJackson2JsonRedisSerializer {
         @Override
