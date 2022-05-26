@@ -113,8 +113,8 @@ public class KafkaConsumer {
                 }
             }else{
                 //+1
-                log.info("addAppUsedCount消费了： appId:" + appId + ",5,"+1);
-                redisUtils.hincrby(appUsedCount, appId, 1);
+                Long hincrby = redisUtils.hincrby(appUsedCount, appId, 1l);
+                log.info("addAppUsedCount消费了： appId:" + appId + ",5,"+hincrby);
             }
         }catch (Exception ex){
             log.error("更新redis异常", ex);

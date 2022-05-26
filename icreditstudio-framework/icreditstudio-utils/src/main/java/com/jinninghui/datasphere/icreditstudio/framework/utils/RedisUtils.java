@@ -202,6 +202,10 @@ public class RedisUtils {
         return redisTemplate.opsForHash().increment(key, field, num);
     }
 
+    public Long hincrby(String key, String field, Long num){
+        return redisTemplate.opsForHash().increment(key, field, num);
+    }
+
     /**
      * 实现命令：HGET key field，返回哈希表 key中给定域 field的值
      *
