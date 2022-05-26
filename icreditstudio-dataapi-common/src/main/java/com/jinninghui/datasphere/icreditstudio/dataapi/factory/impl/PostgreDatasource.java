@@ -66,45 +66,7 @@ public class PostgreDatasource implements DatasourceSync {
                 tempSql = tempSql.replaceAll("AND " + field + " = " + "'null'", "");
             }
         }
-
-
-        //pg数据库需要对所有返回字符按字段加上""
-        int selectIndex = tempSql.indexOf("select");
-        int SELECTIndex = tempSql.indexOf("SELECT");
-        int fromIndex = tempSql.indexOf("from");
-        int FROMIndex = tempSql.indexOf("FROM");
-        String substring = tempSql.substring(Math.max(selectIndex, SELECTIndex) + "select".length(), Math.max(fromIndex, FROMIndex)).trim();
-        String[] split = substring.split(",");
-        StringBuilder builder = new StringBuilder("select ");
-        for (String key : split) {
-            key = key.trim();
-            if (key.contains("\"") || (key.contains("(") && key.contains(")"))){
-                builder.append(key).append(",");
-            }else {
-                builder.append("\"" + key + "\"" + ",");
-            }
-        }
-        String s = builder.toString();
-        String sql= s.substring(0, s.length() -1) + tempSql.substring(Math.max(fromIndex, FROMIndex));
-
-        if (!sql.contains("and") && !sql.contains("AND")){
-            return sql;
-        }
-
-        //对所有入参字段加上""
-        Set set = kvs.entrySet();
-        Iterator i = set.iterator();
-        //where条件后面的谓词
-        int andIndex = sql.indexOf("and");
-        int ANDIndex = sql.indexOf("AND");
-        String resp = sql.substring(Math.max(andIndex, ANDIndex));
-        String param = sql.substring(0, Math.max(andIndex, ANDIndex));
-        while(i.hasNext()){
-            Map.Entry<String, String> entry=(Map.Entry<String, String>)i.next();
-            String key = entry.getKey();
-            resp = resp.replaceAll(key, "\"" + key + "\"");
-        }
-        return param + resp;
+        return tempSql;
     }
 
     @Override
