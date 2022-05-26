@@ -6,12 +6,10 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.SerializationException;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +33,11 @@ public class RedisUtils {
     public void setRedisTemplate(RedisTemplate redisTemplate) {
         //自定义string类型序列化器，防止乱码
         this.redisTemplate = redisTemplate;
+        //System.out.println(hashValueSerializer.hashCode());
         //this.redisTemplate.setKeySerializer(new StringRedisSerializer());
         //this.redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        //重载GenericJackson2JsonRedisSerializer，解决在使用hincrby时ERR hash value is not an integer的问题
-        this.redisTemplate.setHashValueSerializer(new MyGenericJackson2JsonRedisSerializer());
+        //重载JdkSerializationRedisSerializer，解决在使用hincrby时ERR hash value is not an integer的问题
+        this.redisTemplate.setHashValueSerializer(new MyJdkSerializationRedisSerializer());
     }
 
     /*public static void main(String[] ss){
@@ -52,9 +51,9 @@ public class RedisUtils {
 
     }*/
 
-    class MyGenericJackson2JsonRedisSerializer extends GenericJackson2JsonRedisSerializer {
+    class MyJdkSerializationRedisSerializer extends JdkSerializationRedisSerializer {
         @Override
-        public byte[] serialize(Object object) throws SerializationException {
+        public byte[] serialize(Object object) {
             if (object == null){
                 return new byte[0];
             }
@@ -64,7 +63,7 @@ public class RedisUtils {
             //避免改动对已有其他方法的影响
             if (object instanceof Long || object instanceof Double || object instanceof Integer) {
                 StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-                for(int i=2;i<stackTrace.length;i++){
+                for(int i=5;i<stackTrace.length;i++){
                     StackTraceElement st = stackTrace[i];
                     String className = st.getClassName();
                     String methodName = st.getMethodName();
@@ -82,6 +81,26 @@ public class RedisUtils {
             } catch (Exception exception) {
                 throw new SerializationException("Could not serialize : " + exception.getMessage(), exception);
             }*/
+        }
+        @Override
+        public Object deserialize(@Nullable byte[] bytes) {
+            if (bytes == null || bytes.length == 0) {
+                return null;
+            }
+            try{
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                for(int i=2;i<stackTrace.length||i<20;i++){
+                    StackTraceElement st = stackTrace[i];
+                    String className = st.getClassName();
+                    String methodName = st.getMethodName();
+                    if(("appTopView".equals(methodName) && className.endsWith("StatisticsServiceImpl")) || ("addAppUsedCount".equals(methodName) && className.endsWith("KafkaConsumer"))){
+                        return new String(bytes, "UTF-8");
+                    }
+                }
+
+            }catch (Exception ex){}
+
+            return super.deserialize(bytes);
         }
     }
 
