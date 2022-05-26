@@ -118,4 +118,6 @@ public interface DatasourceSync {
     String getPageParamBySql(String querySql, Integer pageNum, Integer pageSize);
 
     String parseSql(String content, Map<String, String> kvs);
+
+    String getFileld(String field);
 }

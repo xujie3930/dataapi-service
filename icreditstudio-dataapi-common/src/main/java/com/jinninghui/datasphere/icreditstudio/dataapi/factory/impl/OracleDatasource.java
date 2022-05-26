@@ -64,4 +64,9 @@ public class OracleDatasource implements DatasourceSync {
         }
         return tempSql;
     }
+
+    @Override
+    public String getFileld(String field) {
+        return field;
+    }
 }

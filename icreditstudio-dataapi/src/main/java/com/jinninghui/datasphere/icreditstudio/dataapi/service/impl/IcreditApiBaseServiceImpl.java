@@ -10,11 +10,12 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.druid.DataApiDruidDataSourceService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequestFiledEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequiredFiledEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ResponseFiledEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceFactory;
+import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
@@ -22,8 +23,6 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.CreateApiInfoBO;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableFieldBO;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.TableNameInfoBO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.DBConnectionManager;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
@@ -351,6 +350,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         StringBuffer querySqlPrefix = new StringBuffer(SQL_START);
         StringBuffer querySqlSuffix = new StringBuffer(SQL_WHERE);
         //保存 api param
+        //数据库类型:1-mysql,2-oracle,3-pg
+        Integer databaseType = param.getApiGenerateSaveRequest().getDatabaseType();
+        DatasourceSync datasource = DatasourceFactory.getDatasource(databaseType);
         for (DatasourceApiParamSaveRequest datasourceApiParamSaveRequest : param.getApiParamSaveRequestList()) {
             IcreditApiParamEntity apiParamEntity = new IcreditApiParamEntity();
             apiParamEntity.setApiBaseId(apiId);
@@ -364,12 +366,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiParamEntity.setIsResponse(datasourceApiParamSaveRequest.getIsResponse());
             apiParamEntityList.add(apiParamEntity);
             if (ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsResponse())) {
-                querySqlPrefix.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+                String fileld = datasource.getFileld(datasourceApiParamSaveRequest.getFieldName());
+                querySqlPrefix.append(fileld).append(SQL_FIELD_SPLIT_CHAR);
                 responseFields.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                 isHaveRespField = true;
             }
             if (RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsRequest())) {
-                querySqlSuffix.append(datasourceApiParamSaveRequest.getFieldName())
+                String fileld = datasource.getFileld(datasourceApiParamSaveRequest.getFieldName());
+                querySqlSuffix.append(fileld)
                         .append(" = ${").append(datasourceApiParamSaveRequest.getFieldName()).append("}").append(SQL_AND);
             }
             if (RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getRequired())) {
@@ -857,6 +861,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         startTime = System.currentTimeMillis();
         apiParamService.removeByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
         log.info("移除apiParam耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
+        Integer databaseType = param.getApiGenerateSaveRequest().getDatabaseType();
+        DatasourceSync datasource = DatasourceFactory.getDatasource(databaseType);
         if (ApiModelTypeEnum.SINGLE_TABLE_CREATE_MODEL.getCode().equals(param.getApiGenerateSaveRequest().getModel())) {//表单生成模式
             boolean isHaveRespField = false;
             StringBuffer querySqlPrefix = new StringBuffer(SQL_START);
@@ -875,12 +881,14 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
                 apiParamEntity.setIsResponse(datasourceApiParamSaveRequest.getIsResponse());
                 apiParamEntityList.add(apiParamEntity);
                 if (ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsResponse())) {
-                    querySqlPrefix.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
+                    String fileld = datasource.getFileld(datasourceApiParamSaveRequest.getFieldName());
+                    querySqlPrefix.append(fileld).append(SQL_FIELD_SPLIT_CHAR);
                     responseFields.append(datasourceApiParamSaveRequest.getFieldName()).append(SQL_FIELD_SPLIT_CHAR);
                     isHaveRespField = true;
                 }
                 if (RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getIsRequest())) {
-                    querySqlSuffix.append(datasourceApiParamSaveRequest.getFieldName())
+                    String fileld = datasource.getFileld(datasourceApiParamSaveRequest.getFieldName());
+                    querySqlSuffix.append(fileld)
                             .append(" = ${").append(datasourceApiParamSaveRequest.getFieldName()).append("}").append(SQL_AND);
                 }
                 if (RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(datasourceApiParamSaveRequest.getRequired())) {
