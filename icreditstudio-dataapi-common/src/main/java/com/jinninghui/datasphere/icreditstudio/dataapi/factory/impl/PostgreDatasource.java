@@ -70,6 +70,11 @@ public class PostgreDatasource implements DatasourceSync {
     }
 
     @Override
+    public String getFileld(String field) {
+        return "\"" + field + "\"";
+    }
+
+    @Override
     public String geturi(String uri) {
         //根据uri获取jdbc连接
         String substring = uri.substring(0, uri.indexOf(URL_SEPARATOR));
