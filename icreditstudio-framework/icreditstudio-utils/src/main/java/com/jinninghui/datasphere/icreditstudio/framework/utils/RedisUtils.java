@@ -7,9 +7,11 @@ import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,17 @@ public class RedisUtils {
         //this.redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         //重载GenericJackson2JsonRedisSerializer，解决在使用hincrby时ERR hash value is not an integer的问题
         this.redisTemplate.setHashValueSerializer(new MyGenericJackson2JsonRedisSerializer());
+    }
+
+    public static void main(String[] ss){
+        byte[] serialize = new JdkSerializationRedisSerializer().serialize("system.prop.app.used.count");
+        try {
+            String string = new java.lang.String(serialize, "utf-8");
+            System.out.println(string);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
     }
 
     class MyGenericJackson2JsonRedisSerializer extends GenericJackson2JsonRedisSerializer {
@@ -243,6 +256,13 @@ public class RedisUtils {
      */
     public long lpush(String key, String value) {
         return redisTemplate.opsForList().leftPush(key, value);
+    }
+    public long lpush(String key, String... value) {
+        return redisTemplate.opsForList().leftPushAll(key, value);
+    }
+
+    public List<Object> lrange(String key, long start, long end) {
+        return redisTemplate.opsForList().range(key, start, end);
     }
 
     /**
