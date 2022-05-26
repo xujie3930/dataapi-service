@@ -64,7 +64,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         Long publishInterfaceCount = apiBaseHiMapper.getCountByPublishAndDelFlag(ApiPublishStatusEnum.PUBLISHED.getCode(), DelFlagEnum.ENA_BLED.getCode());
 //        Long publishInterfaceCount = apiBaseMapper.getCountByPublishAndDelFlag(ApiPublishStatusEnum.PUBLISHED.getCode(), DelFlagEnum.ENA_BLED.getCode());
         result.setPublishInterfaceCount(publishInterfaceCount);
-        Long interfaceCount = apiBaseHiMapper.getCountByPublishAndDelFlag(ApiPublishStatusEnum.PUBLISHED.getCode(), DelFlagEnum.ENA_BLED.getCode());
+        Long interfaceCount = apiBaseHiMapper.getCountByPublishAndDelFlag(null, DelFlagEnum.ENA_BLED.getCode());
 //        Long interfaceCount = apiBaseMapper.getCountByPublishAndDelFlag(null, DelFlagEnum.ENA_BLED.getCode());
         result.setInterfaceCount(interfaceCount);
         Long authInterfaceCount = authMapper.getApiAuthCount(DelFlagEnum.ENA_BLED.getCode());
