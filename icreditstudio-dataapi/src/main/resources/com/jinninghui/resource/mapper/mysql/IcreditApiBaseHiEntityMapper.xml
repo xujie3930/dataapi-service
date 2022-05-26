@@ -98,4 +98,17 @@
             and `name` = #{name}
         </if>
     </select>
+
+    <select id="getCountByPublishAndDelFlag" resultType="java.lang.Long">
+        select ifnull(count(*), 0)
+        from icredit_api_base_hi
+        <where>
+            <if test="publishStatus != null ">
+                AND publish_status = #{publishStatus}
+            </if>
+            <if test="delFlag != null ">
+                AND del_flag = #{delFlag}
+            </if>
+        </where>
+    </select>
 </mapper>

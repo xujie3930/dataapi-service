@@ -39,4 +39,6 @@ public interface IcreditApiBaseHiMapper extends BaseMapper<IcreditApiBaseHiEntit
     List<IcreditApiBaseHiEntity> findWaitPublishedByApiId(@Param("apiId") String apiId);
 
     List<IcreditApiBaseHiEntity> findByApiBaseIdAndName(@Param("apiId") String apiId, @Param("name") String name);
+
+    Long getCountByPublishAndDelFlag(@Param("publishStatus") Integer publishStatus, @Param("delFlag") Integer delFlag);
 }
