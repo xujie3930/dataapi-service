@@ -103,4 +103,14 @@
             </if>
         </where>
     </select>
+
+    <select id="newlyDayList" resultType="java.lang.Long">
+        select ifnull(count(*), 0) from icredit_api_base
+        <where>
+            <if test="createTime !=null ">
+                and TO_DAYS(create_time) = TO_DAYS(#{createTime})
+            </if>
+            AND del_flag = 0
+        </where>
+    </select>
 </mapper>

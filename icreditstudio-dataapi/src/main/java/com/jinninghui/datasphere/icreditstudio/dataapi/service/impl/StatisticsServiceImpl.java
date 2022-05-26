@@ -71,6 +71,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         result.setEnableAppCount(enableAppCount);
         Long appCount = appMapper.getCountByEnableAndDelFlag(null, DelFlagEnum.ENA_BLED.getCode());
         result.setAppCount(appCount);
+        Long newlyInterfaceCount = apiBaseMapper.newlyDayList(new Date());
+        result.setNewlyInterfaceCount(newlyInterfaceCount);
         return result;
     }
 
