@@ -104,7 +104,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<StatisticsAppTopResult> appTopView() {
-        long a = System.currentTimeMillis();
+        //long a = System.currentTimeMillis();
+        System.out.println("addAppUsedCount消费了： 6");
         List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
         //List<Map<String, Object>> appApiCountList = this.getAppApiCountList();
         if(null==appApiCountList || appApiCountList.isEmpty()){
