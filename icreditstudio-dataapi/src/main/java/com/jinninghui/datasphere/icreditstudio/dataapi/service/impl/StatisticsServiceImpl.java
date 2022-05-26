@@ -1,7 +1,5 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiPublishStatusEnum;
@@ -10,22 +8,16 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMappe
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.StatisticsService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.utils.HttpUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
-import com.jinninghui.datasphere.icreditstudio.framework.utils.DateUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.RedisUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.text.Collator;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * @author xujie
@@ -112,7 +104,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<StatisticsAppTopResult> appTopView() {
-        long a = System.currentTimeMillis();
+        //long a = System.currentTimeMillis();
+        System.out.println("addAppUsedCount消费了： 6");
         List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
         //List<Map<String, Object>> appApiCountList = this.getAppApiCountList();
         if(null==appApiCountList || appApiCountList.isEmpty()){
