@@ -20,5 +20,5 @@ public interface StatisticsService  {
 
     List<StatisticsAppTopResult> appTopView();
 
-    List<Map<String, String>> xnMap();
+    //List<Map<String, String>> xnMap();
 }

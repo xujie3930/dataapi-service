@@ -56,9 +56,9 @@ public class SearchController {
         return BusinessResult.success(statisticsService.appTopView());
     }
 
-    @GetMapping ("/t")
+    /*@GetMapping ("/t")
     public BusinessResult<List<Map<String, String>>> t() {
         return BusinessResult.success(statisticsService.xnMap());
-    }
+    }*/
 }
 
