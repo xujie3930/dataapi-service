@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -56,9 +55,12 @@ public class SearchController {
         return BusinessResult.success(statisticsService.appTopView());
     }
 
-    /*@GetMapping ("/t")
-    public BusinessResult<List<Map<String, String>>> t() {
-        return BusinessResult.success(statisticsService.xnMap());
+    /*@Autowired
+    private KafkaConsumer kafkaConsumer;
+    @GetMapping ("/t")
+    public BusinessResult<Boolean> t(HttpServletRequest request) {
+        kafkaConsumer.addAppUsedCount(request.getParameter("appId"));
+        return BusinessResult.success(true);
     }*/
 }
 
