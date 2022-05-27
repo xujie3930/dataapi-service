@@ -281,7 +281,7 @@ export default {
                   : value
               }
 
-              if ('hide' in list) {
+              if ('hide' in list && generateApi) {
                 this.detailConfiguration.table[idx].hide = hide(generateApi)
               }
             })
@@ -303,10 +303,12 @@ export default {
               visible:
                 data.type === 1 && generateApi?.model !== 1 ? true : false
             })
+
             Object.assign(this.detailTableConfiguration.request, {
               visible: data.type === 0 ? true : false,
               tableData: registerRequestParamSaveRequestList
             })
+
             Object.assign(this.detailTableConfiguration.response, {
               visible: data.type === 0 ? true : false,
               tableData: registerResponseParamSaveRequestList

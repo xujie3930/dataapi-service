@@ -88,10 +88,7 @@ export const detailConfiguration = {
       label: '数据表名称',
       value: '',
       key: 'tableName',
-      hide: data => {
-        console.log(data, data.model !== 1, 'data')
-        return data.model !== 1
-      }
+      hide: data => data?.model !== 1
     }
   ],
 
