@@ -237,7 +237,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         logInfo.setApiPath(path);
         logInfo.setAppName(appAuthInfo.getName());
         logInfo.setAppId(appAuthInfo.getId());
-        logInfo.setCallIp(request.getRemoteHost());
+        logInfo.setCallIp(getIpAddr(request));
         logInfo.setApiVersion(Integer.valueOf(version));
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
@@ -253,5 +253,19 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         logInfo.setApiName(apiInfo.getApiName());
         logInfo.setApiType(apiInfo.getApiType());
         return logInfo;
+    }
+
+    public String getIpAddr(HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
 }
