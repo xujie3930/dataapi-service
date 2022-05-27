@@ -237,7 +237,8 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         logInfo.setApiPath(path);
         logInfo.setAppName(appAuthInfo.getName());
         logInfo.setAppId(appAuthInfo.getId());
-        logInfo.setCallIp(getIpAddr(request));
+        logInfo.setCallIp(request.getRemoteHost());
+//        logInfo.setCallIp(getIpAddr(request));
         logInfo.setApiVersion(Integer.valueOf(version));
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
