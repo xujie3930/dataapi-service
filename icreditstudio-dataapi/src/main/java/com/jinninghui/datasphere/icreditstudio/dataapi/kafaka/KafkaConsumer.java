@@ -99,7 +99,7 @@ public class KafkaConsumer {
                         List<String> querys = new ArrayList<>(2);
                         querys.add(appId);
                         List<Map<String, Object>> dbdata = apiLogMapper.queryUsedCountByAppIds(querys);
-                        useCount = (null==dbdata || null==dbdata.get(0) || null==dbdata.get(0).get("nums"))?0:Integer.valueOf(dbdata.get(0).get("nums")+"");
+                        useCount = (null==dbdata || dbdata.isEmpty() || null==dbdata.get(0) || null==dbdata.get(0).get("nums"))?0:Integer.valueOf(dbdata.get(0).get("nums")+"");
                         //回写redis
                         redisUtils.hset(appUsedCount, appId, useCount+1);
                     }else{

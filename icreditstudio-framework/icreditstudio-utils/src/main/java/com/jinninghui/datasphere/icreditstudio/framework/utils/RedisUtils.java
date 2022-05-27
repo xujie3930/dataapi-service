@@ -63,11 +63,11 @@ public class RedisUtils {
             //避免改动对已有其他方法的影响
             if (object instanceof Long || object instanceof Double || object instanceof Integer) {
                 StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-                for(int i=5;i<stackTrace.length;i++){
+                for(int i=2;i<stackTrace.length;i++){
                     StackTraceElement st = stackTrace[i];
                     String className = st.getClassName();
                     String methodName = st.getMethodName();
-                    if("appTopView".equals(methodName) && className.endsWith("StatisticsServiceImpl")){
+                    if(("appTopView".equals(methodName) && className.endsWith("StatisticsServiceImpl")) || ("addAppUsedCount".equals(methodName) && className.endsWith("KafkaConsumer"))){
                         return object.toString().getBytes(Charset.forName("UTF-8"));
                     }
                 }
