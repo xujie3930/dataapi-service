@@ -5,9 +5,9 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.HttpUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,10 +238,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         logInfo.setApiPath(path);
         logInfo.setAppName(appAuthInfo.getName());
         logInfo.setAppId(appAuthInfo.getId());
-//        logInfo.setCallIp(request.getRemoteHost());
-        logInfo.setCallIp(getIpRequest(request));
-        logInfo.setCallIp(getIpAddress(request));
-        logInfo.setCallIp(getVisitorIp(request));
+        logInfo.setCallIp(HttpUtils.getVisitorIp(request));
         logInfo.setApiVersion(Integer.valueOf(version));
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
@@ -259,98 +256,4 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         return logInfo;
     }
 
-    public String getIpAddr(HttpServletRequest request) {
-        String ip = request.getHeader("x-forwarded-for");
-        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        logger.info("远程服务IP:{}", ip);
-        return ip;
-    }
-
-    /**
-     * 获取Ip
-     *
-     * @param request  请求
-     */
-    public String getIpRequest(HttpServletRequest request) {
-        String unknown = "unknown";
-
-        String ip0 = request.getHeader("x-forwarded-for");
-        String ip = request.getHeader("X-Real-IP");
-
-        if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-
-        if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-
-        if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        logger.info("获取远程ip1:{}", ip);
-        return ip;
-    }
-
-    public String getIpAddress(HttpServletRequest request) {
-        String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        // 获取到多个ip时取第一个作为客户端真实ip
-        if (StringUtils.isNotEmpty(ip) && ip.contains(",")) {
-            String[] ipArray = ip.split(",");
-            if (ArrayUtils.isNotEmpty(ipArray)) {
-                ip = ipArray[0];
-            }
-        }
-        logger.info("获取远程ip2:{}", ip);
-        return ip;
-    }
-
-    public String getVisitorIp(HttpServletRequest request) {
-        String remoteAddr = request.getRemoteAddr();
-        String forwarded = request.getHeader("X-Forwarded-For");
-        String realIp = request.getHeader("X-Real-IP");
-
-        String ipAddress = null;
-        if (realIp == null) {
-            if (forwarded == null) {
-                ipAddress = remoteAddr;
-            } else {
-                ipAddress = remoteAddr + "/" + forwarded.split(",")[0];
-            }
-        } else {
-            if (realIp.equals(forwarded)) {
-                ipAddress = realIp;
-            } else {
-                if(forwarded != null){
-                    forwarded = forwarded.split(",")[0];
-                }
-                ipAddress = realIp + "/" + forwarded;
-            }
-        }
-        logger.info("获取远程ip3:{}", ipAddress);
-        return ipAddress;
-    }
 }
