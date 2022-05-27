@@ -237,8 +237,8 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         logInfo.setApiPath(path);
         logInfo.setAppName(appAuthInfo.getName());
         logInfo.setAppId(appAuthInfo.getId());
-        logInfo.setCallIp(request.getRemoteHost());
-//        logInfo.setCallIp(getIpAddr(request));
+//        logInfo.setCallIp(request.getRemoteHost());
+        logInfo.setCallIp(getIpRequest(request));
         logInfo.setApiVersion(Integer.valueOf(version));
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
@@ -268,6 +268,32 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
             ip = request.getRemoteAddr();
         }
         logger.info("远程服务IP:{}", ip);
+        return ip;
+    }
+
+    /**
+     * 获取Ip
+     *
+     * @param request  请求
+     */
+    public String getIpRequest(HttpServletRequest request) {
+        String unknown = "unknown";
+
+        String ip0 = request.getHeader("x-forwarded-for");
+        String ip = request.getHeader("X-Real-IP");
+
+        if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+
+        if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+
+        if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+
         return ip;
     }
 }
