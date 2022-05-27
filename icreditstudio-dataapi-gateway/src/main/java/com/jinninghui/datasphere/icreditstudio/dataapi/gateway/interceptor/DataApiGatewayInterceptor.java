@@ -266,6 +266,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
+        logger.info("远程服务IP:{}", ip);
         return ip;
     }
 }
