@@ -17,7 +17,7 @@
 
     <select id="getApiAuthCount" resultType="java.lang.Long">
         SELECT
-            *
+            count(*)
         FROM
             icredit_api_base_hi
         WHERE
