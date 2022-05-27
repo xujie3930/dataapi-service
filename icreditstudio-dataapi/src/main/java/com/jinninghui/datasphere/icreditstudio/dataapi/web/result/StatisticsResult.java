@@ -21,4 +21,6 @@ public class StatisticsResult {
     private Long enableAppCount;
     //应用总数量
     private Long appCount;
+    //当日新增接口数量
+    private Long newlyInterfaceCount;
 }

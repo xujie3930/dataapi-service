@@ -16,12 +16,21 @@
     </delete>
 
     <select id="getApiAuthCount" resultType="java.lang.Long">
-        select ifnull(count(distinct api_id), 0) from icredit_auth
-        <where>
-            <if test="delFlag != null">
-                AND del_flag = #{delFlag}
-            </if>
-        </where>
+        SELECT
+            count(*)
+        FROM
+            icredit_api_base_hi
+        WHERE
+                api_base_id IN (
+                SELECT DISTINCT
+                    api_id
+                FROM
+                    icredit_auth
+                WHERE
+                    del_flag = 0
+            )
+          and
+            del_flag = 0
     </select>
 
     <select id="getAppAuthCount" resultType="java.lang.Long">

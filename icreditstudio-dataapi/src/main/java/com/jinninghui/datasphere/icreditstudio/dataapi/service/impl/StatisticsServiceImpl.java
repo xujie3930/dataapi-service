@@ -3,10 +3,8 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiPublishStatusEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
-import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiLogMapper;
-import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAppMapper;
-import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseHiService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.StatisticsService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
@@ -42,6 +40,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Autowired
     private IcreditApiBaseMapper apiBaseMapper;
     @Autowired
+    private IcreditApiBaseHiMapper apiBaseHiMapper;
+    @Autowired
+    private IcreditApiBaseHiService apiBaseHiService;
+    @Autowired
     private IcreditAuthMapper authMapper;
     @Autowired
     private IcreditAppMapper appMapper;
@@ -59,9 +61,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public StatisticsResult statistics() {
         StatisticsResult result = new StatisticsResult();
-        Long publishInterfaceCount = apiBaseMapper.getCountByPublishAndDelFlag(ApiPublishStatusEnum.PUBLISHED.getCode(), DelFlagEnum.ENA_BLED.getCode());
+        Long publishInterfaceCount = apiBaseHiMapper.getCountByPublishAndDelFlag(ApiPublishStatusEnum.PUBLISHED.getCode(), DelFlagEnum.ENA_BLED.getCode());
+//        Long publishInterfaceCount = apiBaseMapper.getCountByPublishAndDelFlag(ApiPublishStatusEnum.PUBLISHED.getCode(), DelFlagEnum.ENA_BLED.getCode());
         result.setPublishInterfaceCount(publishInterfaceCount);
-        Long interfaceCount = apiBaseMapper.getCountByPublishAndDelFlag(null, DelFlagEnum.ENA_BLED.getCode());
+        Long interfaceCount = apiBaseHiMapper.getCountByPublishAndDelFlag(null, DelFlagEnum.ENA_BLED.getCode());
+//        Long interfaceCount = apiBaseMapper.getCountByPublishAndDelFlag(null, DelFlagEnum.ENA_BLED.getCode());
         result.setInterfaceCount(interfaceCount);
         Long authInterfaceCount = authMapper.getApiAuthCount(DelFlagEnum.ENA_BLED.getCode());
         result.setAuthInterfaceCount(authInterfaceCount);
@@ -71,6 +75,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         result.setEnableAppCount(enableAppCount);
         Long appCount = appMapper.getCountByEnableAndDelFlag(null, DelFlagEnum.ENA_BLED.getCode());
         result.setAppCount(appCount);
+        Long newlyInterfaceCount = apiBaseMapper.newlyDayList(new Date());
+        result.setNewlyInterfaceCount(newlyInterfaceCount);
         return result;
     }
 

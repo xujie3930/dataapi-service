@@ -35,4 +35,6 @@ public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
     void truthDelById(@Param("id") String id);
 
     Long getCountByPublishAndDelFlag(@Param("publishStatus") Integer publishStatus, @Param("delFlag") Integer delFlag);
+
+    Long newlyDayList(@Param("createTime") Date date);
 }
