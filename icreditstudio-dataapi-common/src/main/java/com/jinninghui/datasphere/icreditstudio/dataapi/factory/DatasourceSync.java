@@ -19,6 +19,7 @@ public interface DatasourceSync {
     //整个数据库的表数量
     String TABLESCOUNT = "tablesCount";
     int MAX_IMUM = 10000;
+    String[] WILDCARD_Arr = {"%", "_"};
 
     /**
      * 根据uri获取jdbc连接
@@ -120,4 +121,15 @@ public interface DatasourceSync {
     String parseSql(String content, Map<String, String> kvs);
 
     String getFileld(String field);
+
+    default Boolean isContainWildcard(String content, String key){
+        String front = content.substring(0, content.indexOf(key));
+        String end = content.substring(front.length() + key.length(), content.length());
+        for (String wildcard: WILDCARD_Arr) {
+            if (front.endsWith(wildcard) || end.startsWith(wildcard)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

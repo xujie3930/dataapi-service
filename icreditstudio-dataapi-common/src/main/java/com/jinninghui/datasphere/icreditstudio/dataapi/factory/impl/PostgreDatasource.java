@@ -4,7 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +54,11 @@ public class PostgreDatasource implements DatasourceSync {
             if (value == null){
                 noRequiredSet.add(key);
             }
-            m.appendReplacement(sb, "'" + value + "'");
+            if (isContainWildcard(content, group)){
+                m.appendReplacement(sb, value);
+            }else{
+                m.appendReplacement(sb, "'" + value + "'");
+            }
         }
         m.appendTail(sb);
         String tempSql = sb.toString();
