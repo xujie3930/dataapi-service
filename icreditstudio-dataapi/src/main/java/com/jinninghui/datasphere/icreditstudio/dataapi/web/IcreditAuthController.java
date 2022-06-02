@@ -3,10 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthDelRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthInfoRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthInfoResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
@@ -35,6 +32,17 @@ public class IcreditAuthController {
     @PostMapping("/save")
     BusinessResult<Boolean> saveDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveRequest request) {
         return authService.saveDef(userId, request);
+    }
+
+    /**
+     * 根据API批量设置app配置
+     * @author  maoc
+     * @create  2022/6/2 15:55
+     * @desc
+     **/
+    @PostMapping("/saveApi")
+    BusinessResult<Boolean> saveApiDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveApiRequest request) {
+        return authService.saveApiDef(userId, request);
     }
 
     @PostMapping("/info")
@@ -72,6 +80,15 @@ public class IcreditAuthController {
 
     @PostMapping("/del")
     BusinessResult<Boolean> del(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthDelRequest request) {
+        //notblank和notempty失效
+        if(StringUtils.isEmpty(request.getAppId())){
+            ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
+            return BusinessResult.fail(resourceCode20000021.getCode(), resourceCode20000021.getMessage());
+        }
+        if(null==request.getAuthList() || request.getAuthList().isEmpty()){
+            ResourceCodeBean.ResourceCode resourceCode20000056 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000056;
+            return BusinessResult.fail(resourceCode20000056.getCode(), resourceCode20000056.getMessage());
+        }
         return authService.del(userId, request);
     }
 }

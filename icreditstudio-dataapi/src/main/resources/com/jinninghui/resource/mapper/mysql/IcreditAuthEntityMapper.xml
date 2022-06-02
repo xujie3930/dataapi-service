@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper">
 
+    <select id="findByApiId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
+        select *
+        from icredit_auth
+        where del_flag = 0
+        <if test="apiId != null and apiId != ''">
+            and api_id = #{apiId}
+        </if>
+    </select>
+
     <select id="findByAppId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
         select *
         from icredit_auth
@@ -11,8 +20,22 @@
         </if>
     </select>
 
+    <select id="findByAppIds" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
+        select *
+        from icredit_auth
+        where del_flag = 0
+        <if test="appIds != null">
+            <foreach collection="appIds" item="item" open=" and app_id in (" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
     <delete id="removeByAppId">
         delete from icredit_auth where app_id = #{appId}
+    </delete>
+    <delete id="removeByApiId">
+        delete from icredit_auth where api_id = #{apiId}
     </delete>
 
     <select id="getApiAuthCount" resultType="java.lang.Long">
@@ -77,5 +100,33 @@
         INNER JOIN icredit_auth_config iac ON ia.auth_config_id = iac.id
         <where> 1=1 AND ia.del_flag=0 and app.del_flag=0 AND iac.del_flag=0 AND ia.api_id=#{apiId} </where>
 
+    </select>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO icredit_auth(id, app_id, api_id, auth_config_id, remark, create_time, create_by, update_time, update_by, del_flag)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.appId},#{item.apiId},#{item.authConfigId},#{item.remark},now(),#{item.createBy},#{item.updateTime},#{item.updateBy},0)
+        </foreach>
+    </insert>
+
+    <update id="deletes" parameterType="java.util.Map">
+        UPDATE icredit_auth SET del_flag=1 WHERE 1=1 AND del_flag=0 AND
+        <trim prefixOverrides="AND|OR">
+            <if test="appId != null"> AND app_id=#{appId} </if>
+            <if test="ids != null"> AND
+                <foreach collection="ids" item="item" open=" id in (" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </trim>
+    </update>
+
+    <select id="getAuthNumByConfigIds" parameterType="java.util.Collection" resultType="java.util.Map">
+        SELECT auth_config_id authConfigId, COUNT(1) authNum FROM icredit_auth WHERE del_flag=0 AND
+        <foreach collection="configIds" item="item" open=" auth_config_id in (" close=")" separator=",">
+            #{item}
+        </foreach>
+        GROUP BY auth_config_id
     </select>
 </mapper>

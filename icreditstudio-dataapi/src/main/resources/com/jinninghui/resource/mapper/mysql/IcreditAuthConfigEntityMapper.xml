@@ -2,4 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthConfigMapper">
 
+    <update id="deletes" parameterType="java.util.Map">
+        UPDATE icredit_auth_config SET del_flag=1 WHERE 1=1 AND del_flag=0 AND
+        <trim prefixOverrides="AND|OR">
+            <if test="ids != null"> AND
+                <foreach collection="ids" item="item" open=" id in (" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </trim>
+    </update>
 </mapper>
