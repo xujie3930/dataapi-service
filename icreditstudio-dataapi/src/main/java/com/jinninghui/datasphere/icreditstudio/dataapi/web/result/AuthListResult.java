@@ -11,6 +11,7 @@ public class AuthListResult {
     private Long authPeriodBegin;
     private Long authPeroidEnd;
     private Integer authAllowCall;
+    private Integer appTokenType;
 
 
     public String getAppGroupId() {
@@ -83,5 +84,13 @@ public class AuthListResult {
 
     public void setAuthAllowCall(Integer authAllowCall) {
         this.authAllowCall = authAllowCall;
+    }
+
+    public Integer getAppTokenType() {
+        return appTokenType;
+    }
+
+    public void setAppTokenType(Integer appTokenType) {
+        this.appTokenType = appTokenType;
     }
 }

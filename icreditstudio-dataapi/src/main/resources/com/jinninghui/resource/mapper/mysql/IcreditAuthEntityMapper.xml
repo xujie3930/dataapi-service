@@ -69,7 +69,8 @@
         app.app_group_id appGroupId,
         iac.allow_call authAllowCall,
         iac.period_begin authPeriodBegin,
-        iac.period_end authPeroidEnd
+        iac.period_end authPeroidEnd,
+        app.token_type appTokenType
         FROM
         icredit_auth ia
         INNER JOIN icredit_app app ON ia.app_id = app.id
