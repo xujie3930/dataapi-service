@@ -25,6 +25,7 @@ public class BusinessBasePageForm extends BaseRequest {
      * 排序顺序 DESC & ASC
      */
     private String order;
+    private int pageStart = 0;
 
     public int getPageNum() {
         return this.pageNum;
@@ -33,6 +34,7 @@ public class BusinessBasePageForm extends BaseRequest {
     public void setPageNum(int pageNum) {
         if (pageNum >= 1) {
             this.pageNum = pageNum;
+            this.pageStart = (this.pageNum-1)*this.pageSize;
         }
     }
 
@@ -43,6 +45,7 @@ public class BusinessBasePageForm extends BaseRequest {
     public void setPageSize(int pageSize) {
         if (pageSize >= 1) {
             this.pageSize = pageSize;
+            this.pageStart = (this.pageNum-1)*this.pageSize;
         }
     }
 
@@ -62,4 +65,7 @@ public class BusinessBasePageForm extends BaseRequest {
         this.order = order;
     }
 
+    public int getPageStart() {
+        return pageStart;
+    }
 }
