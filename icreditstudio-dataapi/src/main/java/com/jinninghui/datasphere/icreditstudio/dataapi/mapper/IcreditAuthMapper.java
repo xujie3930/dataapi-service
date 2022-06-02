@@ -2,9 +2,12 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -23,4 +26,8 @@ public interface IcreditAuthMapper extends BaseMapper<IcreditAuthEntity> {
     Long getApiAuthCount(@Param("delFlag") Integer delFlag);
 
     Long getAppAuthCount(@Param("delFlag") Integer code);
+
+    List<AuthListResult> getListByAppId(AuthListRequest request);
+    List<AuthListResult> getApiAuthList(AuthListRequest request);
+
 }

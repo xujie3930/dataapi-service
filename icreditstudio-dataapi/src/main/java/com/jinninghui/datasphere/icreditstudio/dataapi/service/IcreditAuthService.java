@@ -2,9 +2,12 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthDelRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthInfoRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthInfoResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 import java.util.List;
@@ -24,4 +27,28 @@ public interface IcreditAuthService extends IService<IcreditAuthEntity> {
     List<IcreditAuthEntity> findByAppId(String appId);
 
     BusinessResult<AuthInfoResult> authInfo(AuthInfoRequest request);
+
+    /**
+     * 分页列表
+     * @author  maoc
+     * @create  2022/6/1 16:38
+     * @desc
+     **/
+    List<AuthListResult> authList(AuthListRequest request);
+    /**
+     * 通过api path查询授权列表
+     * @author  maoc
+     * @create  2022/6/2 11:46
+     * @desc
+     **/
+    List<AuthListResult> queryApiAuthListByPath(String path);
+
+    /**
+     * 批量删除
+     * @author  maoc
+     * @create  2022/6/2 10:39
+     * @desc
+     **/
+    BusinessResult<Boolean> del(String userId, AuthDelRequest request);
+
 }

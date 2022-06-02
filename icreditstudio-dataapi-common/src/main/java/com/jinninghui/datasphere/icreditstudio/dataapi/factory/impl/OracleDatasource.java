@@ -48,7 +48,11 @@ public class OracleDatasource implements DatasourceSync {
             if (value == null){
                 noRequiredSet.add(key);
             }
-            m.appendReplacement(sb, "'" + value + "'");
+            if (isContainWildcard(content, group)){
+                m.appendReplacement(sb, value);
+            }else{
+                m.appendReplacement(sb, "'" + value + "'");
+            }
         }
         m.appendTail(sb);
         String tempSql = sb.toString();

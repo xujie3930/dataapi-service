@@ -1,12 +1,21 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthDelRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthInfoRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthInfoResult;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.ws.rs.GET;
+import java.util.List;
 
 /**
  * <p>
@@ -33,5 +42,37 @@ public class IcreditAuthController {
         return authService.authInfo(request);
     }
 
+    /**
+     * 获取应用授权列表
+     * @author  maoc
+     * @create  \ 16:32
+     * @desc
+     **/
+    @PostMapping("/list")
+    BusinessResult<List<AuthListResult>> list(@RequestBody AuthListRequest request) {
+        if(StringUtils.isEmpty(request.getAppId())){
+            ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
+            return BusinessResult.fail(resourceCode20000021.getCode(), resourceCode20000021.getMessage());
+        }
+        if(null==request.getPeriodType() || request.getPeriodType().intValue()==2){
+            request.setPeriodBegin(null);
+            request.setPeriodEnd(null);
+        }
+        if(null!=request.getPeriodType() && request.getPeriodType().intValue()==1 && (null==request.getPeriodBegin() || null==request.getPeriodEnd())){
+            //短期
+            return BusinessResult.fail("", "授权时间不正确");
+        }
+        return BusinessResult.success(authService.authList(request));
+    }
+
+    @GetMapping("/queryApiAuthListByPath")
+    BusinessResult<List<AuthListResult>> queryApiAuthListByPath(@RequestParam(value = "path") String path) {
+        return BusinessResult.success(authService.queryApiAuthListByPath(path));
+    }
+
+    @PostMapping("/del")
+    BusinessResult<Boolean> del(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthDelRequest request) {
+        return authService.del(userId, request);
+    }
 }
 

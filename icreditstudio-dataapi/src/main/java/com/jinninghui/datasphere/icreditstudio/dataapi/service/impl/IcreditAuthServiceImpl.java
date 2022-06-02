@@ -5,23 +5,28 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisAppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthEffectiveTimeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthInfoTypeEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthConfigService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthDelRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthInfoRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthSaveRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -54,10 +60,12 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     private IcreditAuthMapper authMapper;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private IcreditApiBaseMapper apiBaseMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request) {
+    public BusinessResult<Boolean> saveDef(String userIds, AuthSaveRequest request) {
         if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getDurationType()) && request.getAllowCall() < 0){
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036.getMessage());
         }
@@ -189,4 +197,24 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         return apiCascadeInfoList;
     }
 
+    @Override
+    public List<AuthListResult> authList(AuthListRequest request) {
+        return authMapper.getListByAppId(request);
+    }
+
+    @Override
+    public List<AuthListResult> queryApiAuthListByPath(String path) {
+        IcreditApiBaseEntity apiEntity = apiBaseMapper.findByApiPath(path);
+        if(null==apiEntity || StringUtils.isEmpty(apiEntity.getId())){
+            return new ArrayList<>(0);
+        }
+        AuthListRequest request = new AuthListRequest();
+        request.setApiId(apiEntity.getId());
+        return authMapper.getApiAuthList(request);
+    }
+
+    @Override
+    public BusinessResult<Boolean> del(String userId, AuthDelRequest request) {
+        return null;
+    }
 }

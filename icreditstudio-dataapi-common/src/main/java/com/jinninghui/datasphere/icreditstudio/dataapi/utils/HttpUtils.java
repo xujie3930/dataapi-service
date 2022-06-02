@@ -5,9 +5,13 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.utils;
  * @description http请求工具类
  * @create 2022-03-21 15:56
  **/
+
 import org.apache.commons.lang.StringUtils;
 
-import java.io.*;
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
@@ -125,5 +129,30 @@ public class HttpUtils {
             }
         }
         return result;
+    }
+
+    public static String getVisitorIp(HttpServletRequest request) {
+        String remoteAddr = request.getRemoteAddr();
+        String forwarded = request.getHeader("X-Forwarded-For");
+        String realIp = request.getHeader("X-Real-IP");
+
+        String ipAddress = null;
+        if (realIp == null) {
+            if (forwarded == null) {
+                ipAddress = remoteAddr;
+            } else {
+                ipAddress = remoteAddr + "/" + forwarded.split(",")[0];
+            }
+        } else {
+            if (realIp.equals(forwarded)) {
+                ipAddress = realIp;
+            } else {
+                if(forwarded != null){
+                    forwarded = forwarded.split(",")[0];
+                }
+                ipAddress = realIp + "/" + forwarded;
+            }
+        }
+        return ipAddress;
     }
 }

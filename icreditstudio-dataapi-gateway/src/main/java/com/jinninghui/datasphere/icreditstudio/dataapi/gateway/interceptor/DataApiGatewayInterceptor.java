@@ -5,6 +5,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.KafkaProducer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils.MapUtils;
+import com.jinninghui.datasphere.icreditstudio.dataapi.utils.HttpUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -237,7 +238,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         logInfo.setApiPath(path);
         logInfo.setAppName(appAuthInfo.getName());
         logInfo.setAppId(appAuthInfo.getId());
-        logInfo.setCallIp(getIpAddr(request));
+        logInfo.setCallIp(HttpUtils.getVisitorIp(request));
         logInfo.setApiVersion(Integer.valueOf(version));
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
@@ -255,17 +256,4 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         return logInfo;
     }
 
-    public String getIpAddr(HttpServletRequest request) {
-        String ip = request.getHeader("x-forwarded-for");
-        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if(ip ==null || ip.length() ==0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        return ip;
-    }
 }
