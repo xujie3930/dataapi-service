@@ -273,13 +273,15 @@ export default {
             // 选择表
             cloneDeep(this.detailConfiguration.table).forEach((list, idx) => {
               const { key, value, hide, formatter } = list
-              this.detailConfiguration.table[idx].value = formatter
-                ? formatter(key in generateApi ? generateApi[key] : value)
-                : key in generateApi
-                ? generateApi[key]
-                : value
+              if (generateApi) {
+                this.detailConfiguration.table[idx].value = formatter
+                  ? formatter(key in generateApi ? generateApi[key] : value)
+                  : key in generateApi
+                  ? generateApi[key]
+                  : value
+              }
 
-              if ('hide' in list) {
+              if ('hide' in list && generateApi) {
                 this.detailConfiguration.table[idx].hide = hide(generateApi)
               }
             })
@@ -301,10 +303,12 @@ export default {
               visible:
                 data.type === 1 && generateApi?.model !== 1 ? true : false
             })
+
             Object.assign(this.detailTableConfiguration.request, {
               visible: data.type === 0 ? true : false,
               tableData: registerRequestParamSaveRequestList
             })
+
             Object.assign(this.detailTableConfiguration.response, {
               visible: data.type === 0 ? true : false,
               tableData: registerResponseParamSaveRequestList
