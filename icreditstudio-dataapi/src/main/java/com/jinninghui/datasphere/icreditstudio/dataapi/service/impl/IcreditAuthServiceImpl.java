@@ -293,6 +293,10 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     public BusinessResult<Boolean> del(String userId, AuthDelRequest request) {
         //同时保存授权信息到redis
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
+        if(null==appEntity){
+            ResourceCodeBean.ResourceCode resourceCode20000010 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000010;
+            return BusinessResult.fail(resourceCode20000010.getCode(), resourceCode20000010.getMessage());
+        }
         List<IcreditAuthEntity> authList = authMapper.findByAppId(request.getAppId());
         if(null==authList || authList.isEmpty()){
             //没有授权，返回成功
@@ -301,26 +305,37 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         StringBuilder sb = new StringBuilder();
         Set<String> authConfigSet = new HashSet<>(), delRedisList = new HashSet<>();
         authList.stream().forEach(auth->{
-            sb.setLength(0);
-            delRedisList.add(sb.append(auth.getApiId()).append(appEntity.getGenerateId()).toString());
-            authConfigSet.add(auth.getAuthConfigId());
+            if(request.getAuthList().contains(auth.getId())){
+                sb.setLength(0);
+                delRedisList.add(sb.append(auth.getApiId()).append(appEntity.getGenerateId()).toString());
+                authConfigSet.add(auth.getAuthConfigId());
+            }
         });
         //删除
         final Set<String> delConfigId = new HashSet<>();
         final Map<String, Object> paramsMap = new HashMap<>(4);
         paramsMap.put("ids", request.getAuthList());
         paramsMap.put("appId", request.getAppId());
-        authMapper.deletes(paramsMap);
+        if(authMapper.deletes(paramsMap)<=0){
+            //没有授权关系
+            return BusinessResult.success(true);
+        }
         //判断authConfig是否还有其他引用
-        Map<String, Object> authNumMap = authMapper.getAuthNumByConfigIds(authConfigSet);
+        List<Map<String, Object>> authNumList = authMapper.getAuthNumByConfigIds(authConfigSet);
         //获取没有被引用的config，并且删除
-        authNumMap.keySet().stream().forEach(configId->{
-            Long authNum = (Long) authNumMap.get(configId);
-            if(authNum.intValue()<=0){
-                //该配置已经没有引用了，删除
-                delConfigId.add(configId);
-            }
-        });
+        if(null!=authNumList && !authNumList.isEmpty()){
+            authNumList.stream().forEach(authNumMap -> {
+                final String authConfigId = (String) authNumMap.get("authConfigId");
+                final Long authNum = (Long) authNumMap.get("authNum");
+                if(authNum.intValue()<=0){
+                    //该配置已经没有引用了，删除
+                    delConfigId.add(authConfigId);
+                }
+            });
+        }else{
+            delConfigId.addAll(authConfigSet);
+        }
+
         if(!delConfigId.isEmpty()){
             //删除没引用的config
             authConfigService.deleteByIds(delConfigId);

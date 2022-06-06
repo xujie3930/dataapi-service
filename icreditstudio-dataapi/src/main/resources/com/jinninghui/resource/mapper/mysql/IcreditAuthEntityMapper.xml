@@ -67,7 +67,7 @@
 
     <select id="getListByAppId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest">
         SELECT api.name as apiName, api.path apiPath, api.id apiId, iac.period_begin authPeriodBegin,
-        iac.period_end authPeroidEnd, iac.allow_call authAllowCall, ia.app_id appId, iac.id authId
+        iac.period_end authPeroidEnd, iac.allow_call authAllowCall, ia.app_id appId, iac.id authId, api.interface_source apiInterfaceSource
         FROM icredit_auth ia
         inner join icredit_auth_config iac ON ia.auth_config_id=iac.id
         inner JOIN icredit_api_base api ON ia.api_id=api.id

@@ -44,6 +44,6 @@ public interface IcreditAuthMapper extends BaseMapper<IcreditAuthEntity> {
 
     int deletes(final Map<String, Object> paramsMap);
 
-    Map<String, Object> getAuthNumByConfigIds(@Param("configIds")Collection<String> configIds);
+    List<Map<String, Object>> getAuthNumByConfigIds(@Param("configIds")Collection<String> configIds);
 
 }

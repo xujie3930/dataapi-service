@@ -12,7 +12,15 @@ public class AuthListResult {
     private Long authPeroidEnd;
     private Integer authAllowCall;
     private Integer appTokenType;
+    private Integer apiInterfaceSource;
 
+    public Integer getApiInterfaceSource() {
+        return apiInterfaceSource;
+    }
+
+    public void setApiInterfaceSource(Integer apiInterfaceSource) {
+        this.apiInterfaceSource = apiInterfaceSource;
+    }
 
     public String getAppGroupId() {
         return appGroupId;
