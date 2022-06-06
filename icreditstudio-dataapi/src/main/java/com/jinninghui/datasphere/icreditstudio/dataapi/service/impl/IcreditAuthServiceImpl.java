@@ -14,10 +14,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthInfoTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthConfigMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthConfigService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
@@ -25,6 +23,8 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
@@ -65,8 +65,12 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     private IcreditApiBaseMapper apiBaseMapper;
     @Resource
     private IcreditAuthConfigMapper authConfigMapper;
+    @Autowired
+    private IcreditApiBaseService apiBaseService;
+
 
     @Override
+    @Transactional
     public BusinessResult<Boolean> saveOuterApiDef(String userId, AuthSaveApiRequest request) {
         //同时保存授权信息到redis
         //查找api信息
@@ -80,7 +84,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             return BusinessResult.fail(resourceCode20000057.getCode(), resourceCode20000057.getMessage());
         }
         //查找应用信息
-        Collection<IcreditAppEntity> appList = appService.listByIds(request.getAppIds());
+        Collection<IcreditAppEntity> appList = (request.getAppIds().isEmpty()?new ArrayList<>(0):appService.listByIds(request.getAppIds()));
         Map<String, IcreditAppEntity> appMap = (null==appList || appList.isEmpty())?new HashMap<>(0):appList.stream().collect(Collectors.toMap(IcreditAppEntity::getId, IcreditAppEntity->IcreditAppEntity));
         //获取已授权列表
         List<Map<String, Object>> authList = authMapper.findOuterByApiId(request.getApiId());
@@ -129,42 +133,52 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             redisTemplate.delete(cancelSelectedList);
         }
 
-        IcreditAuthConfigEntity authConfigEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
-        authConfigService.saveOrUpdate(authConfigEntity);
+        if(!request.getAppIds().isEmpty()){
+            //当数组为空时，表示取消所有的授权，因此此处不走
+            IcreditAuthConfigEntity config = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
+            authConfigService.saveOrUpdate(config);
 
-        //保存auth信息
-        List<IcreditAuthEntity> saveDb = new ArrayList<>();
-        Map<String, String> saveRedis = new HashMap<>();
-        for (String appId : request.getAppIds()) {
-            IcreditAuthEntity authEntity = new IcreditAuthEntity();
-            authEntity.setAppId(appId);
-            authEntity.setApiId(request.getApiId());
-            authEntity.setAuthConfigId(authConfigEntity.getId());
-            saveDb.add(authEntity);
-            //save(authEntity);
-            String redisKey = String.valueOf(new StringBuilder(request.getApiId()).append(appMap.get(appId).getGenerateId()));
-            Object appAuthAppObject = redisTemplate.opsForValue().get(redisKey);
-            RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), Objects.isNull(appAuthAppObject)?0:JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class).getCalled());
+            //保存auth信息
+            List<IcreditAuthEntity> saveDb = new ArrayList<>();
+            Map<String, String> saveRedis = new HashMap<>();
+            for (String appId : request.getAppIds()) {
+                IcreditAuthEntity authEntity = new IcreditAuthEntity();
+                authEntity.setAppId(appId);
+                authEntity.setApiId(request.getApiId());
+                authEntity.setAuthConfigId(config.getId());
+                saveDb.add(authEntity);
+                //save(authEntity);
+                String redisKey = String.valueOf(new StringBuilder(request.getApiId()).append(appMap.get(appId).getGenerateId()));
+                Object appAuthAppObject = redisTemplate.opsForValue().get(redisKey);
+                RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(config.getPeriodBegin(), config.getPeriodEnd(), config.getAllowCall(), Objects.isNull(appAuthAppObject)?0:JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class).getCalled());
             /*if(Objects.isNull(appAuthAppObject)){
                 appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), 0);
             }else{
                 appAuthInfo = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
                 appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), appAuthInfo.getCalled());
             }*/
-            saveRedis.put(redisKey, JSON.toJSONString(appAuthInfo));
+                saveRedis.put(redisKey, JSON.toJSONString(appAuthInfo));
+            }
+            if(null!=saveDb && !saveDb.isEmpty()){
+                authMapper.batchInsert(saveDb);
+                redisTemplate.executePipelined(new RedisCallback<String>() {
+                    @Override
+                    public String doInRedis(RedisConnection redisConnection) throws DataAccessException {
+                        //StringRedisConnection src = (StringRedisConnection)redisConnection;
+                        saveRedis.entrySet().stream().forEach(next->{
+                            redisConnection.set(next.getKey().getBytes(Charset.forName("UTF-8")), next.getValue().getBytes(Charset.forName("UTF-8")));
+                        });
+                        return null;
+                    }
+                });
+            }
         }
-        if(null!=saveDb && !saveDb.isEmpty()){
-            authMapper.batchInsert(saveDb);
-            redisTemplate.executePipelined(new RedisCallback<String>() {
-                @Override
-                public String doInRedis(RedisConnection redisConnection) throws DataAccessException {
-                    //StringRedisConnection src = (StringRedisConnection)redisConnection;
-                    saveRedis.entrySet().stream().forEach(next->{
-                        redisConnection.set(next.getKey().getBytes(Charset.forName("UTF-8")), next.getValue().getBytes(Charset.forName("UTF-8")));
-                    });
-                    return null;
-                }
-            });
+
+        DatasourceApiSaveParam param = new DatasourceApiSaveParam();
+        BeanUtils.copyProperties(request.getApiSaveRequest(), param);
+        BusinessResult<ApiSaveResult> andPublish = apiBaseService.createAndPublish(userId, param);
+        if (!andPublish.isSuccess() || Objects.isNull(andPublish.getData())) {
+            throw new AppException(andPublish.getReturnCode());
         }
         return BusinessResult.success(true);
     }

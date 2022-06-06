@@ -45,7 +45,7 @@ public class IcreditAuthController {
      **/
     @PostMapping("/saveOuterApi")
     BusinessResult<Boolean> saveOuterApiDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveApiRequest request) {
-        if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getDurationType()) && request.getAllowCall() < 0){
+        if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getCallCountType()) && request.getAllowCall() < 0){
             ResourceCodeBean.ResourceCode resourceCode20000036 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036;
             return BusinessResult.fail(resourceCode20000036.getCode(), resourceCode20000036.getMessage());
         }
@@ -53,7 +53,7 @@ public class IcreditAuthController {
             ResourceCodeBean.ResourceCode resourceCode20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
             return BusinessResult.fail(resourceCode20000009.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getMessage());
         }
-        if (CollectionUtils.isEmpty(request.getAppIds())){
+        if (null==request.getAppIds()){
             ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
             throw new AppException(resourceCode20000021.getCode(), resourceCode20000021.getMessage());
         }
