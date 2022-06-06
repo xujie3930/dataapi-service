@@ -73,6 +73,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_20000054("20000054", "API信息异常，请联系管理员！"),
         RESOURCE_CODE_20000055("20000055", "该接口暂不支持删除内部表！"),
         RESOURCE_CODE_20000056("20000056", "授权id不能为空！"),
+        RESOURCE_CODE_20000057("20000057", "授权id需为外部API！"),
 
         RESOURCE_CODE_60000001("60000001", "获取资源库连接失败！"),
         RESOURCE_CODE_60000002("60000002", "数据源不明确，id为空！"),

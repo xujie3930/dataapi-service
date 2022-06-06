@@ -2,12 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper">
 
-    <select id="findByApiId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
+    <!--<select id="findByApiId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
         select *
         from icredit_auth
         where del_flag = 0
         <if test="apiId != null and apiId != ''">
             and api_id = #{apiId}
+        </if>
+    </select>-->
+
+    <select id="findOuterByApiId" resultType="java.util.Map">
+        select auth.id id, auth.app_id appId, auth.api_id apiId, auth.auth_config_id authConfigId,
+        (SELECT app.generate_id from icredit_app app where app.del_flag=0 and app.id=auth.app_id) appGenerateId
+        from icredit_auth auth
+        inner join icredit_auth_config config ON auth.auth_config_id=config.id
+        where auth.del_flag = 0 AND config.del_flag=0
+        <if test="apiId != null and apiId != ''">
+            and auth.api_id = #{apiId}
         </if>
     </select>
 
@@ -113,6 +124,7 @@
     <update id="deletes" parameterType="java.util.Map">
         UPDATE icredit_auth SET del_flag=1 WHERE 1=1 AND del_flag=0 AND
         <trim prefixOverrides="AND|OR">
+            <if test="apiId != null"> AND api_id=#{apiId} </if>
             <if test="appId != null"> AND app_id=#{appId} </if>
             <if test="ids != null"> AND
                 <foreach collection="ids" item="item" open=" id in (" close=")" separator=",">

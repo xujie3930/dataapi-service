@@ -20,7 +20,7 @@ import java.util.List;
 public interface IcreditAuthService extends IService<IcreditAuthEntity> {
 
     BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request);
-    BusinessResult<Boolean> saveApiDef(String userId, AuthSaveApiRequest request);
+    BusinessResult<Boolean> saveOuterApiDef(String userId, AuthSaveApiRequest request);
 
     List<IcreditAuthEntity> findByAppId(String appId);
 
