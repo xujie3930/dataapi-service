@@ -71,23 +71,37 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
 
     @Override
     @Transactional
-    public BusinessResult<Boolean> saveOuterApiDef(String userId, AuthSaveApiRequest request) {
-        //同时保存授权信息到redis
+    public BusinessResult<ApiSaveResult> saveOuterApiDef(String userId, AuthSaveApiRequest request) {
+        //保存时，先发布接口再授权
+        //为了避免分布式事务，此处做到一块去
+        DatasourceApiSaveParam param = new DatasourceApiSaveParam();
+        BeanUtils.copyProperties(request.getApiSaveRequest(), param);
+        BusinessResult<ApiSaveResult> andPublish = apiBaseService.createAndPublish(userId, param);
+        if (!andPublish.isSuccess() || Objects.isNull(andPublish.getData())) {
+            throw new AppException(andPublish.getReturnCode());
+        }
+        String apiId = andPublish.getData().getId();//app id
+        request.setApiId(apiId);
+//同时保存授权信息到redis
         //查找api信息
-        IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getApiId());
+        IcreditApiBaseEntity apiBaseEntity = (StringUtils.isEmpty(request.getApiId())?apiBaseMapper.findByApiPath(request.getPath()):apiBaseMapper.selectById(request.getApiId()));
         if(null==apiBaseEntity){
-            ResourceCodeBean.ResourceCode resourceCode20000054 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000054;
-            return BusinessResult.fail(resourceCode20000054.getCode(), resourceCode20000054.getMessage());
+            ResourceCodeBean.ResourceCode rc20000054 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000054;
+            return BusinessResult.fail(rc20000054.getCode(), rc20000054.getMessage());
         }
         if(null==apiBaseEntity.getInterfaceSource() || apiBaseEntity.getInterfaceSource()!=1){
-            ResourceCodeBean.ResourceCode resourceCode20000057 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000057;
-            return BusinessResult.fail(resourceCode20000057.getCode(), resourceCode20000057.getMessage());
+            ResourceCodeBean.ResourceCode rc20000057 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000057;
+            return BusinessResult.fail(rc20000057.getCode(), rc20000057.getMessage());
         }
         //查找应用信息
         Collection<IcreditAppEntity> appList = (request.getAppIds().isEmpty()?new ArrayList<>(0):appService.listByIds(request.getAppIds()));
         Map<String, IcreditAppEntity> appMap = (null==appList || appList.isEmpty())?new HashMap<>(0):appList.stream().collect(Collectors.toMap(IcreditAppEntity::getId, IcreditAppEntity->IcreditAppEntity));
+        if(!request.getAppIds().isEmpty() && request.getAppIds().size()!=appMap.size()){
+            ResourceCodeBean.ResourceCode rc20000010 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000010;
+            return BusinessResult.fail(rc20000010.getCode(), rc20000010.getMessage());
+        }
         //获取已授权列表
-        List<Map<String, Object>> authList = authMapper.findOuterByApiId(request.getApiId());
+        List<Map<String, Object>> authList = authMapper.findOuterByApiId(apiBaseEntity.getId());
         if(null!=authList & !authList.isEmpty()){
             //如果存在已授权列表
             //删除redis授权信息
@@ -99,13 +113,13 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                 sb.setLength(0);
                 if(!request.getAppIds().contains(auth.get("appId"))){
                     //cancelSelectedList保存取消勾选
-                    cancelSelectedList.add(sb.append(auth.get("apiId")).append(auth.get("authConfigId")).toString());
+                    cancelSelectedList.add(sb.append(auth.get("apiId")).append(auth.get("appGenerateId")).toString());
                 }
             }
 
             //删除旧的auth信息
             Map<String, Object> delauthMap = new HashMap<>(2);
-            delauthMap.put("apiId", request.getApiId());
+            delauthMap.put("apiId", apiBaseEntity.getId());
             authMapper.deletes(delauthMap);
             //删除旧的config信息
             //先判断config是否存在其他引用
@@ -144,19 +158,13 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             for (String appId : request.getAppIds()) {
                 IcreditAuthEntity authEntity = new IcreditAuthEntity();
                 authEntity.setAppId(appId);
-                authEntity.setApiId(request.getApiId());
+                authEntity.setApiId(apiBaseEntity.getId());
                 authEntity.setAuthConfigId(config.getId());
                 saveDb.add(authEntity);
                 //save(authEntity);
-                String redisKey = String.valueOf(new StringBuilder(request.getApiId()).append(appMap.get(appId).getGenerateId()));
-                Object appAuthAppObject = redisTemplate.opsForValue().get(redisKey);
-                RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(config.getPeriodBegin(), config.getPeriodEnd(), config.getAllowCall(), Objects.isNull(appAuthAppObject)?0:JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class).getCalled());
-            /*if(Objects.isNull(appAuthAppObject)){
-                appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), 0);
-            }else{
-                appAuthInfo = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
-                appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), appAuthInfo.getCalled());
-            }*/
+                String redisKey = String.valueOf(new StringBuilder(apiBaseEntity.getId()).append(appMap.get(appId).getGenerateId()));
+                Object apiAuthApp = redisTemplate.opsForValue().get(redisKey);
+                RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(config.getPeriodBegin(), config.getPeriodEnd(), config.getAllowCall(), Objects.isNull(apiAuthApp)?0:JSON.parseObject(apiAuthApp.toString(), RedisAppAuthInfo.class).getCalled());
                 saveRedis.put(redisKey, JSON.toJSONString(appAuthInfo));
             }
             if(null!=saveDb && !saveDb.isEmpty()){
@@ -174,13 +182,8 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             }
         }
 
-        DatasourceApiSaveParam param = new DatasourceApiSaveParam();
-        BeanUtils.copyProperties(request.getApiSaveRequest(), param);
-        BusinessResult<ApiSaveResult> andPublish = apiBaseService.createAndPublish(userId, param);
-        if (!andPublish.isSuccess() || Objects.isNull(andPublish.getData())) {
-            throw new AppException(andPublish.getReturnCode());
-        }
-        return BusinessResult.success(true);
+
+        return andPublish;
     }
 
     @Override
