@@ -78,27 +78,27 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         BeanUtils.copyProperties(request.getApiSaveRequest(), param);
         BusinessResult<ApiSaveResult> andPublish = apiBaseService.createAndPublish(userId, param);
         if (!andPublish.isSuccess() || Objects.isNull(andPublish.getData())) {
-            throw new AppException(andPublish.getReturnCode());
+            return andPublish;
         }
         String apiId = andPublish.getData().getId();//app id
         request.setApiId(apiId);
-//同时保存授权信息到redis
+        //同时保存授权信息到redis
         //查找api信息
-        IcreditApiBaseEntity apiBaseEntity = (StringUtils.isEmpty(request.getApiId())?apiBaseMapper.findByApiPath(request.getPath()):apiBaseMapper.selectById(request.getApiId()));
+        IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getApiId());
         if(null==apiBaseEntity){
             ResourceCodeBean.ResourceCode rc20000054 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000054;
-            return BusinessResult.fail(rc20000054.getCode(), rc20000054.getMessage());
+            throw new AppException(rc20000054.getCode(), rc20000054.getMessage());
         }
-        if(null==apiBaseEntity.getInterfaceSource() || apiBaseEntity.getInterfaceSource()!=1){
+        /*if(null==apiBaseEntity.getInterfaceSource() || apiBaseEntity.getInterfaceSource()!=1){
             ResourceCodeBean.ResourceCode rc20000057 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000057;
             return BusinessResult.fail(rc20000057.getCode(), rc20000057.getMessage());
-        }
+        }*/
         //查找应用信息
         Collection<IcreditAppEntity> appList = (request.getAppIds().isEmpty()?new ArrayList<>(0):appService.listByIds(request.getAppIds()));
         Map<String, IcreditAppEntity> appMap = (null==appList || appList.isEmpty())?new HashMap<>(0):appList.stream().collect(Collectors.toMap(IcreditAppEntity::getId, IcreditAppEntity->IcreditAppEntity));
         if(!request.getAppIds().isEmpty() && request.getAppIds().size()!=appMap.size()){
             ResourceCodeBean.ResourceCode rc20000010 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000010;
-            return BusinessResult.fail(rc20000010.getCode(), rc20000010.getMessage());
+            throw new AppException(rc20000010.getCode(), rc20000010.getMessage());
         }
         //获取已授权列表
         List<Map<String, Object>> authList = authMapper.findOuterByApiId(apiBaseEntity.getId());
@@ -143,8 +143,11 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                 authConfigMapper.deletes(delconfMap);//改为逻辑删除
             }
 
+            if(!cancelSelectedList.isEmpty()){
+                //cancelSelectedList不为空，表示有取消勾选的情况
+                redisTemplate.delete(cancelSelectedList);
+            }
 
-            redisTemplate.delete(cancelSelectedList);
         }
 
         if(!request.getAppIds().isEmpty()){
@@ -166,10 +169,14 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                 Object apiAuthApp = redisTemplate.opsForValue().get(redisKey);
                 RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(config.getPeriodBegin(), config.getPeriodEnd(), config.getAllowCall(), Objects.isNull(apiAuthApp)?0:JSON.parseObject(apiAuthApp.toString(), RedisAppAuthInfo.class).getCalled());
                 saveRedis.put(redisKey, JSON.toJSONString(appAuthInfo));
+                //redisTemplate.opsForValue().set(redisKey, JSON.toJSONString(appAuthInfo));
             }
             if(null!=saveDb && !saveDb.isEmpty()){
                 authMapper.batchInsert(saveDb);
-                redisTemplate.executePipelined(new RedisCallback<String>() {
+                saveRedis.entrySet().stream().forEach(next->{
+                    redisTemplate.opsForValue().set(next.getKey(), next.getValue());
+                });
+                /*redisTemplate.executePipelined(new RedisCallback<String>() {
                     @Override
                     public String doInRedis(RedisConnection redisConnection) throws DataAccessException {
                         //StringRedisConnection src = (StringRedisConnection)redisConnection;
@@ -178,7 +185,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                         });
                         return null;
                     }
-                });
+                });*/
             }
         }
 

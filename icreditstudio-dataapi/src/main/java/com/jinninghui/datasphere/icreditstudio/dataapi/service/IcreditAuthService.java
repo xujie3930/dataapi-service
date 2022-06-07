@@ -21,6 +21,13 @@ import java.util.List;
 public interface IcreditAuthService extends IService<IcreditAuthEntity> {
 
     BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request);
+    /**
+     * 编辑接口时，调用此方法绑定接口和应用的授权关系
+     * 此接口整合了接口发布方法（避免分布式事务问题），故属于长事务接口
+     * @author  maoc
+     * @create  2022/6/7 10:41
+     * @desc
+     **/
     BusinessResult<ApiSaveResult> saveOuterApiDef(String userId, AuthSaveApiRequest request);
 
     List<IcreditAuthEntity> findByAppId(String appId);

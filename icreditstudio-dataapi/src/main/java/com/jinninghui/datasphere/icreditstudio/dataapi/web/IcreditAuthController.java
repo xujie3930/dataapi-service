@@ -50,10 +50,10 @@ public class IcreditAuthController {
             ResourceCodeBean.ResourceCode resourceCode20000036 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036;
             return BusinessResult.fail(resourceCode20000036.getCode(), resourceCode20000036.getMessage());
         }
-        if(StringUtils.isEmpty(request.getApiId())&&StringUtils.isEmpty(request.getPath())){
+        /*if(StringUtils.isEmpty(request.getApiId())&&StringUtils.isEmpty(request.getPath())){
             ResourceCodeBean.ResourceCode resourceCode20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
             return BusinessResult.fail(resourceCode20000009.getCode(), resourceCode20000009.getMessage());
-        }
+        }*/
         if (null==request.getAppIds()){
             ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
             throw new AppException(resourceCode20000021.getCode(), resourceCode20000021.getMessage());

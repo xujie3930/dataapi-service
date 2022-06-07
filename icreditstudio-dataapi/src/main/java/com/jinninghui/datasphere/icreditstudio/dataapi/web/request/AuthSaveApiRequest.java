@@ -14,8 +14,6 @@ import java.util.Set;
 public class AuthSaveApiRequest {
     //应用主键id
     private String apiId;
-    //路径唯一标识
-    private String path;
     //API的主键id
     private Set<String> appIds;
     //有效起始时间(-1表示无穷)
@@ -100,13 +98,5 @@ public class AuthSaveApiRequest {
 
     public void setApiSaveRequest(DatasourceApiSaveRequest apiSaveRequest) {
         this.apiSaveRequest = apiSaveRequest;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 }
