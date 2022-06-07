@@ -6,6 +6,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthInfoResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public interface IcreditAuthService extends IService<IcreditAuthEntity> {
      * @create  2022/6/1 16:38
      * @desc
      **/
-    List<AuthListResult> authList(AuthListRequest request);
+    BusinessPageResult<AuthListResult> authList(AuthListRequest request);
     /**
      * 通过api path查询授权列表
      * @author  maoc

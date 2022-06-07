@@ -31,6 +31,7 @@ public interface IcreditAuthMapper extends BaseMapper<IcreditAuthEntity> {
 
     Long getAppAuthCount(@Param("delFlag") Integer code);
 
+    Long getCountByAppId(AuthListRequest request);
     List<AuthListResult> getListByAppId(AuthListRequest request);
     List<AuthListResult> getApiAuthList(AuthListRequest request);
 

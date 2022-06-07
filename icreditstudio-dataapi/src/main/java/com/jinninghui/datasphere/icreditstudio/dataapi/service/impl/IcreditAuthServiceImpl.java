@@ -19,6 +19,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceA
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
@@ -344,8 +345,11 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     }
 
     @Override
-    public List<AuthListResult> authList(AuthListRequest request) {
-        return authMapper.getListByAppId(request);
+    public BusinessPageResult<AuthListResult> authList(AuthListRequest request) {
+        //查询数目
+        Long count = authMapper.getCountByAppId(request);
+        List<AuthListResult> list = ((null==count||count.intValue()<1)?new ArrayList<>(0):authMapper.getListByAppId(request));
+        return BusinessPageResult.build(list, request, count);
     }
 
     @Override

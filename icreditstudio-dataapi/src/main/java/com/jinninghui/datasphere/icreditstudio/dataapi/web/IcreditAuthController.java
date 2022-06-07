@@ -9,6 +9,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthInfoResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
@@ -78,7 +79,7 @@ public class IcreditAuthController {
      * @desc
      **/
     @PostMapping("/list")
-    BusinessResult<List<AuthListResult>> list(@RequestBody AuthListRequest request) {
+    BusinessResult<BusinessPageResult<AuthListResult>> list(@RequestBody AuthListRequest request) {
         if(StringUtils.isEmpty(request.getAppId())){
             ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
             return BusinessResult.fail(resourceCode20000021.getCode(), resourceCode20000021.getMessage());
