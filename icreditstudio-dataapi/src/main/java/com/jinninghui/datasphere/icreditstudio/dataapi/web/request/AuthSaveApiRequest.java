@@ -13,7 +13,6 @@ import java.util.Set;
  **/
 public class AuthSaveApiRequest {
     //应用主键id
-    @NotBlank(message = "20000021")
     private String apiId;
     //API的主键id
     private Set<String> appIds;
@@ -23,7 +22,11 @@ public class AuthSaveApiRequest {
     private Long periodEnd;
     //允许调用次数(-1表示无穷)
     private Integer allowCall;
-    private String durationType;//可调用次数类型，0--有限次，1--无限次
+    private Integer callCountType;
+    private Integer tokenType;
+    private Integer authEffectiveTime;
+    private DatasourceApiSaveRequest apiSaveRequest;
+    //private String durationType;//可调用次数类型，0--有限次，1--无限次
 
     public String getApiId() {
         return apiId;
@@ -65,11 +68,35 @@ public class AuthSaveApiRequest {
         this.allowCall = allowCall;
     }
 
-    public String getDurationType() {
-        return durationType;
+    public Integer getCallCountType() {
+        return callCountType;
     }
 
-    public void setDurationType(String durationType) {
-        this.durationType = durationType;
+    public void setCallCountType(Integer callCountType) {
+        this.callCountType = callCountType;
+    }
+
+    public Integer getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(Integer tokenType) {
+        this.tokenType = tokenType;
+    }
+
+    public Integer getAuthEffectiveTime() {
+        return authEffectiveTime;
+    }
+
+    public void setAuthEffectiveTime(Integer authEffectiveTime) {
+        this.authEffectiveTime = authEffectiveTime;
+    }
+
+    public DatasourceApiSaveRequest getApiSaveRequest() {
+        return apiSaveRequest;
+    }
+
+    public void setApiSaveRequest(DatasourceApiSaveRequest apiSaveRequest) {
+        this.apiSaveRequest = apiSaveRequest;
     }
 }

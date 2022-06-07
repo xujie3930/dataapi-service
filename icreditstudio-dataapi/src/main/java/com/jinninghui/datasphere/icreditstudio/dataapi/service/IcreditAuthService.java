@@ -3,8 +3,10 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthInfoResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 
 import java.util.List;
@@ -20,7 +22,15 @@ import java.util.List;
 public interface IcreditAuthService extends IService<IcreditAuthEntity> {
 
     BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request);
-    BusinessResult<Boolean> saveOuterApiDef(String userId, AuthSaveApiRequest request);
+    BusinessResult<Boolean> configDef(String userId, AuthSaveRequest request);
+    /**
+     * 编辑接口时，调用此方法绑定接口和应用的授权关系
+     * 此接口整合了接口发布方法（避免分布式事务问题），故属于长事务接口
+     * @author  maoc
+     * @create  2022/6/7 10:41
+     * @desc
+     **/
+    BusinessResult<ApiSaveResult> saveOuterApiDef(String userId, AuthSaveApiRequest request);
 
     List<IcreditAuthEntity> findByAppId(String appId);
 
@@ -32,7 +42,7 @@ public interface IcreditAuthService extends IService<IcreditAuthEntity> {
      * @create  2022/6/1 16:38
      * @desc
      **/
-    List<AuthListResult> authList(AuthListRequest request);
+    BusinessPageResult<AuthListResult> authList(AuthListRequest request);
     /**
      * 通过api path查询授权列表
      * @author  maoc

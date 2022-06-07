@@ -96,6 +96,23 @@
 
     </select>
 
+    <select id="getCountByAppId" resultType="java.lang.Long" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest">
+        SELECT count(1)
+        FROM icredit_auth ia
+        inner join icredit_auth_config iac ON ia.auth_config_id=iac.id
+        inner JOIN icredit_api_base api ON ia.api_id=api.id
+        <where> 1=1 AND ia.del_flag=0 and iac.del_flag=0 and api.del_flag=0 AND ia.app_id=#{appId}
+            <if test="apiName != null"> AND INSTR(api.name , #{apiName})>0 </if>
+            <if test="apiPath != null"> AND INSTR(api.path , #{apiPath})>0 </if>
+            <if test="periodBegin != null"> AND iac.period_begin &gt;= #{periodBegin} </if>
+            <if test="periodEnd != null"> AND iac.period_end &lt;= #{periodEnd} </if>
+            <if test="durationType != null">
+                <if test="durationType==1"> AND iac.allow_call = -1 </if>
+                <if test="durationType==1"> AND iac.allow_call &gt; = 0 </if>
+            </if>
+        </where>
+    </select>
+
     <select id="getApiAuthList" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest">
         SELECT
         ia.app_id appId,

@@ -5,9 +5,11 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthEffectiveTimeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiSaveResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthInfoResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
@@ -37,6 +39,11 @@ public class IcreditAuthController {
         return authService.saveDef(userId, request);
     }
 
+    @PostMapping("/config")
+    BusinessResult<Boolean> configDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveRequest request) {
+        return authService.configDef(userId, request);
+    }
+
     /**
      * 根据API批量设置app配置
      * @author  maoc
@@ -44,16 +51,16 @@ public class IcreditAuthController {
      * @desc
      **/
     @PostMapping("/saveOuterApi")
-    BusinessResult<Boolean> saveOuterApiDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveApiRequest request) {
-        if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getDurationType()) && request.getAllowCall() < 0){
+    BusinessResult<ApiSaveResult> saveOuterApiDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveApiRequest request) {
+        if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getCallCountType()) && request.getAllowCall() < 0){
             ResourceCodeBean.ResourceCode resourceCode20000036 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036;
             return BusinessResult.fail(resourceCode20000036.getCode(), resourceCode20000036.getMessage());
         }
-        if(StringUtils.isEmpty(request.getApiId())){
+        /*if(StringUtils.isEmpty(request.getApiId())&&StringUtils.isEmpty(request.getPath())){
             ResourceCodeBean.ResourceCode resourceCode20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
-            return BusinessResult.fail(resourceCode20000009.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000004.getMessage());
-        }
-        if (CollectionUtils.isEmpty(request.getAppIds())){
+            return BusinessResult.fail(resourceCode20000009.getCode(), resourceCode20000009.getMessage());
+        }*/
+        if (null==request.getAppIds()){
             ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
             throw new AppException(resourceCode20000021.getCode(), resourceCode20000021.getMessage());
         }
@@ -72,7 +79,7 @@ public class IcreditAuthController {
      * @desc
      **/
     @PostMapping("/list")
-    BusinessResult<List<AuthListResult>> list(@RequestBody AuthListRequest request) {
+    BusinessResult<BusinessPageResult<AuthListResult>> list(@RequestBody AuthListRequest request) {
         if(StringUtils.isEmpty(request.getAppId())){
             ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
             return BusinessResult.fail(resourceCode20000021.getCode(), resourceCode20000021.getMessage());

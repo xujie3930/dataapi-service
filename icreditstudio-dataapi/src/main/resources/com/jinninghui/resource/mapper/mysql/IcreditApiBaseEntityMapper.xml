@@ -113,4 +113,12 @@
             AND del_flag = 0
         </where>
     </select>
+
+    <select id="queryInnerApiCount" resultType="java.lang.Integer" parameterType="java.util.Collection">
+        SELECT COUNT(1) FROM icredit_api_base WHERE del_flag=0 AND interface_source=0
+        AND
+        <foreach collection="collection" index="index" item="item" open=" id in (" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
 </mapper>
