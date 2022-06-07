@@ -172,6 +172,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                 //redisTemplate.opsForValue().set(redisKey, JSON.toJSONString(appAuthInfo));
             }
             if(null!=saveDb && !saveDb.isEmpty()){
+                //循环单条插入改为批量插入
                 authMapper.batchInsert(saveDb);
                 saveRedis.entrySet().stream().forEach(next->{
                     redisTemplate.opsForValue().set(next.getKey(), next.getValue());
@@ -241,6 +242,21 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             redisTemplate.opsForValue().set(redisKey, JSON.toJSONString(appAuthInfo));
         }
         return BusinessResult.success(true);
+    }
+
+    @Override
+    public BusinessResult<Boolean> configDef(String userId, AuthSaveRequest request) {
+        if (CollectionUtils.isEmpty(request.getApiId())){
+            ResourceCodeBean.ResourceCode rc20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
+            return BusinessResult.fail(rc20000009.getCode(), rc20000009.getMessage());
+        }
+        //查询API是否全部为内部API
+        Set<String> apiId = new HashSet<>(request.getApiId());
+        if(apiId.size()!=apiBaseMapper.queryInnerApiCount(apiId).intValue()){
+            ResourceCodeBean.ResourceCode rc20000058 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000058;
+            return BusinessResult.fail(rc20000058.getCode(), rc20000058.getMessage());
+        }
+        return this.saveDef(userId, request);
     }
 
     @Override

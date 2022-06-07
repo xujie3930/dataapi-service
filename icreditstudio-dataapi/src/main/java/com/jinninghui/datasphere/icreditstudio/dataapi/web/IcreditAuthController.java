@@ -38,6 +38,11 @@ public class IcreditAuthController {
         return authService.saveDef(userId, request);
     }
 
+    @PostMapping("/config")
+    BusinessResult<Boolean> configDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveRequest request) {
+        return authService.configDef(userId, request);
+    }
+
     /**
      * 根据API批量设置app配置
      * @author  maoc
