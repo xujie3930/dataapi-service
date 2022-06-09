@@ -821,7 +821,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BusinessResult<ApiSaveResult> createAndPublish(String userId, DatasourceApiSaveParam param) {
-        log.info("IcreditApiBaseServiceImpl createAndPublish param1:{}", JSON.toJSONString(param));
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.findByApiPath(param.getPath());
         if (!Objects.isNull(apiBaseEntity)){
             param.setId(apiBaseEntity.getId());
@@ -850,7 +849,6 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseEntity.setPublishTime(new Date());
         }
         saveOrUpdate(apiBaseEntity);
-        log.info("IcreditApiBaseServiceImpl createAndPublish param2:{}", JSON.toJSONString(apiBaseEntity));
         log.info("保存api耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         startTime = System.currentTimeMillis();
         String querySql = "";
@@ -1006,20 +1004,22 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(apiParamEntityList, ApiParamSaveResult.class);
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
         apiBaseEntity = publish(userId, new ApiPublishRequest(apiBaseEntity.getId(), ApiPublishStatusEnum.PUBLISHED.getCode()));
-        log.info("IcreditApiBaseServiceImpl createAndPublish param3:{}", JSON.toJSONString(apiBaseEntity));
         IcreditApiBaseHiEntity apiBaseHiEntity = BeanCopyUtils.copyProperties(apiBaseEntity, new IcreditApiBaseHiEntity());
-        log.info("IcreditApiBaseServiceImpl createAndPublish param4:{}", JSON.toJSONString(apiBaseHiEntity));
         apiBaseHiEntity.setId(null);
         apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
-        //先删除，再插入
-        apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
-        apiBaseHiService.save(apiBaseHiEntity);
+        //update 测试要求备注和接口地址需保持一样
+        //https://www.tapd.cn/my_worktable?source_user=1347256735&workspace_id=64558269&workitem_type=bug&workitem_id=1164558269001025579#&filter_close=true#&filter_close=true
         //只对入参做筛选
         apiParamEntityList = apiParamEntityList.stream()
                 .filter((IcreditApiParamEntity a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
                 .collect(Collectors.toList());
         List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         apiSaveResult.setDesc(getDatasourceInterfaceAddress(apiBaseEntity, apiParamList));
+        //先删除，再插入
+        apiBaseHiEntity.setDesc(apiSaveResult.getDesc());
+        apiBaseHiService.removeByApiBaseId(apiBaseEntity.getId());
+        apiBaseHiService.save(apiBaseHiEntity);
+
         log.info("组合返回参数耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         return BusinessResult.success(apiSaveResult);
     }
