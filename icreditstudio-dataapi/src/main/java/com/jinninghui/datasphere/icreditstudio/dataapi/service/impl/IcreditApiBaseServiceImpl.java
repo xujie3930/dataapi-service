@@ -821,6 +821,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BusinessResult<ApiSaveResult> createAndPublish(String userId, DatasourceApiSaveParam param) {
+        log.info("IcreditApiBaseServiceImpl createAndPublish param1:{}", JSON.toJSONString(param));
         IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.findByApiPath(param.getPath());
         if (!Objects.isNull(apiBaseEntity)){
             param.setId(apiBaseEntity.getId());
@@ -849,6 +850,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             apiBaseEntity.setPublishTime(new Date());
         }
         saveOrUpdate(apiBaseEntity);
+        log.info("IcreditApiBaseServiceImpl createAndPublish param2:{}", JSON.toJSONString(apiBaseEntity));
         log.info("保存api耗时：" + (System.currentTimeMillis() - startTime) + "毫秒");
         startTime = System.currentTimeMillis();
         String querySql = "";
@@ -1004,7 +1006,9 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         List<ApiParamSaveResult> apiParamSaveResultList = BeanCopyUtils.copy(apiParamEntityList, ApiParamSaveResult.class);
         apiSaveResult.setApiParamSaveRequestList(apiParamSaveResultList);
         apiBaseEntity = publish(userId, new ApiPublishRequest(apiBaseEntity.getId(), ApiPublishStatusEnum.PUBLISHED.getCode()));
+        log.info("IcreditApiBaseServiceImpl createAndPublish param3:{}", JSON.toJSONString(apiBaseEntity));
         IcreditApiBaseHiEntity apiBaseHiEntity = BeanCopyUtils.copyProperties(apiBaseEntity, new IcreditApiBaseHiEntity());
+        log.info("IcreditApiBaseServiceImpl createAndPublish param4:{}", JSON.toJSONString(apiBaseHiEntity));
         apiBaseHiEntity.setId(null);
         apiBaseHiEntity.setApiBaseId(apiBaseEntity.getId());
         //先删除，再插入
