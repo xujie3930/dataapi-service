@@ -8,6 +8,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.dto.DatasourceApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.RegisterApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DataAssertFeignClient;
+import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseHiMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -46,7 +48,8 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
 
     private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
     private static final String COMMA = ",";
-
+    @Resource
+    private DataAssertFeignClient dataAssertFeignClient;
     @Resource
     private IcreditApiBaseHiMapper apiBaseHiMapper;
     @Resource
@@ -134,6 +137,10 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             IcreditRegisterApiEntity registerApiEntity = registerApiService.findByApiIdAndApiVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion());
             result.setReqHost(registerApiEntity.getHost());
             result.setReqPath(registerApiEntity.getPath());
+        }
+        if(null!=result.getGenerateApi() && !StringUtils.isEmpty(result.getGenerateApi().getTableName())){
+            BusinessResult<String> chineseNameResult = dataAssertFeignClient.getChineseName(result.getGenerateApi().getTableName());
+            result.getGenerateApi().setTableChineseName(null==chineseNameResult?null:chineseNameResult.getData());
         }
         result.setParamList(apiParamList);
         result.setRegisterRequestParamSaveRequestList(registerRequestParamSaveRequestList);
