@@ -8,6 +8,7 @@ import tableRequestConfigurationDetail from './data-service-api-request-detail'
 import tableResponseConfigurationDetail from './data-service-api-response-detail'
 import dataServiceAppTableConfig from './data-service-app'
 import logManageTableConfig from './data-service-log'
+import tableAppAuthList from './app-auth-list'
 
 export {
   dataServiceApiTableConfig,
@@ -19,5 +20,6 @@ export {
   tableRequestConfigurationDetail,
   tableResponseConfigurationDetail,
   dataServiceAppTableConfig,
-  logManageTableConfig
+  logManageTableConfig,
+  tableAppAuthList
 }

@@ -2,6 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper">
 
+    <!--<select id="findByApiId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
+        select *
+        from icredit_auth
+        where del_flag = 0
+        <if test="apiId != null and apiId != ''">
+            and api_id = #{apiId}
+        </if>
+    </select>-->
+
+    <select id="findOuterByApiId" resultType="java.util.Map">
+        select auth.id id, auth.app_id appId, auth.api_id apiId, auth.auth_config_id authConfigId,
+        (SELECT app.generate_id from icredit_app app where app.del_flag=0 and app.id=auth.app_id) appGenerateId
+        from icredit_auth auth
+        inner join icredit_auth_config config ON auth.auth_config_id=config.id
+        where auth.del_flag = 0 AND config.del_flag=0
+        <if test="apiId != null and apiId != ''">
+            and auth.api_id = #{apiId}
+        </if>
+    </select>
+
     <select id="findByAppId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
         select *
         from icredit_auth
@@ -11,8 +31,22 @@
         </if>
     </select>
 
+    <select id="findByAppIds" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity">
+        select *
+        from icredit_auth
+        where del_flag = 0
+        <if test="appIds != null">
+            <foreach collection="appIds" item="item" open=" and app_id in (" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
     <delete id="removeByAppId">
         delete from icredit_auth where app_id = #{appId}
+    </delete>
+    <delete id="removeByApiId">
+        delete from icredit_auth where api_id = #{apiId}
     </delete>
 
     <select id="getApiAuthCount" resultType="java.lang.Long">
@@ -40,5 +74,88 @@
                 AND del_flag = #{delFlag}
             </if>
         </where>
+    </select>
+
+    <select id="getListByAppId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest">
+        SELECT api.name as apiName, api.path apiPath, api.id apiId, iac.period_begin authPeriodBegin,
+        iac.period_end authPeroidEnd, iac.allow_call authAllowCall, ia.app_id appId, iac.id authId, api.interface_source apiInterfaceSource
+        FROM icredit_auth ia
+        inner join icredit_auth_config iac ON ia.auth_config_id=iac.id
+        inner JOIN icredit_api_base api ON ia.api_id=api.id
+        <where> 1=1 AND ia.del_flag=0 and iac.del_flag=0 and api.del_flag=0 AND ia.app_id=#{appId}
+            <if test="apiName != null"> AND INSTR(api.name , #{apiName})>0 </if>
+            <if test="apiPath != null"> AND INSTR(api.path , #{apiPath})>0 </if>
+            <if test="periodBegin != null"> AND iac.period_begin &gt;= #{periodBegin} </if>
+            <if test="periodEnd != null"> AND iac.period_end &lt;= #{periodEnd} </if>
+            <if test="durationType != null">
+                <if test="durationType==1"> AND iac.allow_call = -1 </if>
+                <if test="durationType==1"> AND iac.allow_call &gt; = 0 </if>
+            </if>
+        </where>
+        <if test="pageNum gt 0 and pageSize gt 0"> LIMIT #{pageStart}, #{pageSize} </if>
+
+    </select>
+
+    <select id="getCountByAppId" resultType="java.lang.Long" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest">
+        SELECT count(1)
+        FROM icredit_auth ia
+        inner join icredit_auth_config iac ON ia.auth_config_id=iac.id
+        inner JOIN icredit_api_base api ON ia.api_id=api.id
+        <where> 1=1 AND ia.del_flag=0 and iac.del_flag=0 and api.del_flag=0 AND ia.app_id=#{appId}
+            <if test="apiName != null"> AND INSTR(api.name , #{apiName})>0 </if>
+            <if test="apiPath != null"> AND INSTR(api.path , #{apiPath})>0 </if>
+            <if test="periodBegin != null"> AND iac.period_begin &gt;= #{periodBegin} </if>
+            <if test="periodEnd != null"> AND iac.period_end &lt;= #{periodEnd} </if>
+            <if test="durationType != null">
+                <if test="durationType==1"> AND iac.allow_call = -1 </if>
+                <if test="durationType==1"> AND iac.allow_call &gt; = 0 </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="getApiAuthList" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest">
+        SELECT
+        ia.app_id appId,
+        ia.api_id apiId,
+        app.app_group_id appGroupId,
+        iac.allow_call authAllowCall,
+        iac.period_begin authPeriodBegin,
+        iac.period_end authPeroidEnd,
+        app.token_type appTokenType
+        FROM
+        icredit_auth ia
+        INNER JOIN icredit_app app ON ia.app_id = app.id
+        INNER JOIN icredit_auth_config iac ON ia.auth_config_id = iac.id
+        <where> 1=1 AND ia.del_flag=0 and app.del_flag=0 AND iac.del_flag=0 AND ia.api_id=#{apiId} </where>
+
+    </select>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO icredit_auth(id, app_id, api_id, auth_config_id, remark, create_time, create_by, update_time, update_by, del_flag)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.appId},#{item.apiId},#{item.authConfigId},#{item.remark},now(),#{item.createBy},#{item.updateTime},#{item.updateBy},0)
+        </foreach>
+    </insert>
+
+    <update id="deletes" parameterType="java.util.Map">
+        UPDATE icredit_auth SET del_flag=1 WHERE 1=1 AND del_flag=0 AND
+        <trim prefixOverrides="AND|OR">
+            <if test="apiId != null"> AND api_id=#{apiId} </if>
+            <if test="appId != null"> AND app_id=#{appId} </if>
+            <if test="ids != null"> AND
+                <foreach collection="ids" item="item" open=" id in (" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </trim>
+    </update>
+
+    <select id="getAuthNumByConfigIds" parameterType="java.util.Collection" resultType="java.util.Map">
+        SELECT auth_config_id authConfigId, COUNT(1) authNum FROM icredit_auth WHERE del_flag=0 AND
+        <foreach collection="configIds" item="item" open=" auth_config_id in (" close=")" separator=",">
+            #{item}
+        </foreach>
+        GROUP BY auth_config_id
     </select>
 </mapper>

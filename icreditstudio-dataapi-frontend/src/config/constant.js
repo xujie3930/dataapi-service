@@ -30,6 +30,9 @@ export const CERTIFICATION_TYPE = { 0: '密钥认证', 1: '证书认证' }
 // API: Token有效期
 export const TOEKN_PERIOD = { 0: '长期', 1: '8小时', 2: '自定义' }
 
+// API： 授权有效期
+export const APP_AUTH_PERIOD = { 1: '短期', 2: '永久' }
+
 // API: 参数类型
 export const REGISTER_API_TYPR = [
   { label: 'STRING', value: 'STRING' },
@@ -73,5 +76,7 @@ export default {
   CERTIFICATION_TYPE,
   TOEKN_PERIOD,
   ENABLED_STATUS,
-  REQUEST_STATUS
+  REQUEST_STATUS,
+  APP_AUTH_PERIOD,
+  interfaceSource_TYPE
 }

@@ -81,17 +81,17 @@ export const detailConfiguration = {
       label: '数据库类型',
       value: 'MySQL',
       key: 'databaseType',
-      formatter: val => objectKeyConvertToValue(DATABASE_TYPE)[val]
+      formatter: ({ databaseType }) =>
+        objectKeyConvertToValue(DATABASE_TYPE)[databaseType]
     },
     { label: '数据源名称', value: '', key: 'databaseName' },
     {
       label: '数据表名称',
       value: '',
       key: 'tableName',
-      hide: data => {
-        console.log(data, data.model !== 1, 'data')
-        return data.model !== 1
-      }
+      formatter: ({ tableName, tableChineseName }) =>
+        tableChineseName ? `${tableName}  （${tableChineseName}）` : tableName,
+      hide: data => data?.model !== 1
     }
   ],
 

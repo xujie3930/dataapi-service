@@ -5,31 +5,39 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.RedisAppAuthInfo;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ApiInfoDTO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAppEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthEffectiveTimeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.AuthInfoTypeEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthConfigMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditAuthMapper;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAppService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthConfigService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditAuthService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthInfoRequest;
-import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.*;
 import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
+import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessPageResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
+import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.StringRedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -54,6 +62,138 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     private IcreditAuthMapper authMapper;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private IcreditApiBaseMapper apiBaseMapper;
+    @Resource
+    private IcreditAuthConfigMapper authConfigMapper;
+    @Autowired
+    private IcreditApiBaseService apiBaseService;
+
+
+    @Override
+    @Transactional
+    public BusinessResult<ApiSaveResult> saveOuterApiDef(String userId, AuthSaveApiRequest request) {
+        //保存时，先发布接口再授权
+        //为了避免分布式事务，此处做到一块去
+        DatasourceApiSaveParam param = new DatasourceApiSaveParam();
+        BeanUtils.copyProperties(request.getApiSaveRequest(), param);
+        BusinessResult<ApiSaveResult> andPublish = apiBaseService.createAndPublish(userId, param);
+        if (!andPublish.isSuccess() || Objects.isNull(andPublish.getData())) {
+            return andPublish;
+        }
+        String apiId = andPublish.getData().getId();//app id
+        request.setApiId(apiId);
+        //同时保存授权信息到redis
+        //查找api信息
+        IcreditApiBaseEntity apiBaseEntity = apiBaseMapper.selectById(request.getApiId());
+        if(null==apiBaseEntity){
+            ResourceCodeBean.ResourceCode rc20000054 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000054;
+            throw new AppException(rc20000054.getCode(), rc20000054.getMessage());
+        }
+        /*if(null==apiBaseEntity.getInterfaceSource() || apiBaseEntity.getInterfaceSource()!=1){
+            ResourceCodeBean.ResourceCode rc20000057 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000057;
+            return BusinessResult.fail(rc20000057.getCode(), rc20000057.getMessage());
+        }*/
+        //查找应用信息
+        Collection<IcreditAppEntity> appList = (request.getAppIds().isEmpty()?new ArrayList<>(0):appService.listByIds(request.getAppIds()));
+        Map<String, IcreditAppEntity> appMap = (null==appList || appList.isEmpty())?new HashMap<>(0):appList.stream().collect(Collectors.toMap(IcreditAppEntity::getId, IcreditAppEntity->IcreditAppEntity));
+        if(!request.getAppIds().isEmpty() && request.getAppIds().size()!=appMap.size()){
+            ResourceCodeBean.ResourceCode rc20000010 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000010;
+            throw new AppException(rc20000010.getCode(), rc20000010.getMessage());
+        }
+        //获取已授权列表
+        List<Map<String, Object>> authList = authMapper.findOuterByApiId(apiBaseEntity.getId());
+        if(null!=authList & !authList.isEmpty()){
+            //如果存在已授权列表
+            //删除redis授权信息
+            List<String> cancelSelectedList = new ArrayList<>();
+            Set<String> authConfigIds = new HashSet<>();
+            StringBuilder sb = new StringBuilder();
+            for (Map<String, Object> auth : authList) {
+                authConfigIds.add((String) auth.get("authConfigId"));
+                sb.setLength(0);
+                if(!request.getAppIds().contains(auth.get("appId"))){
+                    //cancelSelectedList保存取消勾选
+                    cancelSelectedList.add(sb.append(auth.get("apiId")).append(auth.get("appGenerateId")).toString());
+                }
+            }
+
+            //删除旧的auth信息
+            Map<String, Object> delauthMap = new HashMap<>(2);
+            delauthMap.put("apiId", apiBaseEntity.getId());
+            authMapper.deletes(delauthMap);
+            //删除旧的config信息
+            //先判断config是否存在其他引用
+            //判断authConfig是否还有其他引用
+            List<Map<String, Object>> authConfigNumList = authMapper.getAuthNumByConfigIds(authConfigIds);
+            //获取没有被引用的config，并且删除
+            if(null!=authConfigNumList && !authConfigNumList.isEmpty()){
+                authConfigNumList.stream().forEach(authNumMap -> {
+                    final String authConfigId = (String) authNumMap.get("authConfigId");
+                    final Long authNum = (Long) authNumMap.get("authNum");
+                    if(authNum.intValue()>0){
+                        //该配置还有引用，不可删除
+                        authConfigIds.remove(authConfigId);
+                    }
+                });
+            }
+            if(!authConfigIds.isEmpty()){
+                //此时authConfigIds不存在其他引用
+                Map<String, Object> delconfMap = new HashMap<>(2);
+                delconfMap.put("ids", authConfigIds);
+                authConfigMapper.deletes(delconfMap);//改为逻辑删除
+            }
+
+            if(!cancelSelectedList.isEmpty()){
+                //cancelSelectedList不为空，表示有取消勾选的情况
+                redisTemplate.delete(cancelSelectedList);
+            }
+
+        }
+
+        if(!request.getAppIds().isEmpty()){
+            //当数组为空时，表示取消所有的授权，因此此处不走
+            IcreditAuthConfigEntity config = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
+            authConfigService.saveOrUpdate(config);
+
+            //保存auth信息
+            List<IcreditAuthEntity> saveDb = new ArrayList<>();
+            Map<String, String> saveRedis = new HashMap<>();
+            for (String appId : request.getAppIds()) {
+                IcreditAuthEntity authEntity = new IcreditAuthEntity();
+                authEntity.setAppId(appId);
+                authEntity.setApiId(apiBaseEntity.getId());
+                authEntity.setAuthConfigId(config.getId());
+                saveDb.add(authEntity);
+                //save(authEntity);
+                String redisKey = String.valueOf(new StringBuilder(apiBaseEntity.getId()).append(appMap.get(appId).getGenerateId()));
+                Object apiAuthApp = redisTemplate.opsForValue().get(redisKey);
+                RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(config.getPeriodBegin(), config.getPeriodEnd(), config.getAllowCall(), Objects.isNull(apiAuthApp)?0:JSON.parseObject(apiAuthApp.toString(), RedisAppAuthInfo.class).getCalled());
+                saveRedis.put(redisKey, JSON.toJSONString(appAuthInfo));
+                //redisTemplate.opsForValue().set(redisKey, JSON.toJSONString(appAuthInfo));
+            }
+            if(null!=saveDb && !saveDb.isEmpty()){
+                //循环单条插入改为批量插入
+                authMapper.batchInsert(saveDb);
+                saveRedis.entrySet().stream().forEach(next->{
+                    redisTemplate.opsForValue().set(next.getKey(), next.getValue());
+                });
+                /*redisTemplate.executePipelined(new RedisCallback<String>() {
+                    @Override
+                    public String doInRedis(RedisConnection redisConnection) throws DataAccessException {
+                        //StringRedisConnection src = (StringRedisConnection)redisConnection;
+                        saveRedis.entrySet().stream().forEach(next->{
+                            redisConnection.set(next.getKey().getBytes(Charset.forName("UTF-8")), next.getValue().getBytes(Charset.forName("UTF-8")));
+                        });
+                        return null;
+                    }
+                });*/
+            }
+        }
+
+
+        return andPublish;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -103,6 +243,21 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             redisTemplate.opsForValue().set(redisKey, JSON.toJSONString(appAuthInfo));
         }
         return BusinessResult.success(true);
+    }
+
+    @Override
+    public BusinessResult<Boolean> configDef(String userId, AuthSaveRequest request) {
+        if (CollectionUtils.isEmpty(request.getApiId())){
+            ResourceCodeBean.ResourceCode rc20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
+            return BusinessResult.fail(rc20000009.getCode(), rc20000009.getMessage());
+        }
+        //查询API是否全部为内部API
+        Set<String> apiId = new HashSet<>(request.getApiId());
+        if(apiId.size()!=apiBaseMapper.queryInnerApiCount(apiId).intValue()){
+            ResourceCodeBean.ResourceCode rc20000058 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000058;
+            return BusinessResult.fail(rc20000058.getCode(), rc20000058.getMessage());
+        }
+        return this.saveDef(userId, request);
     }
 
     @Override
@@ -189,4 +344,78 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         return apiCascadeInfoList;
     }
 
+    @Override
+    public BusinessPageResult<AuthListResult> authList(AuthListRequest request) {
+        //查询数目
+        Long count = authMapper.getCountByAppId(request);
+        List<AuthListResult> list = ((null==count||count.intValue()<1)?new ArrayList<>(0):authMapper.getListByAppId(request));
+        return BusinessPageResult.build(list, request, count);
+    }
+
+    @Override
+    public List<AuthListResult> queryApiAuthListByPath(String path) {
+        IcreditApiBaseEntity apiEntity = apiBaseMapper.findByApiPath(path);
+        if(null==apiEntity || StringUtils.isEmpty(apiEntity.getId())){
+            return new ArrayList<>(0);
+        }
+        AuthListRequest request = new AuthListRequest();
+        request.setApiId(apiEntity.getId());
+        return authMapper.getApiAuthList(request);
+    }
+
+    @Override
+    public BusinessResult<Boolean> del(String userId, AuthDelRequest request) {
+        //同时保存授权信息到redis
+        IcreditAppEntity appEntity = appService.getById(request.getAppId());
+        if(null==appEntity){
+            ResourceCodeBean.ResourceCode resourceCode20000010 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000010;
+            return BusinessResult.fail(resourceCode20000010.getCode(), resourceCode20000010.getMessage());
+        }
+        List<IcreditAuthEntity> authList = authMapper.findByAppId(request.getAppId());
+        if(null==authList || authList.isEmpty()){
+            //没有授权，返回成功
+            return BusinessResult.success(true);
+        }
+        StringBuilder sb = new StringBuilder();
+        Set<String> authConfigSet = new HashSet<>(), delRedisList = new HashSet<>();
+        authList.stream().forEach(auth->{
+            if(request.getAuthList().contains(auth.getId())){
+                sb.setLength(0);
+                delRedisList.add(sb.append(auth.getApiId()).append(appEntity.getGenerateId()).toString());
+                authConfigSet.add(auth.getAuthConfigId());
+            }
+        });
+        //删除
+        final Set<String> delConfigId = new HashSet<>();
+        final Map<String, Object> paramsMap = new HashMap<>(4);
+        paramsMap.put("ids", request.getAuthList());
+        paramsMap.put("appId", request.getAppId());
+        if(authMapper.deletes(paramsMap)<=0){
+            //没有授权关系
+            return BusinessResult.success(true);
+        }
+        //判断authConfig是否还有其他引用
+        List<Map<String, Object>> authNumList = authMapper.getAuthNumByConfigIds(authConfigSet);
+        //获取没有被引用的config，并且删除
+        if(null!=authNumList && !authNumList.isEmpty()){
+            authNumList.stream().forEach(authNumMap -> {
+                final String authConfigId = (String) authNumMap.get("authConfigId");
+                final Long authNum = (Long) authNumMap.get("authNum");
+                if(authNum.intValue()<=0){
+                    //该配置已经没有引用了，删除
+                    delConfigId.add(authConfigId);
+                }
+            });
+        }else{
+            delConfigId.addAll(authConfigSet);
+        }
+
+        if(!delConfigId.isEmpty()){
+            //删除没引用的config
+            authConfigService.deleteByIds(delConfigId);
+        }
+        //删除缓存
+        redisTemplate.delete(delRedisList);
+        return BusinessResult.success(true);
+    }
 }

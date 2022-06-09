@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -37,4 +38,6 @@ public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
     Long getCountByPublishAndDelFlag(@Param("publishStatus") Integer publishStatus, @Param("delFlag") Integer delFlag);
 
     Long newlyDayList(@Param("createTime") Date date);
+
+    Integer queryInnerApiCount(@Param("collection") Collection<String> collection);
 }

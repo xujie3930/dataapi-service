@@ -22,35 +22,37 @@
       :model="authorizeForm"
       :rules="rules"
     >
-      <el-form-item>
-        <div slot="label" class="icredit-form--title">选择授权应用</div>
-      </el-form-item>
+      <template v-if="options.opType === 'add'">
+        <el-form-item>
+          <div slot="label" class="icredit-form--title">选择授权API</div>
+        </el-form-item>
 
-      <el-form-item label="应用名称">
+        <!-- <el-form-item label="应用名称">
         <span>{{ authorizeForm.name }}</span>
-      </el-form-item>
+      </el-form-item> -->
 
-      <el-form-item label="选择API" prop="apiId">
-        <el-cascader
-          ref="cascader"
-          clearable
-          filterable
-          style="width: 500px"
-          placeholder="请选择API"
-          :collapse-tags="true"
-          :options="apiOptions"
-          :props="cascaderProps"
-          v-model="authorizeForm.apiId"
-          @change="handleCascaderChange"
-        ></el-cascader>
-        <!-- <JTransferTree
+        <el-form-item label="选择API" prop="apiId">
+          <el-cascader
+            ref="cascader"
+            clearable
+            filterable
+            style="width: 500px"
+            placeholder="请选择API"
+            :collapse-tags="true"
+            :options="apiOptions"
+            :props="cascaderProps"
+            v-model="authorizeForm.apiId"
+            @change="handleCascaderChange"
+          ></el-cascader>
+          <!-- <JTransferTree
           ref="transferTree"
           :props="{ key: 'id', label: 'name' }"
           :left-tree-data="leftTreeData"
           :right-tree-data="rightTreeData"
           @transfer-data="transferDataCallback"
         /> -->
-      </el-form-item>
+        </el-form-item>
+      </template>
 
       <template v-if="!!authorizeForm.apiId.length">
         <el-form-item>
@@ -212,27 +214,31 @@ export default {
 
     // 点击-新增或编辑API授权
     addApiAuthorization() {
+      const { opType, apiIds, row } = this.options
       this.$refs?.authorizeForm.validate(valid => {
         const { appId, allowCall, apiId, durationType, authPeriod, validTime } =
           this.authorizeForm
         const params = {
-          appId,
           durationType,
-          apiId: apiId.map(item => item[2]),
+          appId: opType === 'add' ? appId : row.id,
+          apiId: opType === 'add' ? apiId.map(item => item[2]) : apiIds,
           allowCall: durationType ? -1 : allowCall,
           periodBegin: validTime?.length && !authPeriod ? validTime[0] : -1,
           periodEnd: validTime?.length && !authPeriod ? validTime[1] : -1
         }
 
+        const method =
+          opType === 'add' ? 'updateApiAuthorization' : 'deployAuthApi'
+
         !valid
           ? this.$refs.baseDialog.setButtonLoading(false)
-          : API.updateApiAuthorization(params)
+          : API[method](params)
               .then(({ success, data }) => {
                 if ((success, data)) {
                   this.$notify.success({
                     title: '操作结果',
-                    message: '授权成功！',
-                    duration: 1500
+                    message: '授权配置成功！',
+                    duration: 2000
                   })
                   this.$refs.baseDialog.setButtonLoading(false)
                   this.close()

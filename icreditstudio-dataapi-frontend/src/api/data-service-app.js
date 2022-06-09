@@ -57,6 +57,12 @@ const deleteAppGroup = params => postAction('/appGroup/del', params)
 // 启用或停用应用
 const enableOrStopApp = params => postAction('/app/enableOrStop', params)
 
+// 删除或批量删除授权API
+const deleteAuthApi = params => postAction('/auth/del', params)
+
+// 配置或批量配置授权API
+const deployAuthApi = params => postAction('/auth/config', params)
+
 export default {
   getAppGroupList,
   getAppUniqueId,
@@ -73,5 +79,7 @@ export default {
   getAppAuthDetail,
   editAppGroup,
   deleteAppGroup,
-  enableOrStopApp
+  enableOrStopApp,
+  deleteAuthApi,
+  deployAuthApi
 }

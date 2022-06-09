@@ -32,6 +32,7 @@
       <div class="header-operate" slot="operation">
         <div class="header-operate-left">
           <el-button
+            :disabled="!tableSelections.length"
             class="jui-button--default"
             @click="handleBatchDeleteAppGroup"
             >批量删除</el-button
@@ -58,8 +59,8 @@
     <!-- 新增应用分组 -->
     <AddAppGroup ref="addAppGroup" @on-close="closeAddAppGroupCallback" />
 
-    <!-- 授权 -->
-    <AppAuthorization ref="authorize" @on-close="closeAuthorizeCallback" />
+    <!-- 授权列表 -->
+    <AppAuthorizationList ref="authorize" @on-close="closeAuthorizeCallback" />
 
     <!-- 详情 -->
     <JDetail
@@ -83,7 +84,7 @@ import { cloneDeep } from 'lodash'
 
 import AddApp from './add-app'
 import AddAppGroup from './add-app-group'
-import AppAuthorization from './app-authorization'
+import AppAuthorizationList from './app-authorization-list'
 
 import { detailConfiguration, detailTitleKeyMapping } from './detail-config'
 
@@ -93,7 +94,7 @@ export default {
   components: {
     AddApp,
     AddAppGroup,
-    AppAuthorization
+    AppAuthorizationList
   },
 
   data() {
@@ -335,7 +336,7 @@ export default {
       API.getAppDetail({ id })
         .then(({ success, data }) => {
           if (success && data) {
-            const { authResult, apiResult } = data
+            //  const { authResult, apiResult } = data
             // 基础信息模块赋值
             cloneDeep(this.detailConfiguration.base).forEach((item, idx) => {
               const { key, formatter } = item
@@ -354,35 +355,35 @@ export default {
             })
 
             // 显示授权信息模块
-            this.detailTitleKeyMapping.auth.visible = Boolean(apiResult)
+            // this.detailTitleKeyMapping.auth.visible = Boolean(apiResult)
 
             // 显示授权时间模块
-            this.detailTitleKeyMapping.authTime.visible = Boolean(authResult)
+            // this.detailTitleKeyMapping.authTime.visible = Boolean(authResult)
 
             // 授权信息赋值
-            apiResult &&
-              (this.detailConfiguration.auth[0].value = apiResult?.apiNames)
+            // apiResult &&
+            //   (this.detailConfiguration.auth[0].value = apiResult?.apiNames)
 
             // 授权时间赋值
-            authResult &&
-              cloneDeep(this.detailConfiguration.authTime).forEach(
-                (item, idx) => {
-                  const { key: k, formatter } = item
+            // authResult &&
+            //   cloneDeep(this.detailConfiguration.authTime).forEach(
+            //     (item, idx) => {
+            //       const { key: k, formatter } = item
 
-                  this.detailConfiguration.authTime[idx].value = formatter
-                    ? typeof formatter(authResult[k]) === 'object'
-                      ? formatter(authResult[k])?.name
-                      : formatter(authResult)
-                    : authResult[k]
+            //       this.detailConfiguration.authTime[idx].value = formatter
+            //         ? typeof formatter(authResult[k]) === 'object'
+            //           ? formatter(authResult[k])?.name
+            //           : formatter(authResult)
+            //         : authResult[k]
 
-                  // 根特定条件隐藏某个label
-                  if ('hide' in item) {
-                    const { periodBegin, periodEnd } = authResult
-                    this.detailConfiguration.authTime[idx].hide =
-                      periodBegin > -1 && periodEnd > -1
-                  }
-                }
-              )
+            //       // 根特定条件隐藏某个label
+            //       if ('hide' in item) {
+            //         const { periodBegin, periodEnd } = authResult
+            //         this.detailConfiguration.authTime[idx].hide =
+            //           periodBegin > -1 && periodEnd > -1
+            //       }
+            //     }
+            //   )
           }
         })
         .finally(() => {
