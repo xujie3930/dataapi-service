@@ -275,7 +275,7 @@ export default {
               const { key, value, hide, formatter } = list
               if (generateApi) {
                 this.detailConfiguration.table[idx].value = formatter
-                  ? formatter(key in generateApi ? generateApi[key] : value)
+                  ? formatter(key in generateApi ? generateApi ?? {} : value)
                   : key in generateApi
                   ? generateApi[key]
                   : value

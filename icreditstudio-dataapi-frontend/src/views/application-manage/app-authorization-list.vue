@@ -176,7 +176,42 @@ export default {
       const apiSourceArr = this.tableSelections.map(
         ({ apiInterfaceSource }) => apiInterfaceSource
       )
-      console.log(apiSourceArr, 'jjii')
+
+      const externalApiSourceArr = apiSourceArr.filter(item => item)
+
+      console.log(apiSourceArr, externalApiSourceArr, 'jjii')
+      // 勾选的数据只包含外部API
+      if (externalApiSourceArr.length === apiSourceArr.length) {
+        this.$alert(
+          '批量选中的API均为外部来源API，请到资源目录下进行配置！',
+          '批量配置提示',
+          {
+            showConfirmButton: false,
+            showCancelButton: true,
+            type: 'warning'
+          }
+        )
+        return
+      }
+
+      // 勾选的数据包含内部以及外部API
+      if (apiSourceArr.includes(1) && apiSourceArr.includes(0)) {
+        this.$confirm(
+          '批量选中的API中包含外部来源的API，点击“确定”按钮则过滤外部来源API后继续配置，重新选择请点击“取消”按钮。',
+          '批量配置提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+          .then(() => {
+            console.log(33333)
+          })
+          .catch(() => {})
+      } else {
+        console.log(11111)
+      }
     },
 
     // 按钮点击-新增授权API
