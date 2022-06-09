@@ -65,6 +65,7 @@ public final class DataApiDruidDataSourceService {
         DatasourceSync dataFactory = DatasourceFactory.getDatasource(type);
         String uri = dataFactory.geturi(url);
         prop.setProperty("url", uri);
+        logger.info("url:{},username:{},password:{}", uri, userName, password);
         prop.setProperty("connectionProperties", "useUnicode=true;characterEncoding=UTF8");
         prop.setProperty("username", userName);
         prop.setProperty("password", password);
