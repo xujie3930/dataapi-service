@@ -173,13 +173,14 @@ export default {
 
     // 按钮点击-批量配置API
     handleBatchConfigureClick() {
+      const { row } = this.options
+
       const apiSourceArr = this.tableSelections.map(
         ({ apiInterfaceSource }) => apiInterfaceSource
       )
 
       const externalApiSourceArr = apiSourceArr.filter(item => item)
 
-      console.log(apiSourceArr, externalApiSourceArr, 'jjii')
       // 勾选的数据只包含外部API
       if (externalApiSourceArr.length === apiSourceArr.length) {
         this.$alert(
@@ -206,12 +207,36 @@ export default {
           }
         )
           .then(() => {
-            console.log(33333)
+            this.$refs.authorizeApi.open({
+              row,
+              apiIds: this.tableSelections
+                .filter(({ apiInterfaceSource }) => !apiInterfaceSource)
+                .map(({ apiId }) => apiId),
+              title: '授权参数配置',
+              opType: 'batchDeploy'
+            })
           })
           .catch(() => {})
       } else {
-        console.log(11111)
+        this.$refs.authorizeApi.open({
+          row,
+          apiIds: this.tableSelections.map(({ apiId }) => apiId),
+          title: '授权参数配置',
+          opType: 'batchDeploy'
+        })
       }
+    },
+
+    // 按钮点击-单个配置API
+    handleConfigureClick(options) {
+      const { row } = this.options
+      const { apiId } = options.row
+      this.$refs.authorizeApi.open({
+        row,
+        apiIds: [apiId],
+        title: '授权参数配置',
+        opType: 'deploy'
+      })
     },
 
     // 按钮点击-新增授权API
@@ -220,12 +245,13 @@ export default {
       this.$refs.authorizeApi.open({ row, title: '新增授权API', opType: 'add' })
     },
 
-    // 按钮点击-配置
-    handleConfigureClick() {},
-
     handleDetailClick() {},
 
-    closeAuthorizeCallback() {},
+    closeAuthorizeCallback() {
+      // this.$refs?.crud.$refs?.table.$refs?.appAuthList.clearSelection()
+      this.mixinRetrieveTableData()
+      this.tableSelections = []
+    },
 
     // 拦截-表格请求接口参数拦截
     interceptorsRequestRetrieve(params) {
