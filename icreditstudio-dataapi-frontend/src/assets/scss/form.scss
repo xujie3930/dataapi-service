@@ -84,16 +84,19 @@
 }
 
 .el-dialog {
+  $--width-form-label: 120px ;
+ .iframe-label .iframe-form-label {
+    width: $--width-form-label;
+  }
+
+
   .iframe-form-item {
-    width: 48%;
-    margin-right: 2%;
+    $--count-form-inline: 3 ;
+    width: $width-100 / $--count-form-inline - 1%;
+    margin-right: 1% * $--count-form-inline / ($--count-form-inline - 1);
 
-    &:nth-child(2n) {
+    &:nth-child(2n+1) {
       margin-right: 0;
-    }
-
-    &:nth-child(#{$--count-form-inline}n) {
-      margin-right: 2%;
     }
   }
 }

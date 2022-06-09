@@ -58,8 +58,8 @@
     <!-- 新增应用分组 -->
     <AddAppGroup ref="addAppGroup" @on-close="closeAddAppGroupCallback" />
 
-    <!-- 授权 -->
-    <AppAuthorization ref="authorize" @on-close="closeAuthorizeCallback" />
+    <!-- 授权列表 -->
+    <AppAuthorizationList ref="authorize" @on-close="closeAuthorizeCallback" />
 
     <!-- 详情 -->
     <JDetail
@@ -83,7 +83,7 @@ import { cloneDeep } from 'lodash'
 
 import AddApp from './add-app'
 import AddAppGroup from './add-app-group'
-import AppAuthorization from './app-authorization'
+import AppAuthorizationList from './app-authorization-list'
 
 import { detailConfiguration, detailTitleKeyMapping } from './detail-config'
 
@@ -93,7 +93,7 @@ export default {
   components: {
     AddApp,
     AddAppGroup,
-    AppAuthorization
+    AppAuthorizationList
   },
 
   data() {

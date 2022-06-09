@@ -290,6 +290,8 @@
           <el-form-item>
             <div slot="label" class="source-main-form--title">选择表</div>
           </el-form-item>
+
+          <!-- API模式为单表模式生成API -->
           <template
             v-if="form.apiGenerateSaveRequest.model === API_MODE_MAPPING.TABLE"
           >
@@ -303,6 +305,7 @@
                     filterable
                     style="width: 100%"
                     placeholder="请选择数据库类型"
+                    :disabled="options.opType === 'edit'"
                     v-model="form.apiGenerateSaveRequest.databaseType"
                     @change="handleDatabaseTypeChange"
                   >
@@ -324,6 +327,7 @@
                     style="width: 100%"
                     v-model="form.apiGenerateSaveRequest.datasourceId"
                     placeholder="请选择数据源名称"
+                    :disabled="options.opType === 'edit'"
                     @change="handleDatasourceNameChange"
                   >
                     <el-option
@@ -344,7 +348,10 @@
                   <el-select
                     filterable
                     style="width: 100%"
-                    :disabled="!form.apiGenerateSaveRequest.datasourceId"
+                    :disabled="
+                      !form.apiGenerateSaveRequest.datasourceId ||
+                      options.opType === 'edit'
+                    "
                     v-model="form.apiGenerateSaveRequest.tableName"
                     :placeholder="
                       form.apiGenerateSaveRequest.datasourceId
@@ -762,6 +769,9 @@ export default {
 
     // 点击-保存表单
     handleSaveFormClick(saveType) {
+      const { opType } = this.options
+      const { datasourceId } = this.form.apiGenerateSaveRequest
+
       const messageMapping = {
         0: { type: '保存', loading: 'isSaveBtnLoading' },
         1: { type: '发布', loading: 'isPublishBtnLoading' }
@@ -770,6 +780,14 @@ export default {
         registerRequestParamSaveRequestList: req,
         registerResponseParamSaveRequestList: res
       } = cloneDeep(this.form)
+
+      if (opType === 'edit' && !datasourceId) {
+        this.$notify.error({
+          title: '接口数据异常',
+          message: '数据源异常！',
+          duration: 2000
+        })
+      }
 
       this.$refs.form.validate(valid => {
         if (valid) {
@@ -785,7 +803,6 @@ export default {
               !(fieldName === '' && defaultValue === '' && desc === '')
           )
 
-          const { opType } = this.options
           const { apiGroupId, ...restForm } = this.form
           const params = {
             saveType,
@@ -972,8 +989,14 @@ export default {
             if (opType === 'edit' && key === 'datasourceOptions') {
               const ids = data.map(item => item.id) ?? []
               const { datasourceId } = this.form.apiGenerateSaveRequest
-              !ids.includes(datasourceId) &&
-                (this.form.apiGenerateSaveRequest.datasourceId = '')
+              if (!ids.includes(datasourceId)) {
+                this.form.apiGenerateSaveRequest.datasourceId = ''
+                this.$notify.error({
+                  title: '接口数据异常',
+                  message: '数据源异常！',
+                  duration: 1500
+                })
+              }
             }
           }
         })

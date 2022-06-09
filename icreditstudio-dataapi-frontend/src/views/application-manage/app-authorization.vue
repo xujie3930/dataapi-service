@@ -23,12 +23,12 @@
       :rules="rules"
     >
       <el-form-item>
-        <div slot="label" class="icredit-form--title">选择授权应用</div>
+        <div slot="label" class="icredit-form--title">选择授权API</div>
       </el-form-item>
 
-      <el-form-item label="应用名称">
+      <!-- <el-form-item label="应用名称">
         <span>{{ authorizeForm.name }}</span>
-      </el-form-item>
+      </el-form-item> -->
 
       <el-form-item label="选择API" prop="apiId">
         <el-cascader
