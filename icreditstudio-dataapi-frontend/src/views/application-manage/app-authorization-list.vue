@@ -7,7 +7,7 @@
       hide-footer
       :title="options.title"
       @on-change="change"
-      @on-confirm="addApiAuthorization"
+      @on-confirm="handleAddApiAuthorization"
     >
       <Crud
         ref="crud"
@@ -32,15 +32,23 @@
         :handleExport="mixinHandleExport"
         :handleUpdate="mixinHandleCreateOrUpdate"
         :handleCancel="mixinHandleCancel"
+        :handleSelectChange="handleSelectChange"
       >
         <div class="header-operate" slot="operation">
-          <div class="header-operate-right">
+          <div class="header-operate-left">
             <el-button
+              :disabled="!tableSelections.length"
               class="jui-button--default"
               @click="handleBatchDeleteClick"
               >批量删除</el-button
             >
-            <el-button type="primary" @click="handleBatchConfigureClick">
+          </div>
+          <div class="header-operate-right">
+            <el-button
+              :disabled="!tableSelections.length"
+              type="primary"
+              @click="handleBatchConfigureClick"
+            >
               批量配置
             </el-button>
 
@@ -58,6 +66,7 @@
 </template>
 
 <script>
+import API from '@/api/api'
 import { crud } from '@/mixins'
 import { formAppAuthList } from '@/configuration/form'
 import { tableAppAuthList } from '@/configuration/table'
@@ -71,6 +80,7 @@ export default {
   data() {
     return {
       options: { title: '' },
+      tableSelections: [],
       formOption: formAppAuthList,
       tableConfiguration: tableAppAuthList(this),
       mixinSearchFormConfig: {
@@ -88,27 +98,99 @@ export default {
 
   methods: {
     open(options) {
-      console.log(options, 'koko')
       this.options = options
-      this.$refs.baseDialog.open()
       this.mixinRetrieveTableData()
+      this.$refs.baseDialog.open()
     },
 
-    change() {},
+    close() {
+      this.mixinHandleReset(false)
+      this.$refs.baseDialog.close()
+    },
 
-    addApiAuthorization() {},
+    change(visible) {
+      !visible && this.close()
+      this.$emit('on-close', visible)
+    },
 
-    handleBatchDeleteClick() {},
-    handleBatchConfigureClick() {},
+    handleAddApiAuthorization() {},
+
+    handleSelectChange(selection) {
+      this.tableSelections = selection
+    },
+
+    // 按钮点击-批量删除API
+    handleBatchDeleteClick() {
+      const { id: appId } = this.options.row
+      const params = {
+        appId,
+        authList: this.tableSelections.map(({ authId }) => authId)
+      }
+      this.$confirm('请确认是否删除批量选中的所有API？', '删除提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.deleteApi(params)
+        })
+        .catch(() => {})
+    },
+
+    // 按钮点击-单个删除API
+    handleDeleteClick({ row }) {
+      const { id: appId } = this.options.row
+      const params = { appId, authList: [row.authId] }
+      this.$confirm(
+        '删除该API后，应用则不能对该API进行调用，请确认是否删除？',
+        '删除提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          this.deleteApi(params)
+        })
+        .catch(() => {})
+    },
+
+    // 删除API
+    deleteApi(params) {
+      API.deleteAuthApi(params).then(({ success, data }) => {
+        if (success && data) {
+          this.$notify.success({
+            title: '操作结果',
+            message: `删除成功！`,
+            duration: 1500
+          })
+          this.tableSelections = []
+          this.mixinRetrieveTableData()
+        }
+      })
+    },
+
+    // 按钮点击-批量配置API
+    handleBatchConfigureClick() {
+      const apiSourceArr = this.tableSelections.map(
+        ({ apiInterfaceSource }) => apiInterfaceSource
+      )
+      console.log(apiSourceArr, 'jjii')
+    },
+
+    // 按钮点击-新增授权API
     handleAddAuthorizeAppClick() {
       const { row } = this.options
       this.$refs.authorizeApi.open({ row, title: '新增授权API', opType: 'add' })
     },
 
-    closeAuthorizeCallback() {},
-
+    // 按钮点击-配置
     handleConfigureClick() {},
+
     handleDetailClick() {},
+
+    closeAuthorizeCallback() {},
 
     // 拦截-表格请求接口参数拦截
     interceptorsRequestRetrieve(params) {
@@ -131,12 +213,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/scss/button';
+
 .app-auth-list {
   .header-operate {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
+    @include flex(space-between);
     padding-bottom: 20px;
   }
 

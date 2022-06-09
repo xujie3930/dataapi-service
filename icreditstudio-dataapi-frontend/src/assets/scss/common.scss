@@ -113,6 +113,14 @@
     .el-button--text {
       color: #1890ff;
     }
+
+    .el-button.is-disabled,
+    .el-button.is-disabled:focus,
+    .el-button.is-disabled:hover {
+      color: #c0c4cc;
+      cursor: not-allowed;
+      background-image: none;
+    }
   }
 }
 
@@ -151,9 +159,9 @@
     padding: 9px 15px;
   }
 
-  .el-button--primary {
-    color: #fff;
-    background-color: #1890ff;
-    border-color: #1890ff;
-  }
+  // .el-button--primary {
+  //   color: #fff;
+  //   background-color: #1890ff;
+  //   border-color: #1890ff;
+  // }
 }

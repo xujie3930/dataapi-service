@@ -82,10 +82,11 @@ export default that => ({
       operationList: [
         {
           func: that.handleConfigureClick,
-          label: '配置'
+          label: '配置',
+          disabled: ({ row: { apiInterfaceSource } }) => !!apiInterfaceSource
         },
         {
-          func: that.handleDetailClick,
+          func: that.handleDeleteClick,
           label: '删除'
         }
       ]

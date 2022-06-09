@@ -19,6 +19,12 @@
   border: 1px solid #1890ff;
 }
 
+.jui-button--default.is-disabled {
+  color: #a0cfff;
+  background-color: #fff;
+  border-color: #a0cfff;
+}
+
 .jui-button--priamry {
   @extend .jui-button;
   color: #fff;
