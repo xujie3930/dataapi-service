@@ -78,13 +78,13 @@
 
     <select id="getListByAppId" resultType="com.jinninghui.datasphere.icreditstudio.dataapi.web.result.AuthListResult" parameterType="com.jinninghui.datasphere.icreditstudio.dataapi.web.request.AuthListRequest">
         SELECT api.name as apiName, api.path apiPath, api.id apiId, iac.period_begin authPeriodBegin,
-        iac.period_end authPeroidEnd, iac.allow_call authAllowCall, ia.app_id appId, iac.id authId, api.interface_source apiInterfaceSource
+        iac.period_end authPeroidEnd, iac.allow_call authAllowCall, ia.app_id appId, ia.id authId, api.interface_source apiInterfaceSource
         FROM icredit_auth ia
         inner join icredit_auth_config iac ON ia.auth_config_id=iac.id
         inner JOIN icredit_api_base api ON ia.api_id=api.id
         <where> 1=1 AND ia.del_flag=0 and iac.del_flag=0 and api.del_flag=0 AND ia.app_id=#{appId}
-            <if test="apiName != null"> AND INSTR(api.name , #{apiName})>0 </if>
-            <if test="apiPath != null"> AND INSTR(api.path , #{apiPath})>0 </if>
+            <if test="apiName != null and apiName != ''"> AND INSTR(api.name , #{apiName})>0 </if>
+            <if test="apiPath != null and apiPath != ''"> AND INSTR(api.path , #{apiPath})>0 </if>
             <if test="periodBegin != null"> AND iac.period_begin &gt;= #{periodBegin} </if>
             <if test="periodEnd != null"> AND iac.period_end &lt;= #{periodEnd} </if>
             <if test="durationType != null">
@@ -102,8 +102,8 @@
         inner join icredit_auth_config iac ON ia.auth_config_id=iac.id
         inner JOIN icredit_api_base api ON ia.api_id=api.id
         <where> 1=1 AND ia.del_flag=0 and iac.del_flag=0 and api.del_flag=0 AND ia.app_id=#{appId}
-            <if test="apiName != null"> AND INSTR(api.name , #{apiName})>0 </if>
-            <if test="apiPath != null"> AND INSTR(api.path , #{apiPath})>0 </if>
+            <if test="apiName != null and apiName != ''"> AND INSTR(api.name , #{apiName})>0 </if>
+            <if test="apiPath != null and apiPath != ''"> AND INSTR(api.path , #{apiPath})>0 </if>
             <if test="periodBegin != null"> AND iac.period_begin &gt;= #{periodBegin} </if>
             <if test="periodEnd != null"> AND iac.period_end &lt;= #{periodEnd} </if>
             <if test="durationType != null">
