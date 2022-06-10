@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -32,7 +33,7 @@ public interface IcreditWorkFlowMapper extends BaseMapper<IcreditWorkFlowEntity>
 
     List<WorkFlowIdAndNameResult> getWorkFlowList();
 
-    List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds);
+    List<ApiInfoDTO> findApiInfoByApiIds(Map<String, Object> paramsMap);
 
     void renameById(@Param("name") String name, @Param("id") String id);
 

@@ -36,7 +36,7 @@ public class IcreditAuthController {
 
     @PostMapping("/save")
     BusinessResult<Boolean> saveDef(@RequestHeader(value = "userId", defaultValue = "910626036754939904") String userId, @RequestBody AuthSaveRequest request) {
-        return authService.saveDef(userId, request);
+        return authService.saveDefV2(userId, request);
     }
 
     @PostMapping("/config")

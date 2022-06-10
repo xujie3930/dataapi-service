@@ -22,4 +22,6 @@ public interface IcreditAuthConfigService extends IService<IcreditAuthConfigEnti
      * @desc
      **/
     int deleteByIds(Collection<String> ids);
+
+    int updateByIds(IcreditAuthConfigEntity entity, Collection<String> ids);
 }

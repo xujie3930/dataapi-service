@@ -130,7 +130,7 @@ public class IcreditAppServiceImpl extends ServiceImpl<IcreditAppMapper, Icredit
             for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
                 apiIds.add(icreditAuthEntity.getApiId());
             }
-            List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);
+            List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds, null);
             StringBuffer apiInfoStr = new StringBuffer();
             int len = apiInfoList.size();
             for (int i = 0;i < len;i++) {

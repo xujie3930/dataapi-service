@@ -6,5 +6,6 @@ import lombok.Data;
 public class AuthInfoRequest {
 
     private String appId;
+    private Integer publishStatus;
 
 }
