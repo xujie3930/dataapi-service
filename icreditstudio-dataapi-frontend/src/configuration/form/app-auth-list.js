@@ -56,6 +56,6 @@ export default [
     inline: true,
     isSearch: true,
     format: 'yyyy-MM-dd HH:mm',
-    valueFormat: 'yyyy-MM-dd HH:mm'
+    valueFormat: 'timestamp'
   }
 ]
