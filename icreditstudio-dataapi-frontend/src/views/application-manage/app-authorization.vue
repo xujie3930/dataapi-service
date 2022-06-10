@@ -5,7 +5,6 @@
 
 <template>
   <Dialog
-    v-if="isShowDialog"
     ref="baseDialog"
     width="735px"
     footer-placement="center"
@@ -22,37 +21,34 @@
       :model="authorizeForm"
       :rules="rules"
     >
-      <el-form-item>
-        <div slot="label" class="icredit-form--title">选择授权API</div>
-      </el-form-item>
+      <template v-if="options.opType === 'add'">
+        <el-form-item>
+          <div slot="label" class="icredit-form--title">选择授权API</div>
+        </el-form-item>
 
-      <!-- <el-form-item label="应用名称">
-        <span>{{ authorizeForm.name }}</span>
-      </el-form-item> -->
-
-      <el-form-item label="选择API" prop="apiId">
-        <el-cascader
-          ref="cascader"
-          clearable
-          filterable
-          style="width: 500px"
-          placeholder="请选择API"
-          :collapse-tags="true"
-          :options="apiOptions"
-          :props="cascaderProps"
-          v-model="authorizeForm.apiId"
-          @change="handleCascaderChange"
-        ></el-cascader>
-        <!-- <JTransferTree
+        <el-form-item label="选择API" prop="apiId">
+          <el-cascader
+            ref="cascader"
+            clearable
+            filterable
+            style="width: 500px"
+            placeholder="请选择API"
+            :collapse-tags="true"
+            :options="apiOptions"
+            :props="cascaderProps"
+            v-model="authorizeForm.apiId"
+          ></el-cascader>
+          <!-- <JTransferTree
           ref="transferTree"
           :props="{ key: 'id', label: 'name' }"
           :left-tree-data="leftTreeData"
           :right-tree-data="rightTreeData"
           @transfer-data="transferDataCallback"
         /> -->
-      </el-form-item>
+        </el-form-item>
+      </template>
 
-      <template v-if="!!authorizeForm.apiId.length">
+      <template v-if="isShowAuthPeriodConfig">
         <el-form-item>
           <div slot="label" class="icredit-form--title">设置授权时间</div>
         </el-form-item>
@@ -122,18 +118,10 @@ export default {
       rightTreeData: [],
 
       timerId: null,
-      oldApiId: [],
       options: {},
-      cascaderProps: {
-        multiple: true,
-        // lazy: true,
-        // lazyLoad: this.lazyLoad,
-        label: 'name',
-        value: 'id'
-      },
+      cascaderProps: { multiple: true, label: 'name', value: 'id' },
       apiOptions: [],
       loading: false,
-      isShowDialog: false,
       veifyNameLoading: false,
       oldGroupName: '',
       authorizeForm: {
@@ -143,8 +131,8 @@ export default {
         apiId: [],
         appId: '',
         allowCall: '',
-        durationType: 0,
-        authPeriod: 0,
+        durationType: 1,
+        authPeriod: 1,
         validTime: []
       },
       rules: {
@@ -179,6 +167,14 @@ export default {
     }
   },
 
+  computed: {
+    isShowAuthPeriodConfig() {
+      const { opType } = this.options
+      const { apiId } = this.authorizeForm
+      return opType === 'add' ? !!apiId?.length : true
+    }
+  },
+
   methods: {
     open(options) {
       const { row } = options
@@ -187,7 +183,6 @@ export default {
       this.authorizeForm.appId = row?.id
       this.loading = true
       this.fetchApiAuthDetail(row?.id)
-      this.isShowDialog = true
       this.$nextTick(() => {
         this.$refs.baseDialog.open()
       })
@@ -206,48 +201,7 @@ export default {
     reset() {
       this.leftTreeData = []
       this.rightTreeData = []
-      this.isShowDialog = false
       this.$refs.authorizeForm.resetFields()
-    },
-
-    // 点击-新增或编辑API授权
-    addApiAuthorization() {
-      this.$refs?.authorizeForm.validate(valid => {
-        const { appId, allowCall, apiId, durationType, authPeriod, validTime } =
-          this.authorizeForm
-        const params = {
-          appId,
-          durationType,
-          apiId: apiId.map(item => item[2]),
-          allowCall: durationType ? -1 : allowCall,
-          periodBegin: validTime?.length && !authPeriod ? validTime[0] : -1,
-          periodEnd: validTime?.length && !authPeriod ? validTime[1] : -1
-        }
-
-        !valid
-          ? this.$refs.baseDialog.setButtonLoading(false)
-          : API.updateApiAuthorization(params)
-              .then(({ success, data }) => {
-                if ((success, data)) {
-                  this.$notify.success({
-                    title: '操作结果',
-                    message: '授权成功！',
-                    duration: 1500
-                  })
-                  this.$refs.baseDialog.setButtonLoading(false)
-                  this.close()
-                }
-              })
-              .catch(() => {
-                this.$refs.baseDialog.setButtonLoading(false)
-              })
-      })
-    },
-
-    // 切换-选在API
-    handleCascaderChange(value) {
-      console.log(value, 'ooo')
-      // value.length && (this.oldApiId = value)
     },
 
     transferDataCallback(data, targetTree) {
@@ -389,94 +343,89 @@ export default {
       })
     },
 
-    // 级联-懒加载
-    lazyLoad({ level, value, data }, resolve) {
-      level === 1
-        ? this.fetchApiGroupList(value, resolve, data)
-        : level === 2
-        ? this.fetchApiList(value, resolve, data)
-        : resolve([])
-    },
+    // 已经授权的API禁止勾选
+    setApiChildrenStatus(apiCascadeInfoStrList) {
+      const selectedAuthApis = []
 
-    // 获取-三级 API节点
-    fetchApiList(id, resolve, options) {
-      API.getApiInfoList({ apiGroupIds: [id] })
-        .then(({ success, data }) => {
-          if (success && data) {
-            const { children } = options
-            const curApiIds = children?.map(({ id }) => id) ?? []
-            const apiList = data
-              .filter(item => !curApiIds.includes(item.id))
-              .map(({ id, name }) => {
-                return {
-                  id,
-                  name,
-                  children: [],
-                  leaf: true
-                }
-              })
-            resolve(apiList)
-            // this.authorizeForm.apiId = this.oldApiId
-          }
+      //已经授权的API禁用
+      apiCascadeInfoStrList?.forEach(({ children: groups }) => {
+        groups?.forEach(({ children: apis }) => {
+          apis?.forEach(({ id }) => {
+            selectedAuthApis.push(id)
+          })
         })
-        .catch(() => resolve([]))
-    },
+      })
 
-    // 获取-二级 API分组节点
-    fetchApiGroupList(id, resolve, options) {
-      API.getGroupList({ workIds: [id] })
-        .then(({ success, data }) => {
-          if (success && data) {
-            const { children } = options
-            const curGroupIds = children?.map(({ id }) => id) ?? []
-            const apiGroupList = data
-              .filter(item => !curGroupIds.includes(item.id))
-              .map(({ id, name }) => {
-                return {
-                  id,
-                  name,
-                  children: [],
-                  leaf: false
-                }
-              })
-
-            resolve(apiGroupList)
-            // this.authorizeForm.apiId = this.oldApiId
-          }
-        })
-        .catch(() => resolve([]))
-    },
-
-    // 获取-一级 业务流程
-    fetchBusinessProcessList() {
-      const processIds = cloneDeep(this.apiOptions).map(({ id }) => id)
-
-      API.getBusinessPcoessList().then(({ success, data }) => {
-        if (success) {
-          const newApiOptions = data
-            .filter(item => !processIds.includes(item.id))
-            .map(({ id, name }) => {
-              return {
+      const setChildrenDisabled = arr => {
+        arr.forEach((item, index) => {
+          const { id, children, ...rest } = item
+          children?.length
+            ? setChildrenDisabled(children)
+            : arr.splice(index, 1, {
                 id,
-                name,
-                leaf: false
-              }
-            })
+                children,
+                ...rest,
+                disabled: selectedAuthApis.includes(id)
+              })
+        })
+      }
 
-          this.apiOptions = cloneDeep([...newApiOptions, ...this.apiOptions])
+      setChildrenDisabled(this.apiOptions)
+    },
+
+    // 点击-新增或编辑API授权
+    addApiAuthorization() {
+      const { opType, apiIds, row } = this.options
+      this.$refs?.authorizeForm.validate(valid => {
+        const { appId, allowCall, apiId, durationType, authPeriod, validTime } =
+          this.authorizeForm
+        const params = {
+          durationType,
+          appId: opType === 'add' ? appId : row.id,
+          apiId: opType === 'add' ? apiId.map(item => item[2]) : apiIds,
+          allowCall: durationType ? -1 : allowCall,
+          periodBegin: validTime?.length && !authPeriod ? validTime[0] : -1,
+          periodEnd: validTime?.length && !authPeriod ? validTime[1] : -1
         }
+
+        const method =
+          opType === 'add' ? 'updateApiAuthorization' : 'deployAuthApi'
+
+        !valid
+          ? this.$refs.baseDialog.setButtonLoading(false)
+          : API[method](params)
+              .then(({ success, data }) => {
+                if ((success, data)) {
+                  this.$notify.success({
+                    title: '操作结果',
+                    message:
+                      opType === 'add' ? '新增API授权成功！' : '授权配置成功！',
+                    duration: 2000
+                  })
+                  this.$refs.baseDialog.setButtonLoading(false)
+                  this.close()
+                }
+              })
+              .catch(() => {
+                this.$refs.baseDialog.setButtonLoading(false)
+              })
       })
     },
 
     // 获取-API授权详情
     fetchApiAuthDetail(appId) {
+      const { opType } = this.options
       this.authorizeForm.validTime = []
       this.authorizeForm.allowCall = undefined
 
-      API.getAppAuthDetail({ appId })
+      API.getAppAuthDetail({ appId, publishStatus: 2 })
         .then(({ success, data }) => {
           if (success && data) {
-            const { noApiCascadeInfoStrList, apiCascadeInfoStrList } = data
+            const {
+              noApiCascadeInfoStrList,
+              apiCascadeInfoStrList,
+              authResult
+            } = data
 
             const {
               allowCall,
@@ -484,28 +433,35 @@ export default {
               callCountType,
               periodBegin,
               periodEnd
-            } = data.authResult ?? {}
+            } = authResult ?? { authEffectiveTime: 1, callCountType: 1 }
 
-            // 级联回显
-            this.apiOptions = noApiCascadeInfoStrList ?? []
-            this.authorizeForm.apiId = []
-            this.oldApiId = []
+            if (opType === 'add') {
+              // 级联回显
+              this.apiOptions = noApiCascadeInfoStrList ?? []
+              this.authorizeForm.apiId = []
 
-            this.leftTreeData = []
-            this.leftTreeData = noApiCascadeInfoStrList
+              this.leftTreeData = []
+              this.leftTreeData = noApiCascadeInfoStrList
+              // 已经授权的API
+              // apiCascadeInfoStrList?.forEach(({ children: groups }) => {
+              //   groups?.forEach(({ children: apis }) => {
+              //     apis?.forEach(({ id }) => this.apiCascadeInfoStrList.push(id))
+              //   })
+              // })
 
-            apiCascadeInfoStrList?.forEach(({ id: pid, children: groups }) => {
-              groups?.forEach(({ id: gid, children: apis }) => {
-                apis?.forEach(({ id }) =>
-                  this.authorizeForm.apiId.push([pid, gid, id])
-                )
-              })
-            })
+              // 禁用勾选已授权的API
+              this.setApiChildrenStatus(
+                apiCascadeInfoStrList,
+                noApiCascadeInfoStrList
+              )
+            }
 
+            // 值回显处理
             this.authorizeForm.allowCall = allowCall < 0 ? undefined : allowCall
-            this.authorizeForm.durationType = callCountType
-            this.authorizeForm.authPeriod = authEffectiveTime
-            this.oldApiId = this.authorizeForm.apiId
+            this.authorizeForm.durationType =
+              callCountType < 0 ? 1 : callCountType
+            this.authorizeForm.authPeriod =
+              authEffectiveTime < 0 ? 1 : authEffectiveTime
 
             if (periodBegin > -1 && periodEnd > -1) {
               this.authorizeForm.validTime = [periodBegin, periodEnd]
@@ -514,7 +470,6 @@ export default {
         })
         .finally(() => {
           this.loading = false
-          // this.fetchBusinessProcessList()
         })
     }
   }
