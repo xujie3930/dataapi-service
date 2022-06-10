@@ -757,6 +757,25 @@ export default {
       }
     },
 
+    // 版本覆盖提示
+    judgeOverrideToast(param, saveType) {
+      this.$confirm(
+        '请确认是否生成新的版本？如需生成新的版本请选择“是”，如需保存修改内容到当前版本请选择“否”',
+        '提示',
+        {
+          confirmButtonText: '是',
+          cancelButtonText: '否',
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          this.saveApiForm({ ...param, override: 0 }, saveType)
+        })
+        .catch(() => {
+          this.saveApiForm({ ...param, override: 1 }, saveType)
+        })
+    },
+
     handleJumpBackClick() {
       this.isShowCascader = false
       this.$emit('on-jump', this.opType)
@@ -772,10 +791,6 @@ export default {
       const { opType } = this.options
       const { datasourceId } = this.form.apiGenerateSaveRequest
 
-      const messageMapping = {
-        0: { type: '保存', loading: 'isSaveBtnLoading' },
-        1: { type: '发布', loading: 'isPublishBtnLoading' }
-      }
       const {
         registerRequestParamSaveRequestList: req,
         registerResponseParamSaveRequestList: res
@@ -811,44 +826,51 @@ export default {
           }
 
           // 内容有修改的前提下是否需要覆盖旧版本的弹窗提示
-          // if(opType === 'edit' && saveType === 1) {
-
-          // }
-
-          this[messageMapping[saveType].loading] = true
-
-          API[opType === 'add' ? 'addApiInfo' : 'editApiInfo'](params)
-            .then(({ success, data }) => {
-              if (success) {
-                const {
-                  id,
-                  apiHiId,
-                  apiGenerateSaveRequest: gen,
-                  apiParamSaveRequestList: param
-                } = data
-
-                this.$notify.success({
-                  title: '操作结果',
-                  message: `${messageMapping[saveType].type}成功！`,
-                  duration: 2000
-                })
-
-                this.form.id = id
-                this.form.apiHiId = apiHiId
-                this.form.apiGenerateSaveRequest = gen
-                this.form.apiParamSaveRequestList = param
-                this.oldTableData = param
-
-                this.$emit('on-save', saveType)
-              }
-            })
-            .finally(() => {
-              this.isSaveBtnLoading = false
-              this.isTestBtnLoading = false
-              this.isPublishBtnLoading = false
-            })
+          opType === 'edit'
+            ? this.judgeOverrideToast(params, saveType)
+            : this.saveApiForm(params, saveType)
         }
       })
+    },
+
+    saveApiForm(params, saveType) {
+      const { opType } = this.options
+      const messageMapping = {
+        0: { type: '保存', loading: 'isSaveBtnLoading' },
+        1: { type: '发布', loading: 'isPublishBtnLoading' }
+      }
+
+      this[messageMapping[saveType].loading] = true
+      API[opType === 'add' ? 'addApiInfo' : 'editApiInfo'](params)
+        .then(({ success, data }) => {
+          if (success) {
+            const {
+              id,
+              apiHiId,
+              apiGenerateSaveRequest: gen,
+              apiParamSaveRequestList: param
+            } = data
+
+            this.$notify.success({
+              title: '操作结果',
+              message: `${messageMapping[saveType].type}成功！`,
+              duration: 2000
+            })
+
+            this.form.id = id
+            this.form.apiHiId = apiHiId
+            this.form.apiGenerateSaveRequest = gen
+            this.form.apiParamSaveRequestList = param
+            this.oldTableData = param
+
+            this.$emit('on-save', saveType)
+          }
+        })
+        .finally(() => {
+          this.isSaveBtnLoading = false
+          this.isTestBtnLoading = false
+          this.isPublishBtnLoading = false
+        })
     },
 
     // 切换-是否设置为请求参数
