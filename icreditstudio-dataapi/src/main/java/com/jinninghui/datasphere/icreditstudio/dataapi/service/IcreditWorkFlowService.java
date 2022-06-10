@@ -38,7 +38,7 @@ public interface IcreditWorkFlowService extends IService<IcreditWorkFlowEntity> 
 
     BusinessResult<List<WorkFlowIdAndNameResult>> getWorkFlowList();
 
-    List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds);
+    List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds, Integer publishStatus);
 
     BusinessResult<WorkFlowDelResult> delById(WorkFlowDelRequest request);
 

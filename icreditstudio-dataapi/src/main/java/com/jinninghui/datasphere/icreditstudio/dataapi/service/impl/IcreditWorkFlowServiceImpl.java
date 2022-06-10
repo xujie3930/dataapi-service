@@ -199,8 +199,11 @@ public class IcreditWorkFlowServiceImpl extends ServiceImpl<IcreditWorkFlowMappe
     }
 
     @Override
-    public List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds) {
-        return workFlowMapper.findApiInfoByApiIds(apiIds);
+    public List<ApiInfoDTO> findApiInfoByApiIds(List<String> apiIds, Integer publishStatus) {
+        Map<String, Object> paramsMap = new HashMap<>(4);
+        paramsMap.put("list", apiIds);
+        paramsMap.put("publishStatus", publishStatus);
+        return workFlowMapper.findApiInfoByApiIds(paramsMap);
     }
 
     @Override

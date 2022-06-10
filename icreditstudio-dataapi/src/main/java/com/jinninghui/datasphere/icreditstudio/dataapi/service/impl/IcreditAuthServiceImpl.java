@@ -196,6 +196,55 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     }
 
     @Override
+    @Transactional
+    public BusinessResult<Boolean> saveDefV2(String userId, AuthSaveRequest request) {
+        if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getDurationType()) && request.getAllowCall() < 0){
+            ResourceCodeBean.ResourceCode rc20000036 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036;
+            return BusinessResult.fail(rc20000036.getCode(), rc20000036.getMessage());
+        }
+        if (CollectionUtils.isEmpty(request.getApiId())){
+            ResourceCodeBean.ResourceCode rc20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
+            return BusinessResult.fail(rc20000009.getCode(), rc20000009.getMessage());
+        }
+        //同时保存授权信息到redis
+        IcreditAppEntity appEntity = appService.getById(request.getAppId());
+        if(null==appEntity){
+            ResourceCodeBean.ResourceCode rc20000010 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000010;
+            return BusinessResult.fail(rc20000010.getCode(), rc20000010.getMessage());
+        }
+        IcreditAuthConfigEntity authConfigEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
+        /*if(!authConfigService.save(authConfigEntity)){
+            ResourceCodeBean.ResourceCode rc60000003 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_60000003;
+            return BusinessResult.fail(rc60000003.getCode(), rc60000003.getMessage());
+        }*/
+
+        //保存auth信息
+        List<IcreditAuthEntity> saveDb = new ArrayList<>();
+        Map<String, String> saveRedis = new HashMap<>();
+        for (String apiId : request.getApiId()) {
+            authConfigEntity.setId(null);
+            authConfigService.save(authConfigEntity);
+            IcreditAuthEntity authEntity = new IcreditAuthEntity();
+            authEntity.setAppId(request.getAppId());
+            authEntity.setApiId(apiId);
+            authEntity.setAuthConfigId(authConfigEntity.getId());
+
+            String redisKey = String.valueOf(new StringBuilder(apiId).append(appEntity.getGenerateId()));
+            RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), 0);
+
+            saveDb.add(authEntity);
+            saveRedis.put(redisKey, JSON.toJSONString(appAuthInfo));
+        }
+
+        if(!saveDb.isEmpty() && authMapper.batchInsert(saveDb)>0){
+            saveRedis.entrySet().stream().forEach(next->{
+                redisTemplate.opsForValue().set(next.getKey(), next.getValue());
+            });
+        }
+        return BusinessResult.success(true);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request) {
         if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getDurationType()) && request.getAllowCall() < 0){
@@ -251,13 +300,52 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             ResourceCodeBean.ResourceCode rc20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
             return BusinessResult.fail(rc20000009.getCode(), rc20000009.getMessage());
         }
+        if(AuthEffectiveTimeEnum.SORT_TIME.getDurationType().equals(request.getDurationType()) && request.getAllowCall() < 0){
+            ResourceCodeBean.ResourceCode rc20000036 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000036;
+            return BusinessResult.fail(rc20000036.getCode(), rc20000036.getMessage());
+        }
+        if (CollectionUtils.isEmpty(request.getApiId())){
+            ResourceCodeBean.ResourceCode rc20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
+            return BusinessResult.fail(rc20000009.getCode(), rc20000009.getMessage());
+        }
         //查询API是否全部为内部API
         Set<String> apiId = new HashSet<>(request.getApiId());
         if(apiId.size()!=apiBaseMapper.queryInnerApiCount(apiId).intValue()){
             ResourceCodeBean.ResourceCode rc20000058 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000058;
             return BusinessResult.fail(rc20000058.getCode(), rc20000058.getMessage());
         }
-        return this.saveDef(userId, request);
+
+        IcreditAuthConfigEntity authConfigEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
+        IcreditAppEntity appEntity = appService.getById(request.getAppId());
+        List<IcreditAuthEntity> authList = authMapper.findByAppId(request.getAppId());
+
+        Map<String, String> updateRedisMap = new HashMap<>();
+        Set<String> updateDbSet = new HashSet<>();
+        for (IcreditAuthEntity authEntity : authList) {
+            if(request.getApiId().contains(authEntity.getApiId())) {
+                String redisKey = String.valueOf(new StringBuilder(authEntity.getApiId()).append(appEntity.getGenerateId()));
+                Object appAuthAppObject = redisTemplate.opsForValue().get(redisKey);
+                RedisAppAuthInfo appAuthInfo = null;
+                if(Objects.isNull(appAuthAppObject)){
+                    appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), 0);
+                }else{
+                    appAuthInfo = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
+                    appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), appAuthInfo.getCalled());
+                }
+                updateDbSet.add(authEntity.getAuthConfigId());
+                updateRedisMap.put(redisKey, JSON.toJSONString(appAuthInfo));
+            }
+        }
+        //保存DB信息
+        if(!updateDbSet.isEmpty() && authConfigService.updateByIds(authConfigEntity, updateDbSet)>0){
+            //保存redis信息
+            updateRedisMap.entrySet().stream().forEach(next->{
+                redisTemplate.opsForValue().set(next.getKey(), next.getValue());
+            });
+        }
+
+
+        return BusinessResult.success(true);
     }
 
     @Override
@@ -270,7 +358,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
         List<IcreditAuthEntity> authEntityList = authService.findByAppId(request.getAppId());
         AuthInfoResult authInfoResult = new AuthInfoResult();
-        List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null);//所有业务流程、api分组、api
+        List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null, request.getPublishStatus());//所有业务流程、api分组、api
         if(CollectionUtils.isEmpty(authEntityList)){//新增授权
             List<ApiCascadeInfoResult> notSelectedApiCascadeInfoList = handleApiInfo(allApiInfoList);
             authInfoResult.setNoApiCascadeInfoStrList(notSelectedApiCascadeInfoList);
@@ -285,7 +373,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
             apiIds.add(icreditAuthEntity.getApiId());
         }
-        List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds);//已授权的业务流程、api分组、api
+        List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds, request.getPublishStatus());//已授权的业务流程、api分组、api
 
 //        //移除已选择的api
 //        List<ApiInfoDTO> allNoSelectedApiInfoList = new ArrayList();

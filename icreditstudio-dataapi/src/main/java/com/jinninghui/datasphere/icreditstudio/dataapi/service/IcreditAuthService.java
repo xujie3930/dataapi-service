@@ -21,6 +21,13 @@ import java.util.List;
  */
 public interface IcreditAuthService extends IService<IcreditAuthEntity> {
 
+    /**
+     * 改为：前端只传新增的api列表（已新增的置灰不可删除）
+     * @author  maoc
+     * @create  2022/6/10 11:21
+     * @desc
+     **/
+    BusinessResult<Boolean> saveDefV2(String userId, AuthSaveRequest request);
     BusinessResult<Boolean> saveDef(String userId, AuthSaveRequest request);
     BusinessResult<Boolean> configDef(String userId, AuthSaveRequest request);
     /**

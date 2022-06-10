@@ -1,8 +1,11 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
+import com.jinninghui.datasphere.icreditstudio.dataapi.dto.ICreditAuthConfigUpdateDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditAuthConfigEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -16,4 +19,6 @@ import java.util.Map;
 public interface IcreditAuthConfigMapper extends BaseMapper<IcreditAuthConfigEntity> {
 
     int deletes(final Map<String, Object> paramsMap);
+
+    int updateByIds(ICreditAuthConfigUpdateDTO entity);
 }
