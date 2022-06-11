@@ -457,11 +457,14 @@ export default {
             }
 
             // 值回显处理
+            console.log(this.options, 'olkok')
             this.authorizeForm.allowCall = allowCall < 0 ? undefined : allowCall
             this.authorizeForm.durationType =
-              callCountType < 0 ? 1 : callCountType
+              opType === 'batchDeploy' || callCountType < 0 ? 1 : callCountType
             this.authorizeForm.authPeriod =
-              authEffectiveTime < 0 ? 1 : authEffectiveTime
+              opType === 'batchDeploy' || authEffectiveTime < 0
+                ? 1
+                : authEffectiveTime
 
             if (periodBegin > -1 && periodEnd > -1) {
               this.authorizeForm.validTime = [periodBegin, periodEnd]

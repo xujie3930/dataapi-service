@@ -567,6 +567,8 @@ export default {
         lazy: true,
         lazyLoad: this.cascaderLazyLoader
       },
+      isDataChange: false,
+      oldForm: {},
       form: {
         id: '',
         apiHiId: '',
@@ -757,31 +759,186 @@ export default {
       }
     },
 
-    handleJumpBackClick() {
-      this.isShowCascader = false
-      this.$emit('on-jump', this.opType)
+    // 判断是否版本覆盖提示
+    judgeOverrideToast(param, saveType) {
+      this.judeSameVersionData()
+      this.isDataChange
+        ? this.$confirm(
+            '请确认是否生成新的版本？如需生成新的版本请选择“是”，如需保存修改内容到当前版本请选择“否”',
+            '提示',
+            {
+              confirmButtonText: '是',
+              cancelButtonText: '否',
+              type: 'warning',
+              showClose: false,
+              closeOnClickModal: false,
+              closeOnPressEscape: false
+            }
+          )
+            .then(() => {
+              this.saveApiForm({ ...param, override: 0 }, saveType)
+            })
+            .catch(() => {
+              this.saveApiForm({ ...param, override: 1 }, saveType)
+            })
+        : this.saveApiForm({ ...param, override: 0 }, saveType)
     },
 
-    // 点击-打开SQL编写提示弹窗
-    handleSqlTipsClick() {
-      this.$refs?.tipsDialog.$refs.baseDialog.open()
+    // 判断新旧两份数据是有变化
+    judeSameVersionData() {
+      const {
+        name,
+        desc,
+        reqHost,
+        reqPath,
+        apiGenerateSaveRequest,
+        apiParamSaveRequestList,
+        registerRequestParamSaveRequestList: reqList,
+        registerResponseParamSaveRequestList: resList
+      } = this.form
+
+      const {
+        paramList,
+        name: oldName,
+        desc: oldDesc,
+        reqHost: oldReqHost,
+        reqPath: oldReqPath,
+        registerRequestParamSaveRequestList: oldReqList,
+        registerResponseParamSaveRequestList: oldResList,
+        generateApi: oldApiSaveRequest
+      } = this.oldForm
+
+      const { databaseType, sql, datasourceId, tableName } =
+        apiGenerateSaveRequest ?? {}
+
+      const {
+        databaseType: oldDatabaseType,
+        sql: oldSql,
+        datasourceId: oldDatasourceId,
+        tableName: oldTableName
+      } = oldApiSaveRequest ?? {
+        datasourceId: '',
+        tableName: '',
+        databaseType: 1,
+        sql: ''
+      }
+
+      // 旧数据表单
+      const oldForm = {
+        name: oldName,
+        desc: oldDesc,
+        sql: oldSql,
+        reqHost: oldReqHost,
+        reqPath: oldReqPath,
+        datasourceId: oldDatasourceId,
+        databaseType: oldDatabaseType,
+        tableName: oldTableName,
+        apiParamSaveRequestList: paramList.map(
+          ({ isRequest, isResponse, required }) => ({
+            isRequest,
+            isResponse,
+            required
+          })
+        ),
+        registerRequestParamSaveRequestList: oldReqList,
+        registerResponseParamSaveRequestList: oldResList
+      }
+
+      // 新数据表单
+      const curForm = {
+        name,
+        desc,
+        sql: sql ?? '',
+        reqHost,
+        reqPath,
+        datasourceId: datasourceId ?? '',
+        databaseType: databaseType ?? 1,
+        tableName: tableName ?? '',
+        apiParamSaveRequestList: apiParamSaveRequestList.map(
+          ({ isRequest, isResponse, required }) => ({
+            isRequest,
+            isResponse,
+            required
+          })
+        ),
+        registerRequestParamSaveRequestList: reqList,
+        registerResponseParamSaveRequestList: resList
+      }
+
+      this.isDataChange = JSON.stringify(oldForm) !== JSON.stringify(curForm)
+      console.log(oldForm, curForm, this.isDataChange)
+    },
+
+    saveApiForm(params, saveType) {
+      const { opType } = this.options
+      const messageMapping = {
+        0: { type: '保存', loading: 'isSaveBtnLoading' },
+        1: { type: '发布', loading: 'isPublishBtnLoading' }
+      }
+
+      // 更新旧表单数据
+      const fieldArr = [
+        'name',
+        'desc',
+        'sql',
+        'reqHost',
+        'reqPath',
+        'datasourceId',
+        'databaseType',
+        'tableName',
+        'apiParamSaveRequestList',
+        'registerRequestParamSaveRequestList',
+        'registerResponseParamSaveRequestList'
+      ]
+
+      fieldArr.forEach(item => (this.oldForm[item] = cloneDeep(params[item])))
+
+      this[messageMapping[saveType].loading] = true
+      API[opType === 'add' ? 'addApiInfo' : 'editApiInfo'](params)
+        .then(({ success, data }) => {
+          if (success) {
+            const {
+              id,
+              apiHiId,
+              apiGenerateSaveRequest: gen,
+              apiParamSaveRequestList: param
+            } = data
+
+            this.$notify.success({
+              title: '操作结果',
+              message: `${messageMapping[saveType].type}成功！`,
+              duration: 2000
+            })
+
+            this.form.id = id
+            this.form.apiHiId = apiHiId
+            this.form.apiGenerateSaveRequest = gen
+            this.form.apiParamSaveRequestList = param
+            this.oldTableData = param
+
+            this.$emit('on-save', saveType)
+          }
+        })
+        .finally(() => {
+          this.isSaveBtnLoading = false
+          this.isTestBtnLoading = false
+          this.isPublishBtnLoading = false
+        })
     },
 
     // 点击-保存表单
     handleSaveFormClick(saveType) {
       const { opType } = this.options
-      const { datasourceId } = this.form.apiGenerateSaveRequest
+      const { datasourceId, model } = this.form.apiGenerateSaveRequest
 
-      const messageMapping = {
-        0: { type: '保存', loading: 'isSaveBtnLoading' },
-        1: { type: '发布', loading: 'isPublishBtnLoading' }
-      }
       const {
+        type,
         registerRequestParamSaveRequestList: req,
         registerResponseParamSaveRequestList: res
       } = cloneDeep(this.form)
 
-      if (opType === 'edit' && !datasourceId) {
+      //  API类型为数据源生成API以及API模式为表单生成
+      if (opType === 'edit' && type === 1 && !model && !datasourceId) {
         this.$notify.error({
           title: '接口数据异常',
           message: '数据源异常！',
@@ -811,44 +968,21 @@ export default {
           }
 
           // 内容有修改的前提下是否需要覆盖旧版本的弹窗提示
-          // if(opType === 'edit' && saveType === 1) {
-
-          // }
-
-          this[messageMapping[saveType].loading] = true
-
-          API[opType === 'add' ? 'addApiInfo' : 'editApiInfo'](params)
-            .then(({ success, data }) => {
-              if (success) {
-                const {
-                  id,
-                  apiHiId,
-                  apiGenerateSaveRequest: gen,
-                  apiParamSaveRequestList: param
-                } = data
-
-                this.$notify.success({
-                  title: '操作结果',
-                  message: `${messageMapping[saveType].type}成功！`,
-                  duration: 2000
-                })
-
-                this.form.id = id
-                this.form.apiHiId = apiHiId
-                this.form.apiGenerateSaveRequest = gen
-                this.form.apiParamSaveRequestList = param
-                this.oldTableData = param
-
-                this.$emit('on-save', saveType)
-              }
-            })
-            .finally(() => {
-              this.isSaveBtnLoading = false
-              this.isTestBtnLoading = false
-              this.isPublishBtnLoading = false
-            })
+          opType === 'edit'
+            ? this.judgeOverrideToast(params, saveType)
+            : this.saveApiForm(params, saveType)
         }
       })
+    },
+
+    handleJumpBackClick() {
+      this.isShowCascader = false
+      this.$emit('on-jump', this.opType)
+    },
+
+    // 点击-打开SQL编写提示弹窗
+    handleSqlTipsClick() {
+      this.$refs?.tipsDialog.$refs.baseDialog.open()
     },
 
     // 切换-是否设置为请求参数
@@ -991,16 +1125,21 @@ export default {
           if (success && data) {
             this[key] = data
 
-            if (opType === 'edit' && key === 'datasourceOptions') {
+            if (
+              opType === 'edit' &&
+              key === 'datasourceOptions' &&
+              this.form.type === 1
+            ) {
               const ids = data.map(item => item.id) ?? []
-              const { datasourceId } = this.form.apiGenerateSaveRequest
+              const { datasourceId, model } = this.form.apiGenerateSaveRequest
               if (!ids.includes(datasourceId)) {
                 this.form.apiGenerateSaveRequest.datasourceId = ''
-                this.$notify.error({
-                  title: '接口数据异常',
-                  message: '数据源异常！',
-                  duration: 1500
-                })
+                !model &&
+                  this.$notify.error({
+                    title: '接口数据异常',
+                    message: '数据源异常！',
+                    duration: 1500
+                  })
               }
             }
           }
@@ -1038,6 +1177,7 @@ export default {
             fieldArr.forEach(item => (this.form[item] = data[item]))
             this.form.path = apiPath
             this.form.apiGroupId = [workFlowId, apiGroupId]
+            this.oldForm = cloneDeep(data)
 
             // 数据源生成API
             if (type === 1) {
