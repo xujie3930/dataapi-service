@@ -113,7 +113,7 @@
             <if test="periodEnd != null"> AND iac.period_end &lt;= #{periodEnd} </if>
             <if test="durationType != null">
                 <if test="durationType==1"> AND iac.allow_call = -1 </if>
-                <if test="durationType==0"> AND iac.allow_call &gt; = 0 </if>
+                <if test="durationType==0"> AND iac.allow_call &gt;= 0 </if>
             </if>
         </where>
     </select>
