@@ -12,6 +12,7 @@ export default that => ({
   isBorder: true,
   isStripe: true,
   hasPage: true,
+  rowKey: 'apiId',
   group: [
     {
       type: 'selection',
