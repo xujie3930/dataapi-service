@@ -211,7 +211,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiMapper.selectById(param.getApiHiId());
         IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(apiBaseHiEntity.getApiBaseId());
         //待发布的编辑，版本号不变
-        if(ApiPublishStatusEnum.WAIT_PUBLISH.getCode().equals(apiBaseHiEntity.getPublishStatus())){
+        if(ApiPublishStatusEnum.WAIT_PUBLISH.getCode().equals(apiBaseHiEntity.getPublishStatus()) || ApiHisOverrideEnum.OVERRIDE.getCode().equals(param.getOverride())){
             param.setApiVersion(apiBaseHiEntity.getApiVersion());
             ApiSaveResult apiSaveResult;
             String apiId = apiBaseEntity.getId();

@@ -84,14 +84,14 @@ public class IcreditAuthController {
             ResourceCodeBean.ResourceCode resourceCode20000021 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000021;
             return BusinessResult.fail(resourceCode20000021.getCode(), resourceCode20000021.getMessage());
         }
-        if(null==request.getPeriodType() || request.getPeriodType().intValue()==2){
+        /*if(null==request.getPeriodType() || request.getPeriodType().intValue()==2){
             request.setPeriodBegin(null);
             request.setPeriodEnd(null);
         }
         if(null!=request.getPeriodType() && request.getPeriodType().intValue()==1 && (null==request.getPeriodBegin() || null==request.getPeriodEnd())){
             //短期
             return BusinessResult.fail("", "授权时间不正确");
-        }
+        }*/
         return BusinessResult.success(authService.authList(request));
     }
 
