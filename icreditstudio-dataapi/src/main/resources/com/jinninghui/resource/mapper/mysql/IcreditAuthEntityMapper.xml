@@ -98,7 +98,7 @@
                 <if test="periodType==2"> OR iac.period_end = -1 </if>
                 )
             </if>
-            <if test="periodType != null AND periodBegin == null">
+            <if test="periodType != null and periodBegin == null">
                 <if test="periodType==2"> AND iac.period_begin = -1 AND iac.period_end = -1 </if>
                 <if test="periodType==1"> AND iac.period_begin &gt; 0 AND iac.period_end &gt; 0 </if>
             </if>
@@ -127,7 +127,7 @@
                 <if test="periodType==2"> OR iac.period_end = -1 </if>
                 )
             </if>
-            <if test="periodType != null AND periodBegin == null">
+            <if test="periodType != null and periodBegin == null">
                 <if test="periodType==2"> AND iac.period_begin = -1 AND iac.period_end = -1 </if>
                 <if test="periodType==1"> AND iac.period_begin &gt; 0 AND iac.period_end &gt; 0 </if>
             </if>
