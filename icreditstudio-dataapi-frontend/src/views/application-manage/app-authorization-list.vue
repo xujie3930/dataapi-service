@@ -207,6 +207,14 @@ export default {
           }
         )
           .then(() => {
+            this.tableSelections
+              .filter(({ apiInterfaceSource }) => apiInterfaceSource)
+              .forEach(item =>
+                this.$refs?.crud.$refs?.table.$refs?.appAuthList.toggleRowSelection(
+                  item,
+                  false
+                )
+              )
             this.$refs.authorizeApi.open({
               row,
               apiIds: this.tableSelections
@@ -216,7 +224,9 @@ export default {
               opType: 'batchDeploy'
             })
           })
-          .catch(() => {})
+          .catch(err => {
+            console.log(err, 'err')
+          })
       } else {
         this.$refs.authorizeApi.open({
           row,
@@ -245,10 +255,7 @@ export default {
       this.$refs.authorizeApi.open({ row, title: '新增授权API', opType: 'add' })
     },
 
-    handleDetailClick() {},
-
     closeAuthorizeCallback() {
-      // this.$refs?.crud.$refs?.table.$refs?.appAuthList.clearSelection()
       this.mixinRetrieveTableData()
       this.tableSelections = []
     },
