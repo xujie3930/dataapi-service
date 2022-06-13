@@ -92,10 +92,10 @@
             <if test="apiPath != null and apiPath != ''"> AND INSTR(api.path , #{apiPath})>0 </if>
             <if test="periodBegin != null and periodEnd != null">
                 AND (iac.period_begin &gt;= #{periodBegin}
-                <if test="periodType==2"> OR iac.period_begin = -1 </if>
+                <if test="periodType == null or periodType==2"> OR iac.period_begin = -1 </if>
                 )
                 AND (iac.period_end &lt;= #{periodEnd}
-                <if test="periodType==2"> OR iac.period_end = -1 </if>
+                <if test="periodType == null or periodType==2"> OR iac.period_end = -1 </if>
                 )
             </if>
             <if test="periodType != null and periodBegin == null">
@@ -121,10 +121,10 @@
             <if test="apiPath != null and apiPath != ''"> AND INSTR(api.path , #{apiPath})>0 </if>
             <if test="periodBegin != null and periodEnd != null">
                 AND (iac.period_begin &gt;= #{periodBegin}
-                <if test="periodType==2"> OR iac.period_begin = -1 </if>
+                <if test="periodType == null or periodType==2"> OR iac.period_begin = -1 </if>
                 )
                 AND (iac.period_end &lt;= #{periodEnd}
-                <if test="periodType==2"> OR iac.period_end = -1 </if>
+                <if test="periodType == null or periodType==2"> OR iac.period_end = -1 </if>
                 )
             </if>
             <if test="periodType != null and periodBegin == null">
