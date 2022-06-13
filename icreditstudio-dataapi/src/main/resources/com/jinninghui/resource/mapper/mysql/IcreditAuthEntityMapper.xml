@@ -107,6 +107,7 @@
                 <if test="durationType==0"> AND iac.allow_call &gt;= 0 </if>
             </if>
         </where>
+        ORDER BY ia.id DESC
         <if test="pageNum gt 0 and pageSize gt 0"> LIMIT #{pageStart}, #{pageSize} </if>
 
     </select>
