@@ -457,7 +457,6 @@ export default {
             }
 
             // 值回显处理
-            console.log(this.options, 'olkok')
             this.authorizeForm.allowCall = allowCall < 0 ? undefined : allowCall
             this.authorizeForm.durationType =
               opType === 'batchDeploy' || callCountType < 0 ? 1 : callCountType

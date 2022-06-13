@@ -832,7 +832,7 @@ export default {
         reqPath: oldReqPath,
         datasourceId: oldDatasourceId,
         databaseType: oldDatabaseType,
-        tableName: oldTableName,
+        tableName: oldTableName ?? '',
         apiParamSaveRequestList: paramList.map(
           ({ isRequest, isResponse, required }) => ({
             isRequest,
