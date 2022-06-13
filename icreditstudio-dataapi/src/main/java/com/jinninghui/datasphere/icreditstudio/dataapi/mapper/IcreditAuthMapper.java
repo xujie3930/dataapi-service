@@ -22,7 +22,7 @@ public interface IcreditAuthMapper extends BaseMapper<IcreditAuthEntity> {
 
     List<IcreditAuthEntity> findByAppId(@Param("appId") String appId);
     List<IcreditAuthEntity> findByAppIds(@Param("appIds") Collection<String> appIds);
-    List<Map<String, Object>> findOuterByApiId(@Param("apiId") String appId);
+    List<Map<String, Object>> findOuterAuthList(final Map<String, Object> paramsMap);
 
     void removeByAppId(@Param("appId") String appId);
     void removeByApiId(@Param("apiId") String apiId);
@@ -46,5 +46,13 @@ public interface IcreditAuthMapper extends BaseMapper<IcreditAuthEntity> {
     int deletes(final Map<String, Object> paramsMap);
 
     List<Map<String, Object>> getAuthNumByConfigIds(@Param("configIds")Collection<String> configIds);
+
+    /**
+     * 根据api id批量更新config id
+     * @author  maoc
+     * @create  2022/6/11 18:34
+     * @desc
+     **/
+    int batchUpdateConfigIdByIds(@Param("param")Map<String, String> param);
 
 }
