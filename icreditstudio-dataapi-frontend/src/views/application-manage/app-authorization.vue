@@ -457,15 +457,25 @@ export default {
             }
 
             // 值回显处理
-            this.authorizeForm.allowCall = allowCall < 0 ? undefined : allowCall
+            const operateArr = ['batchDeploy', 'add']
+            this.authorizeForm.allowCall =
+              operateArr.includes(opType) || allowCall < 0
+                ? undefined
+                : allowCall
             this.authorizeForm.durationType =
-              opType === 'batchDeploy' || callCountType < 0 ? 1 : callCountType
+              operateArr.includes(opType) || callCountType < 0
+                ? 1
+                : callCountType
             this.authorizeForm.authPeriod =
-              opType === 'batchDeploy' || authEffectiveTime < 0
+              operateArr.includes(opType) || authEffectiveTime < 0
                 ? 1
                 : authEffectiveTime
 
-            if (periodBegin > -1 && periodEnd > -1) {
+            if (
+              periodBegin > 0 &&
+              periodEnd > 0 &&
+              !operateArr.includes(opType)
+            ) {
               this.authorizeForm.validTime = [periodBegin, periodEnd]
             }
           }
