@@ -414,11 +414,11 @@ export default {
 
     // 获取-API授权详情
     fetchApiAuthDetail(appId) {
-      const { opType } = this.options
+      const { opType, row } = this.options
       this.authorizeForm.validTime = []
       this.authorizeForm.allowCall = undefined
 
-      API.getAppAuthDetail({ appId, publishStatus: 2 })
+      API.getAppAuthDetail({ appId, apiId: row?.apiId, publishStatus: 2 })
         .then(({ success, data }) => {
           if (success && data) {
             const {
