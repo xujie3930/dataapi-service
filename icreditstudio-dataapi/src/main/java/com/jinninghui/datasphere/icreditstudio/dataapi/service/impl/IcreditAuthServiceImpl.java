@@ -349,6 +349,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     }
 
     @Override
+    @Transactional
     public BusinessResult<Boolean> configDef(String userId, AuthSaveRequest request) {
         if (CollectionUtils.isEmpty(request.getApiId())){
             ResourceCodeBean.ResourceCode rc20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
@@ -369,29 +370,67 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             return BusinessResult.fail(rc20000058.getCode(), rc20000058.getMessage());
         }
 
-        IcreditAuthConfigEntity authConfigEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
+        IcreditAuthConfigEntity configEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
         List<IcreditAuthEntity> authList = authMapper.findByAppId(request.getAppId());
+        if(null==authList || authList.isEmpty()){
+            ResourceCodeBean.ResourceCode rc20000009 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000009;
+            return BusinessResult.fail(rc20000009.getCode(), rc20000009.getMessage());
+        }
 
-        Map<String, String> updateRedisMap = new HashMap<>();
+        //额外补充逻辑：由于历史数据原因（多对一，多个授权公用一个配置。新版本改为一对一，一个授权对应一个配置），兼容历史数据
+        //判断：在配置时，如果关联的配置被多个授权引用，则新增配置。否则直接修改
+        //获取所有对应的configId
+        Set<String> configsIdSet = authList.stream().filter(e->request.getApiId().contains(e.getApiId())).map(IcreditAuthEntity::getAuthConfigId).collect(Collectors.toSet());
+        //判断authConfig是否还有其他引用
+        List<Map<String, Object>> authNumList = authMapper.getAuthNumByConfigIds(configsIdSet);
+        //获取没有被引用的config，并且删除
+        if(null!=authNumList && !authNumList.isEmpty()){
+            authNumList.stream().forEach(authNumMap -> {
+                final String authConfigId = (String) authNumMap.get("authConfigId");
+                final Long authNum = (Long) authNumMap.get("authNum");
+                if(authNum.intValue()<=1){
+                    //只被一个授权引用的配置，移除
+                    configsIdSet.remove(authConfigId);
+                }
+            });
+        }
+
+        Map<String, String> updateRedisMap = new HashMap<>(), updateAuthMap = new HashMap<>(8);
         Set<String> updateDbSet = new HashSet<>();
         for (IcreditAuthEntity authEntity : authList) {
             if(request.getApiId().contains(authEntity.getApiId())) {
                 String redisKey = String.valueOf(new StringBuilder(authEntity.getApiId()).append(appEntity.getGenerateId()));
                 Object appAuthAppObject = redisTemplate.opsForValue().get(redisKey);
-                RedisAppAuthInfo appAuthInfo = null;
-                if(Objects.isNull(appAuthAppObject)){
-                    appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), 0);
-                }else{
-                    appAuthInfo = JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class);
-                    appAuthInfo = new RedisAppAuthInfo(authConfigEntity.getPeriodBegin(), authConfigEntity.getPeriodEnd(), authConfigEntity.getAllowCall(), appAuthInfo.getCalled());
-                }
-                updateDbSet.add(authEntity.getAuthConfigId());
+                RedisAppAuthInfo appAuthInfo = new RedisAppAuthInfo(configEntity.getPeriodBegin(), configEntity.getPeriodEnd(), configEntity.getAllowCall(), Objects.isNull(appAuthAppObject)?0:JSON.parseObject(appAuthAppObject.toString(), RedisAppAuthInfo.class).getCalled());
+
                 updateRedisMap.put(redisKey, JSON.toJSONString(appAuthInfo));
+
+                if(configsIdSet.contains(authEntity.getAuthConfigId())){
+                    //此配置被多个授权引用
+                    IcreditAuthConfigEntity authConfigEntity = BeanCopyUtils.copyProperties(request, new IcreditAuthConfigEntity());
+                    authConfigService.save(authConfigEntity);
+                    updateAuthMap.put(authEntity.getId(), authConfigEntity.getId());
+                }else{
+                    updateDbSet.add(authEntity.getAuthConfigId());
+                }
+
+            }
+
+            if(updateRedisMap.size() == request.getApiId().size()){
+                break;
             }
         }
         //保存DB信息
-        if(!updateDbSet.isEmpty() && authConfigService.updateByIds(authConfigEntity, updateDbSet)>0){
+        if(!updateRedisMap.isEmpty()){
+            if(!updateDbSet.isEmpty() && authConfigService.updateByIds(configEntity, updateDbSet)<=0){
+                ResourceCodeBean.ResourceCode rc60000003 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_60000003;
+                throw new AppException(rc60000003.getCode(), rc60000003.getMessage());
+            }
+            if(!updateAuthMap.isEmpty() && authMapper.batchUpdateConfigIdByIds(updateAuthMap)<=0){
+                ResourceCodeBean.ResourceCode rc60000003 = ResourceCodeBean.ResourceCode.RESOURCE_CODE_60000003;
+                throw new AppException(rc60000003.getCode(), rc60000003.getMessage());
+            }
             //保存redis信息
             updateRedisMap.entrySet().stream().forEach(next->{
                 redisTemplate.opsForValue().set(next.getKey(), next.getValue());

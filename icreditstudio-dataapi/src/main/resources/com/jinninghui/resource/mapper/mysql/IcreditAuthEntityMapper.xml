@@ -109,8 +109,20 @@
         <where> 1=1 AND ia.del_flag=0 and iac.del_flag=0 and api.del_flag=0 AND ia.app_id=#{appId}
             <if test="apiName != null and apiName != ''"> AND INSTR(api.name , #{apiName})>0 </if>
             <if test="apiPath != null and apiPath != ''"> AND INSTR(api.path , #{apiPath})>0 </if>
-            <if test="periodBegin != null"> AND iac.period_begin &gt;= #{periodBegin} </if>
-            <if test="periodEnd != null"> AND iac.period_end &lt;= #{periodEnd} </if>
+            <if test="periodBegin != null or periodType==2">
+                AND (iac.period_begin &gt;= #{periodBegin}
+                    <if test="periodType==2">
+                        OR iac.period_begin = -1
+                    </if>
+                )
+            </if>
+            <if test="periodEnd != null or periodType==2">
+                AND (iac.period_end &lt;= #{periodEnd}
+                <if test="periodType==2">
+                    OR iac.period_end = -1
+                </if>
+                )
+            </if>
             <if test="durationType != null">
                 <if test="durationType==1"> AND iac.allow_call = -1 </if>
                 <if test="durationType==0"> AND iac.allow_call &gt;= 0 </if>
