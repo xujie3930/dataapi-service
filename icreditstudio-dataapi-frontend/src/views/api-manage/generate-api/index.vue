@@ -761,8 +761,9 @@ export default {
 
     // 判断是否版本覆盖提示
     judgeOverrideToast(param, saveType) {
+      const { publishStatus } = this.options
       this.judeSameVersionData()
-      this.isDataChange
+      this.isDataChange && publishStatus
         ? this.$confirm(
             '请确认是否生成新的版本？如需生成新的版本请选择“是”，如需保存修改内容到当前版本请选择“否”',
             '提示',
@@ -779,7 +780,7 @@ export default {
               this.saveApiForm(
                 { ...param, override: 0 },
                 saveType,
-                '保存成功，已生成新版本!',
+                '发布成功，已生成新版本!',
                 true
               )
             })
@@ -788,7 +789,7 @@ export default {
                 this.saveApiForm(
                   { ...param, override: 1 },
                   saveType,
-                  '保存成功，已覆盖当前版本内容！',
+                  '发布成功，已覆盖当前版本内容！',
                   true
                 )
             })
@@ -915,9 +916,10 @@ export default {
               apiParamSaveRequestList: param
             } = data
 
+            const msg = `${messageMapping[saveType].type}成功！`
             this.$notify.success({
               title: '操作结果',
-              message: message || `${messageMapping[saveType].type}成功！`,
+              message: message || msg,
               duration: 2500
             })
 
