@@ -418,7 +418,11 @@ export default {
       this.authorizeForm.validTime = []
       this.authorizeForm.allowCall = undefined
 
-      API.getAppAuthDetail({ appId, apiId: apiIds[0], publishStatus: 2 })
+      API.getAppAuthDetail({
+        appId,
+        apiId: opType === 'deploy' ? apiIds[0] : '',
+        publishStatus: 2
+      })
         .then(({ success, data }) => {
           if (success && data) {
             const {
