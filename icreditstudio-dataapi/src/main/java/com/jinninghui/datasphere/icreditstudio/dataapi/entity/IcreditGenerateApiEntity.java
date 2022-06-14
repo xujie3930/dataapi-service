@@ -43,6 +43,4 @@ public class IcreditGenerateApiEntity extends BaseEntity implements Serializable
     private Integer apiVersion;
 
     private Integer databaseType;
-
-    private String schema;
 }

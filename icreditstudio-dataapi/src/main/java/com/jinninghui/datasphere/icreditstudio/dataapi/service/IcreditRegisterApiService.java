@@ -3,6 +3,7 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.service;
 import com.jinninghui.datasphere.icreditstudio.dataapi.dto.RegisterApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditRegisterApiEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.TableNameListRequest;
 
 import java.util.LinkedList;
 import java.util.List;
