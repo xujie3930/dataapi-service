@@ -460,7 +460,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             if(StringUtils.isEmpty(request.getApiId())){
                 //单个配置查询时，不返回该列表
                 List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null, request.getPublishStatus());//所有业务流程、api分组、api
-                notSelectedApiCascadeInfoList = (!StringUtils.isEmpty(request.getApiId())?handleApiInfo(allApiInfoList):new ArrayList<>(0));
+                notSelectedApiCascadeInfoList = (StringUtils.isEmpty(request.getApiId())?handleApiInfo(allApiInfoList):new ArrayList<>(0));
             }
 
             authInfoResult.setNoApiCascadeInfoStrList(notSelectedApiCascadeInfoList);
