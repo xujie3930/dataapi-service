@@ -20,6 +20,7 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClie
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DataSourceInfoRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.result.DatasourceDetailResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO;
+import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseHiMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.bo.CreateApiInfoBO;
@@ -79,6 +80,8 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
     private RedisTemplate<String, Object> redisTemplate;
     @Resource
     private IcreditApiBaseMapper apiBaseMapper;
+    @Resource
+    private IcreditApiBaseHiMapper apiBaseHiMapper;
     @Value("${host.addr}")
     private String host;
 
@@ -192,6 +195,10 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 
     @Override
     public ApiSaveResult saveApi(String userId, DatasourceApiSaveParam param, IcreditApiBaseEntity apiBaseEntity) {
+        if (ApiHisOverrideEnum.OVERRIDE.getCode().equals(param.getOverride())){
+            IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiMapper.selectById(param.getApiHiId());
+            apiBaseEntity.setApiVersion(apiBaseHiEntity.getApiVersion());
+        }
         if(ApiTypeEnum.API_REGISTER.getCode().equals(param.getType())) {
             checkReqPath(param.getReqPath());
             checkReqHost(param.getReqHost());
