@@ -452,15 +452,15 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         List<IcreditAuthEntity> authEntityList = authService.findByAppId(request.getAppId());
         AuthInfoResult authInfoResult = new AuthInfoResult();
 
-        if(null!=authEntityList && !authEntityList.isEmpty() && null!=request.getApiId()){
+        if(null!=authEntityList && !authEntityList.isEmpty() && !StringUtils.isEmpty(request.getApiId())){
             authEntityList = authEntityList.stream().filter(e -> request.getApiId().equals(e.getApiId())).collect(Collectors.toList());
         }
         if(CollectionUtils.isEmpty(authEntityList)){//新增授权
             List<ApiCascadeInfoResult> notSelectedApiCascadeInfoList = new ArrayList<>(0);
-            if(null==request.getApiId()){
+            if(StringUtils.isEmpty(request.getApiId())){
                 //单个配置查询时，不返回该列表
                 List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null, request.getPublishStatus());//所有业务流程、api分组、api
-                notSelectedApiCascadeInfoList = (null!=request.getApiId()?handleApiInfo(allApiInfoList):new ArrayList<>(0));
+                notSelectedApiCascadeInfoList = (!StringUtils.isEmpty(request.getApiId())?handleApiInfo(allApiInfoList):new ArrayList<>(0));
             }
 
             authInfoResult.setNoApiCascadeInfoStrList(notSelectedApiCascadeInfoList);
@@ -487,7 +487,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
 //            }
 //        }
         List<ApiCascadeInfoResult> noApiCascadeInfoList = new ArrayList<>(0), apiCascadeInfoList = new ArrayList<>(0);
-        if(null==request.getApiId()){
+        if(StringUtils.isEmpty(request.getApiId())){
             //单个配置查询时，不返回该列表
             List<String> apiIds = new ArrayList<>(authEntityList.size());
             for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
