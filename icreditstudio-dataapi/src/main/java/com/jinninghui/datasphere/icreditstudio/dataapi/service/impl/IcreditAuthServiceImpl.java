@@ -564,6 +564,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
     }
 
     @Override
+    @Transactional
     public BusinessResult<Boolean> del(String userId, AuthDelRequest request) {
         //同时保存授权信息到redis
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
@@ -585,8 +586,33 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
                 authConfigSet.add(auth.getAuthConfigId());
             }
         });
-        //删除
+        if(delRedisList.isEmpty()){
+            return BusinessResult.success(true);
+        }
+
+        //判断authConfig是否还有其他引用
         final Set<String> delConfigId = new HashSet<>();
+        List<Map<String, Object>> authNumList = authMapper.getAuthNumByConfigIds(authConfigSet);
+        //获取没有被引用的config，并且删除
+        if(null!=authNumList && !authNumList.isEmpty()){
+            authNumList.stream().forEach(authNumMap -> {
+                final String authConfigId = (String) authNumMap.get("authConfigId");
+                final Long authNum = (Long) authNumMap.get("authNum");
+                authConfigSet.remove(authConfigId);
+                if(authNum.intValue()<=1){
+                    //该配置已经没有引用了，删除
+                    delConfigId.add(authConfigId);
+                }
+            });
+            if(!authConfigSet.isEmpty()){
+                //authConfigSet里面的数据为没有被引用的配置
+                delConfigId.addAll(authConfigSet);
+            }
+        }else{
+            delConfigId.addAll(authConfigSet);
+        }
+
+        //删除
         final Map<String, Object> paramsMap = new HashMap<>(4);
         paramsMap.put("ids", request.getAuthList());
         paramsMap.put("appId", request.getAppId());
@@ -594,21 +620,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
             //没有授权关系
             return BusinessResult.success(true);
         }
-        //判断authConfig是否还有其他引用
-        List<Map<String, Object>> authNumList = authMapper.getAuthNumByConfigIds(authConfigSet);
-        //获取没有被引用的config，并且删除
-        if(null!=authNumList && !authNumList.isEmpty()){
-            authNumList.stream().forEach(authNumMap -> {
-                final String authConfigId = (String) authNumMap.get("authConfigId");
-                final Long authNum = (Long) authNumMap.get("authNum");
-                if(authNum.intValue()<=0){
-                    //该配置已经没有引用了，删除
-                    delConfigId.add(authConfigId);
-                }
-            });
-        }else{
-            delConfigId.addAll(authConfigSet);
-        }
+
 
         if(!delConfigId.isEmpty()){
             //删除没引用的config
