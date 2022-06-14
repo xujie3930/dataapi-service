@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="isShowDialog">
     <Dialog
       class="app-auth-list"
       ref="baseDialog"
@@ -82,6 +82,7 @@ export default {
       options: { title: '' },
       tableSelections: [],
       formOption: formAppAuthList,
+      isShowDialog: false,
       tableConfiguration: tableAppAuthList(this),
       mixinSearchFormConfig: {
         models: {
@@ -98,13 +99,19 @@ export default {
 
   methods: {
     open(options) {
-      this.options = options
-      this.mixinRetrieveTableData()
-      this.$refs.baseDialog.open()
+      this.isShowDialog = true
+      this.$nextTick(() => {
+        this.options = options
+        this.$refs.baseDialog.open()
+        this.mixinRetrieveTableData()
+      })
     },
 
     close() {
+      this.isShowDialog = false
       this.mixinHandleReset(false)
+      this.mixinTablePagination.currentPage = 1
+      this.mixinTablePagination.pageSize = 10
       this.$refs.baseDialog.close()
     },
 

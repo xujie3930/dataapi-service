@@ -108,8 +108,6 @@ export default {
       this.$emit('on-close', visible)
     },
 
-    handleAuthorizeClick() {},
-
     // 点击-查看详情
     handleApiDetailClick({ row }) {
       this.detailVisible = true
