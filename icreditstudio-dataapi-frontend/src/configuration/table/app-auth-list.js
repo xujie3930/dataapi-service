@@ -69,7 +69,7 @@ export default that => ({
     },
     {
       type: 'text',
-      label: '调用次数',
+      label: '有效调用次数',
       prop: 'authAllowCall',
       width: 150,
       formatter: ({ authAllowCall }) => (authAllowCall < 0 ? '' : authAllowCall)
