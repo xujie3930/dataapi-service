@@ -291,7 +291,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
 
             //未发布、已发布的编辑，版本号 为最新版本号+1
             param.setApiVersion(apiBaseEntity.getApiVersion() + 1);
-
+            log.info("apiBaseEntity表版本：{}", param.getApiVersion());
             //保存api基础信息、及api历史信息
             IcreditApiBaseEntity newApiBaseEntity = new IcreditApiBaseEntity();
             BeanUtils.copyProperties(param, newApiBaseEntity);
