@@ -873,8 +873,16 @@ export default {
     saveApiForm(params, saveType) {
       const { opType } = this.options
       const messageMapping = {
-        0: { type: '保存', loading: 'isSaveBtnLoading' },
-        1: { type: '发布', loading: 'isPublishBtnLoading' }
+        0: {
+          type: '保存',
+          message: '保存成功，已生成新版本!',
+          loading: 'isSaveBtnLoading'
+        },
+        1: {
+          type: '发布',
+          message: '保存成功，已覆盖当前版本内容！',
+          loading: 'isPublishBtnLoading'
+        }
       }
 
       // 更新旧表单数据
@@ -906,8 +914,7 @@ export default {
             } = data
 
             this.$notify.success({
-              title: '操作结果',
-              message: `${messageMapping[saveType].type}成功！`,
+              message: `${messageMapping[saveType].message}成功！`,
               duration: 2000
             })
 
