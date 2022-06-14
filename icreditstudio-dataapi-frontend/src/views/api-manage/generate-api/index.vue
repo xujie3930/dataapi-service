@@ -779,7 +779,7 @@ export default {
               this.saveApiForm(
                 { ...param, override: 0 },
                 saveType,
-                '保存成功，已覆盖当前版本内容！',
+                '保存成功，已生成新版本!',
                 true
               )
             })
@@ -788,7 +788,7 @@ export default {
                 this.saveApiForm(
                   { ...param, override: 1 },
                   saveType,
-                  '保存成功，已生成新版本!',
+                  '保存成功，已覆盖当前版本内容！',
                   true
                 )
             })
