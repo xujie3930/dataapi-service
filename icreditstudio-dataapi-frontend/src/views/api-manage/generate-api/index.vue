@@ -776,11 +776,21 @@ export default {
             }
           )
             .then(() => {
-              this.saveApiForm({ ...param, override: 0 }, saveType)
+              this.saveApiForm(
+                { ...param, override: 0 },
+                saveType,
+                '保存成功，已生成新版本!',
+                true
+              )
             })
             .catch(opType => {
               opType === 'cancel' &&
-                this.saveApiForm({ ...param, override: 1 }, saveType)
+                this.saveApiForm(
+                  { ...param, override: 1 },
+                  saveType,
+                  '保存成功，已覆盖当前版本内容！',
+                  true
+                )
             })
         : this.saveApiForm({ ...param, override: 0 }, saveType)
     },
@@ -870,7 +880,7 @@ export default {
       console.log(oldForm, curForm, this.isDataChange)
     },
 
-    saveApiForm(params, saveType) {
+    saveApiForm(params, saveType, message, cover) {
       const { opType } = this.options
       const messageMapping = {
         0: { type: '保存', loading: 'isSaveBtnLoading' },
@@ -907,8 +917,8 @@ export default {
 
             this.$notify.success({
               title: '操作结果',
-              message: `${messageMapping[saveType].type}成功！`,
-              duration: 2000
+              message: message || `${messageMapping[saveType].type}成功！`,
+              duration: 2500
             })
 
             this.form.id = id
@@ -917,7 +927,7 @@ export default {
             this.form.apiParamSaveRequestList = param
             this.oldTableData = param
 
-            this.$emit('on-save', saveType)
+            this.$emit('on-save', { saveType, opType, cover })
           }
         })
         .finally(() => {
