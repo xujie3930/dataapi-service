@@ -770,7 +770,7 @@ export default {
               confirmButtonText: '是',
               cancelButtonText: '否',
               type: 'warning',
-              showClose: false,
+              distinguishCancelAndClose: true,
               closeOnClickModal: false,
               closeOnPressEscape: false
             }
@@ -778,8 +778,9 @@ export default {
             .then(() => {
               this.saveApiForm({ ...param, override: 0 }, saveType)
             })
-            .catch(() => {
-              this.saveApiForm({ ...param, override: 1 }, saveType)
+            .catch(opType => {
+              opType === 'cancel' &&
+                this.saveApiForm({ ...param, override: 1 }, saveType)
             })
         : this.saveApiForm({ ...param, override: 0 }, saveType)
     },
