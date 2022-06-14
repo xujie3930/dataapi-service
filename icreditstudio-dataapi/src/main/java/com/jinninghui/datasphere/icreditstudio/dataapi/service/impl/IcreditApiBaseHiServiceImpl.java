@@ -24,6 +24,7 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import com.jinninghui.datasphere.icreditstudio.framework.result.util.BeanCopyUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
  * @author xujie
  * @since 2022-02-21
  */
+@Slf4j
 @Service
 public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMapper, IcreditApiBaseHiEntity> implements IcreditApiBaseHiService {
 
@@ -305,10 +307,12 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             IcreditApiBaseHiEntity newApiBaseHiEntity = new IcreditApiBaseHiEntity();
             BeanUtils.copyProperties(newApiBaseEntity, newApiBaseHiEntity);
             newApiBaseEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
+            log.info("base表newApiBaseEntity:{}", newApiBaseEntity);
             apiBaseService.updateById(newApiBaseEntity);
             newApiBaseHiEntity.setApiBaseId(newApiBaseHiEntity.getId());
             newApiBaseHiEntity.setId(null);
             newApiBaseHiEntity.setInterfaceSource(InterfaceSourceEnum.IN_SIDE.getCode());
+            log.info("历史表newApiBaseHiEntity:{}", newApiBaseHiEntity);
             save(newApiBaseHiEntity);
             ApiSaveResult apiSaveResult = apiBaseService.saveApi(userId, param, newApiBaseEntity);
             apiSaveResult.setApiHiId(newApiBaseHiEntity.getId());
