@@ -596,10 +596,16 @@ export default {
     },
 
     // 回调-新增API
-    saveCallback(saveType) {
+    saveCallback({ saveType, cover }) {
+      if (cover) {
+        this.opType = ''
+        this.handleVersionClick()
+        return
+      }
+
       if (saveType === 1) {
         this.opType = ''
-        saveType === 1 && this.mixinRetrieveTableData()
+        this.mixinRetrieveTableData()
       }
     },
 
