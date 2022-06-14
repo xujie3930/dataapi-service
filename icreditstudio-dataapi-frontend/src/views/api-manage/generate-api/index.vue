@@ -761,8 +761,9 @@ export default {
 
     // 判断是否版本覆盖提示
     judgeOverrideToast(param, saveType) {
+      const { publishStatus } = this.options
       this.judeSameVersionData()
-      this.isDataChange
+      this.isDataChange && publishStatus
         ? this.$confirm(
             '请确认是否生成新的版本？如需生成新的版本请选择“是”，如需保存修改内容到当前版本请选择“否”',
             '提示',
@@ -770,16 +771,27 @@ export default {
               confirmButtonText: '是',
               cancelButtonText: '否',
               type: 'warning',
-              showClose: false,
+              distinguishCancelAndClose: true,
               closeOnClickModal: false,
               closeOnPressEscape: false
             }
           )
             .then(() => {
-              this.saveApiForm({ ...param, override: 0 }, saveType)
+              this.saveApiForm(
+                { ...param, override: 0 },
+                saveType,
+                `${saveType ? '发布' : '保存'}成功，已生成新版本!`,
+                true
+              )
             })
-            .catch(() => {
-              this.saveApiForm({ ...param, override: 1 }, saveType)
+            .catch(opType => {
+              opType === 'cancel' &&
+                this.saveApiForm(
+                  { ...param, override: 1 },
+                  saveType,
+                  `${saveType ? '发布' : '保存'}成功，已覆盖当前版本内容！`,
+                  true
+                )
             })
         : this.saveApiForm({ ...param, override: 0 }, saveType)
     },
@@ -869,7 +881,7 @@ export default {
       console.log(oldForm, curForm, this.isDataChange)
     },
 
-    saveApiForm(params, saveType) {
+    saveApiForm(params, saveType, message, cover) {
       const { opType } = this.options
       const messageMapping = {
         0: { type: '保存', loading: 'isSaveBtnLoading' },
@@ -904,10 +916,11 @@ export default {
               apiParamSaveRequestList: param
             } = data
 
+            const msg = `${messageMapping[saveType].type}成功！`
             this.$notify.success({
               title: '操作结果',
-              message: `${messageMapping[saveType].type}成功！`,
-              duration: 2000
+              message: message || msg,
+              duration: 2500
             })
 
             this.form.id = id
@@ -916,7 +929,7 @@ export default {
             this.form.apiParamSaveRequestList = param
             this.oldTableData = param
 
-            this.$emit('on-save', saveType)
+            this.$emit('on-save', { saveType, opType, cover })
           }
         })
         .finally(() => {
