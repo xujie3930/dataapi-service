@@ -215,11 +215,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         if (ApiHisOverrideEnum.OVERRIDE.getCode().equals(param.getOverride())){
             if(ApiTypeEnum.API_GENERATE.getCode().equals(param.getType())) {
                 param.getApiGenerateSaveRequest().setId(generateApiService.getByApiIdAndVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion()).getId());
-                apiBaseEntity.setApiVersion(apiBaseHiEntity.getApiVersion());
             }
             if(ApiTypeEnum.API_REGISTER.getCode().equals(param.getType())) {
                 param.getApiGenerateSaveRequest().setId(registerApiService.findByApiIdAndApiVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion()).getId());
-                apiBaseEntity.setApiVersion(apiBaseHiEntity.getApiVersion());
             }
         }
         //待发布的编辑，版本号不变
