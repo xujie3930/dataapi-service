@@ -7,5 +7,5 @@ public class AuthInfoRequest {
 
     private String appId;
     private Integer publishStatus;
-
+    private String apiId;
 }

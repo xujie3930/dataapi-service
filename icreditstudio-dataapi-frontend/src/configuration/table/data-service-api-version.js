@@ -17,6 +17,7 @@ export default that => ({
   isBorder: true,
   isStripe: true,
   hasPage: true,
+  rowKey: 'apiHiId',
   customBtnConfig: [
     {
       label: '批量删除',

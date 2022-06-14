@@ -251,7 +251,7 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
      **/
     private void updateOuterConfigByApis(AuthSaveRequest request){
         Collection<IcreditApiBaseEntity> apis = apiBaseService.listByIds(request.getApiId());
-        List<String> apiIds = (null==apis || apis.isEmpty()?null:apis.stream().filter((IcreditApiBaseEntity a) -> null != a.getInterfaceSource() && a.getInterfaceSource() == 1).map(a -> a.getId()).collect(Collectors.toList()));
+        List<String> apiIds = (null==apis || apis.isEmpty()?null:apis.stream().filter((IcreditApiBaseEntity a) -> (null != a.getInterfaceSource() && a.getInterfaceSource() == 1)).map(a -> a.getId()).collect(Collectors.toList()));
         if(null==apiIds || apiIds.isEmpty()){
             return;
         }
@@ -451,22 +451,31 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
         IcreditAppEntity appEntity = appService.getById(request.getAppId());
         List<IcreditAuthEntity> authEntityList = authService.findByAppId(request.getAppId());
         AuthInfoResult authInfoResult = new AuthInfoResult();
-        List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null, request.getPublishStatus());//所有业务流程、api分组、api
+
+        if(null!=authEntityList && !authEntityList.isEmpty() && null!=request.getApiId()){
+            authEntityList = authEntityList.stream().filter(e -> request.getApiId().equals(e.getApiId())).collect(Collectors.toList());
+        }
         if(CollectionUtils.isEmpty(authEntityList)){//新增授权
-            List<ApiCascadeInfoResult> notSelectedApiCascadeInfoList = handleApiInfo(allApiInfoList);
+            List<ApiCascadeInfoResult> notSelectedApiCascadeInfoList = new ArrayList<>(0);
+            if(null==request.getApiId()){
+                //单个配置查询时，不返回该列表
+                List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null, request.getPublishStatus());//所有业务流程、api分组、api
+                notSelectedApiCascadeInfoList = (null!=request.getApiId()?handleApiInfo(allApiInfoList):new ArrayList<>(0));
+            }
+
             authInfoResult.setNoApiCascadeInfoStrList(notSelectedApiCascadeInfoList);
             authInfoResult.setInfoType(AuthInfoTypeEnum.ADD.getCode());
             return BusinessResult.success(authInfoResult);
         }
 
+
+
         //编辑授权
-        List<String> apiIds = new ArrayList<>(authEntityList.size());
+
         authInfoResult.setAppName(appEntity.getName());
         authInfoResult.setAppId(appEntity.getId());
-        for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
-            apiIds.add(icreditAuthEntity.getApiId());
-        }
-        List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds, request.getPublishStatus());//已授权的业务流程、api分组、api
+
+        //已授权的业务流程、api分组、api
 
 //        //移除已选择的api
 //        List<ApiInfoDTO> allNoSelectedApiInfoList = new ArrayList();
@@ -477,9 +486,19 @@ public class IcreditAuthServiceImpl extends ServiceImpl<IcreditAuthMapper, Icred
 //                }
 //            }
 //        }
+        List<ApiCascadeInfoResult> noApiCascadeInfoList = new ArrayList<>(0), apiCascadeInfoList = new ArrayList<>(0);
+        if(null==request.getApiId()){
+            //单个配置查询时，不返回该列表
+            List<String> apiIds = new ArrayList<>(authEntityList.size());
+            for (IcreditAuthEntity icreditAuthEntity : authEntityList) {
+                apiIds.add(icreditAuthEntity.getApiId());
+            }
+            List<ApiInfoDTO> allApiInfoList = workFlowService.findApiInfoByApiIds(null, request.getPublishStatus());//所有业务流程、api分组、api
+            List<ApiInfoDTO> apiInfoList = workFlowService.findApiInfoByApiIds(apiIds, request.getPublishStatus());
+            noApiCascadeInfoList = handleApiInfo(allApiInfoList);
+            apiCascadeInfoList = handleApiInfo(apiInfoList);
+        }
 
-        List<ApiCascadeInfoResult> noApiCascadeInfoList = handleApiInfo(allApiInfoList);
-        List<ApiCascadeInfoResult> apiCascadeInfoList = handleApiInfo(apiInfoList);
         authInfoResult.setApiCascadeInfoStrList(apiCascadeInfoList);
         authInfoResult.setNoApiCascadeInfoStrList(noApiCascadeInfoList);
 
