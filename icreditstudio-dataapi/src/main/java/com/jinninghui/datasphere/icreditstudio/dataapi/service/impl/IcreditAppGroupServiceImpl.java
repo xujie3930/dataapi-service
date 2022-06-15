@@ -68,7 +68,7 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     @ResultReturning
     public BusinessResult<List<AppGroupQueryListResult>> getList(AppQueryListRequest request) {
         try {
-            Thread.sleep(5000);
+            Thread.sleep(9000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
