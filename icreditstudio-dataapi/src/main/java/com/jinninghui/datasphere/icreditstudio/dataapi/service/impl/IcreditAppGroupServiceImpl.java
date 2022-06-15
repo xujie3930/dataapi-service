@@ -67,11 +67,11 @@ public class IcreditAppGroupServiceImpl extends ServiceImpl<IcreditAppGroupMappe
     @Override
     @ResultReturning
     public BusinessResult<List<AppGroupQueryListResult>> getList(AppQueryListRequest request) {
-        try {
+        /*try {
             Thread.sleep(30000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         AppQueryListParam param = BeanCopyUtils.copyProperties(request, new AppQueryListParam());
         List<AppQueryListDTO> list = appGroupMapper.getList(param);
         List<AppGroupQueryListResult> appGroupQueryListResultList = new ArrayList<>();
