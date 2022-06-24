@@ -66,4 +66,13 @@
         </foreach>
          group by app_id
     </select>
+
+    <select id="queryUsedCountByApiIds" resultType="java.util.Map" parameterType="java.util.Collection">
+        SELECT api_id apiId, count(1) nums
+        FROM icredit_api_log WHERE del_flag=0 AND api_id IN
+        <foreach collection="list" item="apiId" open=" (" close=")" separator=",">
+            #{apiId}
+        </foreach>
+        group by api_id
+    </select>
 </mapper>

@@ -2,11 +2,11 @@ package com.jinninghui.datasphere.icreditstudio.dataapi.web;
 
 
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
-import com.jinninghui.datasphere.icreditstudio.dataapi.kafaka.KafkaConsumer;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditWorkFlowService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.StatisticsService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.CharacterUtils;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.WorkFlowSaveRequest;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsApiTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.WorkFlowResult;
@@ -14,7 +14,6 @@ import com.jinninghui.datasphere.icreditstudio.framework.result.BusinessResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -57,11 +56,16 @@ public class SearchController {
         return BusinessResult.success(statisticsService.appTopView());
     }
 
+    @GetMapping ("/apiTopView")
+    public BusinessResult<List<StatisticsApiTopResult>> apiTopView() {
+        return BusinessResult.success(statisticsService.apiTopView());
+    }
+
     /*@Autowired
     private KafkaConsumer kafkaConsumer;
     @GetMapping ("/t")
     public BusinessResult<Boolean> t(HttpServletRequest request) {
-        kafkaConsumer.addAppUsedCount(request.getParameter("appId"));
+        kafkaConsumer.addApiUsedCount(request.getParameter("apiId"));
         return BusinessResult.success(true);
     }*/
 }

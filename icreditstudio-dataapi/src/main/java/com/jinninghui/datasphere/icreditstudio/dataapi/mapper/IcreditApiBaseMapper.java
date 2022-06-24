@@ -1,13 +1,14 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.ApiNameAndIdListResult;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -40,4 +41,12 @@ public interface IcreditApiBaseMapper extends BaseMapper<IcreditApiBaseEntity> {
     Long newlyDayList(@Param("createTime") Date date);
 
     Integer queryInnerApiCount(@Param("collection") Collection<String> collection);
+
+    /**
+     * 查询接口调用量列表
+     * @author  maoc
+     * @create  2022/6/22 15:29
+     * @desc
+     **/
+    List<Map<String, Object>> queryApiInBiUsedCount(final Map<String, Object> paramsMap);
 }

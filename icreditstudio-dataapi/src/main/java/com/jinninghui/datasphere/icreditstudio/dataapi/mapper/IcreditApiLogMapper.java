@@ -1,7 +1,7 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.mapper;
 
-import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiLogEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.request.LogListQueryRequest;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.LogListQueryResult;
 import org.apache.ibatis.annotations.Param;
@@ -33,4 +33,7 @@ public interface IcreditApiLogMapper extends BaseMapper<IcreditApiLogEntity> {
      * @desc
      **/
     List<Map<String, Object>> queryUsedCountByAppIds(@Param("list") Collection<String> list);
+
+    List<Map<String, Object>> queryUsedCountByApiIds(@Param("list") Collection<String> list);
+
 }

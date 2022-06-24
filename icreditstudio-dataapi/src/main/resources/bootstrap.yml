@@ -43,6 +43,8 @@ system:
   prop:
     app.used.count.redis.key: system.prop.app.used.count
     app.api.auth.redis.key: system.prop.app.api.auth
+    api.used.count.redis.key: system.prop.api.used.count
+    api.last.time.redis.key: system.prop.api.last.time
 #mybatis:
 #  mapper-locations: classpath*:com/hashtech/**/mapper/mysql/*.xml
 #  type-handlers-package: com.hashtech

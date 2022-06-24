@@ -10,10 +10,10 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.common.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
 import com.jinninghui.datasphere.icreditstudio.dataapi.druid.DataApiDruidDataSourceService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
+import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiTypeEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.RequestFiledEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ResponseFiledEnum;
-import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceFactory;
 import com.jinninghui.datasphere.icreditstudio.dataapi.factory.DatasourceSync;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DatasourceFeignClient;
@@ -46,8 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.sql.*;
-import java.util.Date;
 import java.util.*;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -65,7 +65,8 @@ import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
 @Slf4j
 @Service
 public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper, IcreditApiBaseEntity> implements IcreditApiBaseService {
-
+    @Value("${system.prop.api.used.count.redis.key}")
+    private String apiUsedCount;
     @Resource
     private IcreditGenerateApiService generateApiService;
     @Resource
@@ -1118,6 +1119,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             registerApiService.deleteByApiIdAndApiVersion(apiBaseEntity.getId(), apiBaseEntity.getApiVersion());
             //只有一个版本
             redisTemplate.delete(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(1)));
+            redisTemplate.opsForZSet().remove(apiUsedCount, apiBaseEntity.getId());//删除调用次数
         }
         return BusinessResult.success(true);
     }

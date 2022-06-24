@@ -1,5 +1,6 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.ResourceCodeBean;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.validate.ResultReturning;
@@ -9,10 +10,8 @@ import com.jinninghui.datasphere.icreditstudio.dataapi.dto.RegisterApiDTO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.entity.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.feign.DataAssertFeignClient;
-import com.jinninghui.datasphere.icreditstudio.dataapi.feign.vo.ConnectionInfoVO;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.IcreditApiBaseHiMapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.*;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.factory.ApiBaseFactory;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.param.DatasourceApiSaveParam;
 import com.jinninghui.datasphere.icreditstudio.dataapi.utils.StringLegalUtils;
@@ -47,7 +46,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMapper, IcreditApiBaseHiEntity> implements IcreditApiBaseHiService {
-
+    @Value("${system.prop.api.used.count.redis.key}")
+    private String apiUsedCount;
     private static final String REDIS_KEY_SPLIT_JOINT_CHAR = ":";
     private static final String COMMA = ",";
     @Resource
@@ -481,6 +481,7 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
             }
         }
         redisTemplate.delete(String.valueOf(new StringBuilder(entity.getPath()).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(entity.getApiVersion())));
+        redisTemplate.opsForZSet().remove(apiUsedCount, entity.getApiBaseId());//删除调用次数
     }
 
     @Override

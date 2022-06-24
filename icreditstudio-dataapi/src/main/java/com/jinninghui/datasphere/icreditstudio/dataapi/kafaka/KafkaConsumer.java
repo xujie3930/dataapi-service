@@ -22,8 +22,10 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author xujie
@@ -42,6 +44,8 @@ public class KafkaConsumer {
     private RedisUtils redisUtils;
     @Value("${system.prop.app.used.count.redis.key}")
     private String appUsedCount;
+    @Value("${system.prop.api.used.count.redis.key}")
+    private String apiUsedCount;
 
     @KafkaListener(groupId = "test", topics = "#{'${kafkaConsumer.topic}'}")
     public void topic_test(ConsumerRecord<?, ?> record, Acknowledgment ack, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -55,9 +59,11 @@ public class KafkaConsumer {
                 if(redisTemplate.opsForValue().setIfAbsent(logInfo.getTraceId(), logInfo)){
                     //修改redis引用调用数
                     this.addAppUsedCount(logInfo.getAppId());
+                    this.addApiUsedCount(logInfo.getApiId());
                     IcreditApiLogEntity apiLogEntity = new IcreditApiLogEntity();
                     BeanUtils.copyProperties(logInfo, apiLogEntity);
                     apiLogMapper.insert(apiLogEntity);
+
 
                 }else{
                     if (!CallStatusEnum.CALL_ON.getCode().equals(logInfo.getCallStatus())){
@@ -79,6 +85,40 @@ public class KafkaConsumer {
         } finally {
             ack.acknowledge();
         }
+    }
+
+    public boolean addApiUsedCount(String apiId){
+        if(StringUtils.isEmpty(apiId)){
+            return false;
+        }
+        try{
+            //操作redis
+            Double useCount = redisUtils.zscore(apiUsedCount, apiId);
+            if(null==useCount){
+                //使用锁，防止同步操作时数据错乱
+                synchronized (StatisticsServiceImpl.updateApiRedisUsedCountLock){
+                    Double useCount2 = redisUtils.zscore(apiUsedCount, apiId);
+                    if(null==useCount2){
+                        //查询数据库，回写redis
+                        List<String> querys = new ArrayList<>(2);
+                        querys.add(apiId);
+                        List<Map<String, Object>> dbdata = apiLogMapper.queryUsedCountByApiIds(querys);
+                        useCount = (null==dbdata || dbdata.isEmpty() || null==dbdata.get(0) || null==dbdata.get(0).get("nums"))?0d:Double.valueOf(dbdata.get(0).get("nums")+"");
+                        //回写redis
+                        redisUtils.zincrby(apiUsedCount, apiId, useCount+1);
+                    }else{
+                        //+1
+                        redisUtils.zincrby(apiUsedCount, apiId, 1d);
+                    }
+                }
+            }else{
+                //+1
+                redisUtils.zincrby(apiUsedCount, apiId, 1d);
+            }
+        }catch (Exception ex){
+            log.error("更新redis异常", ex);
+        }
+        return true;
     }
 
     public boolean addAppUsedCount(String appId){

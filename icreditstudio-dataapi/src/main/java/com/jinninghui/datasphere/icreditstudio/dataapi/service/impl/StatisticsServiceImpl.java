@@ -1,19 +1,26 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.AppEnableEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.common.DelFlagEnum;
+import com.jinninghui.datasphere.icreditstudio.dataapi.entity.IcreditApiBaseEntity;
 import com.jinninghui.datasphere.icreditstudio.dataapi.enums.ApiPublishStatusEnum;
 import com.jinninghui.datasphere.icreditstudio.dataapi.mapper.*;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseHiService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.service.IcreditApiBaseService;
 import com.jinninghui.datasphere.icreditstudio.dataapi.service.StatisticsService;
+import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsApiTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsAppTopResult;
 import com.jinninghui.datasphere.icreditstudio.dataapi.web.result.StatisticsResult;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.RedisUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.*;
 
@@ -24,19 +31,8 @@ import java.util.*;
  **/
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
-
-    /*public StatisticsServiceImpl(){
-        xnMap.put("1", new AtomicLong(0));
-        xnMap.put("2", new AtomicLong(0));
-        xnMap.put("3", new AtomicLong(0));
-        xnMap.put("4", new AtomicLong(0));
-        xnMap.put("5", new AtomicLong(0));
-        xnMap.put("6", new AtomicLong(0));
-        xnMap.put("7", new AtomicLong(0));
-        xnMap.put("8", new AtomicLong(0));
-        xnMap.put("9", new AtomicLong(0));
-        xnMap.put("10", new AtomicLong(0));
-    }*/
+    @Autowired
+    private IcreditApiBaseService icreditApiBaseService;
     @Autowired
     private IcreditApiBaseMapper apiBaseMapper;
     @Autowired
@@ -55,8 +51,13 @@ public class StatisticsServiceImpl implements StatisticsService {
     private String appUsedCount;
     @Value("${system.prop.app.api.auth.redis.key}")
     private String appApiAuth;
+    @Value("${system.prop.api.used.count.redis.key}")
+    private String apiUsedCount;
+    @Value("${system.prop.api.last.time.redis.key}")
+    private String apiLastTime;
 
     public static final String updateRedisUsedCountLock = "updateRedisUsedCountLock";
+    public static final Object updateApiRedisUsedCountLock = new Object();
 
     @Override
     public StatisticsResult statistics() {
@@ -110,21 +111,16 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<StatisticsAppTopResult> appTopView() {
-        //long a = System.currentTimeMillis();
         List<Map<String, Object>> appApiCountList = appMapper.getAppApiCountList();
         //List<Map<String, Object>> appApiCountList = this.getAppApiCountList();
         if(null==appApiCountList || appApiCountList.isEmpty()){
             return new ArrayList<>(0);
         }
-        //xnMap.get("1").addAndGet(System.currentTimeMillis()-a);
-        //a = System.currentTimeMillis();
         final List<StatisticsAppTopResult> resultList = new ArrayList<>();
         final Map<String, StatisticsAppTopResult> appMap = new HashMap<>();
         final Set<String> noappIds=new HashSet<>();
         //注意，hgetall有性能问题
         final Map<String, Object> counts = redisUtils.hgetall(appUsedCount);
-        //xnMap.get("2").addAndGet(System.currentTimeMillis()-a);
-        //a = System.currentTimeMillis();
         appApiCountList.stream().forEach(appApiCount->{
             StatisticsAppTopResult appTop = new StatisticsAppTopResult();
             String appId = (String) appApiCount.get("appId");
@@ -142,8 +138,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 noappIds.add(appId);
             }
         });
-        //xnMap.get("3").addAndGet(System.currentTimeMillis()-a);
-        //a = System.currentTimeMillis();
         if(!noappIds.isEmpty()){
             //使用锁，防止同步操作时数据错乱
             synchronized (updateRedisUsedCountLock){
@@ -158,16 +152,12 @@ public class StatisticsServiceImpl implements StatisticsService {
                         noappIds.remove(dbappid);
                     });
                 }
-                //xnMap.get("4").addAndGet(System.currentTimeMillis()-a);
-                //a = System.currentTimeMillis();
                 if(!noappIds.isEmpty()){
                     //如果存在没访问记录的引用，给默认访问记录
                     noappIds.stream().forEach(noappId->{
                         redisUtils.hincrby(appUsedCount, noappId, 0l);
                     });
                 }
-                //xnMap.get("5").addAndGet(System.currentTimeMillis()-a);
-                //a = System.currentTimeMillis();
             }
         }
         //排序
@@ -180,49 +170,161 @@ public class StatisticsServiceImpl implements StatisticsService {
                     return perCom;
                 }
         });
-        //xnMap.get("6").addAndGet(System.currentTimeMillis()-a);
-        //a = System.currentTimeMillis();
         //final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
         for(int i=0;i<resultList.size();i++){
             resultList.get(i).setSort(i+1);
         }
-        //xnMap.get("7").addAndGet(System.currentTimeMillis()-a);
         return resultList;
     }
 
-    //public final Map<String, AtomicLong> xnMap = new HashMap<>();
+    /**
+     * 获取上次api使用数量统计时间
+     * 返回-1：无需同步，返回0：全量同步，放回整数：上次同步时间
+     * @author  maoc
+     * @create  2022/6/23 15:19
+     * @desc
+     **/
+    private Long apiCountNeedUpdate(){
+        boolean exists = redisUtils.exists(apiUsedCount).booleanValue();
+        if(!exists){
+            return 0l;
+        }
+        //获取上次同步时间
+        Object lasttimeo = redisUtils.get(apiLastTime);
+        if(null==lasttimeo){
+            return 0l;
+        }
+        Long lasttime = Long.valueOf(lasttimeo+"");
+        if(System.currentTimeMillis()-lasttime.longValue()<60000){
+            //小于一分钟，不同步
+            return -1l;
+        }
+        //获取最新的api
+        final QueryWrapper wrappers = new QueryWrapper<IcreditApiBaseEntity>();
+        wrappers.eq("del_flag", 0);
+        wrappers.gt("create_time", new Date(Long.valueOf(lasttime+"")));
+        int newCount = icreditApiBaseService.count(wrappers);
+        return newCount>0?lasttime:-1l;
+    }
 
-    /*public static void main(String[] s){
-        String url = "http://127.0.0.1:9080/resource/table/info/baseInfo";
-        Map<String, Object> map = new HashMap<>(8);
-        Map<String, String> hea = new HashMap<>(4);
-        map.put("tableName", "tag");
-        map.put("datasourceId", "943883401306308608");
-        map.put("type", 1);
-        hea.put("Content-Type", "application/json");
-        String send = JSON.toJSONString(map);
-        *//*for(int i=1;i<Integer.MAX_VALUE;i++){
-            try {
-                Thread.sleep(i<=6?i*1000:6000);
-                System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    @Override
+    public List<StatisticsApiTopResult> apiTopView() {
+
+        Long lastTime1 = apiCountNeedUpdate();
+        if(lastTime1.longValue()>=0){
+            synchronized (apiUsedCount){
+                Long lastTime2 = apiCountNeedUpdate();
+                if(lastTime2.longValue()>=0){
+                    //查询所有接口
+                    Set<ZSetOperations.TypedTuple<Object>> apiCountRedisSet = new HashSet<>();
+                    final Map<String, ZSetOperations.TypedTuple<Object>> apiCountMap = new HashMap<>();
+                    final Map<String, Object> paramsMap = new HashMap<>(4);
+                    final QueryWrapper wrappers = new QueryWrapper<IcreditApiBaseEntity>();
+                    wrappers.eq("del_flag", 0);
+                    if(lastTime2.longValue()>0){
+                        Date lt2 = new Date(lastTime2);
+                        wrappers.gt("create_time", lt2);
+                        paramsMap.put("createTimeGt", lt2);
+                    }
+                    int size=100;
+                    int count = icreditApiBaseService.count(wrappers);
+                    int page = (count % size == 0?count/size:count/size+1);
+                    if(count>0){
+                        paramsMap.put("size", size);
+                        for(int i=0;i<page;i++){
+                            paramsMap.put("start", i*100);
+                            List<Map<String, Object>> apis = apiBaseMapper.queryApiInBiUsedCount(paramsMap);
+                            if(null!=apis && !apis.isEmpty()){
+                                for(Map<String, Object> api:apis){
+                                    String id = (String) api.get("id");
+                                    DefaultTypedTuple<Object> dtt = new DefaultTypedTuple<>(id, 0d);
+                                    apiCountMap.put(id, dtt);
+                                    apiCountRedisSet.add(dtt);
+                                }
+                                //查询接口调用次数
+                                List<Map<String, Object>> dbcounts = apiLogMapper.queryUsedCountByApiIds(apiCountMap.keySet());
+                                if(null!=dbcounts && !dbcounts.isEmpty()){
+                                    dbcounts.stream().forEach(dbcount->{
+                                        String apiId = (String) dbcount.get("apiId");
+                                        Double dbnum = (null==dbcount.get("nums")?0d:((Long) dbcount.get("nums")).doubleValue());
+                                        if(null!=apiId && null!=dbnum){
+                                            ZSetOperations.TypedTuple<Object> dtt = apiCountMap.get(apiId);
+                                            try {
+                                                Field scoref = dtt.getClass().getDeclaredField("score");
+                                                scoref.setAccessible(true);
+                                                scoref.set(dtt, dbnum);
+                                            } catch (NoSuchFieldException e) {
+                                                e.printStackTrace();
+                                            } catch (IllegalAccessException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    //写入redis
+                    if(!apiCountRedisSet.isEmpty()){
+                        redisUtils.zadd(apiUsedCount, apiCountRedisSet);
+                        redisUtils.set(apiLastTime, System.currentTimeMillis());
+                    }
+                }
+
             }
-            //System.out.println(HttpUtils.sendPost(url, send, hea).length());
-        }*//*
-        System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
-        System.out.println(DateUtils.formatDate(new Date(System.currentTimeMillis()))+":"+HttpUtils.sendPost(url, send, hea).length());
-    }*/
+        }
 
-    /*@Override
-    public List<Map<String, String>> xnMap() {
-        List<Map<String, String>> results = new ArrayList<>();
-        xnMap.entrySet().stream().forEach(xn->{
-            Map<String, String> xm = new HashMap<>();
-            xm.put("key", xn.getKey());
-            xm.put("value", xn.getValue().get()+"");
-            results.add(xm);
+        //有数据了
+        //获取前100名
+        Set<Object> apiCount = redisUtils.zrevrange(apiUsedCount, 0, 99, true);
+        if(null==apiCount || apiCount.isEmpty()){
+            return new ArrayList<>(0);
+        }
+        List<StatisticsApiTopResult> resultList = new ArrayList<>();
+        Map<String, StatisticsApiTopResult> resultMap = new HashMap<>();
+        for(Object api:apiCount){
+            StatisticsApiTopResult tr = new StatisticsApiTopResult();
+            DefaultTypedTuple<Object> tt = (DefaultTypedTuple<Object>) api;
+            tr.setApiId((String) tt.getValue());
+            tr.setApiUsedCount(tt.getScore()==null?0: (int) tt.getScore().doubleValue());//有隐患
+            resultList.add(tr);
+            resultMap.put(tr.getApiId(), tr);
+        }
+
+        //做二级排序，获取最后一个成员
+        //Integer lastCount = resultList.get(resultList.size() - 1).getApiUsedCount();
+        final Map<String, Object> paramsMap = new HashMap<>(2);
+        paramsMap.put("ids", resultMap.keySet());
+        List<Map<String, Object>> apiBases = apiBaseMapper.queryApiInBiUsedCount(paramsMap);
+        if(null!=apiBases && !apiBases.isEmpty()){
+            apiBases.stream().forEach(apiBase->{
+                Object interfaceSourceo = apiBase.get("interfaceSource");
+                Object typeo = apiBase.get("type");
+                String id = (String) apiBase.get("id");
+                String name = (String) apiBase.get("name");
+                Integer type = (null==typeo?null:(typeo instanceof java.lang.Long?((Long) typeo).intValue():(Integer) typeo));
+                Integer interfaceSource = (null==interfaceSourceo?null:(null!= interfaceSourceo && interfaceSourceo instanceof java.lang.Long?((Long) interfaceSourceo).intValue():(Integer) interfaceSourceo));
+                StatisticsApiTopResult result = resultMap.get(id);
+                result.setApiName(name);
+                result.setApiType(type);
+                result.setApiSource(interfaceSource);
+            });
+        }
+        //排序
+        Comparator compareIns = Collator.getInstance(java.util.Locale.CHINA);
+        resultList.sort((p1, p2)-> {
+            int perCom = p2.getApiUsedCount().compareTo(p1.getApiUsedCount());
+            if (perCom == 0) {
+                return compareIns.compare(p1.getApiName(), p2.getApiName());}
+            else {
+                return perCom;
+            }
         });
-        return results;
-    }*/
+        //final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
+        for(int i=0;i<resultList.size();i++){
+            resultList.get(i).setSort(i+1);
+        }
+        return resultList;
+    }
 }

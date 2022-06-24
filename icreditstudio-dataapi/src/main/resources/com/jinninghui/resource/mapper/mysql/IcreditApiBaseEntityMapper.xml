@@ -121,4 +121,17 @@
             #{item}
         </foreach>
     </select>
+
+    <select id="queryApiInBiUsedCount" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT id, type*1 AS type, name, interface_source*1 interfaceSource FROM icredit_api_base WHERE del_flag=0
+        <if test="ids!=null">
+            <foreach collection="ids" index="index" item="item" open=" AND id IN (" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="createTimeGt!=null"> AND create_time &gt; #{createTimeGt}</if>
+        <if test="null!=start and null!=size">
+            limit #{start}, #{size}
+        </if>
+    </select>
 </mapper>
