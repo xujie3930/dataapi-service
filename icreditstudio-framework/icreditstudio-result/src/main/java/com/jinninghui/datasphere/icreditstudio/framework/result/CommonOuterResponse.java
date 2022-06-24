@@ -27,6 +27,8 @@ public class CommonOuterResponse {
      * 如果result非0000，则 errorMsg 为错误信息， result为0000，errorMsg为空
      */
     protected String returnMsg="Success";
+
+    protected String returnError=null;
     
     protected String nonceStr= UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -73,5 +75,12 @@ public class CommonOuterResponse {
     public void setSuccess(boolean success){
     	this.success = success;
 	}
-    
+
+	public String getReturnError() {
+		return returnError;
+	}
+
+	public void setReturnError(String returnError) {
+		this.returnError = returnError;
+	}
 }
