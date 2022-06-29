@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1447,6 +1448,30 @@ public abstract class StringUtils {
 			return querySql.substring(querySql.indexOf(start)+start.length());
 		}
 		return querySql.substring(querySql.indexOf(start)+start.length(),querySql.indexOf(end));
+	}
+
+	public static String calculateAscii(String string){
+		if(StringUtils.isEmpty(string)){
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		Class<? extends String> clazz = string.getClass();
+		try {
+			Field field = clazz.getDeclaredField("value");
+			field.setAccessible(true);
+			char[] value = (char[]) field.get(string);
+			if(null!=value && value.length>0){
+				for(int i=0;i<value.length;i++){
+					sb.append((int)value[i]);
+				}
+			}
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} finally {
+			return sb.toString();
+		}
 	}
 
 }

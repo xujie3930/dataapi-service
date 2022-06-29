@@ -21,6 +21,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.text.Collator;
 import java.util.*;
 
@@ -204,7 +205,196 @@ public class StatisticsServiceImpl implements StatisticsService {
         wrappers.eq("del_flag", 0);
         wrappers.gt("create_time", new Date(Long.valueOf(lasttime+"")));
         int newCount = icreditApiBaseService.count(wrappers);
+        redisUtils.set(apiLastTime, System.currentTimeMillis());
         return newCount>0?lasttime:-1l;
+    }
+
+    private void initApiRedisData(){
+        Long lastTime1 = apiCountNeedUpdate();
+        if(lastTime1.longValue()>=0){
+            synchronized (updateApiRedisUsedCountLock){
+                Long lastTime2 = apiCountNeedUpdate();
+                if(lastTime2.longValue()>=0){
+                    //查询所有接口
+                    Map<String, Map<String, Object>> apiMap = new HashMap<>();
+                    List<ZSetOperations.TypedTuple<Object>> apiCountList = new ArrayList<>();
+                    Set<ZSetOperations.TypedTuple<Object>> apiCountRedisSet = new HashSet<>();
+
+                    final Map<String, Object> paramsMap = new HashMap<>(4);
+                    final QueryWrapper wrappers = new QueryWrapper<IcreditApiBaseEntity>();
+                    wrappers.eq("del_flag", 0);
+                    /*if(lastTime2.longValue()>0){
+                        Date lt2 = new Date(lastTime2);
+                        wrappers.gt("create_time", lt2);
+                        paramsMap.put("createTimeGt", lt2);
+                    }*/
+                    int size=100;
+                    int count = icreditApiBaseService.count(wrappers);
+                    int page = (count % size == 0?count/size:count/size+1);
+                    if(count<=0){
+                        return ;
+                    }
+
+                    //查询redis所有数据
+                    Map<String, DefaultTypedTuple<Object>> existMap = new HashMap<>();
+                    Set<Object> apiCount = redisUtils.zrevrange(apiUsedCount, 0, -1, true);
+                    if(null!=apiCount && !apiCount.isEmpty()){
+                        apiCount.stream().forEach(api->{
+                            DefaultTypedTuple<Object> tt = (DefaultTypedTuple<Object>) api;
+                            existMap.put((String) tt.getValue(), tt);
+                        });
+                    }
+
+                    paramsMap.put("size", size);
+                    for(int i=0;i<page;i++){
+                        paramsMap.put("start", i*100);
+                        final Map<String, ZSetOperations.TypedTuple<Object>> apiCountMap = new HashMap<>();
+                        List<Map<String, Object>> apis = apiBaseMapper.queryApiInBiUsedCount(paramsMap);
+                        if(null!=apis && !apis.isEmpty()){
+                            for(Map<String, Object> api:apis){
+                                String id = (String) api.get("id");
+                                DefaultTypedTuple<Object> dtt = null;//分数就是调用次数，默认0
+
+                                DefaultTypedTuple<Object> exist = existMap.get(id);
+                                if(lastTime2.longValue()==0 || null==exist){
+                                    //全量或缓存不存在
+                                    dtt = new DefaultTypedTuple<>(id, 0d);
+                                    apiCountMap.put(id, dtt);
+                                }else{
+                                    //已经存在
+                                    dtt = new DefaultTypedTuple<>(id, exist.getScore());
+                                }
+
+                                apiCountRedisSet.add(dtt);
+                                apiCountList.add(dtt);
+                                apiMap.put(id, api);
+                            }
+                            if(apiCountMap.isEmpty()){
+                                continue;
+                            }
+                            //查询接口调用次数
+                            List<Map<String, Object>> dbcounts = apiLogMapper.queryUsedCountByApiIds(apiCountMap.keySet());
+                            if(null!=dbcounts && !dbcounts.isEmpty()){
+                                dbcounts.stream().forEach(dbcount->{
+                                    String apiId = (String) dbcount.get("apiId");
+                                    Double dbnum = (null==dbcount.get("nums")?0d:((Long) dbcount.get("nums")).doubleValue());
+                                    if(null!=apiId && null!=dbnum){
+                                        ZSetOperations.TypedTuple<Object> dtt = apiCountMap.get(apiId);
+                                        try {
+                                            //设置调用次数
+                                            //ZSetOperations.TypedTuple类分数数据后就不可修改，故此处采用反射修改值
+                                            Field scoref = dtt.getClass().getDeclaredField("score");
+                                            scoref.setAccessible(true);
+                                            scoref.set(dtt, dbnum);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    //做二级排序，根据应用名
+                    Comparator compareIns = Collator.getInstance(java.util.Locale.CHINA);
+                    apiCountList.sort((p1, p2)-> {
+                        int perCom = p2.getScore().compareTo(p1.getScore());
+                        if (perCom == 0) {
+                            //找到分数相同的
+                            String id1 = (String) p1.getValue();
+                            String id2 = (String) p2.getValue();
+                            Map<String, Object> api1 = apiMap.get(id1);
+                            Map<String, Object> api2 = apiMap.get(id2);
+                            String name1 = (String) api1.get("name");
+                            String name2 = (String) api2.get("name");
+                            int compare = compareIns.compare(name1, name2);
+                            return compare;
+                        } else {
+                            return perCom;
+                        }
+                    });
+
+                    //排好序的，设置分数
+                    for(int i=0;i<apiCountList.size();i++){
+                        ZSetOperations.TypedTuple<Object> zt = apiCountList.get(i);
+                        String id = (String) zt.getValue();
+                        double score = zt.getScore();
+                        Class<? extends ZSetOperations.TypedTuple> clazz = zt.getClass();
+                        try {
+                            Field field = clazz.getDeclaredField("score");
+                            field.setAccessible(true);
+                            field.set(zt, score+Double.valueOf("0."+(Integer.MAX_VALUE-i)));
+                        } catch (NoSuchFieldException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    //写入redis
+                    if(!apiCountRedisSet.isEmpty()){
+                        redisUtils.zadd(apiUsedCount, apiCountRedisSet);
+                        redisUtils.set(apiLastTime, System.currentTimeMillis());
+                    }
+                }
+
+            }
+        }
+    }
+
+    //@Override
+    public List<StatisticsApiTopResult> apiTopView2() {
+        this.initApiRedisData();
+        //有数据了
+        //获取前100名
+        Set<Object> apiCount = redisUtils.zrevrange(apiUsedCount, 0, 99, true);
+        if(null==apiCount || apiCount.isEmpty()){
+            return new ArrayList<>(0);
+        }
+        List<StatisticsApiTopResult> resultList = new ArrayList<>();
+        Map<String, StatisticsApiTopResult> resultMap = new HashMap<>();
+        for(Object api:apiCount){
+            StatisticsApiTopResult tr = new StatisticsApiTopResult();
+            DefaultTypedTuple<Object> tt = (DefaultTypedTuple<Object>) api;
+            tr.setApiId((String) tt.getValue());
+            tr.setApiUsedCount(tt.getScore()==null?0: (int) tt.getScore().doubleValue());//有隐患
+            resultList.add(tr);
+            resultMap.put(tr.getApiId(), tr);
+        }
+
+        //做二级排序，获取最后一个成员
+        final Map<String, Object> paramsMap = new HashMap<>(2);
+        paramsMap.put("ids", resultMap.keySet());
+        List<Map<String, Object>> apiBases = apiBaseMapper.queryApiInBiUsedCount(paramsMap);
+        if(null!=apiBases && !apiBases.isEmpty()){
+            apiBases.stream().forEach(apiBase->{
+                Object interfaceSourceo = apiBase.get("interfaceSource");
+                Object typeo = apiBase.get("type");
+                String id = (String) apiBase.get("id");
+                String name = (String) apiBase.get("name");
+                Integer type = (null==typeo?null:(typeo instanceof java.lang.Long?((Long) typeo).intValue():(Integer) typeo));
+                Integer interfaceSource = (null==interfaceSourceo?null:(null!= interfaceSourceo && interfaceSourceo instanceof java.lang.Long?((Long) interfaceSourceo).intValue():(Integer) interfaceSourceo));
+                StatisticsApiTopResult result = resultMap.get(id);
+                result.setApiName(name);
+                result.setApiType(type);
+                result.setApiSource(interfaceSource);
+            });
+        }
+        //排序
+        /*Comparator compareIns = Collator.getInstance(java.util.Locale.CHINA);
+        resultList.sort((p1, p2)-> {
+            int perCom = p2.getApiUsedCount().compareTo(p1.getApiUsedCount());
+            if (perCom == 0) {
+                return compareIns.compare(p1.getApiName(), p2.getApiName());}
+            else {
+                return perCom;
+            }
+        });
+        //final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
+        for(int i=0;i<resultList.size();i++){
+            resultList.get(i).setSort(i+1);
+        }*/
+        return resultList;
     }
 
     @Override
@@ -281,6 +471,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         if(null==apiCount || apiCount.isEmpty()){
             return new ArrayList<>(0);
         }
+        int sort = 1;
         List<StatisticsApiTopResult> resultList = new ArrayList<>();
         Map<String, StatisticsApiTopResult> resultMap = new HashMap<>();
         for(Object api:apiCount){
@@ -288,12 +479,11 @@ public class StatisticsServiceImpl implements StatisticsService {
             DefaultTypedTuple<Object> tt = (DefaultTypedTuple<Object>) api;
             tr.setApiId((String) tt.getValue());
             tr.setApiUsedCount(tt.getScore()==null?0: (int) tt.getScore().doubleValue());//有隐患
+            tr.setSort(sort++);
             resultList.add(tr);
             resultMap.put(tr.getApiId(), tr);
         }
 
-        //做二级排序，获取最后一个成员
-        //Integer lastCount = resultList.get(resultList.size() - 1).getApiUsedCount();
         final Map<String, Object> paramsMap = new HashMap<>(2);
         paramsMap.put("ids", resultMap.keySet());
         List<Map<String, Object>> apiBases = apiBaseMapper.queryApiInBiUsedCount(paramsMap);
@@ -310,20 +500,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 result.setApiType(type);
                 result.setApiSource(interfaceSource);
             });
-        }
-        //排序
-        Comparator compareIns = Collator.getInstance(java.util.Locale.CHINA);
-        resultList.sort((p1, p2)-> {
-            int perCom = p2.getApiUsedCount().compareTo(p1.getApiUsedCount());
-            if (perCom == 0) {
-                return compareIns.compare(p1.getApiName(), p2.getApiName());}
-            else {
-                return perCom;
-            }
-        });
-        //final List<StatisticsAppTopResult> results = resultList.stream().sorted(Comparator.comparing(StatisticsAppTopResult::getUseApiCount).reversed().thenComparing(StatisticsAppTopResult::getAppName)).collect(Collectors.toList());
-        for(int i=0;i<resultList.size();i++){
-            resultList.get(i).setSort(i+1);
         }
         return resultList;
     }

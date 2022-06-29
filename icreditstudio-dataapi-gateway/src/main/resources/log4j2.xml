@@ -14,15 +14,19 @@
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
 
-        <File name="Filelog" fileName="${logpath}/icreditstudio_dataapi_gateway.log" append="false">
-            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+        <RollingRandomAccessFile name="Filelog" fileName="${logpath}/icreditstudio_dataapi_gateway.log" append="false" filePattern="${logpath}/icreditstudio_dataapi_gateway-%d{yyyy-MM-dd}.log">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
-        </File>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingRandomAccessFile>
 
 
     </Appenders>
     <Loggers>
-        <Root level="all">
+        <Root level="error">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="Filelog"/>
         </Root>

@@ -190,7 +190,7 @@ public class ExceptionHandler implements HandlerExceptionResolver, Ordered, Appl
             if(null!=stackTrace && stackTrace.length>0){
                 for(int i=0;i<stackTrace.length;i++){
                     StackTraceElement st = stackTrace[i];
-                    sb.append("\\r\\n").append("    at ").append(st.getFileName()).append(".").append(st.getMethodName()).append("(").append(st.getFileName()).append(":").append(st.getLineNumber()).append(")");
+                    sb.append("\\r\\n").append("    at ").append(st.getClassName()).append(".").append(st.getMethodName()).append("(").append(st.getFileName()).append(":").append(st.getLineNumber()).append(")");
                 }
             }
         }finally {
