@@ -91,7 +91,7 @@ public final class DataApiDruidDataSourceService {
             Date now = new Date();
             dataApiDruidDataSource.setCreateDate(now);
             dataApiDruidDataSource.setLastUseDate(now);
-            map.put(url, dataApiDruidDataSource);
+            map.put(url+ userName + password, dataApiDruidDataSource);
             return dataApiDruidDataSource;
         } catch (Exception e) {
             logger.error("初始化创建数据源{}连接池失败！", url, e);
@@ -108,9 +108,20 @@ public final class DataApiDruidDataSourceService {
             }
         }
         source = map.get(url);
+        source = needCreatePooledConnnection(url, type, userName, password, source);
         source.setLastUseDate(new Date());
         logger.warn("当前数据库连接池的量为：" + source.getDruidDataSource().getActiveConnections().size() + "---" + source.getDruidDataSource().getActiveCount() + "---" + source.getDruidDataSource().getCloseCount());
         return (DruidPooledConnection) source.getDruidDataSource().getPooledConnection();
+    }
+
+    private DataApiDruidDataSource needCreatePooledConnnection(String url, Integer type, String userName, String password, DataApiDruidDataSource source) throws Exception {
+        String oldUsername = source.getDruidDataSource().getUsername();
+        String oldPassword = source.getDruidDataSource().getPassword();
+        if (!oldUsername.equals(userName) || !oldPassword.equals(password)) {
+            source.getDruidDataSource().close();
+            source = initDataSource(url, type, userName, password);
+        }
+        return source;
     }
 
     public DruidPooledConnection getOrCreateConnectionWithoutUsername(String url, Integer type) throws Exception {
