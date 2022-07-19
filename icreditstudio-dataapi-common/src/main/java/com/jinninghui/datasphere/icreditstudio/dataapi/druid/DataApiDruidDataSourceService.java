@@ -91,7 +91,7 @@ public final class DataApiDruidDataSourceService {
             Date now = new Date();
             dataApiDruidDataSource.setCreateDate(now);
             dataApiDruidDataSource.setLastUseDate(now);
-            map.put(url+ userName + password, dataApiDruidDataSource);
+            map.put(url, dataApiDruidDataSource);
             return dataApiDruidDataSource;
         } catch (Exception e) {
             logger.error("初始化创建数据源{}连接池失败！", url, e);
