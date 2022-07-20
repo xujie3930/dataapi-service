@@ -65,7 +65,7 @@ public final class DataApiDruidDataSourceService {
         DatasourceSync dataFactory = DatasourceFactory.getDatasource(type);
         String uri = dataFactory.geturi(url);
         prop.setProperty("url", uri);
-        logger.info("url:{},username:{},password:{}", uri, userName, password);
+        logger.debug("url:{},username:{},password:{}", uri, userName, password);
         prop.setProperty("connectionProperties", "useUnicode=true;characterEncoding=UTF8");
         prop.setProperty("username", userName);
         prop.setProperty("password", password);
@@ -110,7 +110,7 @@ public final class DataApiDruidDataSourceService {
         source = map.get(url);
         source = needCreatePooledConnnection(url, type, userName, password, source);
         source.setLastUseDate(new Date());
-        logger.warn("当前数据库连接池的量为：" + source.getDruidDataSource().getActiveConnections().size() + "---" + source.getDruidDataSource().getActiveCount() + "---" + source.getDruidDataSource().getCloseCount());
+        logger.debug("当前数据库连接池的量为：" + source.getDruidDataSource().getActiveConnections().size() + "---" + source.getDruidDataSource().getActiveCount() + "---" + source.getDruidDataSource().getCloseCount());
         return (DruidPooledConnection) source.getDruidDataSource().getPooledConnection();
     }
 
@@ -136,7 +136,7 @@ public final class DataApiDruidDataSourceService {
         }
         source = map.get(url);
         source.setLastUseDate(new Date());
-        logger.warn("当前数据库连接池的量为：" + source.getDruidDataSource().getActiveConnections().size() + "---" + source.getDruidDataSource().getActiveCount() + "---" + source.getDruidDataSource().getCloseCount());
+        logger.debug("当前数据库连接池的量为：" + source.getDruidDataSource().getActiveConnections().size() + "---" + source.getDruidDataSource().getActiveCount() + "---" + source.getDruidDataSource().getCloseCount());
         return (DruidPooledConnection) source.getDruidDataSource().getPooledConnection();
     }
 
