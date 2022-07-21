@@ -78,7 +78,9 @@ public final class DataApiDruidDataSourceService {
         prop.setProperty("maxWait", "60000");
         prop.setProperty("filters", "stat");
         prop.setProperty("timeBetweenEvictionRunsMillis", "35000");
-        prop.setProperty("minEvictableIdleTimeMillis", "30000");
+        prop.setProperty("minEvictableIdleTimeMillis", "10000");
+        prop.setProperty("validationQuery", "SELECT 1");
+        prop.setProperty("keepAlive", "true");
         prop.setProperty("testWhileIdle", "true");
         prop.setProperty("testOnBorrow", "false");
         prop.setProperty("testOnReturn", "false");
