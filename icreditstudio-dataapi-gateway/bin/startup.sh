@@ -9,7 +9,7 @@ export PROFILE=$1
 
 if test -z "$SERVER_HEAP_SIZE"
 then
-  export SERVER_HEAP_SIZE="512M"
+  export SERVER_HEAP_SIZE="1024M"
 fi
 
 if test -z "$SERVER_JAVA_OPTS"
@@ -27,7 +27,7 @@ if [[ -f "${SERVER_PID}" ]]; then
     fi
 fi
 
-nohup java $SERVER_JAVA_OPTS  -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5015 -Duser.timezone=Asia/Shanghai -cp $HOME/conf:$HOME/lib/* $SERVER_CLASS --spring.profiles.active=$PROFILE 2>&1 > $HOME/bin/nohup.out &
+nohup java $SERVER_JAVA_OPTS  -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data -XX:+PrintGCDetails -XX:+PrintGCDateStamps -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5015 -Duser.timezone=Asia/Shanghai -cp $HOME/conf:$HOME/lib/* $SERVER_CLASS --spring.profiles.active=$PROFILE 2>&1 > $HOME/bin/nohup.out &
 
 pid=$!
 if [[ -z "${pid}" ]]; then
