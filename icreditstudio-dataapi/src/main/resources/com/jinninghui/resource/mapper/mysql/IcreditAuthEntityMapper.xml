@@ -78,6 +78,7 @@
             <if test="delFlag != null">
                 AND del_flag = #{delFlag}
             </if>
+        AND app_id in (SELECT id from icredit_app where del_flag =0 and is_enable = 1)
         </where>
     </select>
 

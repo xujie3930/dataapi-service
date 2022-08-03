@@ -51,5 +51,8 @@ logging:
   level:
     com.hashtech: info
 
+host:
+  addr: 192.168.0.211.3:8108/openapi
+
 kafkaProducer:
   topic: apiInvoke
