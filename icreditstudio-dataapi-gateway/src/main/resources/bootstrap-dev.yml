@@ -67,8 +67,5 @@ minio:
   secretKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
   bucketName: test
 
-host:
-  addr: 192.168.0.201:8108/openapi
-
 kafkaProducer:
   topic: apiInvoke_dev
