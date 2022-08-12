@@ -51,19 +51,16 @@ public class GenerateService implements ApiBaseService {
         String querySql = factory.parseSql(apiInfo.getQuerySql().replaceAll(";", ""), params);
         querySql = factory.getPageParamBySql(querySql, PAGENUM_DEFALUT, PAGESIZE_DEFALUT);
         log.error("数据源生成API查询sql：{}", querySql);
-        log.error("数据源生成API查询timestamp0：{}", System.currentTimeMillis());
         try (Connection conn = DataApiDruidDataSourceService.getInstance()
                 .getOrCreateConnection(apiInfo.getUrl(), apiInfo.getDatabaseType(), apiInfo.getUserName(), apiInfo.getPassword());
              Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
             //连接数据源，执行SQL
             //如果传了分页参数要加上分页 并且返回的数据要用分页对象包装:BusinessResult<BusinessPageResult> ，分页的最大条数500
-            log.error("数据源生成API查询timestamp2：{}", System.currentTimeMillis());
             if (params.containsKey(PAGENUM_MARK) && params.containsKey(PAGESIZE_MARK)) {
                 Integer pageNum = Math.max(Integer.parseInt((String) params.get(PAGENUM_MARK)), PAGENUM_DEFALUT);
                 Integer pageSize = Math.min(Integer.parseInt((String) params.get(PAGESIZE_MARK)), PAGESIZE_DEFALUT);
                 querySql = factory.getPageParamBySql(querySql, pageNum, pageSize);
                 DataApiGatewayPageResult<Object> build = getPageResult(pageNum, pageSize, querySql, apiLogInfo, stmt);
-                log.error("数据源生成API查询timestamp3：{}", System.currentTimeMillis());
                 return BusinessResult.success(build);
             } else {
                 //如果不传分页最大查询500条，不需要用分页对象包装
@@ -77,7 +74,6 @@ public class GenerateService implements ApiBaseService {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getCode(),
                     ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000016.getMessage());
         } finally {
-            log.error("数据源生成API查询timestamp：{}", System.currentTimeMillis());
         }
     }
 
