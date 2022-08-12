@@ -218,6 +218,11 @@ public class RedisUtils {
     public void hset(String key, String field, Object value) {
         redisTemplate.opsForHash().put(key, field, value);
     }
+
+    public void hmset(String key, Map<String, String> map) {
+        redisTemplate.opsForHash().putAll(key, map);
+    }
+
     public void hsetnx(String key, String field, Object value) {
         redisTemplate.opsForHash().putIfAbsent(key, field, value);
     }
