@@ -58,8 +58,6 @@ public class IcreditApiLogServiceImpl extends ServiceImpl<IcreditApiLogMapper, I
         return BusinessResult.success(BusinessPageResult.build(logList, request, logCount));
     }
 
-    int iii=0;
-
     private Long getLogCount(LogListQueryRequest request){
         String callBeginTime = request.getCallBeginTime();
         String callEndTime = request.getCallEndTime();
@@ -112,7 +110,7 @@ public class IcreditApiLogServiceImpl extends ServiceImpl<IcreditApiLogMapper, I
                     try{
                         final Map<String, String> map = new HashMap<>(4);
                         final Long logCount = apiLogMapper.countLog(request);
-                        map.put("logCount", null==logCount?"0":(logCount+(++iii))+"");
+                        map.put("logCount", null==logCount?"0":(logCount)+"");
                         map.put("logExpire", System.currentTimeMillis()+"");
                         redisUtils.hmset(LOG_TOTAL_COUNT, map);
                     }finally {
