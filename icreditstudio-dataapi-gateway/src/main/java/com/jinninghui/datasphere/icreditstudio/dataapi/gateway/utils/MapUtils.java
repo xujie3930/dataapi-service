@@ -1,8 +1,12 @@
 package com.jinninghui.datasphere.icreditstudio.dataapi.gateway.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.jinninghui.datasphere.icreditstudio.framework.exception.interval.AppException;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Enumeration;
@@ -43,17 +47,21 @@ public class MapUtils {
 
     public static Map<String, Object> getRequestParamMap(HttpServletRequest request)
     {
-        Map map = new HashMap();
-        //得到枚举类型的参数名称，参数名称若有重复的只能得到第一个
-        Enumeration enums = request.getParameterNames();
-        while (enums.hasMoreElements())
-        {
-            String paramName = (String) enums.nextElement();
-            String paramValue = request.getParameter(paramName);
-            //形成键值对应的map
-            map.put(paramName, paramValue);
+        Map<String,Object> params = new HashMap<>();
+        BufferedReader br;
+        try {
+            br = request.getReader();
+            String str, wholeParams = "";
+            while((str = br.readLine()) != null){
+                wholeParams += str;
+            }
+            if(StringUtils.isNotBlank(wholeParams)){
+                params = JSON.parseObject(wholeParams,Map.class);
+            }
+        } catch (IOException e) {
+            throw new AppException("格式错误");
         }
-        return map;
+        return params;
     }
 
 
