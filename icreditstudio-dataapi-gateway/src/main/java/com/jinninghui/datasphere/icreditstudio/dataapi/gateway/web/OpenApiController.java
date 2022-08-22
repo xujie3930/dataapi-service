@@ -33,5 +33,10 @@ public class OpenApiController {
         Map<String, Object> paramMap = MapUtils.convertParams(queryString);
         return openApiService.getData(version, path, paramMap);
     }
+
+    @PostMapping("/{version}/{path}")
+    public BusinessResult<Object> postGetData(@PathVariable("version") String version, @PathVariable("path") String path, HttpServletRequest request, @RequestBody Map<String, Object> params) throws UnsupportedEncodingException {
+        return openApiService.getData(version, path, params);
+    }
 }
 

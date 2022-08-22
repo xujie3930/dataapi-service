@@ -27,6 +27,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_10000014("10000014", "授权时间未生效!"),
         RESOURCE_CODE_10000015("10000015", "授权时间已失效!"),
         RESOURCE_CODE_10000016("10000016", "系统异常，请稍后再次尝试!"),
+        RESOURCE_CODE_10000017("10000017", "请求方式和API设置不匹配!"),
         ;
 
         public final String code;

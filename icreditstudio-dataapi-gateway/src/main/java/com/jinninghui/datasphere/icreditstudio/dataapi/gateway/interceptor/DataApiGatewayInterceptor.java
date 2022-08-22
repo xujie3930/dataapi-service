@@ -64,10 +64,8 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
 
         RedisApiInfo apiInfo = getApiAuthInfoByVersionAndPath(version, path);
 
-        String queryString = request.getQueryString();
-        Map<String, Object> paramMap = MapUtils.str2Map(queryString);
-
-        String token = checkRequestToken(request);
+        Map<String, Object> paramMap = getParamMapByRequest(request);
+        String token = checkRequestToken(request, paramMap);
 
         AppAuthInfo appAuthInfo = getAppAuthInfoByToken(token);
         ApiLogInfo apiLogInfo = generateLog(appAuthInfo, apiInfo, version, path, request, paramMap);
@@ -80,7 +78,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
             //2：根据path和version,鉴权API信息
             checkApi(apiInfo, appAuthInfo);
             //3:对入参做校验
-            checkParam(paramMap, apiInfo);
+            checkParam(paramMap, apiInfo, request);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,6 +93,15 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         context.setApiLogInfo(apiLogInfo);
         DataApiGatewayContextHolder.set(context);
         return super.preHandle(request, response, handler);
+    }
+
+    private Map<String, Object> getParamMapByRequest(HttpServletRequest request) {
+        if (request.getMethod().equalsIgnoreCase("POST")) {
+            return MapUtils.getRequestParamMap(request);
+        }
+        String queryString = request.getQueryString();
+        Map<String, Object> paramMap = MapUtils.str2Map(queryString);
+        return paramMap;
     }
 
     private RedisApiInfo checkApi(RedisApiInfo apiAuthInfo, AppAuthInfo appAuthInfo) {
@@ -156,9 +163,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         return apiAuthInfo;
     }
 
-    private String checkRequestToken(HttpServletRequest request) {
-        String queryString = request.getQueryString();
-        Map map = MapUtils.str2Map(queryString);
+    private String checkRequestToken(HttpServletRequest request, Map<String, Object> map) {
         if (!map.containsKey(TOKEN_MARK)){
             String token = request.getHeader(TOKEN_MARK);
             if (StringUtils.isBlank(token)){
@@ -191,7 +196,11 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         return appAuthInfo;
     }
 
-    private Map checkParam(Map map, RedisApiInfo apiInfo) {
+    private Map checkParam(Map map, RedisApiInfo apiInfo, HttpServletRequest request) {
+        String method = request.getMethod();
+        if (StringUtils.isNotBlank(apiInfo.getRequestType()) && !method.equals(apiInfo.getRequestType())) {
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000017.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000017.getMessage());
+        }
         map.remove(TOKEN_MARK);
         List<String> params = MapUtils.mapKeyToList(map);
         if (StringUtils.isNotBlank(apiInfo.getRequiredFields())) {

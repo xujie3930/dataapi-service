@@ -20,4 +20,5 @@ public class RedisApiInfo {
     private List<RegisterApiParamInfo> registerApiParamInfoList;
     private String reqHost;
     private String reqPath;
+    private String requestType;
 }

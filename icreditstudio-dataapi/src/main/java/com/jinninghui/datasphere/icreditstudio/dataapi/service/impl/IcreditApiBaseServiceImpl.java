@@ -254,7 +254,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 //                            createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
 //                }
 //            }else{
-                saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+                saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getRequestType(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                         apiBaseEntity.getType(), param.getApiGenerateSaveRequest().getDatabaseType(), apiBaseEntity.getApiVersion(), createApiInfoBO.getQuerySql(), createApiInfoBO.getRequiredFieldStr(),
                         createApiInfoBO.getResponseFieldStr(), registerApiParamInfos, param.getReqHost(), param.getReqPath());
 //            }
@@ -787,7 +787,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
 //                            responseField, registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
 //                }
 //            }else {
-                saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
+                saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getRequestType(), apiBaseHiEntity.getPath(), apiBaseHiEntity.getName(),
                         generateApiEntity.getModel(), generateApiEntity.getDatabaseType(), apiBaseHiEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                         registerApiParamInfos, registerApiEntity.getHost(), registerApiEntity.getPath());
 //            }
@@ -798,7 +798,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         return BusinessResult.success(true);
     }
 
-    private void saveApiInfoToRedis(String apiId, String datasourceId, String path, String apiName, Integer apiType, Integer databaseType, Integer apiVersion, String sql,
+    private void saveApiInfoToRedis(String apiId, String datasourceId, String requestType, String path, String apiName, Integer apiType, Integer databaseType, Integer apiVersion, String sql,
                                     String requiredFieldStr, String responseFieldStr, List<RegisterApiParamInfo> registerApiParamInfos, String reqHost, String reqPath) {
         BusinessResult<ConnectionInfoVO> connResult = dataSourceFeignClient.getConnectionInfo(new DataSourceInfoRequest(datasourceId));
         ConnectionInfoVO connInfo = connResult.getData();
@@ -818,6 +818,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
         redisApiInfo.setRegisterApiParamInfoList(registerApiParamInfos);
         redisApiInfo.setReqHost(reqHost);
         redisApiInfo.setReqPath(reqPath);
+        redisApiInfo.setRequestType(requestType);
         redisTemplate.opsForValue().set(String.valueOf(new StringBuilder(path).append(REDIS_KEY_SPLIT_JOINT_CHAR).append(apiVersion)), JSON.toJSONString(redisApiInfo));
     }
 
@@ -997,7 +998,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getRequestType(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                     apiBaseEntity.getType(), param.getApiGenerateSaveRequest().getDatabaseType(), apiBaseEntity.getApiVersion(), querySql, requiredFieldStr, responseFieldStr, registerApiParamInfos,
                     null, null);
         }
@@ -1065,7 +1066,7 @@ public class IcreditApiBaseServiceImpl extends ServiceImpl<IcreditApiBaseMapper,
             if(ApiTypeEnum.API_REGISTER.getCode().equals(apiBaseEntity.getType())){//注册api
                 BeanUtils.copyProperties(apiParamEntityList, registerApiParamInfos);
             }
-            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
+            saveApiInfoToRedis(apiBaseEntity.getId(), generateApiEntity.getDatasourceId(), apiBaseEntity.getRequestType(), apiBaseEntity.getPath(), apiBaseEntity.getName(),
                     apiBaseEntity.getType(), generateApiEntity.getDatabaseType(), apiBaseEntity.getApiVersion(), generateApiEntity.getSql(), requiredFieldStr, responseFieldStr,
                     registerApiParamInfos, null, null);
             apiBaseEntity.setPublishUser(userId);
