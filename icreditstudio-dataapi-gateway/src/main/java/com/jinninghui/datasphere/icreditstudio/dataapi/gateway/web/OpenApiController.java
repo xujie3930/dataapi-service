@@ -35,7 +35,9 @@ public class OpenApiController {
     }
 
     @PostMapping("/{version}/{path}")
-    public BusinessResult<Object> postGetData(@PathVariable("version") String version, @PathVariable("path") String path, @RequestBody HttpServletRequest request, Map<String, Object> params) throws UnsupportedEncodingException {
+    public BusinessResult<Object> postGetData(@PathVariable("version") String version, @PathVariable("path") String path, HttpServletRequest request) throws UnsupportedEncodingException {
+        Map params = (Map) request.getAttribute(MapUtils.PARAM_ATTRIBUTE);
+        request.removeAttribute(MapUtils.PARAM_ATTRIBUTE);
         return openApiService.getData(version, path, params);
     }
 }

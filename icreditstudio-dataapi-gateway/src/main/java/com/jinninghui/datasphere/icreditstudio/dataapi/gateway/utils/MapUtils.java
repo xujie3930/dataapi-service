@@ -25,6 +25,7 @@ public class MapUtils {
     private static String UTF8 = "UTF-8";
     private static String PERCENT_CHAR = "%";
     private static String DOUBLE_PERCENT_CHAR = "%%";
+    public static final String PARAM_ATTRIBUTE = "param";
 
     public static Map<String, Object> str2Map(String str){
         Map<String, Object> map = new HashMap();
@@ -61,6 +62,7 @@ public class MapUtils {
         } catch (IOException e) {
             throw new AppException("格式错误");
         }
+        request.setAttribute(PARAM_ATTRIBUTE, params);
         return params;
     }
 
