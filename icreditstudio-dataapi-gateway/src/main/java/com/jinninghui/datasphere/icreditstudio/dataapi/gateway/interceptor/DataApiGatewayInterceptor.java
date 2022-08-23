@@ -83,7 +83,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         } catch (Exception e) {
             e.printStackTrace();
             //发送kafka失败信息
-            ApiLogInfo failLog = generateFailLog(apiLogInfo, e);
+            ApiLogInfo failLog = generateFailLog(apiLogInfo, request, e);
             kafkaProducer.send(failLog);
             logger.info("`发送kafka异常日志:{}", failLog);
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000013.getCode(), failLog.getExceptionDetail());
@@ -224,9 +224,10 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         return map;
     }
 
-    private ApiLogInfo generateFailLog(ApiLogInfo apiLogInfo, Exception e) {
+    private ApiLogInfo generateFailLog(ApiLogInfo apiLogInfo, HttpServletRequest request, Exception e) {
         apiLogInfo.setCallEndTime(new Date());
         apiLogInfo.setCallStatus(CallStatusEnum.CALL_FAIL.getCode());
+        apiLogInfo.setRequestType(request.getMethod());
         if (null != apiLogInfo.getCallBeginTime()) {
             apiLogInfo.setRunTime(System.currentTimeMillis() - apiLogInfo.getCallBeginTime().getTime());
         }
