@@ -270,6 +270,7 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
         logInfo.setRunTime(0L);
         logInfo.setApiName(apiInfo.getApiName());
         logInfo.setApiType(apiInfo.getApiType());
+        logInfo.setRequestType(apiInfo.getRequestType() == null? RquestWayEnum.GET.getDesc() : apiInfo.getRequestType());
         return logInfo;
     }
 
