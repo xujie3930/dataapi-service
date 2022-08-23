@@ -588,7 +588,7 @@ export default {
         reqPath: '',
         reqHost: '',
         apiGroupId: null,
-        requestType: 'GET',
+        requestType: 'POST',
         responseType: 'JSON',
         desc: '',
         apiGenerateSaveRequest: {
