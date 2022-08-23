@@ -116,6 +116,7 @@
               <el-select
                 style="width: 100%"
                 v-model="form.requestType"
+                :disabled="options.opType === 'edit'"
                 placeholder="请选择请求方式"
               >
                 <el-option
