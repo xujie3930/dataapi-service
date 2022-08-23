@@ -114,12 +114,16 @@
           <el-col :lg="{ span: 11 }">
             <el-form-item label="请求方式" prop="requestType">
               <el-select
-                disabled
                 style="width: 100%"
                 v-model="form.requestType"
                 placeholder="请选择请求方式"
               >
-                <el-option label="GET" value="GET"></el-option>
+                <el-option
+                  v-for="item in requestOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
                 <!-- <el-option label="POST" value="POST"></el-option> -->
               </el-select>
             </el-form-item>
@@ -545,6 +549,11 @@ export default {
       API_MODE_MAPPING,
       API_TYPE_MAPPING,
 
+      requestOptions: [
+        { label: 'GET', value: 'GET' },
+        { label: 'POST', value: 'POST' }
+      ],
+
       timerId: null,
       tableLoading: false,
       pageLoading: false,
@@ -878,7 +887,6 @@ export default {
       }
 
       this.isDataChange = JSON.stringify(oldForm) !== JSON.stringify(curForm)
-      console.log(oldForm, curForm, this.isDataChange)
     },
 
     saveApiForm(params, saveType, message, cover) {
@@ -1184,6 +1192,7 @@ export default {
               'desc',
               'reqHost',
               'reqPath',
+              'requestType',
               'registerRequestParamSaveRequestList',
               'registerResponseParamSaveRequestList'
             ]
@@ -1191,6 +1200,7 @@ export default {
             this.form.path = apiPath
             this.form.apiGroupId = [workFlowId, apiGroupId]
             this.oldForm = cloneDeep(data)
+            this.oldTableData = paramList ?? []
 
             // 数据源生成API
             if (type === 1) {
