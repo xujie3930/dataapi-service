@@ -123,19 +123,17 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         }
         //获取其param参数
         List<IcreditApiParamEntity> apiParamEntityList = apiParamService.getByApiIdAndVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion());
-        List<APIParamResult> apiParamList = new ArrayList<>();
+        List<APIParamResult> apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
         List<RegisterRequestParamSaveRequest> registerRequestParamSaveRequestList = new ArrayList<>();
         List<RegisterResponseParamSaveRequest> registerResponseParamSaveRequestList = new ArrayList<>();
-        String address;
+        List<APIParamResult> params = apiParamList.stream()
+                .filter((APIParamResult a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
+                .collect(Collectors.toList());
+        String address = getDatasourceInterfaceAddress(apiBaseHiEntity, params);
         if(ApiTypeEnum.API_GENERATE.getCode().equals(apiBaseHiEntity.getType())) {
-            apiParamList = com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils.copy(apiParamEntityList, APIParamResult.class);
-            List<APIParamResult> params = apiParamList.stream()
-                    .filter((APIParamResult a) -> RequestFiledEnum.IS_REQUEST_FIELD.getCode().equals(a.getIsRequest()))
-                    .collect(Collectors.toList());
-            address = getDatasourceInterfaceAddress(apiBaseHiEntity, params);
+
         }else{
             handleRegisterApiParamInfo(registerRequestParamSaveRequestList, registerResponseParamSaveRequestList, apiParamEntityList);
-            address = getRegisterInterfaceAddress(apiBaseHiEntity, registerRequestParamSaveRequestList);
             IcreditRegisterApiEntity registerApiEntity = registerApiService.findByApiIdAndApiVersion(apiBaseHiEntity.getApiBaseId(), apiBaseHiEntity.getApiVersion());
             result.setReqHost(registerApiEntity.getHost());
             result.setReqPath(registerApiEntity.getPath());
