@@ -11,12 +11,8 @@ import com.jinninghui.datasphere.icreditstudio.framework.utils.CollectionUtils;
 import com.jinninghui.datasphere.icreditstudio.framework.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -47,41 +43,24 @@ public class RegisterService implements ApiBaseService {
 //                .filter((RegisterApiParamInfo r) -> ResponseFiledEnum.IS_RESPONSE_FIELD.getCode().equals(r.getIsResponse()))
 //                .collect(Collectors.toList());
         //生成入参列表,参数格式:name1=value1&name2=value2
-        String response = null;
-        String requestUrl = null;
-        if (apiInfo.getRequestType().equalsIgnoreCase(RquestWayEnum.GET.getDesc())){
-            StringBuilder builder = new StringBuilder();
-            if (!CollectionUtils.isEmpty(requestList)){
-                for (RegisterApiParamInfo requestParam : requestList) {
-                    if (StringUtils.isBlank((String) params.get(requestParam.getFieldName())) && StringUtils.isBlank(requestParam.getDefaultValue())){
-                        continue;
-                    }
-                    builder.append(requestParam.getFieldName()).append("=").append(StringUtils.isBlank((String) params.get(requestParam.getFieldName()))? requestParam.getDefaultValue() : (String) params.get(requestParam.getFieldName())).append("&");
+        StringBuilder builder = new StringBuilder();
+        if (!CollectionUtils.isEmpty(requestList)){
+            for (RegisterApiParamInfo requestParam : requestList) {
+                if (StringUtils.isBlank((String) params.get(requestParam.getFieldName())) && StringUtils.isBlank(requestParam.getDefaultValue())){
+                    continue;
                 }
+                builder.append(requestParam.getFieldName()).append("=").append(StringUtils.isBlank((String) params.get(requestParam.getFieldName()))? requestParam.getDefaultValue() : (String) params.get(requestParam.getFieldName())).append("&");
             }
-            String requestParamStr = builder.toString();
-            if (!StringUtils.isBlank(requestParamStr)){
-                requestParamStr = requestParamStr.substring(0, requestParamStr.length() - 1);
-            }
-            String requestHttpPre = apiInfo.getReqHost() + apiInfo.getReqPath();
-            requestUrl = StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr;
-            log.info("注册API查询uri：{}", requestUrl);
-            ResponseEntity<String> restResult = restTemplate.getForEntity(requestUrl, String.class);
-            response = restResult.getBody();
-        }else {
-            HttpHeaders requestHeaders = new HttpHeaders();
-            //body
-            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-            for (Object key : params.entrySet()) {
-                requestBody.add((String)key, (String) params.get(key));
-            }
-            //HttpEntity
-            HttpEntity<MultiValueMap> requestEntity = new HttpEntity<MultiValueMap>(requestBody, requestHeaders);
-            //post
-            requestUrl = apiInfo.getReqHost() + apiInfo.getReqPath();
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(requestUrl, requestEntity, String.class);
-            response = responseEntity.getBody();
         }
+        String requestParamStr = builder.toString();
+        if (!StringUtils.isBlank(requestParamStr)){
+            requestParamStr = requestParamStr.substring(0, requestParamStr.length() - 1);
+        }
+        String requestHttpPre = apiInfo.getReqHost() + apiInfo.getReqPath();
+        String requestUrl = StringUtils.isBlank(requestParamStr)? requestHttpPre : requestHttpPre + "?" + requestParamStr;
+        log.info("注册API查询uri：{}", requestUrl);
+        ResponseEntity<String> restResult = restTemplate.getForEntity(requestUrl, String.class);
+        String response = restResult.getBody();
         //返回分别对bean类型和array类型做处理
         JSONArray jsonArray = null;
         JSONObject jsonObject = null;
