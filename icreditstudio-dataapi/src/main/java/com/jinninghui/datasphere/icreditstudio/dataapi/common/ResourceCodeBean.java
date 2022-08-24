@@ -75,6 +75,7 @@ public class ResourceCodeBean {
         RESOURCE_CODE_20000056("20000056", "授权id不能为空！"),
         RESOURCE_CODE_20000057("20000057", "授权id需为外部API！"),
         RESOURCE_CODE_20000058("20000058", "授权id需为内部API！"),
+        RESOURCE_CODE_20000059("20000059", "请求方式不允许修改！"),
 
 
         RESOURCE_CODE_60000001("60000001", "获取资源库连接失败！"),

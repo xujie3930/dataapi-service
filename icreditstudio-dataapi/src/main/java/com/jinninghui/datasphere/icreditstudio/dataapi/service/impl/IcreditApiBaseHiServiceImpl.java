@@ -211,6 +211,9 @@ public class IcreditApiBaseHiServiceImpl extends ServiceImpl<IcreditApiBaseHiMap
         StringLegalUtils.checkId(param.getApiHiId());
         checkApiName(new CheckApiNameRequest(param.getApiHiId(), param.getName()));
         IcreditApiBaseHiEntity apiBaseHiEntity = apiBaseHiMapper.selectById(param.getApiHiId());
+        if (!apiBaseHiEntity.getRequestType().equals(param.getRequestType())){
+            throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000059.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_20000059.getMessage());
+        }
         IcreditApiBaseEntity apiBaseEntity = apiBaseService.getById(apiBaseHiEntity.getApiBaseId());
         if (ApiHisOverrideEnum.OVERRIDE.getCode().equals(param.getOverride())){
             if(ApiTypeEnum.API_GENERATE.getCode().equals(param.getType())) {
