@@ -152,6 +152,9 @@ public class DataApiGatewayInterceptor extends HandlerInterceptorAdapter {
             throw new AppException(ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getCode(), ResourceCodeBean.ResourceCode.RESOURCE_CODE_10000002.getMessage());
         }
         RedisApiInfo apiAuthInfo = JSON.parseObject(apiObject.toString(), RedisApiInfo.class);
+        if (StringUtils.isBlank(apiAuthInfo.getUrl())){
+            return apiAuthInfo;
+        }
         Object newApiObject = redisTemplate.opsForValue().get(apiAuthInfo.getUrl());
         if (!Objects.isNull(newApiObject)) {
             //更新redis信息
